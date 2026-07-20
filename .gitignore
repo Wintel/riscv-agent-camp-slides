@@ -1,0 +1,7 @@
+# OS / 编辑器杂项
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+.vscode/
+.idea/

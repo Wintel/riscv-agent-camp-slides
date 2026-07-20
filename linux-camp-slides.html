@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linux 与 RISC-V 开发实践 · 夏令营</title>
+<style>
+/* =====================================================================
+   SJTU 夏令营 · Linux / 网络 / SSH 幻灯片
+   —— 单文件、可离线、可投影。左右方向键或空格翻页。
+   设计令牌集中在 :root，改这里即可换配色 / 字体。
+   复制任意一整段 section.slide 即可新增一页。
+   ===================================================================== */
+:root{
+  /* —— 品牌色（取自交大 logo）—— */
+  --crimson:#AD1730;
+  --crimson-deep:#870F26;
+  --crimson-soft:#F3DEE2;
+  --crimson-bright:#E85D74;   /* 深色终端上用的亮一点的红 */
+  /* —— 中性色（偏暖，衬托深红）—— */
+  --paper:#F4F2EE;
+  --paper-2:#ECE8E1;
+  --ink:#221C1B;
+  --ink-soft:#6A5F5A;
+  --ink-faint:#9A8F88;
+  --line:#DCD4C8;
+  --letterbox:#16130F;
+  /* —— 语义色 —— */
+  --ok:#1E8A6E;
+  --ok-soft:#DCEFE8;
+  /* —— 终端配色 —— */
+  --term-bg:#14171E;
+  --term-bar:#1B1F28;
+  --term-line:#2A2F3A;
+  --term-fg:#E7EAF0;
+  --term-green:#57D07E;
+  --term-cyan:#54C4D4;
+  --term-blue:#8AA6D6;
+  --term-dim:#8891A0;
+  /* —— 字体 —— */
+  --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Source Han Sans SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Cascadia Code","Cascadia Mono","JetBrains Mono","SF Mono","Consolas","Menlo",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--letterbox);
+  font-family:var(--sans);
+  color:var(--ink);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* ---------- 舞台缩放：1280×720 逻辑画布，等比缩放铺满 ---------- */
+#app{position:fixed;inset:0;overflow:hidden;background:
+  radial-gradient(1200px 700px at 50% -10%, #241d18 0%, var(--letterbox) 60%);}
+#stage{
+  position:absolute;left:50%;top:50%;
+  width:1280px;height:720px;
+  transform-origin:center center;
+  background:var(--paper);
+  border-radius:10px;
+  box-shadow:0 40px 120px -30px rgba(0,0,0,.7), 0 0 0 1px rgba(0,0,0,.25);
+  overflow:hidden;
+}
+/* 淡淡的工程蓝图网格 + 角标，塑造"课程讲义"气质 */
+#stage::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:
+    linear-gradient(rgba(173,23,48,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(173,23,48,.045) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+
+/* ---------- 顶部 / 底部固定装饰栏 ---------- */
+.chrome{position:absolute;left:0;right:0;z-index:20;display:flex;align-items:center;
+  padding:0 56px;pointer-events:none}
+.chrome-top{top:0;height:74px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{width:42px;height:42px;display:block}
+.brand .b-txt{display:flex;flex-direction:column;line-height:1.15}
+.brand .b-1{font-weight:700;font-size:16px;letter-spacing:.01em}
+.brand .b-2{font:600 11px var(--mono);letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase}
+.sec-tag{font:600 12px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);
+  display:flex;align-items:center;gap:9px}
+.sec-tag::before{content:"";width:20px;height:2px;background:var(--crimson);display:inline-block}
+
+.chrome-bot{bottom:0;height:56px;justify-content:space-between}
+.counter{font:600 13px var(--mono);color:var(--ink-faint);letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.counter b{color:var(--crimson)}
+.hint{font-size:12px;color:var(--ink-faint);display:flex;align-items:center;gap:8px}
+.kbd{font:600 11px var(--mono);background:#fff;border:1px solid var(--line);border-bottom-width:2px;
+  border-radius:6px;padding:2px 7px;color:var(--ink-soft)}
+#progress{position:absolute;left:0;bottom:0;height:4px;width:0;background:var(--crimson);
+  z-index:25;transition:width .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px rgba(173,23,48,.5)}
+
+/* ---------- 幻灯片与切换 ---------- */
+#deck{position:absolute;inset:0;z-index:5}
+.slide{position:absolute;inset:74px 56px 56px;opacity:0;pointer-events:none;
+  transform:translateX(70px) scale(.985);
+  transition:opacity .5s ease,transform .55s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;justify-content:center}
+.slide.active{opacity:1;pointer-events:auto;transform:none}
+.slide.past{opacity:0;transform:translateX(-70px) scale(.985)}
+
+/* 布局工具 */
+.two{display:grid;grid-template-columns:1.02fr 1fr;gap:52px;align-items:center;width:100%}
+.two.v{grid-template-columns:1fr 1.15fr}
+.center{align-items:center;text-align:center}
+.stack{display:flex;flex-direction:column}
+
+/* ---------- 排版组件 ---------- */
+.eyebrow{font:600 14px var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--crimson);
+  display:inline-flex;align-items:center;gap:11px;margin-bottom:18px}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--crimson)}
+.eyebrow .n{color:var(--ink-faint)}
+h1.title{font-size:74px;line-height:1.04;font-weight:800;letter-spacing:0;margin:0;text-wrap:balance}
+h2.title{font-size:50px;line-height:1.1;font-weight:800;letter-spacing:0;margin:0 0 16px;text-wrap:balance}
+.mono-accent{font-family:var(--mono);color:var(--crimson);font-weight:700}
+.lead{font-size:25px;line-height:1.55;color:var(--ink-soft);margin:0;max-width:32ch}
+.lead.tight{font-size:22px}
+.big-note{font-size:29px;line-height:1.5;font-weight:600;max-width:26ch}
+.hl{color:var(--crimson);font-weight:700}
+.hl-bg{background:linear-gradient(transparent 58%,var(--crimson-soft) 58%);padding:0 2px}
+ul.clean{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px}
+ul.clean li{display:flex;gap:14px;align-items:flex-start;font-size:22px;line-height:1.45}
+ul.clean li .mk{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+  background:var(--crimson-soft);color:var(--crimson);font:700 15px var(--mono);margin-top:2px}
+ul.clean li b{font-weight:700}
+ul.clean li .sub{display:block;color:var(--ink-soft);font-size:17px;line-height:1.4;margin-top:3px;font-weight:400}
+
+/* 卡片 / 芯片 */
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;
+  box-shadow:0 2px 0 rgba(0,0,0,.02)}
+.card h3{margin:0 0 6px;font-size:20px}
+.card p{margin:0;font-size:16px;color:var(--ink-soft);line-height:1.45}
+.card .ic{font-size:26px;margin-bottom:10px;display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.chip{display:inline-flex;align-items:center;gap:8px;background:var(--paper-2);border:1px solid var(--line);
+  border-radius:999px;padding:8px 15px;font-size:16px;font-weight:600}
+.chip .d{width:9px;height:9px;border-radius:50%;background:var(--crimson)}
+.chip.mono{font-family:var(--mono);font-size:15px}
+.tag-row{display:flex;flex-wrap:wrap;gap:10px}
+
+.cmd-pill{font-family:var(--mono);font-weight:700;background:var(--ink);color:#fff;border-radius:8px;
+  padding:3px 10px;font-size:.92em;white-space:nowrap}
+.cmd-pill.red{background:var(--crimson)}
+code.inline{font-family:var(--mono);background:var(--paper-2);border:1px solid var(--line);
+  border-radius:6px;padding:1px 7px;font-size:.9em;color:var(--crimson-deep);font-weight:600}
+
+/* 键帽 */
+.key{font:600 15px var(--mono);background:#fff;border:1px solid var(--line);border-bottom-width:3px;
+  border-radius:8px;padding:3px 11px;color:var(--ink);box-shadow:0 1px 0 rgba(0,0,0,.03)}
+
+/* ---------- 终端窗口 ---------- */
+.term{background:var(--term-bg);border-radius:14px;overflow:hidden;font-family:var(--mono);
+  box-shadow:0 30px 70px -28px rgba(0,0,0,.55);border:1px solid var(--term-line)}
+.term-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--term-bar);
+  border-bottom:1px solid var(--term-line)}
+.term-bar .dot{width:12px;height:12px;border-radius:50%}
+.term-bar .t{margin-left:10px;color:var(--term-dim);font-size:13px;letter-spacing:.02em}
+.term-body{padding:22px 24px;font-size:21px;line-height:1.75;color:var(--term-fg);white-space:normal}
+.term-body.sm{font-size:18px;line-height:1.7}
+.term .u{color:var(--term-green)}
+.term .h{color:var(--term-cyan)}
+.term .p{color:var(--term-blue)}
+.term .cmd{color:#fff;font-weight:600}
+.term .out{color:var(--term-dim)}
+.term .ok{color:var(--term-green)}
+.term .em{color:var(--crimson-bright);font-weight:600}
+.term .cm{color:#5f6b7d;font-style:italic}   /* 注释 */
+.term .ln{display:block;white-space:pre-wrap;word-break:break-word}
+.cursor{display:inline-block;width:11px;height:1.05em;background:var(--term-green);
+  vertical-align:-.18em;margin-left:2px;animation:blink 1.05s steps(1) infinite}
+
+/* ---------- 分片出现（教学节奏）---------- */
+.frag{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s cubic-bezier(.3,1,.5,1)}
+.frag.revealed{opacity:1;transform:none}
+.frag.pop{transform:scale(.9)}
+.frag.pop.revealed{transform:none}
+.frag.right{transform:translateX(-22px)}
+.frag.right.revealed{transform:none}
+
+/* ---------- 通用小动画（进入当前页时播放）---------- */
+@keyframes blink{50%{opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes popIn{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+@keyframes drawLine{to{stroke-dashoffset:0}}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes dash{to{stroke-dashoffset:-40}}
+@keyframes travelX{0%{offset-distance:0%}100%{offset-distance:100%}}
+
+.slide.active .rise{animation:fadeUp .7s both}
+.slide.active .rise-2{animation:fadeUp .7s .12s both}
+.slide.active .rise-3{animation:fadeUp .7s .24s both}
+
+/* ---------- SVG 图示通用 ---------- */
+svg{overflow:visible}
+.stroke-ink{stroke:var(--ink)}
+.draw{stroke-dasharray:2000;stroke-dashoffset:2000}
+.slide.active .draw{animation:drawLine 1.1s .3s ease forwards}
+.flow{stroke-dasharray:7 9;stroke-linecap:round}
+.slide.active .flow{animation:dash 1s linear infinite}
+
+/* 首页封面 */
+.cover{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 84px}
+.medallion{width:132px;height:132px;border-radius:50%;background:#fff;display:grid;place-items:center;
+  box-shadow:0 0 0 2px var(--crimson), 0 18px 40px -18px rgba(173,23,48,.55);margin-bottom:34px}
+.medallion img{width:96px;height:96px}
+.cover h1{font-size:80px;line-height:1.02;font-weight:800;margin:0}
+.cover .sub{font-size:26px;color:var(--ink-soft);margin:22px 0 0;font-weight:500}
+.cover .meta{margin-top:40px;display:flex;gap:14px;flex-wrap:wrap}
+.bootlog{position:absolute;right:64px;bottom:70px;width:340px;font:12px/1.7 var(--mono);color:var(--ink-faint);
+  opacity:.75;text-align:left;pointer-events:none}
+.bootlog .ln{opacity:0;animation:bootln .5s forwards}
+.slide.active .bootlog .ln{}
+.decor-ring{position:absolute;right:-160px;top:-160px;width:560px;height:560px;border-radius:50%;
+  border:2px dashed rgba(173,23,48,.18);pointer-events:none}
+.decor-ring.two{right:-120px;top:-120px;width:480px;height:480px;border-style:solid;
+  border-color:rgba(173,23,48,.08)}
+@keyframes bootln{to{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.slide.active .decor-ring{animation:spin 90s linear infinite}
+
+/* 徽章 / 步骤数字 */
+.step-n{flex:none;width:46px;height:46px;border-radius:12px;background:var(--crimson);color:#fff;
+  font:800 22px var(--mono);display:grid;place-items:center;box-shadow:0 8px 20px -8px var(--crimson)}
+.warn{background:#fff;border:1px solid var(--crimson);border-left:5px solid var(--crimson);border-radius:12px;
+  padding:16px 20px;display:flex;gap:14px;align-items:flex-start}
+.warn .ic{font-size:24px;flex:none}
+.warn b{color:var(--crimson-deep)}
+.okbox{background:var(--ok-soft);border:1px solid #A9D8C9;border-radius:12px;padding:14px 18px;font-size:18px}
+
+/* 文件系统树（缩进式）*/
+.fstree{font-family:var(--mono);font-size:18px;font-weight:600;line-height:1.1}
+.fstree .fnode{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:7px 12px;margin:6px 0}
+.fstree .hot{border-color:var(--crimson);background:var(--crimson-soft);color:var(--crimson-deep)}
+.fstree .sel{background:var(--crimson);border-color:var(--crimson-deep);color:#fff}
+.fstree .branch{margin-left:20px;padding-left:22px;border-left:2px solid var(--line)}
+.fstree .note{font-family:var(--sans);font-size:13px;color:var(--crimson);font-weight:700;margin-left:8px}
+
+/* 网络节点 */
+.node{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:16px;text-align:center;
+  min-width:120px;box-shadow:0 6px 18px -12px rgba(0,0,0,.3)}
+.node .ic{font-size:34px;line-height:1}
+.node .nm{font-weight:700;font-size:16px;margin-top:6px}
+.node .ip{font:600 13px var(--mono);color:var(--crimson);margin-top:2px}
+.node.hot{border-color:var(--crimson);box-shadow:0 10px 24px -10px rgba(173,23,48,.5)}
+
+/* 端口"门" */
+.door{width:58px;height:86px;border-radius:8px 8px 3px 3px;background:var(--paper-2);
+  border:2px solid var(--line);position:relative;display:grid;place-items:flex-end center;padding-bottom:8px}
+.door .no{font:700 15px var(--mono);color:var(--ink-soft)}
+.door .kn{position:absolute;right:7px;top:50%;width:6px;height:6px;border-radius:50%;background:var(--ink-faint)}
+.door.on{background:var(--crimson);border-color:var(--crimson-deep)}
+.door.on .no{color:#fff}
+.door.on .kn{background:#fff}
+.door .svc{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font:700 12px var(--mono);
+  color:var(--crimson);white-space:nowrap;opacity:0}
+.door.on .svc{opacity:1}
+
+/* 速查小抄 */
+.cheat{display:grid;grid-template-columns:1fr 1fr;gap:8px 34px;font-size:16px}
+.cheat .row{display:flex;justify-content:space-between;gap:16px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.cheat .row code{font-family:var(--mono);font-weight:700;color:var(--crimson-deep)}
+.cheat .row span{color:var(--ink-soft)}
+
+/* 资源链接 */
+.link{font-family:var(--mono);font-weight:700;color:var(--crimson);font-size:20px}
+
+/* 导航箭头（鼠标） */
+.nav{position:absolute;bottom:14px;z-index:30;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+  background:rgba(255,255,255,.85);display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);
+  transition:.2s;font-size:16px}
+.nav:hover{border-color:var(--crimson);color:var(--crimson)}
+#prev{right:112px}#next{right:70px}
+
+/* 减弱动画偏好 */
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.06ms!important}
+}
+/* 屏幕过小时的提示（正常演示会全屏缩放，无妨） */
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <!-- 顶栏 -->
+    <div class="chrome chrome-top">
+      <div class="brand">
+        <img src="sjtu.png" alt="上海交通大学">
+        <div class="b-txt">
+          <span class="b-1">零基础 RISC-V 芯片智能体开发</span>
+          <span class="b-2">上海交通大学夏令营 · SJTU</span>
+        </div>
+      </div>
+      <div class="sec-tag" id="secTag">开始</div>
+    </div>
+
+    <!-- 幻灯片 -->
+    <div id="deck">
+
+      <!-- ============ 01 封面 ============ -->
+      <section class="slide" data-sec="开始">
+        <div class="cover">
+          <div class="decor-ring"></div>
+          <div class="decor-ring two"></div>
+          <div class="medallion rise"><img src="sjtu.png" alt="SJTU"></div>
+          <div class="rise" style="margin-bottom:16px;font-weight:700;font-size:17px;font-family:var(--sans);color:var(--crimson);letter-spacing:.02em;display:flex;align-items:center;gap:11px"><span style="width:26px;height:2px;background:var(--crimson)"></span>零基础 RISC-V 芯片智能体开发 · 夏令营</div>
+          <h1 class="rise-2">从零开始<br><span class="mono-accent">Linux</span> 与 <span class="mono-accent">RISC-V</span> 开发实践</h1>
+          <p class="sub rise-3">第一课 · 命令行 · 网络 · SSH 远程连接<span class="cursor"></span></p>
+          <div class="meta rise-3">
+            <span class="chip"><span class="d"></span>面向零基础同学</span>
+            <span class="chip mono">target: milkv.io/titan</span>
+            <span class="chip mono">ref: missing-semester</span>
+          </div>
+          <div class="bootlog" id="bootlog"></div>
+        </div>
+      </section>
+
+      <!-- ============ 02 路线图 ============ -->
+      <section class="slide" data-sec="开始">
+        <div class="stack" style="gap:8px">
+          <span class="eyebrow"><span class="n">01</span>&nbsp;今天的目标</span>
+          <h2 class="title">这节课结束时，<br>你将能<span class="hl-bg">亲手连上一台 RISC-V 电脑</span></h2>
+        </div>
+        <div class="grid3" style="margin-top:40px">
+          <div class="card frag pop"><span class="ic">🐧</span><h3>看懂 Linux</h3><p>操作系统是什么，为什么服务器和板子都用它</p></div>
+          <div class="card frag pop"><span class="ic">⌨️</span><h3>会用命令行</h3><p>用键盘敲命令来操作电脑：找文件、建目录、看内容</p></div>
+          <div class="card frag pop"><span class="ic">🌐</span><h3>懂一点网络</h3><p>IP 地址、局域网、ping —— 两台电脑怎么"找到"彼此</p></div>
+          <div class="card frag pop"><span class="ic">🔐</span><h3>用 SSH 远程登录</h3><p>安全地从你的电脑，进入板子的命令行</p></div>
+          <div class="card frag pop"><span class="ic">🛠️</span><h3>连上 Titan 板子</h3><p>完整走一遍：通电 → 找 IP → <span class="cmd-pill">ssh</span> → 进去！</p></div>
+          <div class="card frag pop" style="background:var(--crimson);border-color:var(--crimson-deep);color:#fff">
+            <span class="ic">🤖</span><h3 style="color:#fff">为智能体开发打底</h3><p style="color:#ffd7dd">这些是之后在板子上做 AI 智能体的基本功</p></div>
+        </div>
+      </section>
+
+      <!-- ============ 03 全景图 ============ -->
+      <section class="slide" data-sec="开始">
+        <div class="stack" style="margin-bottom:30px">
+          <span class="eyebrow"><span class="n">02</span>&nbsp;全景图</span>
+          <h2 class="title">我们要打通的这条路</h2>
+          <p class="lead" style="max-width:60ch">从你手里的笔记本，一路连到那台 RISC-V 板子，再在上面做开发。今天专攻<span class="hl">前半段：连上去</span>。</p>
+        </div>
+        <div style="position:relative;height:280px">
+          <svg viewBox="0 0 1100 240" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+            <line x1="120" y1="120" x2="980" y2="120" stroke="var(--line)" stroke-width="3"/>
+            <line x1="120" y1="120" x2="980" y2="120" stroke="var(--crimson)" stroke-width="3" class="draw"/>
+            <circle r="8" fill="var(--crimson)" class="signal">
+              <animateMotion dur="3.2s" repeatCount="indefinite" path="M120,120 L980,120"/>
+            </circle>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;justify-content:space-between;align-items:center">
+            <div class="node frag pop" style="min-width:150px"><div class="ic">💻</div><div class="nm">你的笔记本</div><div class="ip">Windows / Mac</div></div>
+            <div class="node frag pop"><div class="ic">📡</div><div class="nm">网络 / 路由器</div><div class="ip">同一个局域网</div></div>
+            <div class="node frag pop hot" style="min-width:170px"><div class="ic">🖥️</div><div class="nm">Titan 板子</div><div class="ip">8 核 RISC-V · Linux</div></div>
+            <div class="node frag pop"><div class="ic">🤖</div><div class="nm">智能体开发</div><div class="ip">下一课</div></div>
+          </div>
+        </div>
+        <p class="frag" style="text-align:center;font-size:20px;color:var(--ink-soft);margin-top:18px">
+          连接它们的桥梁，就是今天的主角 —— <span class="mono-accent">SSH</span></p>
+      </section>
+
+      <!-- ============ 04 什么是操作系统 ============ -->
+      <section class="slide" data-sec="Linux 基础">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">03</span>&nbsp;打好地基</span>
+            <h2 class="title">什么是<br>操作系统？</h2>
+            <p class="lead">它是硬件和你之间的<span class="hl">"管家"</span>：帮你管理 CPU、内存、硬盘、网络，让程序能跑起来。</p>
+            <p class="lead tight frag" style="margin-top:18px">你其实每天都在用操作系统 ——<br>手机的 Android/iOS，电脑的 Windows/macOS，<br>而板子和服务器上，用的是 <span class="hl">Linux</span>。</p>
+          </div>
+          <div class="stack" style="gap:14px">
+            <div class="card frag right" style="background:var(--paper-2);text-align:center;border-style:dashed"><b style="font-size:20px">应用程序</b><div style="color:var(--ink-soft);font-size:15px;margin-top:4px">浏览器 · 微信 · 你写的代码</div></div>
+            <div style="text-align:center;color:var(--ink-faint);font-size:20px">▲ 请求服务</div>
+            <div class="card frag right" style="background:var(--crimson);color:#fff;text-align:center;border-color:var(--crimson-deep)"><b style="font-size:22px">操作系统 (OS)</b><div style="color:#ffd7dd;font-size:15px;margin-top:4px">Linux / Windows / macOS —— 居中调度</div></div>
+            <div style="text-align:center;color:var(--ink-faint);font-size:20px">▼ 驱动控制</div>
+            <div class="card frag right" style="background:var(--paper-2);text-align:center;border-style:dashed"><b style="font-size:20px">硬件</b><div style="color:var(--ink-soft);font-size:15px;margin-top:4px">CPU · 内存 · 硬盘 · 网卡</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 05 什么是 Linux ============ -->
+      <section class="slide" data-sec="Linux 基础">
+        <div class="stack">
+          <span class="eyebrow"><span class="n">04</span>&nbsp;认识主角</span>
+          <h2 class="title"><span class="mono-accent">Linux</span> 其实无处不在</h2>
+          <p class="lead" style="max-width:64ch">一个免费、开源的操作系统。你可能没在自己电脑上装过它，但你每天都在"用"它 —— 因为几乎整个互联网都跑在 Linux 上。</p>
+        </div>
+        <div class="grid3" style="margin-top:34px;gap:18px">
+          <div class="card frag pop"><span class="ic">📱</span><h3>安卓手机</h3><p>Android 的内核就是 Linux —— 全球数十亿台</p></div>
+          <div class="card frag pop"><span class="ic">☁️</span><h3>服务器与云</h3><p>绝大多数网站、App 后台都运行在 Linux 服务器上</p></div>
+          <div class="card frag pop"><span class="ic">🏆</span><h3>超级计算机</h3><p>全球 TOP500 超算 <span class="hl">100%</span> 运行 Linux</p></div>
+          <div class="card frag pop"><span class="ic">📶</span><h3>路由器 / 智能设备</h3><p>家里的路由器、智能音箱，很多也是 Linux</p></div>
+          <div class="card frag pop hot" style="border-color:var(--crimson)"><span class="ic">🖥️</span><h3>我们的 Titan 板子</h3><p>装的正是 Ubuntu / Debian —— 都是 Linux</p></div>
+          <div class="card frag pop"><span class="ic">💡</span><h3>为什么学它？</h3><p>做开发、跑 AI、玩硬件，都绕不开 Linux</p></div>
+        </div>
+      </section>
+
+      <!-- ============ 06 GUI vs CLI ============ -->
+      <section class="slide" data-sec="Linux 基础">
+        <div class="stack" style="margin-bottom:26px">
+          <span class="eyebrow"><span class="n">05</span>&nbsp;两种操作方式</span>
+          <h2 class="title">用鼠标点，还是用键盘敲？</h2>
+        </div>
+        <div class="two" style="gap:40px;align-items:stretch">
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:14px">
+            <div class="chip" style="align-self:flex-start"><span class="d"></span>图形界面 GUI</div>
+            <div style="background:var(--paper-2);border-radius:12px;border:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;gap:6px"><span style="width:11px;height:11px;border-radius:50%;background:#e06">&nbsp;</span><span style="width:11px;height:11px;border-radius:50%;background:#fb0"></span><span style="width:11px;height:11px;border-radius:50%;background:#2c6"></span></div>
+              <div style="height:14px;background:#fff;border-radius:5px;width:80%"></div>
+              <div style="height:14px;background:#fff;border-radius:5px;width:55%"></div>
+              <div style="height:34px;background:var(--crimson);border-radius:7px;width:44%;display:grid;place-items:center;color:#fff;font-size:13px;margin-top:4px">🖱️ 点击</div>
+            </div>
+            <p style="margin:0;color:var(--ink-soft);font-size:17px">直观、好上手 —— 但<b>需要屏幕</b>，也很难自动化。</p>
+          </div>
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:14px;border-color:var(--crimson)">
+            <div class="chip" style="align-self:flex-start;background:var(--crimson-soft);border-color:var(--crimson)"><span class="d"></span>命令行 CLI</div>
+            <div class="term"><div class="term-body sm"><span class="ln"><span class="u">you</span><span class="p">@</span><span class="h">titan</span><span class="p">:~$</span> <span class="cmd">rm *.log</span></span><span class="ln out">删除完成，用时 0.01 秒</span><span class="ln"><span class="u">you</span><span class="p">@</span><span class="h">titan</span><span class="p">:~$</span> <span class="cursor"></span></span></div></div>
+            <p style="margin:0;color:var(--ink-soft);font-size:17px">纯键盘、纯文字 —— <b>不需要屏幕</b>，能远程、能脚本自动化，飞快。</p>
+          </div>
+        </div>
+        <div class="okbox frag" style="margin-top:22px;text-align:center">
+          板子通常<b>没有插显示器</b>，还可能在别的房间甚至云端 —— 所以我们必须学会用命令行远程操作它。
+        </div>
+      </section>
+
+      <!-- ============ 07 终端与 Shell ============ -->
+      <section class="slide" data-sec="Linux 基础">
+        <div class="stack" style="margin-bottom:24px">
+          <span class="eyebrow"><span class="n">06</span>&nbsp;认识提示符</span>
+          <h2 class="title">终端、Shell 与提示符</h2>
+          <p class="lead" style="max-width:62ch"><b>终端</b>是那个黑框框窗口；<b>Shell</b>（如 bash）是里面负责"听命令、办事情"的程序。它启动后会给你一个<b>提示符</b>，等你输入。</p>
+        </div>
+        <div class="frag" style="display:flex;justify-content:center;margin:10px 0 6px">
+          <div class="term" style="width:min(760px,100%)"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">terminal</span></div>
+            <div class="term-body" style="font-size:30px;text-align:center;padding:34px"><span class="u">student</span><span style="color:#fff">@</span><span class="h">milkv</span><span style="color:#fff">:</span><span class="p">~/projects</span><span style="color:#fff">$</span> <span class="cursor"></span></div></div>
+        </div>
+        <div class="grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px">
+          <div class="card frag pop" style="padding:14px 16px"><b style="font-family:var(--mono);color:var(--term-green)">student</b><p style="margin-top:4px">你是谁<br>（用户名）</p></div>
+          <div class="card frag pop" style="padding:14px 16px"><b style="font-family:var(--mono);color:var(--term-cyan)">milkv</b><p style="margin-top:4px">在哪台机器<br>（主机名）</p></div>
+          <div class="card frag pop" style="padding:14px 16px"><b style="font-family:var(--mono);color:var(--term-blue)">~/projects</b><p style="margin-top:4px">当前所在目录<br>（<code class="inline">~</code> 表示家目录）</p></div>
+          <div class="card frag pop" style="padding:14px 16px"><b style="font-family:var(--mono)">$</b><p style="margin-top:4px">"请输入" 的<br>提示符号</p></div>
+        </div>
+      </section>
+
+      <!-- ============ 08 第一批命令 ============ -->
+      <section class="slide" data-sec="命令行基础">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">07</span>&nbsp;动手第一步</span>
+            <h2 class="title">最先要会的<br>三个命令</h2>
+            <ul class="clean" style="margin-top:14px">
+              <li class="frag right"><span class="mk">1</span><div><b><code class="inline">pwd</code> —— 我在哪？</b><span class="sub">print working directory，打印当前目录</span></div></li>
+              <li class="frag right"><span class="mk">2</span><div><b><code class="inline">ls</code> —— 这里有什么？</b><span class="sub">list，列出当前目录的文件和文件夹</span></div></li>
+              <li class="frag right"><span class="mk">3</span><div><b><code class="inline">cd</code> —— 去别的地方</b><span class="sub">change directory，进入某个文件夹</span></div></li>
+            </ul>
+          </div>
+          <div class="frag right term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">student@milkv</span></div>
+            <div class="term-body sm">
+<span class="ln"><span class="u">student</span><span class="p">@milkv</span><span class="p">:~$</span> <span class="cmd">pwd</span></span>
+<span class="ln out">/home/student</span>
+<span class="ln"><span class="u">student</span><span class="p">@milkv</span><span class="p">:~$</span> <span class="cmd">ls</span></span>
+<span class="ln out">Documents  projects  hello.py</span>
+<span class="ln"><span class="u">student</span><span class="p">@milkv</span><span class="p">:~$</span> <span class="cmd">cd projects</span></span>
+<span class="ln"><span class="u">student</span><span class="p">@milkv</span><span class="p"><span class="em">:~/projects</span>$</span> <span class="cm"># 提示符里的路径变了！</span></span>
+<span class="ln"><span class="u">student</span><span class="p">@milkv</span><span class="p">:~/projects$</span> <span class="cursor"></span></span>
+            </div></div>
+        </div>
+        <div class="okbox frag" style="margin-top:20px;text-align:center">小技巧：敲命令时按 <span class="key">Tab</span> 键可以<b>自动补全</b>文件名，按 <span class="key">↑</span> 可以<b>翻出上一条</b>命令 —— 少打很多字。</div>
+      </section>
+
+      <!-- ============ 09 文件系统树 ============ -->
+      <section class="slide" data-sec="命令行基础">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">08</span>&nbsp;文件系统</span>
+            <h2 class="title">整台电脑，<br>是<span class="hl">一棵大树</span></h2>
+            <p class="lead">所有文件都挂在唯一的树根 <code class="inline">/</code> 下面，一层层展开成文件夹。</p>
+            <div class="stack frag" style="gap:10px;margin-top:20px">
+              <div class="chip mono" style="align-self:flex-start">绝对路径：/home/student/projects</div>
+              <div class="chip mono" style="align-self:flex-start">相对路径：从当前位置出发，如 projects</div>
+            </div>
+            <div class="tag-row frag" style="margin-top:16px">
+              <span class="chip"><code class="inline">~</code>&nbsp;我的家目录</span>
+              <span class="chip"><code class="inline">.</code>&nbsp;当前目录</span>
+              <span class="chip"><code class="inline">..</code>&nbsp;上一层</span>
+            </div>
+          </div>
+          <div class="fstree rise-2">
+            <div class="root"><span class="fnode" style="background:var(--crimson);color:#fff;border-color:var(--crimson-deep)">📁 / <span style="opacity:.75;font-weight:400">根目录</span></span></div>
+            <div class="branch">
+              <div><span class="fnode">bin</span></div>
+              <div><span class="fnode">etc</span></div>
+              <div><span class="fnode hot">home</span></div>
+              <div class="branch">
+                <div><span class="fnode hot">student <span style="opacity:.7;font-weight:400">= ~</span></span></div>
+                <div class="branch">
+                  <div><span class="fnode sel">projects</span><span class="note">← 我们在这里</span></div>
+                  <div><span class="fnode">Documents</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 10 文件操作 ============ -->
+      <section class="slide" data-sec="命令行基础">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">09</span>&nbsp;增删改查</span>
+          <h2 class="title">操作文件的常用命令</h2>
+        </div>
+        <div class="grid3" style="gap:14px">
+          <div class="card frag pop"><b class="cmd-pill">mkdir 名字</b><p style="margin-top:8px">新建文件夹<br><span style="color:var(--ink-faint)">make directory</span></p></div>
+          <div class="card frag pop"><b class="cmd-pill">touch 文件</b><p style="margin-top:8px">新建一个空文件</p></div>
+          <div class="card frag pop"><b class="cmd-pill">cat 文件</b><p style="margin-top:8px">查看文件内容</p></div>
+          <div class="card frag pop"><b class="cmd-pill">cp 源 目标</b><p style="margin-top:8px">复制文件<br><span style="color:var(--ink-faint)">copy</span></p></div>
+          <div class="card frag pop"><b class="cmd-pill">mv 源 目标</b><p style="margin-top:8px">移动 / 重命名<br><span style="color:var(--ink-faint)">move</span></p></div>
+          <div class="card frag pop"><b class="cmd-pill red">rm 文件</b><p style="margin-top:8px">删除文件<br><span style="color:var(--ink-faint)">remove</span></p></div>
+        </div>
+        <div class="warn frag" style="margin-top:22px">
+          <span class="ic">⚠️</span>
+          <div><b>命令行的删除没有"回收站"！</b> <code class="inline">rm</code> 删掉就真没了，尤其是 <code class="inline">rm -rf</code> 会连整个文件夹一起删。敲之前，先看清楚路径对不对。</div>
+        </div>
+      </section>
+
+      <!-- ============ 11 获取帮助 ============ -->
+      <section class="slide" data-sec="命令行基础">
+        <div class="stack" style="margin-bottom:26px">
+          <span class="eyebrow"><span class="n">10</span>&nbsp;不用背命令</span>
+          <h2 class="title">忘了怎么用？三条求助路径</h2>
+          <p class="lead" style="max-width:62ch">没有人能记住所有命令和参数。会"查"，比会"背"重要得多。</p>
+        </div>
+        <div class="grid3" style="gap:18px">
+          <div class="card frag pop"><span class="ic">❓</span><h3><code class="inline">命令 --help</code></h3><p>大多数命令加上 <code class="inline">--help</code>，就会打印简短用法。如 <code class="inline">ls --help</code></p></div>
+          <div class="card frag pop"><span class="ic">📖</span><h3><code class="inline">man 命令</code></h3><p>打开完整手册（manual）。按 <span class="key">q</span> 退出阅读。</p></div>
+          <div class="card frag pop hot" style="border-color:var(--crimson)"><span class="ic">🤖</span><h3>问大模型</h3><p>直接问 AI："<span class="hl">ls 怎么按时间排序？</span>" —— 这正是我们夏令营的玩法</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:22px;text-align:center">遇到看不懂的报错，把整段<b>复制给大模型</b>，让它帮你解释、给出下一步 —— 这是最高效的学习方式之一。</div>
+      </section>
+
+      <!-- ============ 12 管道与重定向 ============ -->
+      <section class="slide" data-sec="命令行基础">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">11</span>&nbsp;命令的组合（进阶一瞥）</span>
+            <h2 class="title">像搭积木一样<br>把命令<span class="hl">串起来</span></h2>
+            <p class="lead">命令行真正的威力，在于把小工具拼在一起。现在看个眼熟就好。</p>
+            <ul class="clean" style="margin-top:22px">
+              <li class="frag right"><span class="mk" style="font-size:18px">|</span><div><b>管道 <code class="inline">|</code></b><span class="sub">把左边命令的输出，喂给右边命令继续处理</span></div></li>
+              <li class="frag right"><span class="mk" style="font-size:18px">&gt;</span><div><b>重定向 <code class="inline">&gt;</code></b><span class="sub">把输出写进文件，而不是打印到屏幕</span></div></li>
+            </ul>
+          </div>
+          <div class="stack frag right" style="gap:18px">
+            <div class="term"><div class="term-body sm">
+<span class="ln cm"># 列出文件，只挑出含 "txt" 的那几行</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">ls</span> <span class="em">|</span> <span class="cmd">grep txt</span></span>
+<span class="ln out">notes.txt</span>
+<span class="ln out">todo.txt</span>
+            </div></div>
+            <div class="term"><div class="term-body sm">
+<span class="ln cm"># 把一句话写进文件里</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">echo</span> hello <span class="em">&gt;</span> hi.txt</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">cat</span> hi.txt</span>
+<span class="ln out">hello</span>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 13 网络：计算机如何对话 ============ -->
+      <section class="slide" data-sec="网络基础">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">12</span>&nbsp;网络基础</span>
+          <h2 class="title">两台电脑，怎么"找到"彼此？</h2>
+          <p class="lead" style="max-width:64ch">想连上板子，先得让你的电脑和板子能<span class="hl">互相通话</span>。这和寄快递很像 —— 数据被切成一个个小包裹，每个都写着地址，沿着网络送过去。</p>
+        </div>
+        <div class="frag" style="position:relative;height:250px;margin-top:6px">
+          <svg viewBox="0 0 1080 220" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+            <path id="netpath" d="M120,110 C360,20 720,200 960,110" fill="none" stroke="var(--line)" stroke-width="3"/>
+            <path d="M120,110 C360,20 720,200 960,110" fill="none" stroke="var(--crimson)" stroke-width="3" class="flow"/>
+            <g>
+              <rect x="-22" y="-14" width="44" height="30" rx="6" fill="var(--crimson)"/>
+              <text x="0" y="6" fill="#fff" font-family="var(--mono)" font-size="12" font-weight="700" text-anchor="middle">📦</text>
+              <animateMotion dur="3s" repeatCount="indefinite"><mpath href="#netpath"/></animateMotion>
+            </g>
+            <g>
+              <rect x="-22" y="-14" width="44" height="30" rx="6" fill="var(--ink)"/>
+              <text x="0" y="6" fill="#fff" font-family="var(--mono)" font-size="12" font-weight="700" text-anchor="middle">📦</text>
+              <animateMotion dur="3s" begin="1.5s" repeatCount="indefinite"><mpath href="#netpath"/></animateMotion>
+            </g>
+          </svg>
+          <div style="position:absolute;left:0;top:50%;transform:translateY(-50%)" class="node"><div class="ic">💻</div><div class="nm">你的电脑</div></div>
+          <div style="position:absolute;right:0;top:50%;transform:translateY(-50%)" class="node hot"><div class="ic">🖥️</div><div class="nm">Titan 板子</div></div>
+        </div>
+        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:19px;margin-top:6px">每个"包裹"上都得写清楚<b>地址</b> —— 这个地址，就叫 <span class="mono-accent">IP</span>。</p>
+      </section>
+
+      <!-- ============ 14 IP 地址与局域网 ============ -->
+      <section class="slide" data-sec="网络基础">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">13</span>&nbsp;门牌号</span>
+            <h2 class="title"><span class="mono-accent">IP</span> 地址<br>与局域网</h2>
+            <p class="lead">IP 就是每台设备在网络里的<span class="hl">门牌号</span>，长这样：</p>
+            <div class="chip mono frag" style="align-self:flex-start;font-size:22px;padding:10px 18px;margin-top:14px;background:var(--crimson-soft);border-color:var(--crimson)">192.168.1.50</div>
+            <ul class="clean frag" style="margin-top:22px">
+              <li><span class="mk">🏠</span><div><b>局域网 (LAN)</b><span class="sub">同一个路由器下的设备，像同一栋楼的住户，能直接互相找到</span></div></li>
+              <li><span class="mk">🔑</span><div><b>关键前提</b><span class="sub">你的电脑和板子要接到<b>同一个网</b>，IP 前几段通常相同</span></div></li>
+            </ul>
+          </div>
+          <div class="frag right" style="position:relative;height:400px">
+            <div class="node hot" style="position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);min-width:130px"><div class="ic">📡</div><div class="nm">路由器</div><div class="ip">192.168.1.1</div></div>
+            <svg viewBox="0 0 400 400" width="100%" height="100%" style="position:absolute;inset:0">
+              <g stroke="var(--crimson)" stroke-width="2.5" fill="none" class="draw">
+                <line x1="200" y1="176" x2="70" y2="70"/>
+                <line x1="200" y1="176" x2="330" y2="70"/>
+                <line x1="200" y1="176" x2="90" y2="330"/>
+                <line x1="200" y1="176" x2="320" y2="330"/>
+              </g>
+            </svg>
+            <div class="node" style="position:absolute;left:2%;top:4%"><div class="ic">💻</div><div class="ip">.1.20</div></div>
+            <div class="node" style="position:absolute;right:2%;top:4%"><div class="ic">📱</div><div class="ip">.1.31</div></div>
+            <div class="node" style="position:absolute;left:6%;bottom:2%"><div class="ic">💻</div><div class="ip">.1.42</div></div>
+            <div class="node hot" style="position:absolute;right:2%;bottom:2%"><div class="ic">🖥️</div><div class="nm" style="font-size:14px">Titan</div><div class="ip">.1.50</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 15 找到板子 IP + ping ============ -->
+      <section class="slide" data-sec="网络基础">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">14</span>&nbsp;找到它 · 试探它</span>
+            <h2 class="title">板子的 IP 是多少？</h2>
+            <ul class="clean" style="margin-top:12px">
+              <li class="frag right"><span class="mk">A</span><div><b>在板子上直接查</b><span class="sub">通过串口登录后运行 <code class="inline">ip addr</code>，找到 192.168 开头的那个</span></div></li>
+              <li class="frag right"><span class="mk">B</span><div><b>看路由器后台</b><span class="sub">路由器管理页里，会列出所有连接设备的 IP</span></div></li>
+              <li class="frag right"><span class="mk">C</span><div><b>用 <code class="inline">ping</code> 试试通不通</b><span class="sub">能收到回复，就说明两台机器网络可达</span></div></li>
+            </ul>
+          </div>
+          <div class="frag right term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">在你的电脑上</span></div>
+            <div class="term-body sm">
+<span class="ln"><span class="u">$</span> <span class="cmd">ping 192.168.1.50</span></span>
+<span class="ln out">来自 192.168.1.50 的回复: 时间=<span class="ok">0.8ms</span></span>
+<span class="ln out">来自 192.168.1.50 的回复: 时间=<span class="ok">0.7ms</span></span>
+<span class="ln out">来自 192.168.1.50 的回复: 时间=<span class="ok">0.9ms</span></span>
+<span class="ln cm"># 有回复 = 网络通了 ✓ 按 Ctrl+C 停止</span>
+<span class="ln"><span class="u">$</span> <span class="cursor"></span></span>
+            </div></div>
+        </div>
+        <div class="okbox frag" style="margin-top:20px;text-align:center"><code class="inline">ping</code> 像在喊"<b>喂，在吗？</b>"，对方回一声"<b>在！</b>"，还告诉你来回花了多久（毫秒）。</div>
+      </section>
+
+      <!-- ============ 16 端口 ============ -->
+      <section class="slide" data-sec="网络基础">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">15</span>&nbsp;最后一块拼图</span>
+            <h2 class="title">端口：<br>一台电脑的<span class="hl">很多扇门</span></h2>
+            <p class="lead">找到了 IP（哪栋楼），还得知道敲<span class="hl">哪扇门</span>。一台电脑上跑着很多服务，每个都守着一个编号的"门" —— 这就是<b>端口</b>。</p>
+            <div class="tag-row frag" style="margin-top:22px">
+              <span class="chip mono">80 → 网页 HTTP</span>
+              <span class="chip mono">443 → 加密网页</span>
+              <span class="chip mono" style="background:var(--crimson-soft);border-color:var(--crimson)">22 → SSH</span>
+            </div>
+            <p class="frag" style="margin-top:18px;font-size:20px"><b>我们今天要敲的，就是 <span class="mono-accent">22 号门</span>。</b></p>
+          </div>
+          <div class="frag right" style="display:flex;justify-content:center;align-items:flex-end;gap:22px;padding:40px 0 20px;background:#fff;border:1px solid var(--line);border-radius:18px">
+            <div class="door"><span class="no">80</span></div>
+            <div class="door"><span class="no">443</span></div>
+            <div class="door on"><span class="svc">SSH</span><span class="no">22</span></div>
+            <div class="door"><span class="no">…</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 17 什么是 SSH ============ -->
+      <section class="slide" data-sec="SSH 远程连接">
+        <div class="stack" style="margin-bottom:24px">
+          <span class="eyebrow"><span class="n">16</span>&nbsp;今天的主角</span>
+          <h2 class="title"><span class="mono-accent">SSH</span> = Secure Shell</h2>
+          <p class="lead" style="max-width:66ch">一句话：<span class="hl">安全地、从你的电脑，去操作另一台电脑的命令行</span>。板子没接屏幕、可能在别的房间甚至云端 —— SSH 让你像坐在它面前一样敲命令。</p>
+        </div>
+        <div class="frag" style="position:relative;height:230px;display:flex;align-items:center;justify-content:space-between;padding:0 10px">
+          <div class="node" style="min-width:150px"><div class="ic">💻</div><div class="nm">你的电脑</div><div class="ip">SSH 客户端</div></div>
+          <div style="flex:1;position:relative;height:90px;margin:0 24px">
+            <svg viewBox="0 0 600 90" width="100%" height="100%" preserveAspectRatio="none">
+              <rect x="0" y="30" width="600" height="30" rx="15" fill="var(--ink)"/>
+              <rect x="0" y="30" width="600" height="30" rx="15" fill="none" stroke="var(--crimson)" stroke-width="2" stroke-dasharray="6 8" class="flow"/>
+            </svg>
+            <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--crimson);color:#fff;border-radius:999px;padding:6px 16px;font-weight:700;font-size:16px;box-shadow:0 8px 20px -8px var(--crimson)">🔒 加密隧道</div>
+          </div>
+          <div class="node hot" style="min-width:150px"><div class="ic">🖥️</div><div class="nm">Titan 板子</div><div class="ip">SSH 服务器</div></div>
+        </div>
+        <div class="grid3 frag" style="margin-top:14px;gap:16px">
+          <div class="card" style="padding:14px 18px"><b>🔒 加密</b><p style="margin-top:4px">中途被人偷看，也只看到乱码</p></div>
+          <div class="card" style="padding:14px 18px"><b>🌍 远程</b><p style="margin-top:4px">板子在哪都能连，只要网络可达</p></div>
+          <div class="card" style="padding:14px 18px"><b>⌨️ 就是命令行</b><p style="margin-top:4px">连上后，前面学的命令全都能用</p></div>
+        </div>
+      </section>
+
+      <!-- ============ 18 SSH 如何工作 ============ -->
+      <section class="slide" data-sec="SSH 远程连接">
+        <div class="stack" style="margin-bottom:26px">
+          <span class="eyebrow"><span class="n">17</span>&nbsp;幕后发生了什么</span>
+          <h2 class="title">SSH 连接的四步（简化版）</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:10px"><div class="step-n">1</div><b>敲门</b><p>你的电脑连到板子的 <b>22 端口</b></p></div>
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:10px"><div class="step-n">2</div><b>建立加密隧道</b><p>双方协商密钥，之后通信全程加密</p></div>
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:10px"><div class="step-n">3</div><b>确认身份</b><p>第一次连接会显示板子的"指纹"，问你是不是它</p></div>
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:10px"><div class="step-n">4</div><b>你登录</b><p>输入密码（或用密钥），验证通过 → 进入！</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:26px;text-align:center">你只需要记住最后一步的<b>那条命令</b>，前面这些 SSH 都在幕后自动帮你完成。下一页就实操 👉</div>
+      </section>
+
+      <!-- ============ 19 第一次连接（核心页）============ -->
+      <section class="slide" data-sec="SSH 远程连接">
+        <div class="stack" style="margin-bottom:16px">
+          <span class="eyebrow"><span class="n">18</span>&nbsp;★ 核心实操</span>
+          <h2 class="title">你的第一次 SSH 连接</h2>
+        </div>
+        <div class="two" style="gap:36px;align-items:center">
+          <div class="term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">在你自己的电脑上</span></div>
+            <div class="term-body sm">
+<span class="ln"><span class="u">$</span> <span class="cmd">ssh</span> <span class="em">student</span>@<span class="h">192.168.1.50</span></span>
+<span class="ln frag out">The authenticity of host ... can't be</span>
+<span class="ln frag out">established. ED25519 fingerprint is</span>
+<span class="ln frag out">SHA256:aBcD... Continue? <span class="ok">yes</span> ⏎</span>
+<span class="ln frag out">student@192.168.1.50's password: <span class="ok">••••••</span></span>
+<span class="ln frag" style="color:var(--term-green)">Welcome to Ubuntu (RISC-V) 🎉</span>
+<span class="ln frag"><span class="u">student</span><span class="p">@</span><span class="h" style="color:var(--crimson-bright)">milkv</span><span class="p">:~$</span> <span class="cursor"></span></span>
+            </div></div>
+          <div class="stack" style="gap:16px">
+            <div class="card frag right"><b>格式：<code class="inline">ssh 用户名@板子IP</code></b><p style="margin-top:4px">就这一条命令，是今天最需要记住的。</p></div>
+            <div class="warn frag right"><span class="ic">👀</span><div>第一次会问 <b>fingerprint</b>，确认后输 <b><code class="inline">yes</code></b> 回车。之后就不再问了。</div></div>
+            <div class="warn frag right"><span class="ic">🙈</span><div>输密码时<b>屏幕不显示任何字符</b>，这是正常的安全设计 —— 别以为键盘坏了，照打回车即可。</div></div>
+            <div class="okbox frag right">看到提示符从你电脑的名字，<b>变成了 <code class="inline">student@milkv</code></b> —— 恭喜，你已经在板子里面了！🎉</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 20 密钥登录（进阶）============ -->
+      <section class="slide" data-sec="SSH 远程连接">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">19</span>&nbsp;进阶 · 可选</span>
+            <h2 class="title">免密码登录：<br><span class="hl">SSH 密钥</span></h2>
+            <p class="lead">每次输密码太麻烦，也不够安全。更好的方式是用一对"钥匙"。</p>
+            <ul class="clean" style="margin-top:20px">
+              <li class="frag right"><span class="mk">1</span><div><b><code class="inline">ssh-keygen</code></b><span class="sub">生成一对钥匙：私钥（留在自己电脑，绝不外传）+ 公钥</span></div></li>
+              <li class="frag right"><span class="mk">2</span><div><b><code class="inline">ssh-copy-id student@…</code></b><span class="sub">把公钥"锁孔"装到板子上</span></div></li>
+              <li class="frag right"><span class="mk">3</span><div><b>以后 <code class="inline">ssh</code> 直接进</b><span class="sub">钥匙自动对上锁，免密码、更安全</span></div></li>
+            </ul>
+          </div>
+          <div class="frag right" style="display:flex;flex-direction:column;gap:18px;justify-content:center">
+            <div class="card" style="display:flex;align-items:center;gap:16px"><span style="font-size:40px">🔑</span><div><b>私钥 Private Key</b><p style="margin-top:2px">只存在你的电脑里，像家门钥匙，绝不给别人</p></div></div>
+            <div style="text-align:center;color:var(--crimson);font-weight:700;font-size:22px">配对验证 🔒 ⇄ 🔓</div>
+            <div class="card" style="display:flex;align-items:center;gap:16px;border-color:var(--crimson)"><span style="font-size:40px">🔓</span><div><b>公钥 Public Key</b><p style="margin-top:2px">放到板子上，像装好的锁，公开也没关系</p></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 21 传文件 scp ============ -->
+      <section class="slide" data-sec="SSH 远程连接">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">20</span>&nbsp;顺手一招</span>
+            <h2 class="title">在两台电脑间<br><span class="hl">传文件</span></h2>
+            <p class="lead"><code class="inline">scp</code>（secure copy）用的是同一套 SSH，把文件安全地拷来拷去。</p>
+            <div class="tag-row frag" style="margin-top:22px">
+              <span class="chip">💡 进阶：用 <b>VS Code Remote-SSH</b> 可以像编辑本地文件一样，直接改板子上的代码</span>
+            </div>
+          </div>
+          <div class="stack frag right" style="gap:16px">
+            <div class="term"><div class="term-body sm">
+<span class="ln cm"># 把本地文件 发到 板子</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">scp</span> hello.py <span class="em">student@192.168.1.50</span>:~/</span>
+<span class="ln out">hello.py            100%  1.2KB</span>
+            </div></div>
+            <div style="text-align:center;font-size:26px;color:var(--crimson)">⇅</div>
+            <div class="term"><div class="term-body sm">
+<span class="ln cm"># 把板子上的文件 取回 本地</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">scp</span> <span class="em">student@192.168.1.50</span>:~/result.txt .</span>
+<span class="ln out">result.txt          100%  4.0KB</span>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 22 实战：连上 Titan + 规格 ============ -->
+      <section class="slide" data-sec="实战与收尾">
+        <div class="stack" style="margin-bottom:18px">
+          <span class="eyebrow"><span class="n">21</span>&nbsp;串起来 · 上手</span>
+          <h2 class="title">实战：连上 Milk-V Titan</h2>
+        </div>
+        <div class="two" style="gap:40px;align-items:center">
+          <div>
+            <svg viewBox="0 0 360 300" width="100%" height="260">
+              <rect x="20" y="20" width="320" height="260" rx="14" fill="#fff" stroke="var(--crimson)" stroke-width="2.5" class="draw"/>
+              <!-- SoC -->
+              <rect x="120" y="110" width="120" height="90" rx="8" fill="var(--crimson-soft)" stroke="var(--crimson)" stroke-width="2"/>
+              <text x="180" y="150" text-anchor="middle" font-family="var(--mono)" font-weight="700" font-size="15" fill="var(--crimson-deep)">UR-DP1000</text>
+              <text x="180" y="172" text-anchor="middle" font-family="var(--mono)" font-size="12" fill="var(--crimson)">8× RISC-V</text>
+              <!-- DDR4 slots -->
+              <rect x="120" y="36" width="14" height="60" rx="3" fill="var(--paper-2)" stroke="var(--line)"/>
+              <rect x="140" y="36" width="14" height="60" rx="3" fill="var(--paper-2)" stroke="var(--line)"/>
+              <text x="180" y="60" font-family="var(--mono)" font-size="11" fill="var(--ink-soft)">DDR4 ×2</text>
+              <!-- M.2 -->
+              <rect x="120" y="222" width="130" height="12" rx="3" fill="var(--paper-2)" stroke="var(--line)"/>
+              <text x="185" y="252" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--ink-soft)">M.2 NVMe</text>
+              <!-- RJ45 + USB stack (left I/O) -->
+              <rect x="34" y="70" width="34" height="30" rx="4" fill="var(--ink)"/><text x="51" y="90" text-anchor="middle" font-size="10" fill="#fff" font-family="var(--mono)">RJ45</text>
+              <rect x="34" y="110" width="34" height="24" rx="4" fill="var(--paper-2)" stroke="var(--line)"/><text x="51" y="126" text-anchor="middle" font-size="9" fill="var(--ink-soft)" font-family="var(--mono)">USB3</text>
+              <rect x="34" y="140" width="34" height="24" rx="4" fill="var(--paper-2)" stroke="var(--line)"/><text x="51" y="156" text-anchor="middle" font-size="9" fill="var(--ink-soft)" font-family="var(--mono)">USB3</text>
+              <rect x="34" y="180" width="34" height="18" rx="4" fill="var(--crimson-soft)" stroke="var(--crimson)"/><text x="51" y="193" text-anchor="middle" font-size="8" fill="var(--crimson-deep)" font-family="var(--mono)">Type-C</text>
+            </svg>
+            <div class="tag-row" style="justify-content:center;margin-top:8px">
+              <span class="chip mono frag">8 核 RISC-V · 最高 2.0GHz</span>
+              <span class="chip mono frag">DDR4 · 最高 64GB</span>
+              <span class="chip mono frag">千兆网口</span>
+              <span class="chip mono frag">Ubuntu / Debian / Fedora</span>
+              <span class="chip mono frag">MINI-ITX 主板</span>
+            </div>
+          </div>
+          <div class="stack" style="gap:14px">
+            <div class="card frag right" style="display:flex;gap:14px;align-items:center"><div class="step-n">1</div><div><b>接网线、通电</b><p>网线插到和你电脑同一个路由器；按电源开机</p></div></div>
+            <div class="card frag right" style="display:flex;gap:14px;align-items:center"><div class="step-n">2</div><div><b>查到板子 IP</b><p>路由器后台 / 串口里 <code class="inline">ip addr</code> / <code class="inline">ping</code> 确认</p></div></div>
+            <div class="card frag right" style="display:flex;gap:14px;align-items:center;border-color:var(--crimson)"><div class="step-n">3</div><div><b><code class="inline">ssh 用户名@板子IP</code></b><p>首次输 <code class="inline">yes</code>，再输密码（不显示）</p></div></div>
+            <div class="card frag right" style="display:flex;gap:14px;align-items:center;background:var(--crimson);border-color:var(--crimson-deep)"><div class="step-n" style="background:#fff;color:var(--crimson)">4</div><div><b style="color:#fff">你已经在板子里了！</b><p style="color:#ffd7dd"><code class="inline" style="color:#fff;background:rgba(255,255,255,.15);border:none">pwd</code> · <code class="inline" style="color:#fff;background:rgba(255,255,255,.15);border:none">ls</code> 试试，开始探索 🎉</p></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 23 常见问题 ============ -->
+      <section class="slide" data-sec="实战与收尾">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">22</span>&nbsp;卡住了别慌</span>
+          <h2 class="title">连不上？对照排查</h2>
+        </div>
+        <div class="grid2" style="gap:16px">
+          <div class="card frag right" style="border-left:4px solid var(--crimson)"><h3 style="font-family:var(--mono);font-size:17px;color:var(--crimson-deep)">ping 不通 / No route to host</h3><p style="margin-top:6px">👉 多半没在同一局域网。检查网线、Wi-Fi，确认 IP 前几段一致。</p></div>
+          <div class="card frag right" style="border-left:4px solid var(--crimson)"><h3 style="font-family:var(--mono);font-size:17px;color:var(--crimson-deep)">Connection refused</h3><p style="margin-top:6px">👉 IP 通但 22 号门没开：板子还没启动好，或 SSH 服务没运行。</p></div>
+          <div class="card frag right" style="border-left:4px solid var(--crimson)"><h3 style="font-family:var(--mono);font-size:17px;color:var(--crimson-deep)">Permission denied</h3><p style="margin-top:6px">👉 用户名或密码错了。注意密码区分大小写，重新输一遍。</p></div>
+          <div class="card frag right" style="border-left:4px solid var(--crimson)"><h3 style="font-family:var(--mono);font-size:17px;color:var(--crimson-deep)">连着连着断了 / IP 变了</h3><p style="margin-top:6px">👉 路由器可能重新分配了 IP，重新 <code class="inline">ping</code> 查一次最新地址。</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:22px;text-align:center">📋 终极大招：把<b>完整的报错信息复制给大模型</b>，描述你做了什么，它几乎总能帮你定位问题。</div>
+      </section>
+
+      <!-- ============ 24 下一步 + 总结 ============ -->
+      <section class="slide" data-sec="实战与收尾">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">23</span>&nbsp;你已经会了</span>
+            <h2 class="title">回顾：<br>你今天掌握的</h2>
+            <ul class="clean" style="margin-top:14px">
+              <li class="frag right"><span class="mk">🐧</span><div><b>Linux &amp; 命令行</b><span class="sub">pwd / ls / cd / mkdir / cat …</span></div></li>
+              <li class="frag right"><span class="mk">🌐</span><div><b>网络 &amp; IP</b><span class="sub">局域网、IP 地址、ping、端口</span></div></li>
+              <li class="frag right"><span class="mk">🔐</span><div><b>SSH 远程连接</b><span class="sub">ssh 用户名@IP —— 今天最重要的一条</span></div></li>
+            </ul>
+            <div class="big-note hl frag" style="margin-top:24px;font-size:24px">有了 SSH，你就能远程掌控<br>世界上<span class="hl-bg">任何一台 Linux 电脑</span>。</div>
+          </div>
+          <div class="card frag right" style="background:var(--crimson);border-color:var(--crimson-deep);color:#fff;padding:34px">
+            <span class="ic" style="font-size:40px">🤖</span>
+            <h3 style="color:#fff;font-size:26px;margin-bottom:12px">下一课：在 Titan 上开发 AI 智能体</h3>
+            <ul class="clean" style="gap:14px">
+              <li style="color:#fff;font-size:19px"><span style="color:#ffd7dd">▸</span> 在板子上配好开发环境</li>
+              <li style="color:#fff;font-size:19px"><span style="color:#ffd7dd">▸</span> 接入大模型，做一个能听懂指令、自己干活的智能体</li>
+              <li style="color:#fff;font-size:19px"><span style="color:#ffd7dd">▸</span> 让 AI 帮你写代码，边做边学</li>
+            </ul>
+            <p style="color:#ffd7dd;margin-top:18px;font-size:16px">—— 而这一切，都从"连上板子"开始。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 25 资源 + 谢谢 ============ -->
+      <section class="slide" data-sec="实战与收尾">
+        <div class="two" style="align-items:center">
+          <div class="stack">
+            <div class="medallion rise" style="width:96px;height:96px;margin-bottom:24px"><img src="sjtu.png" alt="SJTU" style="width:66px;height:66px"></div>
+            <h2 class="title">谢谢！开始动手吧 🚀</h2>
+            <p class="lead" style="margin-top:8px">课后想深入，就跟着这两个宝藏资源走：</p>
+            <div class="stack" style="gap:12px;margin-top:20px">
+              <div class="card frag right" style="display:flex;align-items:center;gap:14px;padding:16px 20px"><span style="font-size:26px">📚</span><div><b>MIT Missing Semester（中文版）</b><br><span class="link">missing-semester-cn.github.io</span></div></div>
+              <div class="card frag right" style="display:flex;align-items:center;gap:14px;padding:16px 20px"><span style="font-size:26px">🖥️</span><div><b>Milk-V Titan 板子资料</b><br><span class="link">milkv.io/titan</span></div></div>
+            </div>
+          </div>
+          <div class="card frag right">
+            <div class="eyebrow" style="margin-bottom:14px">命令速查小抄</div>
+            <div class="cheat">
+              <div class="row"><code>pwd</code><span>我在哪</span></div>
+              <div class="row"><code>ls</code><span>列出文件</span></div>
+              <div class="row"><code>cd 目录</code><span>进入目录</span></div>
+              <div class="row"><code>cd ..</code><span>回上一层</span></div>
+              <div class="row"><code>mkdir 名</code><span>建文件夹</span></div>
+              <div class="row"><code>cat 文件</code><span>看内容</span></div>
+              <div class="row"><code>cp / mv</code><span>复制 / 移动</span></div>
+              <div class="row"><code>rm 文件</code><span>删除⚠️</span></div>
+              <div class="row"><code>命令 --help</code><span>看用法</span></div>
+              <div class="row"><code>ping IP</code><span>测通不通</span></div>
+              <div class="row" style="grid-column:1/-1;background:var(--crimson-soft);border-radius:8px;padding:10px 12px;border:none;margin-top:4px"><code style="color:var(--crimson-deep)">ssh 用户名@IP</code><span style="color:var(--crimson-deep);font-weight:700">远程登录板子 ★</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /#deck -->
+
+    <!-- 底栏 -->
+    <div class="chrome chrome-bot">
+      <div class="counter">第 <b id="cur">01</b> / <span id="total">25</span> 页</div>
+      <div class="hint"><span class="kbd">→</span><span class="kbd">空格</span> 下一步 · <span class="kbd">←</span> 返回 · <span class="kbd">F</span> 全屏</div>
+    </div>
+    <div id="progress"></div>
+    <div class="nav" id="prev" title="上一页">‹</div>
+    <div class="nav" id="next" title="下一页">›</div>
+  </div><!-- /#stage -->
+</div><!-- /#app -->
+
+<script>
+(function(){
+  "use strict";
+  var stage = document.getElementById('stage');
+  var deck  = document.getElementById('deck');
+  var slides = Array.prototype.slice.call(deck.querySelectorAll('.slide'));
+  var secTag = document.getElementById('secTag');
+  var curEl = document.getElementById('cur');
+  var totalEl = document.getElementById('total');
+  var progress = document.getElementById('progress');
+
+  var cur = 0;      // 当前页
+  var frag = 0;     // 当前页已展开的分片数
+
+  totalEl.textContent = pad(slides.length);
+
+  function pad(n){ return (n<10?'0':'')+n; }
+  function fragsOf(i){ return Array.prototype.slice.call(slides[i].querySelectorAll('.frag')); }
+
+  function render(){
+    for(var i=0;i<slides.length;i++){
+      var s = slides[i];
+      s.classList.toggle('active', i===cur);
+      s.classList.toggle('past', i<cur);
+    }
+    var fr = fragsOf(cur);
+    for(var j=0;j<fr.length;j++){
+      fr[j].classList.toggle('revealed', j < frag);
+    }
+    curEl.textContent = pad(cur+1);
+    secTag.textContent = slides[cur].getAttribute('data-sec') || '';
+    progress.style.width = ((cur+1)/slides.length*100) + '%';
+  }
+
+  function next(){
+    var fr = fragsOf(cur);
+    if(frag < fr.length){ frag++; render(); return; }
+    if(cur < slides.length-1){ cur++; frag = 0; render(); }
+  }
+  function prev(){
+    if(frag > 0){ frag--; render(); return; }
+    if(cur > 0){ cur--; frag = fragsOf(cur).length; render(); }
+  }
+  function goTo(i){
+    i = Math.max(0, Math.min(slides.length-1, i));
+    cur = i; frag = 0; render();
+  }
+
+  // —— 键盘 ——
+  document.addEventListener('keydown', function(e){
+    switch(e.key){
+      case 'ArrowRight': case ' ': case 'PageDown': case 'Enter':
+        e.preventDefault(); next(); break;
+      case 'ArrowLeft': case 'PageUp': case 'Backspace':
+        e.preventDefault(); prev(); break;
+      case 'Home': e.preventDefault(); goTo(0); break;
+      case 'End': e.preventDefault(); goTo(slides.length-1); break;
+      case 'f': case 'F':
+        if(document.fullscreenElement){ document.exitFullscreen(); }
+        else if(document.documentElement.requestFullscreen){ document.documentElement.requestFullscreen(); }
+        break;
+    }
+  });
+
+  // —— 鼠标 / 触摸 ——
+  document.getElementById('next').addEventListener('click', function(e){ e.stopPropagation(); next(); });
+  document.getElementById('prev').addEventListener('click', function(e){ e.stopPropagation(); prev(); });
+  document.getElementById('app').addEventListener('click', function(e){
+    if(e.target.closest('a,button,.nav')) return;
+    next();
+  });
+  var tx=0;
+  document.addEventListener('touchstart', function(e){ tx = e.changedTouches[0].clientX; }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - tx;
+    if(Math.abs(dx) > 50){ dx < 0 ? next() : prev(); }
+  }, {passive:true});
+
+  // —— 舞台等比缩放 ——
+  function fit(){
+    var pad = 24;
+    var s = Math.min((window.innerWidth - pad)/1280, (window.innerHeight - pad)/720);
+    stage.style.transform = 'translate(-50%,-50%) scale(' + s + ')';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+
+  // —— 封面的假开机日志（纯装饰）——
+  var boot = document.getElementById('bootlog');
+  if(boot){
+    var lines = [
+      '[ OK ]  Reached target Network.',
+      '[ OK ]  Started OpenBSD Secure Shell server.',
+      '[ OK ]  RISC-V UR-DP1000  8 cores online.',
+      'milkv login: _'
+    ];
+    lines.forEach(function(t, i){
+      var d = document.createElement('div');
+      d.className = 'ln'; d.textContent = t;
+      d.style.animationDelay = (0.4 + i*0.5) + 's';
+      boot.appendChild(d);
+    });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

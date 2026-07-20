@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SJTU 夏令营 · 幻灯片模板</title>
+<!-- =========================================================================
+     交大夏令营 · 简洁幻灯片模板
+     用法：
+       1) 用浏览器打开本文件即可演示（sjtu.png 需和本文件放在同一文件夹）。
+       2) 翻页：→ / 空格 = 下一步，← = 上一步，F = 全屏。
+       3) 新增一页：复制任意一整段 <section class="slide"> ... </section>。
+       4) 逐步出现的内容：给元素加 class="frag"，翻页时会一个个显现。
+       5) 换配色 / 字体：只改下面 :root{} 里的变量即可。
+     ========================================================================= -->
+<style>
+:root{
+  /* —— 品牌色（取自交大 logo）—— */
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2; --crimson-bright:#E85D74;
+  /* —— 中性色 —— */
+  --paper:#F4F2EE; --paper-2:#ECE8E1; --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88;
+  --line:#DCD4C8; --letterbox:#16130F; --ok:#1E8A6E; --ok-soft:#DCEFE8;
+  /* —— 终端配色 —— */
+  --term-bg:#14171E; --term-bar:#1B1F28; --term-line:#2A2F3A; --term-fg:#E7EAF0;
+  --term-green:#57D07E; --term-cyan:#54C4D4; --term-blue:#8AA6D6; --term-dim:#8891A0;
+  /* —— 字体 —— */
+  --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",system-ui,sans-serif;
+  --mono:"Cascadia Code","JetBrains Mono","Consolas","Menlo",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--letterbox);font-family:var(--sans);color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+/* ---------- 舞台：1280×720 逻辑画布，等比缩放铺满屏幕 ---------- */
+#app{position:fixed;inset:0;overflow:hidden;background:radial-gradient(1200px 700px at 50% -10%,#241d18,var(--letterbox) 60%)}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center;
+  background:var(--paper);border-radius:10px;overflow:hidden;
+  box-shadow:0 40px 120px -30px rgba(0,0,0,.7),0 0 0 1px rgba(0,0,0,.25)}
+#stage::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(173,23,48,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(173,23,48,.045) 1px,transparent 1px);
+  background-size:40px 40px}
+
+/* ---------- 顶栏 / 底栏 ---------- */
+.chrome{position:absolute;left:0;right:0;z-index:20;display:flex;align-items:center;padding:0 56px;pointer-events:none}
+.chrome-top{top:0;height:74px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{width:42px;height:42px;display:block}
+.brand .b-1{font-weight:700;font-size:16px}
+.brand .b-2{font:600 11px var(--mono);letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase}
+.sec-tag{font:600 12px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);display:flex;align-items:center;gap:9px}
+.sec-tag::before{content:"";width:20px;height:2px;background:var(--crimson)}
+.chrome-bot{bottom:0;height:56px;justify-content:space-between}
+.counter{font:600 13px var(--mono);color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.counter b{color:var(--crimson)}
+.hint{font-size:12px;color:var(--ink-faint);display:flex;gap:8px;align-items:center}
+.kbd{font:600 11px var(--mono);background:#fff;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:2px 7px;color:var(--ink-soft)}
+#progress{position:absolute;left:0;bottom:0;height:4px;width:0;background:var(--crimson);z-index:25;transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+/* ---------- 幻灯片切换 ---------- */
+#deck{position:absolute;inset:0;z-index:5}
+.slide{position:absolute;inset:74px 56px 56px;opacity:0;pointer-events:none;
+  transform:translateX(70px) scale(.985);transition:opacity .5s ease,transform .55s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;justify-content:center}
+.slide.active{opacity:1;pointer-events:auto;transform:none}
+.slide.past{opacity:0;transform:translateX(-70px) scale(.985)}
+
+/* ---------- 布局 & 排版组件 ---------- */
+.two{display:grid;grid-template-columns:1.02fr 1fr;gap:52px;align-items:center;width:100%}
+.stack{display:flex;flex-direction:column}
+.eyebrow{font:600 14px var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--crimson);display:inline-flex;align-items:center;gap:11px;margin-bottom:18px}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--crimson)}
+h1.title{font-size:74px;line-height:1.04;font-weight:800;margin:0;text-wrap:balance}
+h2.title{font-size:50px;line-height:1.1;font-weight:800;margin:0 0 16px;text-wrap:balance}
+.mono-accent{font-family:var(--mono);color:var(--crimson);font-weight:700}
+.lead{font-size:25px;line-height:1.55;color:var(--ink-soft);margin:0;max-width:32ch}
+.hl{color:var(--crimson);font-weight:700}
+.hl-bg{background:linear-gradient(transparent 58%,var(--crimson-soft) 58%);padding:0 2px}
+code.inline{font-family:var(--mono);background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:.9em;color:var(--crimson-deep);font-weight:600}
+.key{font:600 15px var(--mono);background:#fff;border:1px solid var(--line);border-bottom-width:3px;border-radius:8px;padding:3px 11px}
+
+ul.clean{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px}
+ul.clean li{display:flex;gap:14px;align-items:flex-start;font-size:22px;line-height:1.45}
+ul.clean li .mk{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--crimson-soft);color:var(--crimson);font:700 15px var(--mono);margin-top:2px}
+ul.clean li .sub{display:block;color:var(--ink-soft);font-size:17px;margin-top:3px;font-weight:400}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+.card h3{margin:0 0 6px;font-size:20px}
+.card p{margin:0;font-size:16px;color:var(--ink-soft);line-height:1.45}
+.card .ic{font-size:26px;margin-bottom:10px;display:block}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.chip{display:inline-flex;align-items:center;gap:8px;background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-size:16px;font-weight:600}
+.chip .d{width:9px;height:9px;border-radius:50%;background:var(--crimson)}
+.okbox{background:var(--ok-soft);border:1px solid #A9D8C9;border-radius:12px;padding:14px 18px;font-size:18px}
+
+/* ---------- 终端窗口 ---------- */
+.term{background:var(--term-bg);border-radius:14px;overflow:hidden;font-family:var(--mono);border:1px solid var(--term-line);box-shadow:0 30px 70px -28px rgba(0,0,0,.55)}
+.term-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--term-bar);border-bottom:1px solid var(--term-line)}
+.term-bar .dot{width:12px;height:12px;border-radius:50%}
+.term-body{padding:22px 24px;font-size:20px;line-height:1.75;color:var(--term-fg)}
+.term .ln{display:block;white-space:pre-wrap;word-break:break-word}
+.term .u{color:var(--term-green)} .term .p{color:var(--term-blue)} .term .cmd{color:#fff;font-weight:600} .term .out{color:var(--term-dim)}
+.cursor{display:inline-block;width:11px;height:1.05em;background:var(--term-green);vertical-align:-.18em;margin-left:2px;animation:blink 1.05s steps(1) infinite}
+
+/* ---------- 逐步出现（教学节奏）---------- */
+.frag{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s cubic-bezier(.3,1,.5,1)}
+.frag.revealed{opacity:1;transform:none}
+.frag.pop{transform:scale(.9)} .frag.pop.revealed{transform:none}
+
+/* ---------- 进入当前页时播放的入场动画 ---------- */
+@keyframes blink{50%{opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.slide.active .rise{animation:fadeUp .7s both}
+.slide.active .rise-2{animation:fadeUp .7s .12s both}
+.slide.active .rise-3{animation:fadeUp .7s .24s both}
+
+/* ---------- 封面 ---------- */
+.cover{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 84px}
+.medallion{width:120px;height:120px;border-radius:50%;background:#fff;display:grid;place-items:center;
+  box-shadow:0 0 0 2px var(--crimson),0 18px 40px -18px rgba(173,23,48,.55);margin-bottom:30px}
+.medallion img{width:86px;height:86px}
+.cover .sub{font-size:26px;color:var(--ink-soft);margin:22px 0 0;font-weight:500}
+.cover .meta{margin-top:36px;display:flex;gap:14px;flex-wrap:wrap}
+
+/* ---------- 鼠标导航箭头 ---------- */
+.nav{position:absolute;bottom:14px;z-index:30;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.85);display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);font-size:16px;transition:.2s}
+.nav:hover{border-color:var(--crimson);color:var(--crimson)}
+#prev{right:112px}#next{right:70px}
+
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.06ms!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+
+    <!-- ===== 顶栏（每页固定显示，改这里即可换课程名）===== -->
+    <div class="chrome chrome-top">
+      <div class="brand">
+        <img src="sjtu.png" alt="上海交通大学">
+        <div>
+          <div class="b-1">零基础 RISC-V 芯片智能体开发</div>
+          <div class="b-2">上海交通大学夏令营 · SJTU</div>
+        </div>
+      </div>
+      <div class="sec-tag" id="secTag">章节</div>
+    </div>
+
+    <!-- ===== 幻灯片区：每个 <section class="slide"> 就是一页 ===== -->
+    <div id="deck">
+
+      <!-- ---------- 示例 1：封面 ---------- -->
+      <section class="slide" data-sec="开始">
+        <div class="cover">
+          <div class="medallion rise"><img src="sjtu.png" alt="SJTU"></div>
+          <h1 class="title rise-2">课程标题写在这里<br><span class="mono-accent">Subtitle</span> 副标题</h1>
+          <p class="sub rise-3">一句话说明这节课要讲什么<span class="cursor"></span></p>
+          <div class="meta rise-3">
+            <span class="chip"><span class="d"></span>讲师 / 日期</span>
+            <span class="chip">面向零基础</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- 示例 2：左文右图（两栏）+ 逐步出现的要点 ---------- -->
+      <section class="slide" data-sec="示例章节">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow">01&nbsp;小标题</span>
+            <h2 class="title">一页讲<span class="hl-bg">一个核心概念</span></h2>
+            <p class="lead">先用一句话点题，再用右边的图 / 终端 / 卡片把它讲清楚。</p>
+            <!-- 加了 class="frag" 的元素，会随翻页一个个出现 -->
+            <ul class="clean" style="margin-top:22px">
+              <li class="frag"><span class="mk">1</span><div><b>要点一</b><span class="sub">补充说明写在这里</span></div></li>
+              <li class="frag"><span class="mk">2</span><div><b>要点二</b><span class="sub">补充说明写在这里</span></div></li>
+              <li class="frag"><span class="mk">3</span><div><b>要点三</b><span class="sub">补充说明写在这里</span></div></li>
+            </ul>
+          </div>
+          <!-- 右栏：一个终端窗口示例 -->
+          <div class="term rise-2">
+            <div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span></div>
+            <div class="term-body">
+<span class="ln"><span class="u">you</span><span class="p">@host:~$</span> <span class="cmd">echo hello</span></span>
+<span class="ln out">hello</span>
+<span class="ln"><span class="u">you</span><span class="p">@host:~$</span> <span class="cursor"></span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- 示例 3：三张卡片（逐个弹出）---------- -->
+      <section class="slide" data-sec="示例章节">
+        <div class="stack" style="margin-bottom:30px">
+          <span class="eyebrow">02&nbsp;并列要点</span>
+          <h2 class="title">用三张卡片并排呈现</h2>
+        </div>
+        <div class="grid3">
+          <div class="card frag pop"><span class="ic">🐧</span><h3>卡片标题</h3><p>一两句话的说明文字。</p></div>
+          <div class="card frag pop"><span class="ic">🌐</span><h3>卡片标题</h3><p>一两句话的说明文字。</p></div>
+          <div class="card frag pop"><span class="ic">🔐</span><h3>卡片标题</h3><p>一两句话的说明文字。</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:26px;text-align:center">底部可以放一句<b>提示</b>或小结，用 <code class="inline">okbox</code> 样式。</div>
+      </section>
+
+      <!-- ---------- 示例 4：结尾 ---------- -->
+      <section class="slide" data-sec="结束">
+        <div class="stack" style="align-items:center;text-align:center">
+          <div class="medallion rise"><img src="sjtu.png" alt="SJTU"></div>
+          <h2 class="title rise-2">谢谢！</h2>
+          <p class="lead rise-3" style="max-width:40ch">留下资源链接、二维码或联系方式。</p>
+        </div>
+      </section>
+
+    </div><!-- /#deck -->
+
+    <!-- ===== 底栏 ===== -->
+    <div class="chrome chrome-bot">
+      <div class="counter">第 <b id="cur">01</b> / <span id="total">04</span> 页</div>
+      <div class="hint"><span class="kbd">→</span><span class="kbd">空格</span> 下一步 · <span class="kbd">←</span> 返回 · <span class="kbd">F</span> 全屏</div>
+    </div>
+    <div id="progress"></div>
+    <div class="nav" id="prev" title="上一页">‹</div>
+    <div class="nav" id="next" title="下一页">›</div>
+
+  </div><!-- /#stage -->
+</div><!-- /#app -->
+
+<!-- =========================================================================
+     翻页引擎：无需修改。它负责键盘/鼠标翻页、frag 逐步出现、进度条、自动缩放。
+     ========================================================================= -->
+<script>
+(function(){
+  "use strict";
+  var stage=document.getElementById('stage'),deck=document.getElementById('deck');
+  var slides=[].slice.call(deck.querySelectorAll('.slide'));
+  var secTag=document.getElementById('secTag'),curEl=document.getElementById('cur');
+  var totalEl=document.getElementById('total'),progress=document.getElementById('progress');
+  var cur=0,frag=0;
+  totalEl.textContent=pad(slides.length);
+  function pad(n){return (n<10?'0':'')+n;}
+  function fragsOf(i){return [].slice.call(slides[i].querySelectorAll('.frag'));}
+  function render(){
+    for(var i=0;i<slides.length;i++){slides[i].classList.toggle('active',i===cur);slides[i].classList.toggle('past',i<cur);}
+    var fr=fragsOf(cur);for(var j=0;j<fr.length;j++){fr[j].classList.toggle('revealed',j<frag);}
+    curEl.textContent=pad(cur+1);secTag.textContent=slides[cur].getAttribute('data-sec')||'';
+    progress.style.width=((cur+1)/slides.length*100)+'%';
+  }
+  function next(){var fr=fragsOf(cur);if(frag<fr.length){frag++;render();return;}if(cur<slides.length-1){cur++;frag=0;render();}}
+  function prev(){if(frag>0){frag--;render();return;}if(cur>0){cur--;frag=fragsOf(cur).length;render();}}
+  function goTo(i){cur=Math.max(0,Math.min(slides.length-1,i));frag=0;render();}
+  document.addEventListener('keydown',function(e){
+    switch(e.key){
+      case 'ArrowRight':case ' ':case 'PageDown':case 'Enter':e.preventDefault();next();break;
+      case 'ArrowLeft':case 'PageUp':case 'Backspace':e.preventDefault();prev();break;
+      case 'Home':e.preventDefault();goTo(0);break;
+      case 'End':e.preventDefault();goTo(slides.length-1);break;
+      case 'f':case 'F':if(document.fullscreenElement){document.exitFullscreen();}else if(document.documentElement.requestFullscreen){document.documentElement.requestFullscreen();}break;
+    }
+  });
+  document.getElementById('next').addEventListener('click',function(e){e.stopPropagation();next();});
+  document.getElementById('prev').addEventListener('click',function(e){e.stopPropagation();prev();});
+  document.getElementById('app').addEventListener('click',function(e){if(e.target.closest('a,button,.nav'))return;next();});
+  var tx=0;
+  document.addEventListener('touchstart',function(e){tx=e.changedTouches[0].clientX;},{passive:true});
+  document.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?next():prev();}},{passive:true});
+  function fit(){var s=Math.min((window.innerWidth-24)/1280,(window.innerHeight-24)/720);stage.style.transform='translate(-50%,-50%) scale('+s+')';}
+  window.addEventListener('resize',fit);fit();
+  render();
+})();
+</script>
+</body>
+</html>
