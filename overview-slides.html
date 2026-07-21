@@ -337,48 +337,28 @@ svg{overflow:visible}
         <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:19px;margin-top:20px">今天四站：<b>① Linux</b> · <b>② RISC-V 架构</b> · <b>③ DP1000 芯片</b> · <b>④ 大模型与智能体</b></p>
       </section>
 
-      <!-- ============ 03 Linux：什么是操作系统 ============ -->
+      <!-- ============ 03 Linux（高层预览；命令行/SSH 深入留给实操课）============ -->
       <section class="slide" data-sec="Linux">
-        <div class="two">
+        <div class="two v">
           <div class="stack">
             <span class="eyebrow"><span class="n">02</span>&nbsp;第一站 · 系统层</span>
-            <h2 class="title">先说 <span class="mono-accent">Linux</span>：<br>什么是操作系统？</h2>
-            <p class="lead">它是硬件和你之间的<span class="hl">"大管家"</span>：帮你管好 CPU、内存、硬盘、网络，让一堆程序能同时、有序地跑起来。</p>
-            <p class="lead tight frag" style="margin-top:16px">你其实天天在用操作系统——<br>手机是 <b>Android / iOS</b>，电脑是 <b>Windows / macOS</b>，<br>而板子和服务器上，用的是 <span class="hl">Linux</span>。</p>
+            <h2 class="title">先说 <span class="mono-accent">Linux</span>：<br>这台机器的操作系统</h2>
+            <p class="lead">芯片是硬件，还得有个<span class="hl">操作系统</span>来指挥它、把程序跑起来。我们这台 RISC-V 电脑用的，就是 <span class="hl">Linux</span>。</p>
+            <div class="okbox frag" style="margin-top:22px">至于怎么用命令行操作它、怎么用 SSH 远程连上板子——那是 <b>Linux 实操课</b>的动手内容；这节课先认识它就够了。</div>
           </div>
-          <div class="stack" style="gap:12px">
-            <div class="card frag right" style="background:var(--paper-2);text-align:center;border-style:dashed"><b style="font-size:20px">应用程序</b><div style="color:var(--ink-soft);font-size:15px;margin-top:4px">浏览器 · 游戏 · 你写的 AI 程序</div></div>
-            <div style="text-align:center;color:var(--ink-faint);font-size:18px">▲ 请求服务</div>
-            <div class="card frag right" style="background:var(--crimson);color:#fff;text-align:center;border-color:var(--crimson-deep)"><b style="font-size:22px">操作系统 · Linux</b><div style="color:#ffd7dd;font-size:15px;margin-top:4px">居中调度：谁用 CPU、谁占内存，它说了算</div></div>
-            <div style="text-align:center;color:var(--ink-faint);font-size:18px">▼ 驱动控制</div>
-            <div class="card frag right" style="background:var(--paper-2);text-align:center;border-style:dashed"><b style="font-size:20px">硬件</b><div style="color:var(--ink-soft);font-size:15px;margin-top:4px">CPU · 内存 · 硬盘 · 网卡（就是我们的芯片）</div></div>
+          <div class="stack" style="gap:14px">
+            <div class="card frag right" style="display:flex;gap:14px;align-items:center"><span style="font-size:30px">🆓</span><div><b>开源、免费</b><p style="margin-top:2px">代码人人可看、可改、可免费用——和等下的 RISC-V 是同一种精神。</p></div></div>
+            <div class="card frag right" style="display:flex;gap:14px;align-items:center"><span style="font-size:30px">🌍</span><div><b>无处不在</b><p style="margin-top:2px">安卓手机、服务器、超算、跑 AI 的机器……几乎都在用 Linux。</p></div></div>
+            <div class="card frag right" style="display:flex;gap:14px;align-items:center;border-color:var(--crimson)"><span style="font-size:30px">🖥️</span><div><b>我们的 Titan 板子</b><p style="margin-top:2px">装的正是 Ubuntu / Debian——都是 Linux。</p></div></div>
           </div>
         </div>
-      </section>
-
-      <!-- ============ 04 Linux 无处不在 ============ -->
-      <section class="slide" data-sec="Linux">
-        <div class="stack">
-          <span class="eyebrow"><span class="n">03</span>&nbsp;第一站 · 系统层</span>
-          <h2 class="title"><span class="mono-accent">Linux</span> 其实无处不在</h2>
-          <p class="lead" style="max-width:66ch">一个<b>免费、开源</b>的操作系统。你也许没在自己电脑上装过它，却每天都在"用"它——因为几乎整个互联网都跑在 Linux 上。</p>
-        </div>
-        <div class="grid3" style="margin-top:28px;gap:16px">
-          <div class="card frag pop"><span class="ic">📱</span><h3>安卓手机</h3><p>Android 的内核就是 Linux——全球数十亿台</p></div>
-          <div class="card frag pop"><span class="ic">☁️</span><h3>服务器与云</h3><p>绝大多数网站、App 后台都跑在 Linux 上</p></div>
-          <div class="card frag pop"><span class="ic">🏆</span><h3>超级计算机</h3><p>全球 TOP500 超算 <span class="hl">100%</span> 用 Linux</p></div>
-          <div class="card frag pop"><span class="ic">🤖</span><h3>AI 与大模型</h3><p>训练、运行大模型的机器，几乎清一色 Linux</p></div>
-          <div class="card frag pop hot" style="border-color:var(--crimson)"><span class="ic">🖥️</span><h3>我们的 Titan 板子</h3><p>装的正是 Ubuntu / Debian——都是 Linux</p></div>
-          <div class="card frag pop"><span class="ic">💡</span><h3>为什么学它</h3><p>做开发、跑 AI、玩硬件，都绕不开它</p></div>
-        </div>
-        <div class="okbox frag" style="margin-top:20px;text-align:center"><b>开源</b>的力量：代码人人可看、可改、可免费用——记住这个词，等下的 <b>RISC-V</b> 也是同一种精神。</div>
       </section>
 
       <!-- ============ 05 RISC-V：指令集架构 ============ -->
       <section class="slide" data-sec="RISC-V 架构">
         <div class="two v">
           <div class="stack">
-            <span class="eyebrow"><span class="n">04</span>&nbsp;第二站 · 硬件层</span>
+            <span class="eyebrow"><span class="n">03</span>&nbsp;第二站 · 硬件层</span>
             <h2 class="title">CPU 是怎么<br>"听懂"命令的？</h2>
             <p class="lead">芯片其实只认一小套最基础的动作：<b>加一下、把数据搬进来、再存回去</b>…… 这套"动作清单"就叫 <span class="hl">指令集架构（ISA）</span>。</p>
             <ul class="clean frag" style="margin-top:20px">
@@ -402,7 +382,7 @@ svg{overflow:visible}
       <!-- ============ 06 RISC-V：开放免费 ============ -->
       <section class="slide" data-sec="RISC-V 架构">
         <div class="stack" style="margin-bottom:24px">
-          <span class="eyebrow"><span class="n">05</span>&nbsp;第二站 · 硬件层</span>
+          <span class="eyebrow"><span class="n">04</span>&nbsp;第二站 · 硬件层</span>
           <h2 class="title"><span class="mono-accent">RISC-V</span>：一套<span class="hl-bg">开放、免费</span>的指令集</h2>
           <p class="lead" style="max-width:72ch">过去主流指令集不是 Intel 的 <b>x86</b>，就是 <b>ARM</b>——想造芯片，得付高昂授权费、还处处受限。RISC-V 反过来：<b>开源、免费、谁都能用</b>。</p>
         </div>
@@ -421,7 +401,7 @@ svg{overflow:visible}
       <!-- ============ 07 RISC-V：为什么重要 ============ -->
       <section class="slide" data-sec="RISC-V 架构">
         <div class="stack" style="margin-bottom:24px">
-          <span class="eyebrow"><span class="n">06</span>&nbsp;第二站 · 硬件层</span>
+          <span class="eyebrow"><span class="n">05</span>&nbsp;第二站 · 硬件层</span>
           <h2 class="title">为什么大家都在<span class="hl">押注 RISC-V</span>？</h2>
         </div>
         <div class="grid2" style="gap:16px">
@@ -437,7 +417,7 @@ svg{overflow:visible}
       <section class="slide" data-sec="DP1000 芯片">
         <div class="two">
           <div class="stack">
-            <span class="eyebrow"><span class="n">07</span>&nbsp;第三站 · 硬件层</span>
+            <span class="eyebrow"><span class="n">06</span>&nbsp;第三站 · 硬件层</span>
             <h2 class="title"><span class="mono-accent">UR-DP1000</span><br>把 RISC-V 变成真芯片</h2>
             <p class="lead">指令集是"设计图纸"，芯片才是造出来的"实物"。DP1000 就是一颗<b>国产的、基于 RISC-V 的处理器</b>，由 UltraRISC 出品。</p>
             <div class="tag-row" style="margin-top:22px">
@@ -460,7 +440,7 @@ svg{overflow:visible}
       <!-- ============ 09 Milk-V Titan 板子 ============ -->
       <section class="slide" data-sec="DP1000 芯片">
         <div class="stack" style="margin-bottom:14px">
-          <span class="eyebrow"><span class="n">08</span>&nbsp;第三站 · 硬件层</span>
+          <span class="eyebrow"><span class="n">07</span>&nbsp;第三站 · 硬件层</span>
           <h2 class="title">Milk-V Titan：我们要用的<span class="hl">开发板</span></h2>
         </div>
         <div class="two" style="gap:40px;align-items:center">
@@ -503,7 +483,7 @@ svg{overflow:visible}
       <section class="slide" data-sec="大模型与智能体">
         <div class="two v">
           <div class="stack">
-            <span class="eyebrow"><span class="n">09</span>&nbsp;第四站 · 智能层</span>
+            <span class="eyebrow"><span class="n">08</span>&nbsp;第四站 · 智能层</span>
             <h2 class="title">大模型（<span class="mono-accent">LLM</span>）<br>是什么？</h2>
             <p class="lead">用<b>海量文本</b>（几乎整个互联网）训练出来的超大"语言大脑"。它的核心本领简单得惊人：<span class="hl">看着前文，猜下一个字</span>。</p>
             <ul class="clean" style="margin-top:18px">
@@ -527,7 +507,7 @@ svg{overflow:visible}
       <!-- ============ 11 大模型的天花板 ============ -->
       <section class="slide" data-sec="大模型与智能体">
         <div class="stack" style="margin-bottom:22px">
-          <span class="eyebrow"><span class="n">10</span>&nbsp;第四站 · 智能层</span>
+          <span class="eyebrow"><span class="n">09</span>&nbsp;第四站 · 智能层</span>
           <h2 class="title">但大模型有个<span class="hl">"天花板"</span></h2>
           <p class="lead" style="max-width:68ch">它很会"说"，可它只是<b>输出文字</b>——不知道现在几点、算不准复杂的账、连不上网，也没法真正动你的电脑。</p>
         </div>
@@ -542,7 +522,7 @@ svg{overflow:visible}
       <!-- ============ 12 智能体是什么 ============ -->
       <section class="slide" data-sec="大模型与智能体">
         <div class="stack" style="margin-bottom:22px">
-          <span class="eyebrow"><span class="n">11</span>&nbsp;第四站 · 智能层</span>
+          <span class="eyebrow"><span class="n">10</span>&nbsp;第四站 · 智能层</span>
           <h2 class="title">智能体 = 大模型 + <span class="hl-bg">手脚和工具</span></h2>
         </div>
         <div class="two" style="gap:36px;align-items:stretch">
@@ -563,7 +543,7 @@ svg{overflow:visible}
       <!-- ============ 13 智能体怎么运转 ============ -->
       <section class="slide" data-sec="大模型与智能体">
         <div class="stack" style="margin-bottom:22px">
-          <span class="eyebrow"><span class="n">12</span>&nbsp;第四站 · 智能层</span>
+          <span class="eyebrow"><span class="n">11</span>&nbsp;第四站 · 智能层</span>
           <h2 class="title">智能体怎么<span class="hl">自己干活</span>？</h2>
           <p class="lead" style="max-width:66ch">它把一个大目标，拆成"想一步、做一步、看一步"的小循环，转着转着就把事办成了。</p>
         </div>
@@ -583,7 +563,7 @@ svg{overflow:visible}
       <!-- ============ 14 为什么用 AI 智能体来做开发 ============ -->
       <section class="slide" data-sec="大模型与智能体">
         <div class="stack" style="margin-bottom:22px">
-          <span class="eyebrow"><span class="n">13</span>&nbsp;第四站 · 智能层</span>
+          <span class="eyebrow"><span class="n">12</span>&nbsp;第四站 · 智能层</span>
           <h2 class="title">为什么用 <span class="hl">AI 智能体</span> 来做开发？</h2>
         </div>
         <div class="grid2" style="gap:16px">
@@ -598,7 +578,7 @@ svg{overflow:visible}
       <!-- ============ 15 全景回顾 ============ -->
       <section class="slide" data-sec="收尾">
         <div class="stack" style="margin-bottom:20px">
-          <span class="eyebrow"><span class="n">14</span>&nbsp;全景回顾</span>
+          <span class="eyebrow"><span class="n">13</span>&nbsp;全景回顾</span>
           <h2 class="title">回到全景：<span class="hl-bg">一台机器 + 一个 AI 助手</span></h2>
         </div>
         <div class="tower">
@@ -624,7 +604,7 @@ svg{overflow:visible}
           <div class="card frag right">
             <div class="eyebrow" style="margin-bottom:14px">今天四站 · 一页速览</div>
             <ul class="clean">
-              <li><span class="mk">🐧</span><div><b>Linux</b><span class="sub">硬件与你之间的"大管家"，开源、无处不在</span></div></li>
+              <li><span class="mk">🐧</span><div><b>Linux</b><span class="sub">这台机器的操作系统——开源、无处不在</span></div></li>
               <li><span class="mk">🧩</span><div><b>RISC-V 架构</b><span class="sub">开放免费的指令集——芯片界的"开源精神"</span></div></li>
               <li><span class="mk">🔩</span><div><b>UR-DP1000 / Titan</b><span class="sub">国产 8 核 RISC-V 芯片，装进我们的开发板</span></div></li>
               <li><span class="mk">🤖</span><div><b>大模型与智能体</b><span class="sub">你的 AI 开发助手——帮你写代码、查错、做开发</span></div></li>
@@ -637,7 +617,7 @@ svg{overflow:visible}
 
     <!-- 底栏 -->
     <div class="chrome chrome-bot">
-      <div class="counter">第 <b id="cur">01</b> / <span id="total">16</span> 页</div>
+      <div class="counter">第 <b id="cur">01</b> / <span id="total">15</span> 页</div>
       <div class="hint"><span class="kbd">→</span><span class="kbd">空格</span> 下一步 · <span class="kbd">←</span> 返回 · <span class="kbd">F</span> 全屏</div>
     </div>
     <div id="progress"></div>
