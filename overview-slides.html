@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从芯片到智能体 · 夏令营第一课（概览）</title>
+<style>
+/* =====================================================================
+   SJTU 夏令营 · 第一课「概览」幻灯片（戚老师）
+   —— 主线：从一块芯片，到一个会思考的智能体（硬件 → 系统 → 智能）
+   —— 单文件、可离线、可投影。左右方向键或空格翻页。
+   设计令牌集中在 :root，改这里即可换配色 / 字体。
+   复制任意一整段 section.slide 即可新增一页。
+   ===================================================================== */
+:root{
+  /* —— 品牌色（取自交大 logo）—— */
+  --crimson:#AD1730;
+  --crimson-deep:#870F26;
+  --crimson-soft:#F3DEE2;
+  --crimson-bright:#E85D74;   /* 深色终端上用的亮一点的红 */
+  /* —— 中性色（偏暖，衬托深红）—— */
+  --paper:#F4F2EE;
+  --paper-2:#ECE8E1;
+  --ink:#221C1B;
+  --ink-soft:#6A5F5A;
+  --ink-faint:#9A8F88;
+  --line:#DCD4C8;
+  --letterbox:#16130F;
+  /* —— 语义色 —— */
+  --ok:#1E8A6E;
+  --ok-soft:#DCEFE8;
+  /* —— 终端配色 —— */
+  --term-bg:#14171E;
+  --term-bar:#1B1F28;
+  --term-line:#2A2F3A;
+  --term-fg:#E7EAF0;
+  --term-green:#57D07E;
+  --term-cyan:#54C4D4;
+  --term-blue:#8AA6D6;
+  --term-dim:#8891A0;
+  /* —— 字体 —— */
+  --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Source Han Sans SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Cascadia Code","Cascadia Mono","JetBrains Mono","SF Mono","Consolas","Menlo",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--letterbox);
+  font-family:var(--sans);
+  color:var(--ink);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* ---------- 舞台缩放：1280×720 逻辑画布，等比缩放铺满 ---------- */
+#app{position:fixed;inset:0;overflow:hidden;background:
+  radial-gradient(1200px 700px at 50% -10%, #241d18 0%, var(--letterbox) 60%);}
+#stage{
+  position:absolute;left:50%;top:50%;
+  width:1280px;height:720px;
+  transform-origin:center center;
+  background:var(--paper);
+  border-radius:10px;
+  box-shadow:0 40px 120px -30px rgba(0,0,0,.7), 0 0 0 1px rgba(0,0,0,.25);
+  overflow:hidden;
+}
+/* 淡淡的工程蓝图网格，塑造"课程讲义"气质 */
+#stage::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:
+    linear-gradient(rgba(173,23,48,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(173,23,48,.045) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+
+/* ---------- 顶部 / 底部固定装饰栏 ---------- */
+.chrome{position:absolute;left:0;right:0;z-index:20;display:flex;align-items:center;
+  padding:0 56px;pointer-events:none}
+.chrome-top{top:0;height:74px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{width:42px;height:42px;display:block}
+.brand .b-txt{display:flex;flex-direction:column;line-height:1.15}
+.brand .b-1{font-weight:700;font-size:16px;letter-spacing:.01em}
+.brand .b-2{font:600 11px var(--mono);letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase}
+.sec-tag{font:600 12px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);
+  display:flex;align-items:center;gap:9px}
+.sec-tag::before{content:"";width:20px;height:2px;background:var(--crimson);display:inline-block}
+
+.chrome-bot{bottom:0;height:56px;justify-content:space-between}
+.counter{font:600 13px var(--mono);color:var(--ink-faint);letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.counter b{color:var(--crimson)}
+.hint{font-size:12px;color:var(--ink-faint);display:flex;align-items:center;gap:8px}
+.kbd{font:600 11px var(--mono);background:#fff;border:1px solid var(--line);border-bottom-width:2px;
+  border-radius:6px;padding:2px 7px;color:var(--ink-soft)}
+#progress{position:absolute;left:0;bottom:0;height:4px;width:0;background:var(--crimson);
+  z-index:25;transition:width .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px rgba(173,23,48,.5)}
+
+/* ---------- 幻灯片与切换 ---------- */
+#deck{position:absolute;inset:0;z-index:5}
+.slide{position:absolute;inset:74px 56px 56px;opacity:0;pointer-events:none;
+  transform:translateX(70px) scale(.985);
+  transition:opacity .5s ease,transform .55s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;justify-content:center}
+.slide.active{opacity:1;pointer-events:auto;transform:none}
+.slide.past{opacity:0;transform:translateX(-70px) scale(.985)}
+
+/* 布局工具 */
+.two{display:grid;grid-template-columns:1.02fr 1fr;gap:52px;align-items:center;width:100%}
+.two.v{grid-template-columns:1fr 1.15fr}
+.center{align-items:center;text-align:center}
+.stack{display:flex;flex-direction:column}
+
+/* ---------- 排版组件 ---------- */
+.eyebrow{font:600 14px var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--crimson);
+  display:inline-flex;align-items:center;gap:11px;margin-bottom:18px}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--crimson)}
+.eyebrow .n{color:var(--ink-faint)}
+h1.title{font-size:74px;line-height:1.04;font-weight:800;letter-spacing:0;margin:0;text-wrap:balance}
+h2.title{font-size:50px;line-height:1.1;font-weight:800;letter-spacing:0;margin:0 0 16px;text-wrap:balance}
+.mono-accent{font-family:var(--mono);color:var(--crimson);font-weight:700}
+.lead{font-size:25px;line-height:1.55;color:var(--ink-soft);margin:0;max-width:32ch}
+.lead.tight{font-size:22px}
+.big-note{font-size:29px;line-height:1.5;font-weight:600;max-width:26ch}
+.hl{color:var(--crimson);font-weight:700}
+.hl-bg{background:linear-gradient(transparent 58%,var(--crimson-soft) 58%);padding:0 2px}
+ul.clean{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px}
+ul.clean li{display:flex;gap:14px;align-items:flex-start;font-size:22px;line-height:1.45}
+ul.clean li .mk{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+  background:var(--crimson-soft);color:var(--crimson);font:700 15px var(--mono);margin-top:2px}
+ul.clean li b{font-weight:700}
+ul.clean li .sub{display:block;color:var(--ink-soft);font-size:17px;line-height:1.4;margin-top:3px;font-weight:400}
+
+/* 卡片 / 芯片 */
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;
+  box-shadow:0 2px 0 rgba(0,0,0,.02)}
+.card h3{margin:0 0 6px;font-size:20px}
+.card p{margin:0;font-size:16px;color:var(--ink-soft);line-height:1.45}
+.card .ic{font-size:26px;margin-bottom:10px;display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.chip{display:inline-flex;align-items:center;gap:8px;background:var(--paper-2);border:1px solid var(--line);
+  border-radius:999px;padding:8px 15px;font-size:16px;font-weight:600}
+.chip .d{width:9px;height:9px;border-radius:50%;background:var(--crimson)}
+.chip.mono{font-family:var(--mono);font-size:15px}
+.tag-row{display:flex;flex-wrap:wrap;gap:10px}
+
+.cmd-pill{font-family:var(--mono);font-weight:700;background:var(--ink);color:#fff;border-radius:8px;
+  padding:3px 10px;font-size:.92em;white-space:nowrap}
+.cmd-pill.red{background:var(--crimson)}
+code.inline{font-family:var(--mono);background:var(--paper-2);border:1px solid var(--line);
+  border-radius:6px;padding:1px 7px;font-size:.9em;color:var(--crimson-deep);font-weight:600}
+
+/* 键帽 */
+.key{font:600 15px var(--mono);background:#fff;border:1px solid var(--line);border-bottom-width:3px;
+  border-radius:8px;padding:3px 11px;color:var(--ink);box-shadow:0 1px 0 rgba(0,0,0,.03)}
+
+/* ---------- 终端窗口 ---------- */
+.term{background:var(--term-bg);border-radius:14px;overflow:hidden;font-family:var(--mono);
+  box-shadow:0 30px 70px -28px rgba(0,0,0,.55);border:1px solid var(--term-line)}
+.term-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--term-bar);
+  border-bottom:1px solid var(--term-line)}
+.term-bar .dot{width:12px;height:12px;border-radius:50%}
+.term-bar .t{margin-left:10px;color:var(--term-dim);font-size:13px;letter-spacing:.02em}
+.term-body{padding:22px 24px;font-size:21px;line-height:1.75;color:var(--term-fg);white-space:normal}
+.term-body.sm{font-size:18px;line-height:1.7}
+.term .u{color:var(--term-green)}
+.term .h{color:var(--term-cyan)}
+.term .p{color:var(--term-blue)}
+.term .cmd{color:#fff;font-weight:600}
+.term .out{color:var(--term-dim)}
+.term .ok{color:var(--term-green)}
+.term .em{color:var(--crimson-bright);font-weight:600}
+.term .cm{color:#5f6b7d;font-style:italic}   /* 注释 */
+.term .ln{display:block;white-space:pre-wrap;word-break:break-word}
+.cursor{display:inline-block;width:11px;height:1.05em;background:var(--term-green);
+  vertical-align:-.18em;margin-left:2px;animation:blink 1.05s steps(1) infinite}
+
+/* ---------- 分片出现（教学节奏）---------- */
+.frag{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s cubic-bezier(.3,1,.5,1)}
+.frag.revealed{opacity:1;transform:none}
+.frag.pop{transform:scale(.9)}
+.frag.pop.revealed{transform:none}
+.frag.right{transform:translateX(-22px)}
+.frag.right.revealed{transform:none}
+
+/* ---------- 通用小动画（进入当前页时播放）---------- */
+@keyframes blink{50%{opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes popIn{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+@keyframes drawLine{to{stroke-dashoffset:0}}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes dash{to{stroke-dashoffset:-40}}
+
+.slide.active .rise{animation:fadeUp .7s both}
+.slide.active .rise-2{animation:fadeUp .7s .12s both}
+.slide.active .rise-3{animation:fadeUp .7s .24s both}
+
+/* ---------- SVG 图示通用 ---------- */
+svg{overflow:visible}
+.draw{stroke-dasharray:2000;stroke-dashoffset:2000}
+.slide.active .draw{animation:drawLine 1.1s .3s ease forwards}
+.flow{stroke-dasharray:7 9;stroke-linecap:round}
+.slide.active .flow{animation:dash 1s linear infinite}
+
+/* 首页封面 */
+.cover{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 84px}
+.medallion{width:132px;height:132px;border-radius:50%;background:#fff;display:grid;place-items:center;
+  box-shadow:0 0 0 2px var(--crimson), 0 18px 40px -18px rgba(173,23,48,.55);margin-bottom:34px}
+.medallion img{width:96px;height:96px}
+.cover h1{font-size:80px;line-height:1.02;font-weight:800;margin:0}
+.cover .sub{font-size:26px;color:var(--ink-soft);margin:22px 0 0;font-weight:500}
+.cover .meta{margin-top:40px;display:flex;gap:14px;flex-wrap:wrap}
+.bootlog{position:absolute;right:64px;bottom:70px;width:360px;font:12px/1.7 var(--mono);color:var(--ink-faint);
+  opacity:.75;text-align:left;pointer-events:none}
+.bootlog .ln{opacity:0;animation:bootln .5s forwards}
+.decor-ring{position:absolute;right:-160px;top:-160px;width:560px;height:560px;border-radius:50%;
+  border:2px dashed rgba(173,23,48,.18);pointer-events:none}
+.decor-ring.two{right:-120px;top:-120px;width:480px;height:480px;border-style:solid;
+  border-color:rgba(173,23,48,.08)}
+@keyframes bootln{to{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.slide.active .decor-ring{animation:spin 90s linear infinite}
+
+/* 徽章 / 步骤数字 */
+.step-n{flex:none;width:46px;height:46px;border-radius:12px;background:var(--crimson);color:#fff;
+  font:800 22px var(--mono);display:grid;place-items:center;box-shadow:0 8px 20px -8px var(--crimson)}
+.warn{background:#fff;border:1px solid var(--crimson);border-left:5px solid var(--crimson);border-radius:12px;
+  padding:16px 20px;display:flex;gap:14px;align-items:flex-start}
+.warn .ic{font-size:24px;flex:none}
+.warn b{color:var(--crimson-deep)}
+.okbox{background:var(--ok-soft);border:1px solid #A9D8C9;border-radius:12px;padding:14px 18px;font-size:18px}
+
+/* 资源链接 */
+.link{font-family:var(--mono);font-weight:700;color:var(--crimson);font-size:20px}
+
+/* 导航箭头（鼠标） */
+.nav{position:absolute;bottom:14px;z-index:30;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+  background:rgba(255,255,255,.85);display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);
+  transition:.2s;font-size:16px}
+.nav:hover{border-color:var(--crimson);color:var(--crimson)}
+#prev{right:112px}#next{right:70px}
+
+/* =====================================================================
+   本讲新增组件（概览课专用）
+   ===================================================================== */
+/* 技术栈"塔"：三层横条，column-reverse 让它自下而上搭起来 */
+.tower{display:flex;flex-direction:column-reverse;gap:14px;width:100%}
+.band{display:flex;align-items:center;gap:20px;background:#fff;border:1px solid var(--line);
+  border-radius:16px;padding:18px 24px;box-shadow:0 2px 0 rgba(0,0,0,.02)}
+.band .bic{font-size:38px;flex:none;width:52px;text-align:center;line-height:1}
+.band .btxt{flex:1}
+.band .btxt b{font-size:22px}
+.band .btxt .bd{color:var(--ink-soft);font-size:16px;margin-top:3px;line-height:1.4}
+.band .btag{font:700 13px var(--mono);color:var(--crimson);background:var(--crimson-soft);
+  border:1px solid var(--crimson);border-radius:999px;padding:6px 13px;white-space:nowrap}
+.band.mid{background:var(--paper-2)}
+.band.top{background:var(--crimson);border-color:var(--crimson-deep);color:#fff}
+.band.top .btxt .bd{color:#ffd7dd}
+.band.top .btag{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.45)}
+
+/* 大模型"预测下一个字"的条形图 */
+.predict{display:flex;flex-direction:column;gap:11px}
+.pbar{display:flex;align-items:center;gap:12px}
+.pbar .pw{font:700 22px var(--mono);width:40px;text-align:center;color:var(--ink)}
+.pbar .ptrack{flex:1;height:22px;background:var(--paper-2);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.pbar .pfill{display:block;height:100%;background:var(--crimson);border-radius:999px}
+.pbar .pct{font:600 15px var(--mono);color:var(--ink-soft);width:46px;text-align:right}
+
+/* 芯片 die：8 个核 */
+.die{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;background:var(--crimson-soft);
+  border:2px solid var(--crimson);border-radius:16px;padding:20px;box-shadow:0 20px 50px -26px rgba(173,23,48,.5)}
+.die .core{background:#fff;border:1px solid var(--crimson);border-radius:9px;height:62px;
+  display:grid;place-items:center;font:700 15px var(--mono);color:var(--crimson-deep)}
+
+/* 智能体循环的一步 */
+.loopstep{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;text-align:center;min-width:158px}
+.loopstep .li{font-size:30px;line-height:1}
+.loopstep b{display:block;margin-top:8px;font-size:19px}
+.loopstep span{color:var(--ink-soft);font-size:14px}
+.loopstep.hot{border-color:var(--crimson);background:var(--crimson-soft)}
+
+/* 减弱动画偏好 */
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.06ms!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <!-- 顶栏 -->
+    <div class="chrome chrome-top">
+      <div class="brand">
+        <img src="sjtu.png" alt="上海交通大学">
+        <div class="b-txt">
+          <span class="b-1">零基础 RISC-V 芯片智能体开发</span>
+          <span class="b-2">上海交通大学夏令营 · SJTU</span>
+        </div>
+      </div>
+      <div class="sec-tag" id="secTag">序</div>
+    </div>
+
+    <!-- 幻灯片 -->
+    <div id="deck">
+
+      <!-- ============ 01 封面 ============ -->
+      <section class="slide" data-sec="序">
+        <div class="cover">
+          <div class="decor-ring"></div>
+          <div class="decor-ring two"></div>
+          <div class="medallion rise"><img src="sjtu.png" alt="SJTU"></div>
+          <div class="rise" style="margin-bottom:16px;font-weight:700;font-size:17px;color:var(--crimson);letter-spacing:.02em;display:flex;align-items:center;gap:11px"><span style="width:26px;height:2px;background:var(--crimson)"></span>零基础 RISC-V 芯片智能体开发 · 夏令营</div>
+          <h1 class="rise-2">从一块 <span class="mono-accent">芯片</span><br>到一个 <span class="mono-accent">智能体</span></h1>
+          <p class="sub rise-3">第一课 · 先看清全景：Linux · RISC-V · DP1000 · 大模型与智能体<span class="cursor"></span></p>
+          <div class="meta rise-3">
+            <span class="chip"><span class="d"></span>主讲 · 戚老师 长聘教授</span>
+            <span class="chip">面向零基础同学</span>
+            <span class="chip mono">target: milkv.io/titan</span>
+          </div>
+          <div class="bootlog" id="bootlog"></div>
+        </div>
+      </section>
+
+      <!-- ============ 02 全景：三层塔 ============ -->
+      <section class="slide" data-sec="序">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">01</span>&nbsp;全景</span>
+          <h2 class="title">这个夏令营，我们要搭一座<span class="hl-bg">三层的塔</span></h2>
+          <p class="lead" style="max-width:72ch">从最底层的国产芯片，一路搭到顶层会自己干活的 AI。今天先站远一点，看清每一层——后面几课再一层层亲手搭起来。</p>
+        </div>
+        <div class="tower">
+          <div class="band frag right"><div class="bic">🔩</div><div class="btxt"><b>底层 · 硬件</b><div class="bd">RISC-V 架构 → UR-DP1000 芯片 → Milk-V Titan 板子：一切运行的地基</div></div><div class="btag">② RISC-V　③ DP1000</div></div>
+          <div class="band mid frag right"><div class="bic">🐧</div><div class="btxt"><b>中层 · 系统</b><div class="bd">Linux 操作系统：驯服硬件，把它变成一台好用的电脑</div></div><div class="btag">① Linux</div></div>
+          <div class="band top frag right"><div class="bic">🤖</div><div class="btxt"><b>顶层 · 智能</b><div class="bd">大模型 + 智能体：会理解、会决策、会自己动手做事</div></div><div class="btag">④ 大模型与智能体</div></div>
+        </div>
+        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:19px;margin-top:20px">今天四站：<b>① Linux</b> · <b>② RISC-V 架构</b> · <b>③ DP1000 芯片</b> · <b>④ 大模型与智能体</b></p>
+      </section>
+
+      <!-- ============ 03 Linux：什么是操作系统 ============ -->
+      <section class="slide" data-sec="Linux">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">02</span>&nbsp;第一站 · 系统层</span>
+            <h2 class="title">先说 <span class="mono-accent">Linux</span>：<br>什么是操作系统？</h2>
+            <p class="lead">它是硬件和你之间的<span class="hl">"大管家"</span>：帮你管好 CPU、内存、硬盘、网络，让一堆程序能同时、有序地跑起来。</p>
+            <p class="lead tight frag" style="margin-top:16px">你其实天天在用操作系统——<br>手机是 <b>Android / iOS</b>，电脑是 <b>Windows / macOS</b>，<br>而板子和服务器上，用的是 <span class="hl">Linux</span>。</p>
+          </div>
+          <div class="stack" style="gap:12px">
+            <div class="card frag right" style="background:var(--paper-2);text-align:center;border-style:dashed"><b style="font-size:20px">应用程序</b><div style="color:var(--ink-soft);font-size:15px;margin-top:4px">浏览器 · 游戏 · 你写的 AI 程序</div></div>
+            <div style="text-align:center;color:var(--ink-faint);font-size:18px">▲ 请求服务</div>
+            <div class="card frag right" style="background:var(--crimson);color:#fff;text-align:center;border-color:var(--crimson-deep)"><b style="font-size:22px">操作系统 · Linux</b><div style="color:#ffd7dd;font-size:15px;margin-top:4px">居中调度：谁用 CPU、谁占内存，它说了算</div></div>
+            <div style="text-align:center;color:var(--ink-faint);font-size:18px">▼ 驱动控制</div>
+            <div class="card frag right" style="background:var(--paper-2);text-align:center;border-style:dashed"><b style="font-size:20px">硬件</b><div style="color:var(--ink-soft);font-size:15px;margin-top:4px">CPU · 内存 · 硬盘 · 网卡（就是我们的芯片）</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 04 Linux 无处不在 ============ -->
+      <section class="slide" data-sec="Linux">
+        <div class="stack">
+          <span class="eyebrow"><span class="n">03</span>&nbsp;第一站 · 系统层</span>
+          <h2 class="title"><span class="mono-accent">Linux</span> 其实无处不在</h2>
+          <p class="lead" style="max-width:66ch">一个<b>免费、开源</b>的操作系统。你也许没在自己电脑上装过它，却每天都在"用"它——因为几乎整个互联网都跑在 Linux 上。</p>
+        </div>
+        <div class="grid3" style="margin-top:28px;gap:16px">
+          <div class="card frag pop"><span class="ic">📱</span><h3>安卓手机</h3><p>Android 的内核就是 Linux——全球数十亿台</p></div>
+          <div class="card frag pop"><span class="ic">☁️</span><h3>服务器与云</h3><p>绝大多数网站、App 后台都跑在 Linux 上</p></div>
+          <div class="card frag pop"><span class="ic">🏆</span><h3>超级计算机</h3><p>全球 TOP500 超算 <span class="hl">100%</span> 用 Linux</p></div>
+          <div class="card frag pop"><span class="ic">🤖</span><h3>AI 与大模型</h3><p>训练、运行大模型的机器，几乎清一色 Linux</p></div>
+          <div class="card frag pop hot" style="border-color:var(--crimson)"><span class="ic">🖥️</span><h3>我们的 Titan 板子</h3><p>装的正是 Ubuntu / Debian——都是 Linux</p></div>
+          <div class="card frag pop"><span class="ic">💡</span><h3>为什么学它</h3><p>做开发、跑 AI、玩硬件，都绕不开它</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:20px;text-align:center"><b>开源</b>的力量：代码人人可看、可改、可免费用——记住这个词，等下的 <b>RISC-V</b> 也是同一种精神。</div>
+      </section>
+
+      <!-- ============ 05 RISC-V：指令集架构 ============ -->
+      <section class="slide" data-sec="RISC-V 架构">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">04</span>&nbsp;第二站 · 硬件层</span>
+            <h2 class="title">CPU 是怎么<br>"听懂"命令的？</h2>
+            <p class="lead">芯片其实只认一小套最基础的动作：<b>加一下、把数据搬进来、再存回去</b>…… 这套"动作清单"就叫 <span class="hl">指令集架构（ISA）</span>。</p>
+            <ul class="clean frag" style="margin-top:20px">
+              <li><span class="mk">🍽️</span><div><b>像餐厅的一份"菜单"</b><span class="sub">厨房（CPU）只会做菜单上的菜；点菜（写程序）也只能照着点</span></div></li>
+              <li><span class="mk">🤝</span><div><b>软件和硬件的"约定"</b><span class="sub">大家都照这套语言来，芯片就能跑对应的程序</span></div></li>
+            </ul>
+          </div>
+          <div class="stack" style="gap:12px">
+            <div class="term rise-2"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">CPU 认得的"基础动作"</span></div>
+              <div class="term-body sm">
+<span class="ln"><span class="cmd">add</span>  a0, a1, a2   <span class="cm"># a0 = a1 + a2（加法）</span></span>
+<span class="ln"><span class="cmd">ld</span>   a0, 0(a1)    <span class="cm"># 从内存读一个数进来</span></span>
+<span class="ln"><span class="cmd">sd</span>   a0, 0(a1)    <span class="cm"># 把一个数写回内存</span></span>
+<span class="ln"><span class="cmd">beq</span>  a0, a1, L    <span class="cm"># 两个数相等就跳转</span></span>
+              </div></div>
+            <p class="frag" style="color:var(--ink-soft);font-size:17px;text-align:center;margin:0">你写的每一行代码，最后都被翻译成这样一条条"基础动作"。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 06 RISC-V：开放免费 ============ -->
+      <section class="slide" data-sec="RISC-V 架构">
+        <div class="stack" style="margin-bottom:24px">
+          <span class="eyebrow"><span class="n">05</span>&nbsp;第二站 · 硬件层</span>
+          <h2 class="title"><span class="mono-accent">RISC-V</span>：一套<span class="hl-bg">开放、免费</span>的指令集</h2>
+          <p class="lead" style="max-width:72ch">过去主流指令集不是 Intel 的 <b>x86</b>，就是 <b>ARM</b>——想造芯片，得付高昂授权费、还处处受限。RISC-V 反过来：<b>开源、免费、谁都能用</b>。</p>
+        </div>
+        <div class="grid3" style="gap:16px">
+          <div class="card frag pop"><span class="ic">💻</span><h3>x86</h3><p>Intel / AMD 主导，几乎不对外授权<br><span style="color:var(--ink-faint)">电脑 · 服务器</span></p></div>
+          <div class="card frag pop"><span class="ic">📱</span><h3>ARM</h3><p>要付授权费、按规矩使用<br><span style="color:var(--ink-faint)">手机 · 平板</span></p></div>
+          <div class="card frag pop hot" style="border-color:var(--crimson)"><span class="ic">⭐</span><h3 style="color:var(--crimson-deep)">RISC-V</h3><p>开放免费、可自由扩展<br><span style="color:var(--crimson)">从单片机到服务器 · 我们的板子</span></p></div>
+        </div>
+        <div class="tag-row frag" style="margin-top:22px;justify-content:center">
+          <span class="chip">🧩 精简：指令少而规整，好学好造</span>
+          <span class="chip">🔧 可定制：想加功能自己扩展</span>
+          <span class="chip">⚖️ 中立开放：由国际基金会维护，不被一家公司说了算</span>
+        </div>
+      </section>
+
+      <!-- ============ 07 RISC-V：为什么重要 ============ -->
+      <section class="slide" data-sec="RISC-V 架构">
+        <div class="stack" style="margin-bottom:24px">
+          <span class="eyebrow"><span class="n">06</span>&nbsp;第二站 · 硬件层</span>
+          <h2 class="title">为什么大家都在<span class="hl">押注 RISC-V</span>？</h2>
+        </div>
+        <div class="grid2" style="gap:16px">
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:34px">🌍</span><div><h3>正在成为潮流</h3><p style="margin-top:4px">从耳机、单片机到数据中心，越来越多芯片改用 RISC-V。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start;border-color:var(--crimson)"><span style="font-size:34px">🇨🇳</span><div><h3>自主可控</h3><p style="margin-top:4px">不必依赖国外授权，是国产芯片的重要机会——我们的 <b>DP1000</b> 就是国产 RISC-V。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:34px">🧩</span><div><h3>生态在长大</h3><p style="margin-top:4px">编译器、Linux、各种 AI 框架都陆续支持 RISC-V。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:34px">🎓</span><div><h3>特别适合学习</h3><p style="margin-top:4px">开放、资料公开，正好拿来教学和动手研究——就像现在。</p></div></div>
+        </div>
+        <div class="okbox frag" style="margin-top:22px;text-align:center">一句话：现在学 RISC-V，就像当年早早学了 Linux——<b>站上了一条正在长大的赛道</b>。</div>
+      </section>
+
+      <!-- ============ 08 DP1000 芯片 ============ -->
+      <section class="slide" data-sec="DP1000 芯片">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">07</span>&nbsp;第三站 · 硬件层</span>
+            <h2 class="title"><span class="mono-accent">UR-DP1000</span><br>把 RISC-V 变成真芯片</h2>
+            <p class="lead">指令集是"设计图纸"，芯片才是造出来的"实物"。DP1000 就是一颗<b>国产的、基于 RISC-V 的处理器</b>，由 UltraRISC 出品。</p>
+            <div class="tag-row" style="margin-top:22px">
+              <span class="chip mono frag">8 核 · RV64（RVA22）</span>
+              <span class="chip mono frag">最高 2.0 GHz</span>
+              <span class="chip mono frag">DDR4 · 最高 64 GB</span>
+              <span class="chip mono frag">千兆网口 · M.2 NVMe · USB3</span>
+            </div>
+          </div>
+          <div class="stack" style="align-items:center;gap:16px">
+            <div class="die rise-2">
+              <div class="core">核 1</div><div class="core">核 2</div><div class="core">核 3</div><div class="core">核 4</div>
+              <div class="core">核 5</div><div class="core">核 6</div><div class="core">核 7</div><div class="core">核 8</div>
+            </div>
+            <div class="chip mono" style="background:var(--crimson-soft);border-color:var(--crimson)">UR-DP1000 · 8× RISC-V 64 位</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 09 Milk-V Titan 板子 ============ -->
+      <section class="slide" data-sec="DP1000 芯片">
+        <div class="stack" style="margin-bottom:14px">
+          <span class="eyebrow"><span class="n">08</span>&nbsp;第三站 · 硬件层</span>
+          <h2 class="title">Milk-V Titan：我们要用的<span class="hl">开发板</span></h2>
+        </div>
+        <div class="two" style="gap:40px;align-items:center">
+          <div>
+            <svg viewBox="0 0 360 300" width="100%" height="250">
+              <rect x="20" y="20" width="320" height="260" rx="14" fill="#fff" stroke="var(--crimson)" stroke-width="2.5" class="draw"/>
+              <!-- SoC -->
+              <rect x="120" y="110" width="120" height="90" rx="8" fill="var(--crimson-soft)" stroke="var(--crimson)" stroke-width="2"/>
+              <text x="180" y="150" text-anchor="middle" font-family="var(--mono)" font-weight="700" font-size="15" fill="var(--crimson-deep)">UR-DP1000</text>
+              <text x="180" y="172" text-anchor="middle" font-family="var(--mono)" font-size="12" fill="var(--crimson)">8× RISC-V</text>
+              <!-- DDR4 slots -->
+              <rect x="120" y="36" width="14" height="60" rx="3" fill="var(--paper-2)" stroke="var(--line)"/>
+              <rect x="140" y="36" width="14" height="60" rx="3" fill="var(--paper-2)" stroke="var(--line)"/>
+              <text x="180" y="60" font-family="var(--mono)" font-size="11" fill="var(--ink-soft)">DDR4 ×2</text>
+              <!-- M.2 -->
+              <rect x="120" y="222" width="130" height="12" rx="3" fill="var(--paper-2)" stroke="var(--line)"/>
+              <text x="185" y="252" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--ink-soft)">M.2 NVMe</text>
+              <!-- 左侧 I/O -->
+              <rect x="34" y="70" width="34" height="30" rx="4" fill="var(--ink)"/><text x="51" y="90" text-anchor="middle" font-size="10" fill="#fff" font-family="var(--mono)">RJ45</text>
+              <rect x="34" y="110" width="34" height="24" rx="4" fill="var(--paper-2)" stroke="var(--line)"/><text x="51" y="126" text-anchor="middle" font-size="9" fill="var(--ink-soft)" font-family="var(--mono)">USB3</text>
+              <rect x="34" y="140" width="34" height="24" rx="4" fill="var(--paper-2)" stroke="var(--line)"/><text x="51" y="156" text-anchor="middle" font-size="9" fill="var(--ink-soft)" font-family="var(--mono)">USB3</text>
+              <rect x="34" y="180" width="34" height="18" rx="4" fill="var(--crimson-soft)" stroke="var(--crimson)"/><text x="51" y="193" text-anchor="middle" font-size="8" fill="var(--crimson-deep)" font-family="var(--mono)">Type-C</text>
+            </svg>
+            <div class="tag-row" style="justify-content:center;margin-top:6px">
+              <span class="chip mono frag">MINI-ITX 主板</span>
+              <span class="chip mono frag">DP1000 · 8 核 RISC-V</span>
+              <span class="chip mono frag">DDR4 最高 64GB</span>
+              <span class="chip mono frag">可装 Ubuntu / Debian / Fedora</span>
+            </div>
+          </div>
+          <div class="stack" style="gap:14px">
+            <p class="lead">一块 <b>MINI-ITX</b> 的 RISC-V "小电脑"，DP1000 就是它的心脏。接上网线、电源，它就是一台完整的 Linux 主机。</p>
+            <div class="card frag right" style="display:flex;gap:14px;align-items:center"><span style="font-size:30px">🐧</span><div><b>它就是这座"塔"的地基</b><p style="margin-top:2px">后面几课：在它上面装 Linux、跑大模型、做智能体。</p></div></div>
+            <div class="okbox frag">板子资料都在官网：<span class="link">milkv.io/titan</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 10 大模型是什么 ============ -->
+      <section class="slide" data-sec="大模型与智能体">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">09</span>&nbsp;第四站 · 智能层</span>
+            <h2 class="title">大模型（<span class="mono-accent">LLM</span>）<br>是什么？</h2>
+            <p class="lead">用<b>海量文本</b>（几乎整个互联网）训练出来的超大"语言大脑"。它的核心本领简单得惊人：<span class="hl">看着前文，猜下一个字</span>。</p>
+            <ul class="clean" style="margin-top:18px">
+              <li class="frag right"><span class="mk">📚</span><div><b>读得多</b><span class="sub">像读遍了图书馆，你起个头，它能自然地接下去</span></div></li>
+              <li class="frag right"><span class="mk">✨</span><div><b>练大了会"涌现"</b><span class="sub">练到足够大，竟然会翻译、写代码、推理、答题</span></div></li>
+            </ul>
+          </div>
+          <div class="card rise-2" style="align-self:center;width:100%">
+            <div style="font:700 24px/1.2 var(--mono)">今天天气真<span class="cursor"></span></div>
+            <div style="color:var(--ink-soft);font-size:15px;margin:14px 0 10px">大模型猜下一个字（各有概率）：</div>
+            <div class="predict">
+              <div class="pbar frag right"><span class="pw">好</span><span class="ptrack"><span class="pfill" style="width:70%"></span></span><span class="pct">70%</span></div>
+              <div class="pbar frag right"><span class="pw">热</span><span class="ptrack"><span class="pfill" style="width:20%"></span></span><span class="pct">20%</span></div>
+              <div class="pbar frag right"><span class="pw">不</span><span class="ptrack"><span class="pfill" style="width:8%"></span></span><span class="pct">8%</span></div>
+            </div>
+            <p style="color:var(--ink-faint);font-size:14px;margin:14px 0 0">一个字一个字这样接下去，就写出了整段话。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 11 大模型的天花板 ============ -->
+      <section class="slide" data-sec="大模型与智能体">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">10</span>&nbsp;第四站 · 智能层</span>
+          <h2 class="title">但大模型有个<span class="hl">"天花板"</span></h2>
+          <p class="lead" style="max-width:68ch">它很会"说"，可它只是<b>输出文字</b>——不知道现在几点、算不准复杂的账、连不上网，也没法真正动你的电脑。</p>
+        </div>
+        <div class="grid3" style="gap:16px">
+          <div class="card frag pop"><span class="ic">🕒</span><h3>不知道"此刻"</h3><p>训练之后发生的事、现在的天气，它都不知道</p></div>
+          <div class="card frag pop"><span class="ic">🔌</span><h3>没有"手脚"</h3><p>不能自己查资料、跑程序、控制硬件</p></div>
+          <div class="card frag pop"><span class="ic">🎯</span><h3>只答一句</h3><p>你问一句它答一句，不会自己一步步把事办完</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:24px;text-align:center">要让这个"聪明的脑子"真正<b>干活</b>，得给它装上手脚和工具——这就是 <span class="hl">智能体</span>。👉</div>
+      </section>
+
+      <!-- ============ 12 智能体是什么 ============ -->
+      <section class="slide" data-sec="大模型与智能体">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">11</span>&nbsp;第四站 · 智能层</span>
+          <h2 class="title">智能体 = 大模型 + <span class="hl-bg">手脚和工具</span></h2>
+        </div>
+        <div class="two" style="gap:36px;align-items:stretch">
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:12px">
+            <div class="chip" style="align-self:flex-start"><span class="d"></span>只有大模型</div>
+            <div style="font-size:58px;text-align:center;line-height:1.1">🧠</div>
+            <p style="margin:0;font-size:19px;text-align:center">一个"超级大脑"<br><span style="color:var(--ink-soft);font-size:16px">你问一句，它答一句</span></p>
+          </div>
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:12px;border-color:var(--crimson)">
+            <div class="chip" style="align-self:flex-start;background:var(--crimson-soft);border-color:var(--crimson)"><span class="d"></span>智能体 Agent</div>
+            <div style="font-size:46px;text-align:center;line-height:1.1">🧠 ＋ 🛠️ ＋ 📝</div>
+            <p style="margin:0;font-size:19px;text-align:center">大脑 + 会用工具的手 + 记得住事的笔记本<br><span style="color:var(--ink-soft);font-size:16px">给它一个目标，它自己拆解、动手、反复尝试，直到办成</span></p>
+          </div>
+        </div>
+        <div class="okbox frag" style="margin-top:22px;text-align:center">打个比方：大模型是"聪明的脑子"，<b>智能体</b>是"聪明的脑子 + 会用工具的双手 + 记事的笔记本"。</div>
+      </section>
+
+      <!-- ============ 13 智能体怎么运转 ============ -->
+      <section class="slide" data-sec="大模型与智能体">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">12</span>&nbsp;第四站 · 智能层</span>
+          <h2 class="title">智能体怎么<span class="hl">自己干活</span>？</h2>
+          <p class="lead" style="max-width:66ch">它把一个大目标，拆成"想一步、做一步、看一步"的小循环，转着转着就把事办成了。</p>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:6px">
+          <div class="loopstep frag pop"><div class="li">🧠</div><b>思考</b><span>下一步该做什么</span></div>
+          <div style="font-size:28px;color:var(--crimson)">→</div>
+          <div class="loopstep frag pop hot"><div class="li">🛠️</div><b>行动</b><span>调用工具 / 写代码 / 查资料</span></div>
+          <div style="font-size:28px;color:var(--crimson)">→</div>
+          <div class="loopstep frag pop"><div class="li">👀</div><b>观察</b><span>看看结果对不对</span></div>
+          <div style="font-size:26px;color:var(--crimson)">↺</div>
+        </div>
+        <div class="okbox frag" style="margin-top:26px;text-align:center">
+          例：<b>"帮我查一下今天天气，写进文件"</b> → 想：先查天气 → 用天气工具拿到数据 → 写进文件 → 检查一下 → ✅ 完成。没做完，就再转一圈。
+        </div>
+      </section>
+
+      <!-- ============ 14 为什么在板子上做智能体 ============ -->
+      <section class="slide" data-sec="大模型与智能体">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">13</span>&nbsp;第四站 · 智能层</span>
+          <h2 class="title">为什么要在<span class="hl">自己的板子</span>上做智能体？</h2>
+        </div>
+        <div class="grid2" style="gap:16px">
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🔒</span><div><h3>私密 · 自主</h3><p style="margin-top:4px">数据留在本地，不必事事都发到云端。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🔌</span><div><h3>软硬结合</h3><p style="margin-top:4px">智能体能直接指挥这块 RISC-V 硬件：传感器、外设……</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">💪</span><div><h3>端侧智能</h3><p style="margin-top:4px">一台离线的小电脑，也能拥有自己的"大脑"。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start;border-color:var(--crimson)"><span style="font-size:32px">🧠</span><div><h3>真正搞懂 AI</h3><p style="margin-top:4px">亲手从芯片搭到智能体，才知道 AI 到底跑在什么上面。</p></div></div>
+        </div>
+        <div class="okbox frag" style="margin-top:22px;text-align:center">这正是我们夏令营最特别的地方：<b>从一块芯片，一直做到会自己干活的 AI</b>。</div>
+      </section>
+
+      <!-- ============ 15 全景回顾 ============ -->
+      <section class="slide" data-sec="收尾">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">14</span>&nbsp;全景回顾</span>
+          <h2 class="title">回到这座塔：你将<span class="hl-bg">亲手打通</span>三层</h2>
+        </div>
+        <div class="tower">
+          <div class="band rise"><div class="bic">🔩</div><div class="btxt"><b>底层 · 硬件</b><div class="bd">RISC-V 架构 · UR-DP1000 · Milk-V Titan</div></div><div class="btag">地基</div></div>
+          <div class="band mid rise-2"><div class="bic">🐧</div><div class="btxt"><b>中层 · 系统</b><div class="bd">Linux：把硬件驯服成一台好用的电脑</div></div><div class="btag">连接</div></div>
+          <div class="band top rise-3"><div class="bic">🤖</div><div class="btxt"><b>顶层 · 智能</b><div class="bd">大模型 + 智能体：会思考、会动手</div></div><div class="btag">目标</div></div>
+        </div>
+        <div class="big-note hl frag" style="margin-top:22px;text-align:center;max-width:none;font-size:24px">从一块<span class="hl-bg">芯片</span>，到一个会自己干活的<span class="hl-bg">智能体</span>——这就是接下来要走的路。</div>
+      </section>
+
+      <!-- ============ 16 谢谢 + 速览 ============ -->
+      <section class="slide" data-sec="收尾">
+        <div class="two" style="align-items:center">
+          <div class="stack">
+            <div class="medallion rise" style="width:96px;height:96px;margin-bottom:24px"><img src="sjtu.png" alt="SJTU" style="width:66px;height:66px"></div>
+            <h2 class="title">谢谢！<br>下一课，我们就<span class="hl">动手</span> 🚀</h2>
+            <p class="lead" style="margin-top:10px">今天认识了整座塔，下一课开始，就真的连上板子、敲下第一行命令。</p>
+            <div class="stack" style="gap:12px;margin-top:20px">
+              <div class="card frag right" style="display:flex;align-items:center;gap:14px;padding:16px 20px"><span style="font-size:26px">🖥️</span><div><b>Milk-V Titan 板子资料</b><br><span class="link">milkv.io/titan</span></div></div>
+              <div class="card frag right" style="display:flex;align-items:center;gap:14px;padding:16px 20px"><span style="font-size:26px">📚</span><div><b>MIT Missing Semester（中文版）</b><br><span class="link">missing-semester-cn.github.io</span></div></div>
+            </div>
+          </div>
+          <div class="card frag right">
+            <div class="eyebrow" style="margin-bottom:14px">今天四站 · 一页速览</div>
+            <ul class="clean">
+              <li><span class="mk">🐧</span><div><b>Linux</b><span class="sub">硬件与你之间的"大管家"，开源、无处不在</span></div></li>
+              <li><span class="mk">🧩</span><div><b>RISC-V 架构</b><span class="sub">开放免费的指令集——芯片界的"开源精神"</span></div></li>
+              <li><span class="mk">🔩</span><div><b>UR-DP1000 / Titan</b><span class="sub">国产 8 核 RISC-V 芯片，装进我们的开发板</span></div></li>
+              <li><span class="mk">🤖</span><div><b>大模型与智能体</b><span class="sub">大脑 + 手脚：会思考、会自己动手做事</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /#deck -->
+
+    <!-- 底栏 -->
+    <div class="chrome chrome-bot">
+      <div class="counter">第 <b id="cur">01</b> / <span id="total">16</span> 页</div>
+      <div class="hint"><span class="kbd">→</span><span class="kbd">空格</span> 下一步 · <span class="kbd">←</span> 返回 · <span class="kbd">F</span> 全屏</div>
+    </div>
+    <div id="progress"></div>
+    <div class="nav" id="prev" title="上一页">‹</div>
+    <div class="nav" id="next" title="下一页">›</div>
+  </div><!-- /#stage -->
+</div><!-- /#app -->
+
+<script>
+(function(){
+  "use strict";
+  var stage = document.getElementById('stage');
+  var deck  = document.getElementById('deck');
+  var slides = Array.prototype.slice.call(deck.querySelectorAll('.slide'));
+  var secTag = document.getElementById('secTag');
+  var curEl = document.getElementById('cur');
+  var totalEl = document.getElementById('total');
+  var progress = document.getElementById('progress');
+
+  var cur = 0;      // 当前页
+  var frag = 0;     // 当前页已展开的分片数
+
+  totalEl.textContent = pad(slides.length);
+
+  function pad(n){ return (n<10?'0':'')+n; }
+  function fragsOf(i){ return Array.prototype.slice.call(slides[i].querySelectorAll('.frag')); }
+
+  function render(){
+    for(var i=0;i<slides.length;i++){
+      var s = slides[i];
+      s.classList.toggle('active', i===cur);
+      s.classList.toggle('past', i<cur);
+    }
+    var fr = fragsOf(cur);
+    for(var j=0;j<fr.length;j++){
+      fr[j].classList.toggle('revealed', j < frag);
+    }
+    curEl.textContent = pad(cur+1);
+    secTag.textContent = slides[cur].getAttribute('data-sec') || '';
+    progress.style.width = ((cur+1)/slides.length*100) + '%';
+  }
+
+  function next(){
+    var fr = fragsOf(cur);
+    if(frag < fr.length){ frag++; render(); return; }
+    if(cur < slides.length-1){ cur++; frag = 0; render(); }
+  }
+  function prev(){
+    if(frag > 0){ frag--; render(); return; }
+    if(cur > 0){ cur--; frag = fragsOf(cur).length; render(); }
+  }
+  function goTo(i){
+    i = Math.max(0, Math.min(slides.length-1, i));
+    cur = i; frag = 0; render();
+  }
+
+  // —— 键盘 ——
+  document.addEventListener('keydown', function(e){
+    switch(e.key){
+      case 'ArrowRight': case ' ': case 'PageDown': case 'Enter':
+        e.preventDefault(); next(); break;
+      case 'ArrowLeft': case 'PageUp': case 'Backspace':
+        e.preventDefault(); prev(); break;
+      case 'Home': e.preventDefault(); goTo(0); break;
+      case 'End': e.preventDefault(); goTo(slides.length-1); break;
+      case 'f': case 'F':
+        if(document.fullscreenElement){ document.exitFullscreen(); }
+        else if(document.documentElement.requestFullscreen){ document.documentElement.requestFullscreen(); }
+        break;
+    }
+  });
+
+  // —— 鼠标 / 触摸 ——
+  document.getElementById('next').addEventListener('click', function(e){ e.stopPropagation(); next(); });
+  document.getElementById('prev').addEventListener('click', function(e){ e.stopPropagation(); prev(); });
+  document.getElementById('app').addEventListener('click', function(e){
+    if(e.target.closest('a,button,.nav')) return;
+    next();
+  });
+  var tx=0;
+  document.addEventListener('touchstart', function(e){ tx = e.changedTouches[0].clientX; }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - tx;
+    if(Math.abs(dx) > 50){ dx < 0 ? next() : prev(); }
+  }, {passive:true});
+
+  // —— 舞台等比缩放 ——
+  function fit(){
+    var pad = 24;
+    var s = Math.min((window.innerWidth - pad)/1280, (window.innerHeight - pad)/720);
+    stage.style.transform = 'translate(-50%,-50%) scale(' + s + ')';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+
+  // —— 封面的假开机日志（纯装饰）——
+  var boot = document.getElementById('bootlog');
+  if(boot){
+    var lines = [
+      '[ OK ]  RISC-V UR-DP1000  8 cores online.',
+      '[ OK ]  Booted Linux on RISC-V.',
+      '[ OK ]  Large model loaded, agent ready.',
+      'agent@titan:~$ _'
+    ];
+    lines.forEach(function(t, i){
+      var d = document.createElement('div');
+      d.className = 'ln'; d.textContent = t;
+      d.style.animationDelay = (0.4 + i*0.5) + 's';
+      boot.appendChild(d);
+    });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
