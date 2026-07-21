@@ -4,13 +4,13 @@
 
 ## 项目背景
 
-上海交通大学（SJTU）夏令营 **「零基础 RISC-V 芯片智能体开发」** 教学材料。课程主线：先教学生连接 RISC-V 板子、掌握 Linux 基础，再在板子上开发 **AI 智能体（agent）**。
+上海交通大学（SJTU）学森暑期营 **「零基础 RISC-V 芯片智能体开发」** 教学材料。课程主线：先教学生连接 RISC-V 板子、掌握 Linux 基础，再学会用 **AI 智能体（agent）** 在板子上做开发。**注意：是"用智能体做开发"，不是"做智能体"。**
 
 - **受众**：零 Linux 经验的高中生。语气要**友好、具体、多用生活比喻**（如 IP=门牌号、端口=门、SSH=加密隧道）。
 - **语言**：所有面向学生的内容用**中文**。
 - **硬件**：Milk-V Titan（MINI-ITX RISC-V 工作站）。SoC = UltraRISC **UR-DP1000**，8 核 RV64（RVA22），最高 2.0GHz；DDR4 最高 64GB；千兆 RJ45；M.2 NVMe；USB3；Type-C 串口。可装 Ubuntu/Debian/Fedora。资料：milkv.io/titan
 - **参考教材**：MIT Missing Semester 中文版 — missing-semester-cn.github.io
-- **课程进度**：第 1 课（Linux + 命令行 + 网络/IP + SSH）已完成；**第 2 课预计是"在 Titan 上开发 AI 智能体"**。
+- **课程进度**：第 1 课（Linux + 命令行 + 网络/IP + SSH）已完成；**第 2 课预计是"在 Titan 上用 AI 智能体做开发"**。
 
 ## 仓库内容
 
