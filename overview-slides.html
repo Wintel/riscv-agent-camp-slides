@@ -311,7 +311,7 @@ svg{overflow:visible}
           <div class="decor-ring two"></div>
           <div class="medallion rise"><img src="sjtu.png" alt="SJTU"></div>
           <div class="rise" style="margin-bottom:16px;font-weight:700;font-size:17px;color:var(--crimson);letter-spacing:.02em;display:flex;align-items:center;gap:11px"><span style="width:26px;height:2px;background:var(--crimson)"></span>零基础 RISC-V 芯片智能体开发 · 夏令营</div>
-          <h1 class="rise-2">从一块 <span class="mono-accent">芯片</span><br>到一个 <span class="mono-accent">智能体</span></h1>
+          <h1 class="rise-2">用 <span class="mono-accent">AI 智能体</span><br>在 <span class="mono-accent">RISC-V</span> 上做开发</h1>
           <p class="sub rise-3">第一课 · 先看清全景：Linux · RISC-V · DP1000 · 大模型与智能体<span class="cursor"></span></p>
           <div class="meta rise-3">
             <span class="chip"><span class="d"></span>主讲 · 戚老师 长聘教授</span>
@@ -326,13 +326,13 @@ svg{overflow:visible}
       <section class="slide" data-sec="序">
         <div class="stack" style="margin-bottom:22px">
           <span class="eyebrow"><span class="n">01</span>&nbsp;全景</span>
-          <h2 class="title">这个夏令营，我们要搭一座<span class="hl-bg">三层的塔</span></h2>
-          <p class="lead" style="max-width:72ch">从最底层的国产芯片，一路搭到顶层会自己干活的 AI。今天先站远一点，看清每一层——后面几课再一层层亲手搭起来。</p>
+          <h2 class="title">我们的舞台：<span class="hl-bg">一台 RISC-V 电脑，加一个 AI 助手</span></h2>
+          <p class="lead" style="max-width:74ch">这四天，你会认识一台国产 RISC-V 小电脑（芯片 + Linux），并学会用 AI 智能体在它上面做开发。下面两层是你要开发的机器，最上面一层，是帮你开发的 AI。</p>
         </div>
         <div class="tower">
           <div class="band frag right"><div class="bic">🔩</div><div class="btxt"><b>底层 · 硬件</b><div class="bd">RISC-V 架构 → UR-DP1000 芯片 → Milk-V Titan 板子：一切运行的地基</div></div><div class="btag">② RISC-V　③ DP1000</div></div>
           <div class="band mid frag right"><div class="bic">🐧</div><div class="btxt"><b>中层 · 系统</b><div class="bd">Linux 操作系统：驯服硬件，把它变成一台好用的电脑</div></div><div class="btag">① Linux</div></div>
-          <div class="band top frag right"><div class="bic">🤖</div><div class="btxt"><b>顶层 · 智能</b><div class="bd">大模型 + 智能体：会理解、会决策、会自己动手做事</div></div><div class="btag">④ 大模型与智能体</div></div>
+          <div class="band top frag right"><div class="bic">🤖</div><div class="btxt"><b>顶层 · AI 开发助手</b><div class="bd">大模型 + 智能体：帮你在这台机器上写代码、查错、把开发做完</div></div><div class="btag">④ 大模型与智能体</div></div>
         </div>
         <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:19px;margin-top:20px">今天四站：<b>① Linux</b> · <b>② RISC-V 架构</b> · <b>③ DP1000 芯片</b> · <b>④ 大模型与智能体</b></p>
       </section>
@@ -493,7 +493,7 @@ svg{overflow:visible}
           </div>
           <div class="stack" style="gap:14px">
             <p class="lead">一块 <b>MINI-ITX</b> 的 RISC-V "小电脑"，DP1000 就是它的心脏。接上网线、电源，它就是一台完整的 Linux 主机。</p>
-            <div class="card frag right" style="display:flex;gap:14px;align-items:center"><span style="font-size:30px">🐧</span><div><b>它就是这座"塔"的地基</b><p style="margin-top:2px">后面几课：在它上面装 Linux、跑大模型、做智能体。</p></div></div>
+            <div class="card frag right" style="display:flex;gap:14px;align-items:center"><span style="font-size:30px">🐧</span><div><b>它就是我们要开发的那台机器</b><p style="margin-top:2px">后面几课：在它上面装好 Linux，再用 AI 智能体在上面做开发。</p></div></div>
             <div class="okbox frag">板子资料都在官网：<span class="link">milkv.io/titan</span></div>
           </div>
         </div>
@@ -576,37 +576,37 @@ svg{overflow:visible}
           <div style="font-size:26px;color:var(--crimson)">↺</div>
         </div>
         <div class="okbox frag" style="margin-top:26px;text-align:center">
-          例：<b>"帮我查一下今天天气，写进文件"</b> → 想：先查天气 → 用天气工具拿到数据 → 写进文件 → 检查一下 → ✅ 完成。没做完，就再转一圈。
+          例：<b>"帮我在板子上写个程序，读温度并存进文件"</b> → 想：先写代码 → 写好并运行 → 看到报错 → 改一改再跑 → ✅ 跑通。没做完，就再转一圈。
         </div>
       </section>
 
-      <!-- ============ 14 为什么在板子上做智能体 ============ -->
+      <!-- ============ 14 为什么用 AI 智能体来做开发 ============ -->
       <section class="slide" data-sec="大模型与智能体">
         <div class="stack" style="margin-bottom:22px">
           <span class="eyebrow"><span class="n">13</span>&nbsp;第四站 · 智能层</span>
-          <h2 class="title">为什么要在<span class="hl">自己的板子</span>上做智能体？</h2>
+          <h2 class="title">为什么用 <span class="hl">AI 智能体</span> 来做开发？</h2>
         </div>
         <div class="grid2" style="gap:16px">
-          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🔒</span><div><h3>私密 · 自主</h3><p style="margin-top:4px">数据留在本地，不必事事都发到云端。</p></div></div>
-          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🔌</span><div><h3>软硬结合</h3><p style="margin-top:4px">智能体能直接指挥这块 RISC-V 硬件：传感器、外设……</p></div></div>
-          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">💪</span><div><h3>端侧智能</h3><p style="margin-top:4px">一台离线的小电脑，也能拥有自己的"大脑"。</p></div></div>
-          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start;border-color:var(--crimson)"><span style="font-size:32px">🧠</span><div><h3>真正搞懂 AI</h3><p style="margin-top:4px">亲手从芯片搭到智能体，才知道 AI 到底跑在什么上面。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🚀</span><div><h3>零基础也能上手</h3><p style="margin-top:4px">不会写的地方，让 AI 帮你写、帮你解释，边做边学。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🐞</span><div><h3>报错不再卡住</h3><p style="margin-top:4px">把报错丢给它，它帮你找原因、给出修好的代码。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🎯</span><div><h3>你出想法，AI 敲代码</h3><p style="margin-top:4px">繁琐的编码交给它，你专注在"想做什么"上。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start;border-color:var(--crimson)"><span style="font-size:32px">📈</span><div><h3>最高效的开发方式</h3><p style="margin-top:4px">用 AI 智能体做开发，正是这几天的主线，也是当下的趋势。</p></div></div>
         </div>
-        <div class="okbox frag" style="margin-top:22px;text-align:center">这正是我们夏令营最特别的地方：<b>从一块芯片，一直做到会自己干活的 AI</b>。</div>
+        <div class="okbox frag" style="margin-top:22px;text-align:center">划重点：我们不是<b>从零造一个智能体</b>，而是<b>学会用 AI 智能体，在 RISC-V 板子上做开发</b>。</div>
       </section>
 
       <!-- ============ 15 全景回顾 ============ -->
       <section class="slide" data-sec="收尾">
         <div class="stack" style="margin-bottom:20px">
           <span class="eyebrow"><span class="n">14</span>&nbsp;全景回顾</span>
-          <h2 class="title">回到这座塔：你将<span class="hl-bg">亲手打通</span>三层</h2>
+          <h2 class="title">回到全景：<span class="hl-bg">一台机器 + 一个 AI 助手</span></h2>
         </div>
         <div class="tower">
-          <div class="band rise"><div class="bic">🔩</div><div class="btxt"><b>底层 · 硬件</b><div class="bd">RISC-V 架构 · UR-DP1000 · Milk-V Titan</div></div><div class="btag">地基</div></div>
-          <div class="band mid rise-2"><div class="bic">🐧</div><div class="btxt"><b>中层 · 系统</b><div class="bd">Linux：把硬件驯服成一台好用的电脑</div></div><div class="btag">连接</div></div>
-          <div class="band top rise-3"><div class="bic">🤖</div><div class="btxt"><b>顶层 · 智能</b><div class="bd">大模型 + 智能体：会思考、会动手</div></div><div class="btag">目标</div></div>
+          <div class="band rise"><div class="bic">🔩</div><div class="btxt"><b>底层 · 硬件</b><div class="bd">RISC-V 架构 · UR-DP1000 · Milk-V Titan</div></div><div class="btag">机器</div></div>
+          <div class="band mid rise-2"><div class="bic">🐧</div><div class="btxt"><b>中层 · 系统</b><div class="bd">Linux：把硬件驯服成一台好用的电脑</div></div><div class="btag">机器</div></div>
+          <div class="band top rise-3"><div class="bic">🤖</div><div class="btxt"><b>顶层 · AI 开发助手</b><div class="bd">大模型 + 智能体：帮你在这台机器上做开发</div></div><div class="btag">工具</div></div>
         </div>
-        <div class="big-note hl frag" style="margin-top:22px;text-align:center;max-width:none;font-size:24px">从一块<span class="hl-bg">芯片</span>，到一个会自己干活的<span class="hl-bg">智能体</span>——这就是接下来要走的路。</div>
+        <div class="big-note hl frag" style="margin-top:22px;text-align:center;max-width:none;font-size:24px">认识这台 <span class="hl-bg">RISC-V 电脑</span>，再用 <span class="hl-bg">AI 智能体</span>在它上面做开发——这就是接下来几天要走的路。</div>
       </section>
 
       <!-- ============ 16 谢谢 + 速览 ============ -->
@@ -615,7 +615,7 @@ svg{overflow:visible}
           <div class="stack">
             <div class="medallion rise" style="width:96px;height:96px;margin-bottom:24px"><img src="sjtu.png" alt="SJTU" style="width:66px;height:66px"></div>
             <h2 class="title">谢谢！<br>下一课，我们就<span class="hl">动手</span> 🚀</h2>
-            <p class="lead" style="margin-top:10px">今天认识了整座塔，下一课开始，就真的连上板子、敲下第一行命令。</p>
+            <p class="lead" style="margin-top:10px">今天认识了整个全景，下一课开始，就真的连上板子、动手做开发。</p>
             <div class="stack" style="gap:12px;margin-top:20px">
               <div class="card frag right" style="display:flex;align-items:center;gap:14px;padding:16px 20px"><span style="font-size:26px">🖥️</span><div><b>Milk-V Titan 板子资料</b><br><span class="link">milkv.io/titan</span></div></div>
               <div class="card frag right" style="display:flex;align-items:center;gap:14px;padding:16px 20px"><span style="font-size:26px">📚</span><div><b>MIT Missing Semester（中文版）</b><br><span class="link">missing-semester-cn.github.io</span></div></div>
@@ -627,7 +627,7 @@ svg{overflow:visible}
               <li><span class="mk">🐧</span><div><b>Linux</b><span class="sub">硬件与你之间的"大管家"，开源、无处不在</span></div></li>
               <li><span class="mk">🧩</span><div><b>RISC-V 架构</b><span class="sub">开放免费的指令集——芯片界的"开源精神"</span></div></li>
               <li><span class="mk">🔩</span><div><b>UR-DP1000 / Titan</b><span class="sub">国产 8 核 RISC-V 芯片，装进我们的开发板</span></div></li>
-              <li><span class="mk">🤖</span><div><b>大模型与智能体</b><span class="sub">大脑 + 手脚：会思考、会自己动手做事</span></div></li>
+              <li><span class="mk">🤖</span><div><b>大模型与智能体</b><span class="sub">你的 AI 开发助手——帮你写代码、查错、做开发</span></div></li>
             </ul>
           </div>
         </div>
