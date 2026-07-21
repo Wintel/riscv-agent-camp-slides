@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 智能体使用入门 · 学森暑期营 · 智能体介绍 II</title>
+<!-- =========================================================================
+     SJTU 学森暑期营 · 智能体介绍 II：AI 智能体使用入门（7/29 上午 · 韦志翔）
+     基于 template.html 同一套设计系统与翻页引擎。
+     骨架参考：MIT Missing Semester 2026 "Agentic Coding" 讲义
+               + Anthropic《AI Fluency》4D 框架（委派/描述/辨别/尽责）
+     工具主线：OpenClaw（openclaw.ai）· 架构：学生电脑跑智能体，SSH 操控 Titan
+     放映：浏览器打开本文件（sjtu.png 同目录），F 全屏，→/空格 翻页。
+     ========================================================================= -->
+<style>
+:root{
+  /* —— 品牌色（取自交大 logo）—— */
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2; --crimson-bright:#E85D74;
+  /* —— 中性色 —— */
+  --paper:#F4F2EE; --paper-2:#ECE8E1; --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88;
+  --line:#DCD4C8; --letterbox:#16130F; --ok:#1E8A6E; --ok-soft:#DCEFE8;
+  /* —— 终端配色 —— */
+  --term-bg:#14171E; --term-bar:#1B1F28; --term-line:#2A2F3A; --term-fg:#E7EAF0;
+  --term-green:#57D07E; --term-cyan:#54C4D4; --term-blue:#8AA6D6; --term-dim:#8891A0;
+  /* —— 字体 —— */
+  --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",system-ui,sans-serif;
+  --mono:"Cascadia Code","JetBrains Mono","Consolas","Menlo",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--letterbox);font-family:var(--sans);color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+/* ---------- 舞台：1280×720 逻辑画布，等比缩放铺满屏幕 ---------- */
+#app{position:fixed;inset:0;overflow:hidden;background:radial-gradient(1200px 700px at 50% -10%,#241d18,var(--letterbox) 60%)}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center;
+  background:var(--paper);border-radius:10px;overflow:hidden;
+  box-shadow:0 40px 120px -30px rgba(0,0,0,.7),0 0 0 1px rgba(0,0,0,.25)}
+#stage::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(173,23,48,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(173,23,48,.045) 1px,transparent 1px);
+  background-size:40px 40px}
+
+/* ---------- 顶栏 / 底栏 ---------- */
+.chrome{position:absolute;left:0;right:0;z-index:20;display:flex;align-items:center;padding:0 56px;pointer-events:none}
+.chrome-top{top:0;height:74px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{width:42px;height:42px;display:block}
+.brand .b-1{font-weight:700;font-size:16px}
+.brand .b-2{font:600 11px var(--mono);letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase}
+.sec-tag{font:600 12px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);display:flex;align-items:center;gap:9px}
+.sec-tag::before{content:"";width:20px;height:2px;background:var(--crimson)}
+.chrome-bot{bottom:0;height:56px;justify-content:space-between}
+.counter{font:600 13px var(--mono);color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.counter b{color:var(--crimson)}
+.hint{font-size:12px;color:var(--ink-faint);display:flex;gap:8px;align-items:center}
+.kbd{font:600 11px var(--mono);background:#fff;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:2px 7px;color:var(--ink-soft)}
+#progress{position:absolute;left:0;bottom:0;height:4px;width:0;background:var(--crimson);z-index:25;transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+/* ---------- 幻灯片切换 ---------- */
+#deck{position:absolute;inset:0;z-index:5}
+.slide{position:absolute;inset:74px 56px 56px;opacity:0;pointer-events:none;
+  transform:translateX(70px) scale(.985);transition:opacity .5s ease,transform .55s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;justify-content:center}
+.slide.active{opacity:1;pointer-events:auto;transform:none}
+.slide.past{opacity:0;transform:translateX(-70px) scale(.985)}
+
+/* ---------- 布局 & 排版组件 ---------- */
+.two{display:grid;grid-template-columns:1.02fr 1fr;gap:52px;align-items:center;width:100%}
+.two.v{align-items:center}
+.stack{display:flex;flex-direction:column}
+.eyebrow{font:600 14px var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--crimson);display:inline-flex;align-items:center;gap:11px;margin-bottom:18px}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--crimson)}
+.eyebrow .n{color:var(--ink-faint)}
+h1.title{font-size:74px;line-height:1.04;font-weight:800;margin:0;text-wrap:balance}
+h2.title{font-size:46px;line-height:1.12;font-weight:800;margin:0 0 16px;text-wrap:balance}
+.mono-accent{font-family:var(--mono);color:var(--crimson);font-weight:700}
+.lead{font-size:23px;line-height:1.55;color:var(--ink-soft);margin:0;max-width:36ch}
+.hl{color:var(--crimson);font-weight:700}
+.hl-bg{background:linear-gradient(transparent 58%,var(--crimson-soft) 58%);padding:0 2px}
+code.inline{font-family:var(--mono);background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:.9em;color:var(--crimson-deep);font-weight:600}
+.key{font:600 15px var(--mono);background:#fff;border:1px solid var(--line);border-bottom-width:3px;border-radius:8px;padding:3px 11px}
+
+ul.clean{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px}
+ul.clean li{display:flex;gap:14px;align-items:flex-start;font-size:21px;line-height:1.45}
+ul.clean li .mk{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--crimson-soft);color:var(--crimson);font:700 15px var(--mono);margin-top:2px}
+ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-height:1.4;margin-top:3px;font-weight:400}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+.card h3{margin:0 0 6px;font-size:20px}
+.card p{margin:0;font-size:16px;color:var(--ink-soft);line-height:1.45}
+.card .ic{font-size:26px;margin-bottom:10px;display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.chip{display:inline-flex;align-items:center;gap:8px;background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-size:16px;font-weight:600}
+.chip .d{width:9px;height:9px;border-radius:50%;background:var(--crimson)}
+.chip.mono{font-family:var(--mono);font-size:15px}
+.okbox{background:var(--ok-soft);border:1px solid #A9D8C9;border-radius:12px;padding:14px 18px;font-size:18px}
+.warn{background:#fff;border:1px solid var(--crimson);border-left:5px solid var(--crimson);border-radius:12px;
+  padding:14px 18px;display:flex;gap:14px;align-items:flex-start;font-size:17px;line-height:1.5}
+.warn .ic{font-size:24px;flex:none}
+.warn b{color:var(--crimson-deep)}
+.big-note{font-size:27px;line-height:1.5;font-weight:600;max-width:30ch}
+.link{font-family:var(--mono);font-weight:700;color:var(--crimson);font-size:18px}
+.cmd-pill{font-family:var(--mono);font-weight:700;background:var(--ink);color:#fff;border-radius:8px;padding:3px 10px;font-size:.92em;white-space:nowrap}
+.step-n{flex:none;width:46px;height:46px;border-radius:12px;background:var(--crimson);color:#fff;
+  font:800 22px var(--mono);display:grid;place-items:center;box-shadow:0 8px 20px -8px var(--crimson)}
+.demo-tag{display:inline-flex;align-items:center;gap:9px;background:var(--crimson);color:#fff;border-radius:999px;
+  padding:7px 16px;font-weight:700;font-size:15px;box-shadow:0 10px 24px -10px var(--crimson);align-self:flex-start}
+
+/* ---------- 想→做→看 循环卡（同开营导论）---------- */
+.loopstep{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;text-align:center;min-width:158px}
+.loopstep .li{font-size:30px;line-height:1}
+.loopstep b{display:block;margin-top:8px;font-size:19px}
+.loopstep span{color:var(--ink-soft);font-size:14px;display:block;margin-top:2px}
+.loopstep.hot{border-color:var(--crimson);background:var(--crimson-soft)}
+
+/* ---------- 大模型"猜下一个字"演示条 ---------- */
+.predict{display:flex;flex-direction:column;gap:11px}
+.pbar{display:flex;align-items:center;gap:12px}
+.pbar .pw{font:700 22px var(--mono);width:40px;text-align:center;color:var(--ink)}
+.pbar .ptrack{flex:1;height:22px;background:var(--paper-2);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.pbar .pfill{display:block;height:100%;background:var(--crimson);border-radius:999px}
+.pbar .pct{font:600 15px var(--mono);color:var(--ink-soft);width:46px;text-align:right}
+
+/* ---------- 命令速查小抄（同第 1 课）---------- */
+.cheat{display:grid;grid-template-columns:1fr;gap:8px;font-size:16px}
+.cheat .row{display:flex;justify-content:space-between;gap:16px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.cheat .row code{font-family:var(--mono);font-weight:700;color:var(--crimson-deep)}
+.cheat .row span{color:var(--ink-soft)}
+
+/* ---------- 终端窗口 ---------- */
+.term{background:var(--term-bg);border-radius:14px;overflow:hidden;font-family:var(--mono);border:1px solid var(--term-line);box-shadow:0 30px 70px -28px rgba(0,0,0,.55)}
+.term-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--term-bar);border-bottom:1px solid var(--term-line)}
+.term-bar .dot{width:12px;height:12px;border-radius:50%}
+.term-bar .t-title{font:600 12px var(--mono);color:var(--term-dim);margin-left:6px;letter-spacing:.06em}
+.term-body{padding:18px 22px;font-size:17px;line-height:1.75;color:var(--term-fg)}
+.term .ln{display:block;white-space:pre-wrap;word-break:break-word}
+.term .u{color:var(--term-green)} .term .p{color:var(--term-blue)} .term .cmd{color:#fff;font-weight:600} .term .out{color:var(--term-dim)}
+.term .em{color:var(--crimson-bright);font-weight:700} .term .ok{color:var(--term-green)} .term .cm{color:var(--term-dim);font-style:italic}
+.cursor{display:inline-block;width:11px;height:1.05em;background:var(--term-green);vertical-align:-.18em;margin-left:2px;animation:blink 1.05s steps(1) infinite}
+
+/* ---------- OpenClaw 聊天窗口 mockup ---------- */
+.chat{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 30px 70px -28px rgba(0,0,0,.3)}
+.chat-bar{display:flex;align-items:center;gap:10px;padding:11px 16px;background:var(--paper-2);border-bottom:1px solid var(--line);font-weight:700;font-size:14px}
+.chat-bar .cic{width:26px;height:26px;border-radius:8px;background:var(--crimson);color:#fff;display:grid;place-items:center;font-size:15px}
+.chat-bar .st{margin-left:auto;font:600 11px var(--mono);color:var(--ink-faint);letter-spacing:.06em}
+.chat-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;font-size:16px;line-height:1.5}
+.bub{max-width:88%;padding:9px 14px;border-radius:13px}
+.bub.me{align-self:flex-end;background:var(--crimson);color:#fff;border-bottom-right-radius:4px}
+.bub.ai{align-self:flex-start;background:var(--paper);border:1px solid var(--line);border-bottom-left-radius:4px}
+.tooluse{align-self:flex-start;width:92%;background:var(--term-bg);color:var(--term-fg);border-radius:10px;padding:8px 13px;font:13.5px/1.65 var(--mono)}
+.tooluse .tl{display:block;white-space:pre-wrap;word-break:break-word}
+.tooluse .tl.hd{color:var(--term-cyan);font-weight:700}
+.tooluse .tl.okk{color:var(--term-green)}
+.tooluse .tl.dim{color:var(--term-dim)}
+/* 工具审批卡（“请示”弹窗）*/
+.appr{align-self:flex-start;width:92%;background:#fff;border:1.5px solid var(--crimson);border-radius:12px;padding:11px 14px}
+.appr .at{font-weight:700;font-size:14.5px;display:flex;gap:8px;align-items:center;color:var(--crimson-deep)}
+.appr .acmd{font:600 13.5px var(--mono);background:var(--paper-2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-top:8px;color:var(--ink)}
+.appr .btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.abtn{font:700 13px var(--sans);border:1px solid var(--line);border-bottom-width:3px;border-radius:8px;padding:4px 12px;background:var(--paper-2);color:var(--ink-soft)}
+.abtn.yes{background:var(--ok-soft);border-color:#A9D8C9;color:var(--ok)}
+.abtn.no{color:var(--crimson-deep)}
+
+/* ---------- 链路图：你 → 智能体 → 板子 ---------- */
+.chainrow{display:flex;align-items:center;justify-content:center;gap:14px;width:100%}
+.cnode{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 22px;text-align:center;min-width:190px}
+.cnode .ci{font-size:34px;line-height:1}
+.cnode b{display:block;margin-top:7px;font-size:19px}
+.cnode span{display:block;color:var(--ink-soft);font-size:14px;margin-top:2px}
+.cnode.hot{border-color:var(--crimson);background:var(--crimson-soft);box-shadow:0 14px 34px -18px var(--crimson)}
+.carrow{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--crimson);font-weight:700}
+.carrow .aa{font-size:30px;line-height:1}
+.carrow .al{font:700 13px var(--mono);color:var(--ink-soft);background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:3px 11px;white-space:nowrap}
+
+/* ---------- “书桌”上下文示意 ---------- */
+.ctxrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font:600 13px var(--mono)}
+.ctxrow .rlab{font:700 14px var(--sans);color:var(--ink-soft);width:64px;flex:none}
+.ctxrow .seg{border:1px solid var(--line);border-radius:7px;padding:5px 9px;background:#fff;white-space:nowrap}
+.ctxrow .seg.old{background:var(--paper-2);color:var(--ink-soft)}
+.ctxrow .seg.new{background:var(--crimson-soft);border-color:var(--crimson);color:var(--crimson-deep);font-weight:700}
+
+/* ---------- 手机成品 mockup ---------- */
+.phone{width:225px;border:2px solid var(--ink);border-radius:26px;padding:13px 12px 20px;background:#fff;box-shadow:0 30px 60px -30px rgba(0,0,0,.45);margin:0 auto}
+.phone .purl{font:600 11px var(--mono);background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;text-align:center;color:var(--ink-soft)}
+.phone .ptemp{font:800 52px var(--mono);text-align:center;margin:24px 0 4px;color:var(--crimson)}
+.phone .plab{text-align:center;color:var(--ink-soft);font-size:13px}
+
+/* ---------- 逐步出现（教学节奏）---------- */
+.frag{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s cubic-bezier(.3,1,.5,1)}
+.frag.revealed{opacity:1;transform:none}
+.frag.pop{transform:scale(.9)} .frag.pop.revealed{transform:none}
+.frag.right{transform:translateX(26px)} .frag.right.revealed{transform:none}
+
+/* ---------- 进入当前页时播放的入场动画 ---------- */
+@keyframes blink{50%{opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.slide.active .rise{animation:fadeUp .7s both}
+.slide.active .rise-2{animation:fadeUp .7s .12s both}
+.slide.active .rise-3{animation:fadeUp .7s .24s both}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------- 封面 ---------- */
+.cover{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 84px}
+.medallion{width:120px;height:120px;border-radius:50%;background:#fff;display:grid;place-items:center;
+  box-shadow:0 0 0 2px var(--crimson),0 18px 40px -18px rgba(173,23,48,.55);margin-bottom:30px}
+.medallion img{width:86px;height:86px}
+.cover h1{font-size:76px;line-height:1.02;font-weight:800;margin:0}
+.cover .sub{font-size:25px;color:var(--ink-soft);margin:22px 0 0;font-weight:500}
+.cover .meta{margin-top:36px;display:flex;gap:14px;flex-wrap:wrap}
+.decor-ring{position:absolute;right:-160px;top:-160px;width:560px;height:560px;border-radius:50%;
+  border:2px dashed rgba(173,23,48,.18);pointer-events:none}
+.decor-ring.two{right:-120px;top:-120px;width:480px;height:480px;border-style:solid;border-color:rgba(173,23,48,.08)}
+.slide.active .decor-ring{animation:spin 90s linear infinite}
+
+/* ---------- 鼠标导航箭头 ---------- */
+.nav{position:absolute;bottom:14px;z-index:30;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.85);display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);font-size:16px;transition:.2s}
+.nav:hover{border-color:var(--crimson);color:var(--crimson)}
+#prev{right:112px}#next{right:70px}
+
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.06ms!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+
+    <!-- ===== 顶栏 ===== -->
+    <div class="chrome chrome-top">
+      <div class="brand">
+        <img src="sjtu.png" alt="上海交通大学">
+        <div>
+          <div class="b-1">零基础 RISC-V 芯片智能体开发</div>
+          <div class="b-2">上海交通大学学森暑期营 · SJTU</div>
+        </div>
+      </div>
+      <div class="sec-tag" id="secTag">开始</div>
+    </div>
+
+    <!-- ===== 幻灯片区 ===== -->
+    <div id="deck">
+
+      <!-- ============ 01 封面 ============ -->
+      <section class="slide" data-sec="开始">
+        <div class="cover">
+          <div class="decor-ring"></div>
+          <div class="decor-ring two"></div>
+          <div class="medallion rise"><img src="sjtu.png" alt="SJTU"></div>
+          <div class="rise" style="margin-bottom:16px;font-weight:700;font-size:17px;color:var(--crimson);letter-spacing:.02em;display:flex;align-items:center;gap:11px"><span style="width:26px;height:2px;background:var(--crimson)"></span>智能体介绍 II · 使用入门</div>
+          <h1 class="rise-2">指挥 <span class="mono-accent">AI 智能体</span><br>替你做开发</h1>
+          <p class="sub rise-3">从今天起：你说目标，它来敲命令、写代码、修报错。<span class="cursor"></span></p>
+          <div class="meta rise-3">
+            <span class="chip"><span class="d"></span>主讲 · 韦志翔</span>
+            <span class="chip">7 月 29 日 · 09:30–11:30</span>
+            <span class="chip mono">ref: missing-semester 2026</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 02 前情提要 ============ -->
+      <section class="slide" data-sec="开始">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">01</span>&nbsp;前情提要</span>
+            <h2 class="title">昨天，每条命令<br>都是你<span class="hl-bg">亲手敲</span>的</h2>
+            <ul class="clean" style="margin-top:12px">
+              <li class="frag"><span class="mk">🔐</span><div><b>你已经会连：</b><code class="inline">ssh student@192.168.1.50</code><span class="sub">远程掌控一台 RISC-V 电脑</span></div></li>
+              <li class="frag"><span class="mk">⌨️</span><div><b>你已经会用：</b>pwd / ls / cd / cat / mkdir …<span class="sub">在命令行里增删改查</span></div></li>
+              <li class="frag"><span class="mk">🧩</span><div><b>还差一块拼图：</b>AI 怎么帮你干活？<span class="sub">大模型、智能体——今天从零讲起</span></div></li>
+            </ul>
+            <div class="okbox frag" style="margin-top:20px">今天：把"想命令、敲命令"交给 AI——<b>你只负责说清楚要什么。</b></div>
+          </div>
+          <div class="term rise-2">
+            <div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t-title">昨天的你</span></div>
+            <div class="term-body">
+<span class="ln"><span class="u">you</span><span class="p">@laptop:~$</span> <span class="cmd">ssh student@192.168.1.50</span></span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">ls</span></span>
+<span class="ln out">Desktop  Documents  hello.py</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">python3 hello.py</span></span>
+<span class="ln out">Hello, RISC-V!</span>
+<span class="ln cm"># 每一条，都要你自己想、自己敲…</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cursor"></span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 03 全景：你 → 智能体 → 板子 ============ -->
+      <section class="slide" data-sec="开始">
+        <div class="stack" style="margin-bottom:26px">
+          <span class="eyebrow"><span class="n">02</span>&nbsp;今天的全景图</span>
+          <h2 class="title">给你的板子，住进一个<span class="hl-bg">AI 实习生</span></h2>
+          <p class="lead" style="max-width:74ch">它听得懂人话，替你使用昨天学的全部本事。你的电脑只当"遥控器"——<b>有浏览器就行，Win / Mac 都一样</b>。</p>
+        </div>
+        <div class="chainrow" style="margin:10px 0 26px">
+          <div class="cnode frag pop"><div class="ci">🧑‍🎓</div><b>你</b><span>浏览器里：说目标 · 验收</span></div>
+          <div class="carrow frag"><span class="aa">→</span><span class="al">说人话（网页聊天）</span></div>
+          <div class="cnode hot frag pop"><div class="ci">🤖</div><b>OpenClaw（住在板子里）</b><span>想办法 · 敲命令 · 写代码</span></div>
+          <div class="carrow frag"><span class="aa">→</span><span class="al">直接动手</span></div>
+          <div class="cnode frag pop"><div class="ci">🐧</div><b>板子上的一切</b><span>文件 · 程序 · 硬件</span></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+          <span class="chip frag">① 认识大模型和智能体</span>
+          <span class="chip frag">② 上手 OpenClaw</span>
+          <span class="chip frag">③ 能派它干什么</span>
+          <span class="chip frag">④ 怎么用得好</span>
+          <span class="chip frag">⑤ 别踩的坑</span>
+        </div>
+      </section>
+
+      <!-- ============ 04 大模型是什么 ============ -->
+      <section class="slide" data-sec="认识智能体">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">03</span>&nbsp;先认识"大脑"</span>
+            <h2 class="title">大模型（<span class="mono-accent">LLM</span>）<br>是什么？</h2>
+            <p class="lead">用海量文本（几乎整个互联网）训练出来的"语言大脑"。核心本领简单得惊人：<span class="hl">看着前文，猜下一个字。</span></p>
+            <ul class="clean" style="margin-top:16px">
+              <li class="frag"><span class="mk">📚</span><div><b>读得多</b><span class="sub">像读遍了图书馆——你起个头，它能自然接下去</span></div></li>
+              <li class="frag"><span class="mk">✨</span><div><b>练大了会"涌现"</b><span class="sub">大到一定程度，竟然会翻译、推理、写代码</span></div></li>
+              <li class="frag"><span class="mk">⌨️</span><div><b>对今天最重要的一点</b><span class="sub">它读过全世界的代码和命令行——是个"老程序员"</span></div></li>
+            </ul>
+          </div>
+          <div class="card rise-2" style="align-self:center;width:100%">
+            <div style="font:700 24px/1.2 var(--mono)">今天天气真<span class="cursor"></span></div>
+            <div style="color:var(--ink-soft);font-size:15px;margin:14px 0 10px">大模型猜下一个字（各有概率）：</div>
+            <div class="predict">
+              <div class="pbar frag"><span class="pw">好</span><span class="ptrack"><span class="pfill" style="width:70%"></span></span><span class="pct">70%</span></div>
+              <div class="pbar frag"><span class="pw">热</span><span class="ptrack"><span class="pfill" style="width:20%"></span></span><span class="pct">20%</span></div>
+              <div class="pbar frag"><span class="pw">不</span><span class="ptrack"><span class="pfill" style="width:8%"></span></span><span class="pct">8%</span></div>
+            </div>
+            <p style="color:var(--ink-faint);font-size:14px;margin:14px 0 0">一个字一个字接下去，就能写出整段话、整个程序。你听说过的 ChatGPT、DeepSeek，底层都是它。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 05 从会聊到会干 ============ -->
+      <section class="slide" data-sec="认识智能体">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">04</span>&nbsp;但它有天花板</span>
+            <h2 class="title">大模型很聪明，<br>但它<span class="hl">只会"说"</span></h2>
+            <p class="lead">很会"接话"，不代表会"干活"。它天生有三个短板——</p>
+            <ul class="clean" style="margin-top:16px">
+              <li class="frag"><span class="mk">🕒</span><div><b>不知道"此刻"</b><span class="sub">你板子的 IP、文件里有什么，它都看不见</span></div></li>
+              <li class="frag"><span class="mk">🚫</span><div><b>没有手脚</b><span class="sub">不能跑命令、改文件、连板子</span></div></li>
+              <li class="frag"><span class="mk">💬</span><div><b>一问一答</b><span class="sub">不会自己把一件事一步步办完</span></div></li>
+            </ul>
+          </div>
+          <div class="stack" style="gap:14px">
+            <div class="card rise-2" style="text-align:center">
+              <div style="font-size:44px;line-height:1.1">🧠</div>
+              <h3 style="font-size:22px;margin-top:8px">聊天机器人</h3>
+              <p style="font-size:16px">问它"怎么在板子上装 Python"<br>→ 它<b>告诉你</b> 5 个步骤，你自己动手</p>
+            </div>
+            <div class="card frag pop" style="text-align:center;border-color:var(--crimson);background:var(--crimson-soft)">
+              <div style="font-size:44px;line-height:1.1">🧠＋🛠️</div>
+              <h3 style="font-size:22px;margin-top:8px;color:var(--crimson-deep)">智能体</h3>
+              <p style="font-size:16px;color:var(--ink)">同一个问题<br>→ 它<b>自己连上板子，装好，再回来汇报</b></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 06 工具箱 ============ -->
+      <section class="slide" data-sec="认识智能体">
+        <div class="stack" style="margin-bottom:24px">
+          <span class="eyebrow"><span class="n">05</span>&nbsp;智能体 = 大模型 + 工具</span>
+          <h2 class="title">它手里的<span class="hl-bg">四样兵器</span></h2>
+        </div>
+        <div class="grid4">
+          <div class="card frag pop"><span class="ic">📖</span><h3>读文件</h3><p>看你的代码、日志、报错，把"此刻"看在眼里</p></div>
+          <div class="card frag pop"><span class="ic">✏️</span><h3>写文件</h3><p>新建脚本、修改代码——精确到某一行</p></div>
+          <div class="card frag pop" style="border-color:var(--crimson)"><span class="ic">⌨️</span><h3>跑命令</h3><p>打开一个真终端执行命令，再读回结果</p></div>
+          <div class="card frag pop"><span class="ic">🌐</span><h3>上网查</h3><p>搜文档、查资料，补上训练之后的新知识</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:24px;text-align:center">最厉害的是<b>"跑命令"</b>：你昨天会的它全会——<code class="inline">ls</code>、<code class="inline">ping</code>、<code class="inline">ssh</code> 样样在行。<br>⚠️ 危险动作它会先<b>请示你</b>（一会儿讲）。</div>
+      </section>
+
+      <!-- ============ 07 想→做→看 循环 ============ -->
+      <section class="slide" data-sec="认识智能体">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">06</span>&nbsp;运转方式</span>
+          <h2 class="title">它怎么自己干活：<span class="hl-bg">想 → 做 → 看</span>，转圈圈</h2>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin:4px 0 20px">
+          <div class="loopstep frag pop"><div class="li">🧠</div><b>想</b><span>下一步用哪样兵器？</span></div>
+          <div class="frag" style="font-size:28px;color:var(--crimson)">→</div>
+          <div class="loopstep hot frag pop"><div class="li">🛠️</div><b>做</b><span>真的调用工具执行</span></div>
+          <div class="frag" style="font-size:28px;color:var(--crimson)">→</div>
+          <div class="loopstep frag pop"><div class="li">👀</div><b>看</b><span>结果对吗？成了吗？</span></div>
+          <div class="frag" style="font-size:26px;color:var(--crimson)">↺</div>
+        </div>
+        <div class="card frag" style="max-width:980px;margin:0 auto">
+          <p style="font-size:17.5px;line-height:1.7"><b>走一圈：</b>"帮我看看这块板子装没装 Python" → <span class="hl">想</span>：查版本该跑哪条命令？ → <span class="hl">做</span>：<span class="cmd-pill">python3 --version</span> → <span class="hl">看</span>：输出 <code class="inline">Python 3.11.2</code> ✅ → 回来汇报。没办成？再转一圈，直到搞定或来问你。</p>
+        </div>
+        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:17px;margin-top:16px">这个"外壳"并不神秘——核心循环用 <b>200 行代码</b>就能写出来。</p>
+      </section>
+
+      <!-- ============ 08 书桌：上下文 ============ -->
+      <section class="slide" data-sec="认识智能体">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">07</span>&nbsp;一个关键设定</span>
+            <h2 class="title">它的"记性"是一张<br><span class="hl-bg">有限的书桌</span></h2>
+            <ul class="clean" style="margin-top:14px">
+              <li class="frag"><span class="mk">1</span><div><b>大模型本身没有记性</b><span class="sub">每答一句，都要把整段对话从头再读一遍</span></div></li>
+              <li class="frag"><span class="mk">2</span><div><b>书桌大小有限（上下文窗口）</b><span class="sub">聊得越久，桌上的纸越堆越厚</span></div></li>
+              <li class="frag"><span class="mk">3</span><div><b>桌子太乱，它会"顾此失彼"</b><span class="sub">开头交代的要求，聊到后面就忘了</span></div></li>
+            </ul>
+            <div class="okbox frag" style="margin-top:20px">记住这个比喻——后面"用得好"的技巧，一半都是在帮它<b>收拾桌子</b>。</div>
+          </div>
+          <div class="stack" style="gap:14px">
+            <div class="card rise-2" style="padding:18px 20px">
+              <div class="ctxrow"><span class="rlab">第1问</span><span class="seg new">你：写个脚本</span></div>
+              <div class="ctxrow frag" style="margin-top:9px"><span class="rlab">第2问</span><span class="seg old">你：写个脚本</span><span class="seg old">它：写好了A</span><span class="seg new">你：改成5秒</span></div>
+              <div class="ctxrow frag" style="margin-top:9px"><span class="rlab">第3问</span><span class="seg old">你：写个脚本</span><span class="seg old">它：写好了A</span><span class="seg old">你：改成5秒</span><span class="seg old">它：改好了B</span><span class="seg new">你：加上时间</span></div>
+              <p style="margin-top:12px;font-size:14.5px;color:var(--ink-soft)">每次提问，<b>整摞纸</b>都要重新塞给大模型读一遍</p>
+            </div>
+            <div class="card frag" style="text-align:center;background:var(--paper-2)">
+              <p style="font-size:16.5px">🪑 书桌快满时它会<b>整理归档</b>：把前文压缩成一页摘要，细节就丢了</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 09 现场演示① ============ -->
+      <section class="slide" data-sec="认识智能体">
+        <div class="two" style="grid-template-columns:1fr 1.08fr">
+          <div class="stack">
+            <span class="demo-tag">🎬 现场演示 ①</span>
+            <h2 class="title" style="margin-top:16px">完整看一遍：<br>一句话 → 能跑的程序</h2>
+            <div class="card rise-2" style="border-color:var(--crimson);margin-top:8px">
+              <p style="font-size:17px;color:var(--ink)">"写一个 <code class="inline">cpu_temp.py</code>：每 5 秒读一次 CPU 温度，追加记进 temp.log。先跑 30 秒给我看。"</p>
+            </div>
+            <ul class="clean" style="margin-top:18px;gap:12px">
+              <li class="frag"><span class="mk">👀</span><div><b>看它先干什么</b><span class="sub">先探路：温度文件在哪、Python 在不在</span></div></li>
+              <li class="frag"><span class="mk">🔁</span><div><b>看它出错怎么办</b><span class="sub">读报错 → 改代码 → 再跑，自己转圈</span></div></li>
+              <li class="frag"><span class="mk">🙋</span><div><b>看它何时请示</b><span class="sub">每次要跑命令，都先过你这关</span></div></li>
+            </ul>
+          </div>
+          <div class="chat rise-2">
+            <div class="chat-bar"><span class="cic">🦞</span>OpenClaw @ titan<span class="st">demo · 现场以实际演示为准</span></div>
+            <div class="chat-body">
+              <div class="bub me">写一个 cpu_temp.py：每 5 秒读一次 CPU 温度，追加记进 temp.log…</div>
+              <div class="tooluse frag"><span class="tl hd">⌨️ 跑命令</span><span class="tl">$ cat /sys/class/thermal/thermal_zone0/temp</span><span class="tl dim">47000</span></div>
+              <div class="bub ai frag">找到温度接口了（47.0℃）。我来写脚本。</div>
+              <div class="tooluse frag"><span class="tl hd">✏️ 写文件</span><span class="tl okk">✓ cpu_temp.py（14 行）已写好</span><span class="tl hd">⌨️ 跑命令</span><span class="tl">$ python3 cpu_temp.py --seconds 30</span><span class="tl okk">✓ 结束：temp.log 新增 6 行</span></div>
+              <div class="bub ai frag">完成 ✅ 30 秒记了 6 次，温度稳定在 47℃ 上下。要改成开机自动运行吗？</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 10 认识 OpenClaw ============ -->
+      <section class="slide" data-sec="上手 OpenClaw">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">08</span>&nbsp;我们的工具</span>
+          <h2 class="title">今天的智能体：<span class="mono-accent">OpenClaw</span> 🦞</h2>
+          <p class="lead" style="max-width:74ch">一个"住在你自己机器里"的开源 AI 助理——今天，我们把它装进 Titan 板子。</p>
+        </div>
+        <div class="grid4">
+          <div class="card frag pop"><span class="ic">🆓</span><h3>开源免费</h3><p>代码全公开，全世界的人一起改进它</p></div>
+          <div class="card frag pop"><span class="ic">🏠</span><h3>装在你的机器里</h3><p>常驻的"管家"进程；装进板子后，人人环境一致</p></div>
+          <div class="card frag pop"><span class="ic">💬</span><h3>像聊天一样使唤</h3><p>你的电脑开个浏览器就能聊，也能接上 QQ、微信、飞书</p></div>
+          <div class="card frag pop"><span class="ic">🧰</span><h3>工具齐全</h3><p>终端、文件、上网、定时任务，四样兵器都有</p></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:24px;justify-content:center">
+          <span class="chip mono frag">openclaw.ai</span>
+          <span class="chip mono frag">docs.openclaw.ai</span>
+          <span class="chip frag">同类工具：Claude Code · Codex · opencode——道理全相通</span>
+        </div>
+      </section>
+
+      <!-- ============ 11 三步装好 ============ -->
+      <section class="slide" data-sec="上手 OpenClaw">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">09</span>&nbsp;安装</span>
+            <h2 class="title">三步，把它<span class="hl-bg">请进板子</span></h2>
+            <ul class="clean" style="margin-top:14px;gap:20px">
+              <li><span class="step-n">1</span><div><b>SSH 进板子，装好它</b><span class="sub">昨天的本事！Node 24 + 一条 npm 命令（RISC-V 上实测能跑）</span></div></li>
+              <li><span class="step-n">2</span><div><b>向导里填你的钥匙</b><span class="sub">选 DeepSeek，粘贴你自己的 API key——怎么买？下一页</span></div></li>
+              <li><span class="step-n">3</span><div><b>你的电脑开浏览器</b><span class="sub">打开板子的聊天页就能用；Win / Mac 都一样，什么都不用装</span></div></li>
+            </ul>
+            <div class="okbox frag" style="margin-top:22px">今天先看懂流程，<b>下午实验课发一键脚本，手把手带你装</b>。</div>
+          </div>
+          <div class="term rise-2">
+            <div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t-title">在板子上安装 OpenClaw</span></div>
+            <div class="term-body" style="font-size:15.5px">
+<span class="ln"><span class="u">you</span><span class="p">@laptop:~$</span> <span class="cmd">ssh student@192.168.1.50</span>  <span class="cm"># 昨天的本事！</span></span>
+<div class="frag">
+<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">npm install -g openclaw@latest</span></span>
+<span class="ln ok">✔ OpenClaw 安装完成（板子上实测约 1 分钟）</span>
+<span class="ln cm"># Node 24 环境由下午的一键脚本帮你装好</span>
+</div>
+<div class="frag">
+<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">openclaw onboard --install-daemon</span></span>
+<span class="ln out">? 选择模型服务商 › DeepSeek（粘贴你自己的 API key）</span>
+<span class="ln ok">✔ Gateway 已在板子上运行（端口 18789）</span>
+</div>
+<div class="frag">
+<span class="ln cm"># 回到你的电脑，浏览器打开——</span>
+<span class="ln ok">➜ http://192.168.1.50:18789  开始聊天！</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cursor"></span></span>
+</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 12 买钥匙、配钥匙 ============ -->
+      <section class="slide" data-sec="上手 OpenClaw">
+        <div class="two" style="grid-template-columns:1.05fr 1fr">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">10</span>&nbsp;自己的钥匙</span>
+            <h2 class="title">API key：<br>大模型的<span class="hl-bg">"门卡"</span> 🔑</h2>
+            <ul class="clean" style="margin-top:14px">
+              <li class="frag"><span class="mk">🏢</span><div><b>大模型住在云端机房</b><span class="sub">板子上的 OpenClaw 每"想一步"，都要远程请它帮忙</span></div></li>
+              <li class="frag"><span class="mk">🎫</span><div><b>API key 就是你的门卡</b><span class="sub">出示门卡才给服务；按用量（token ≈ 字数）计费</span></div></li>
+              <li class="frag"><span class="mk">💰</span><div><b>不贵</b><span class="sub">DeepSeek 按量计费很便宜——先充 10~20 元，够这几天放开用</span></div></li>
+            </ul>
+            <div class="warn frag" style="margin-top:16px"><span class="ic">🔒</span><div><b>key = 钱包：</b>创建时只完整显示一次，复制保存好；<b>别发群里、别写进代码</b>。</div></div>
+          </div>
+          <div class="card rise-2" style="padding:22px 26px">
+            <div class="eyebrow" style="margin-bottom:12px">以 DeepSeek 为例 · 4 步办卡</div>
+            <ul class="clean" style="gap:13px">
+              <li><span class="step-n" style="width:38px;height:38px;font-size:17px">1</span><div><b>注册</b><span class="sub">platform.deepseek.com，手机号即可</span></div></li>
+              <li><span class="step-n" style="width:38px;height:38px;font-size:17px">2</span><div><b>充值 10~20 元</b><span class="sub">「充值」页，支付宝 / 微信都行</span></div></li>
+              <li><span class="step-n" style="width:38px;height:38px;font-size:17px">3</span><div><b>创建 API Key，复制保存</b><span class="sub">「API Keys」→ 创建——只显示一次！</span></div></li>
+              <li><span class="step-n" style="width:38px;height:38px;font-size:17px">4</span><div><b>填进 OpenClaw</b><span class="sub">onboard 向导选 DeepSeek → 粘贴 → 完成</span></div></li>
+            </ul>
+            <div class="okbox" style="margin-top:16px;font-size:15px">用别家也一样（Kimi、通义、智谱…）：注册 → 充值 → 拿 key。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 13 第一句话与请示 ============ -->
+      <section class="slide" data-sec="上手 OpenClaw">
+        <div class="two" style="grid-template-columns:1fr 1.05fr">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">11</span>&nbsp;第一句话</span>
+            <h2 class="title">它动手前，<br>会先<span class="hl-bg">"请示"你</span></h2>
+            <ul class="clean" style="margin-top:14px">
+              <li class="frag"><span class="mk">❓</span><div><b>为什么要问？</b><span class="sub">跑命令会真实改动你的电脑——说错话没事，做错事有事</span></div></li>
+              <li class="frag"><span class="mk">🔘</span><div><b>三个按钮</b><span class="sub">允许一次 / 总是允许 / 拒绝——"总是允许"只给你看得懂、信得过的命令</span></div></li>
+              <li class="frag"><span class="mk">⭐</span><div><b>这道关卡就是本质区别</b><span class="sub">聊天机器人只"说"；智能体会"做"，所以要有闸门</span></div></li>
+            </ul>
+          </div>
+          <div class="chat rise-2">
+            <div class="chat-bar"><span class="cic">🦞</span>OpenClaw @ titan<span class="st">你的第一句话</span></div>
+            <div class="chat-body">
+              <div class="bub me">这块板子的硬盘还剩多少空间？</div>
+              <div class="appr frag">
+                <div class="at">🙋 请示：OpenClaw 想执行命令</div>
+                <div class="acmd">df -h /</div>
+                <div class="btns"><span class="abtn yes">✅ 允许一次</span><span class="abtn">总是允许</span><span class="abtn no">⛔ 拒绝</span></div>
+              </div>
+              <div class="tooluse frag"><span class="tl dim">文件系统        容量  已用  可用  已用% 挂载点</span><span class="tl dim">/dev/nvme0n1p2  118G   12G  100G   11%  /</span></div>
+              <div class="bub ai frag">很宽裕：118G 的 NVMe 盘只用了 12G，还剩 100G ✅ 放心折腾。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 14 住在板子里 ============ -->
+      <section class="slide" data-sec="上手 OpenClaw">
+        <div class="two" style="grid-template-columns:1fr 1.05fr">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">12</span>&nbsp;关键一步</span>
+            <h2 class="title">它就住在板子里，<br><span class="hl-bg">直接动手</span></h2>
+            <ul class="clean" style="margin-top:14px">
+              <li class="frag"><span class="mk">⚡</span><div><b>命令直接在板子上执行</b><span class="sub">不用再绕 SSH——装它的时候，你已经把它"送进去"了</span></div></li>
+              <li class="frag"><span class="mk">🖥️</span><div><b>你的电脑只是遥控器</b><span class="sub">浏览器聊天页发号施令，Win / Mac / 平板都一样</span></div></li>
+              <li class="frag"><span class="mk">🎯</span><div><b>从现在起分工明确</b><span class="sub">你说"要什么"，它管"怎么做"</span></div></li>
+            </ul>
+            <div class="okbox frag" style="margin-top:18px">今天最重要的一页：<b>你（浏览器）→ 板子里的智能体 → 板子上的一切</b>，这条链通了。</div>
+          </div>
+          <div class="chat rise-2">
+            <div class="chat-bar"><span class="cic">🦞</span>OpenClaw @ titan<span class="st">浏览器 → 板子</span></div>
+            <div class="chat-body">
+              <div class="bub me">看看主目录里有什么、Python 是什么版本</div>
+              <div class="appr frag">
+                <div class="at">🙋 请示：OpenClaw 想执行命令</div>
+                <div class="acmd">ls ~ &amp;&amp; python3 --version</div>
+                <div class="btns"><span class="abtn yes">✅ 允许一次</span><span class="abtn">总是允许</span><span class="abtn no">⛔ 拒绝</span></div>
+              </div>
+              <div class="tooluse frag"><span class="tl dim">Desktop  Documents  hello.py</span><span class="tl dim">Python 3.11.2</span></div>
+              <div class="bub ai frag">都在 ✅ 主目录 3 项，Python 3.11.2 可以直接用。想干点什么？</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 15 七般武艺总览 ============ -->
+      <section class="slide" data-sec="七般武艺">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">13</span>&nbsp;能派它干什么</span>
+          <h2 class="title">指挥官的<span class="hl-bg">派活清单</span>：七般武艺</h2>
+        </div>
+        <div class="grid4" style="gap:14px">
+          <div class="card frag pop" style="padding:18px 18px"><span class="ic">✨</span><h3 style="font-size:18px">写新功能</h3><p style="font-size:14.5px">从一句话需求到能跑的代码</p></div>
+          <div class="card frag pop" style="padding:18px 18px;border-color:var(--crimson)"><span class="ic">🐞</span><h3 style="font-size:18px">修报错</h3><p style="font-size:14.5px">最高频！报错丢给它就行</p></div>
+          <div class="card frag pop" style="padding:18px 18px"><span class="ic">🔧</span><h3 style="font-size:18px">重构整理</h3><p style="font-size:14.5px">改名字、拆文件、理结构</p></div>
+          <div class="card frag pop" style="padding:18px 18px"><span class="ic">🔍</span><h3 style="font-size:18px">审查挑毛病</h3><p style="font-size:14.5px">让它检查 bug 和安全问题</p></div>
+          <div class="card frag pop" style="padding:18px 18px"><span class="ic">📖</span><h3 style="font-size:18px">读懂陌生代码</h3><p style="font-size:14.5px">拿到新项目先让它讲一遍</p></div>
+          <div class="card frag pop" style="padding:18px 18px;border-color:var(--crimson)"><span class="ic">⌨️</span><h3 style="font-size:18px">当万能终端</h3><p style="font-size:14.5px">说人话，它来选命令</p></div>
+          <div class="card frag pop" style="padding:18px 18px;border-color:var(--crimson)"><span class="ic">🗣️</span><h3 style="font-size:18px">纯嘴编程</h3><p style="font-size:14.5px">vibe coding：一行不写做出应用</p></div>
+          <div class="card frag pop" style="padding:18px 18px;background:var(--paper-2);border-style:dashed"><span class="ic">➕</span><h3 style="font-size:18px">更多…</h3><p style="font-size:14.5px">查资料、写文档、做实验记录</p></div>
+        </div>
+        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:17px;margin-top:18px">标红的三个最适合今天的你——接下来逐个细讲。</p>
+      </section>
+
+      <!-- ============ 16 修报错 ============ -->
+      <section class="slide" data-sec="七般武艺">
+        <div class="two" style="grid-template-columns:1fr 1.05fr">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">14</span>&nbsp;武艺一 · 最高频</span>
+            <h2 class="title">修报错：三重境界</h2>
+            <ul class="clean" style="margin-top:14px">
+              <li class="frag"><span class="mk">🥉</span><div><b>把报错原样贴给它</b><span class="sub">别只说"坏了"——报错原文里全是线索</span></div></li>
+              <li class="frag"><span class="mk">🥈</span><div><b>告诉它怎么复现</b><span class="sub">"跑哪条命令出的错"，它就能自己再现</span></div></li>
+              <li class="frag"><span class="mk">🥇</span><div><b>让它自己跑 → 自己修</b><span class="sub">错→改→再跑全自动，这是它最强的打开方式</span></div></li>
+            </ul>
+            <div class="warn frag" style="margin-top:18px"><span class="ic">💡</span><div>报错看不懂没关系，<b>复制粘贴</b>就是最好的提问。</div></div>
+          </div>
+          <div class="chat rise-2">
+            <div class="chat-bar"><span class="cic">🦞</span>OpenClaw<span class="st">debug loop</span></div>
+            <div class="chat-body">
+              <div class="bub me">跑 python3 cpu_temp.py 报错了：<br><span style="font:600 13px var(--mono)">ModuleNotFoundError: No module named 'psutil'</span></div>
+              <div class="bub ai frag">缺一个库。我来装好它，再跑一遍验证。</div>
+              <div class="tooluse frag"><span class="tl hd">⌨️ 跑命令（已请示）</span><span class="tl">$ pip3 install psutil</span><span class="tl okk">✓ Successfully installed psutil</span><span class="tl">$ python3 cpu_temp.py --seconds 10</span><span class="tl okk">✓ 正常退出，temp.log 新增 2 行</span></div>
+              <div class="bub ai frag">修好了 ✅ 原因：没装 psutil 库。我已装好并重跑验证过。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 17 万能终端 ============ -->
+      <section class="slide" data-sec="七般武艺">
+        <div class="two" style="grid-template-columns:1fr 1.05fr">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">15</span>&nbsp;武艺二</span>
+            <h2 class="title">忘了命令？<br><span class="hl-bg">说人话</span>就行</h2>
+            <p class="lead" style="margin-top:4px">昨天教的"求助三法"，今天补上终极版：描述目的，它来选命令、拼参数。</p>
+            <div class="warn frag" style="margin-top:20px"><span class="ic">⚠️</span><div>命令可以不背，但要<b>看得懂</b>——请示框里出现 <code class="inline">rm</code>，你得认得那是"删除"。看不懂的命令，别点"允许"。</div></div>
+          </div>
+          <div class="chat rise-2">
+            <div class="chat-bar"><span class="cic">🦞</span>OpenClaw<span class="st">natural language shell</span></div>
+            <div class="chat-body">
+              <div class="bub me">/var/log 里，哪些日志超过 7 天没动过了？</div>
+              <div class="tooluse frag"><span class="tl hd">⌨️ 跑命令（已请示）</span><span class="tl">$ find /var/log -name "*.log" -mtime +7</span><span class="tl dim">/var/log/alternatives.log</span><span class="tl dim">/var/log/bootstrap.log</span></div>
+              <div class="bub ai frag">两个：alternatives.log 和 bootstrap.log，都是系统装机日志，不动它们也没关系。</div>
+              <div class="bub me frag">把我 photos 文件夹里的图全部缩小一半</div>
+              <div class="tooluse frag"><span class="tl hd">⌨️ 跑命令（已请示）</span><span class="tl">$ mogrify -resize 50% photos/*.jpg</span><span class="tl okk">✓ 28 张图片已处理</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 18 读代码 & 审代码 ============ -->
+      <section class="slide" data-sec="七般武艺">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">16</span>&nbsp;武艺三 · 学习加速器</span>
+          <h2 class="title">让它<span class="hl-bg">讲代码</span>，再让它<span class="hl-bg">挑毛病</span></h2>
+        </div>
+        <div class="grid2" style="gap:18px">
+          <div class="card frag right" style="padding:20px 24px">
+            <span class="ic" style="font-size:30px;margin-bottom:6px">📖</span>
+            <h3 style="font-size:21px">读懂陌生代码</h3>
+            <p style="font-size:16px;margin-top:6px;line-height:1.55">拿到示例项目一脸懵？直接问：</p>
+            <p style="font-size:16px;margin-top:8px;background:var(--paper-2);border-radius:10px;padding:10px 14px;line-height:1.55">"这个项目是干嘛的？主流程从哪个文件开始？<b>用 3 句话讲给我听。</b>"</p>
+            <p style="font-size:14.5px;color:var(--ink-soft);margin-top:8px">上手新板子、新库时，这是最快的入门方式。</p>
+          </div>
+          <div class="card frag right" style="padding:20px 24px">
+            <span class="ic" style="font-size:30px;margin-bottom:6px">🔍</span>
+            <h3 style="font-size:21px">审查挑毛病</h3>
+            <p style="font-size:16px;margin-top:6px;line-height:1.55">代码写完了（不管谁写的），让它当审稿人：</p>
+            <p style="font-size:16px;margin-top:8px;background:var(--paper-2);border-radius:10px;padding:10px 14px;line-height:1.55">"检查这段代码有没有 <b>bug 和安全问题</b>，用人话解释。"</p>
+            <p style="font-size:14.5px;color:var(--ink-soft);margin-top:8px">还可以开个<b>新会话</b>，让"陌生的它"冷眼再审一遍。</p>
+          </div>
+        </div>
+        <div class="okbox frag" style="margin-top:14px;text-align:center;font-size:17px">两招连起来 = 最快的学习法：<b>先让它讲，再让它挑，最后你自己动手改一遍。</b></div>
+      </section>
+
+      <!-- ============ 19 现场演示②：vibe coding ============ -->
+      <section class="slide" data-sec="七般武艺">
+        <div class="two" style="grid-template-columns:1.15fr 1fr">
+          <div class="stack">
+            <span class="demo-tag">🎬 现场演示 ②</span>
+            <h2 class="title" style="margin-top:16px">纯嘴编程：<br><span class="hl-bg">一行代码不写</span>，做出仪表盘</h2>
+            <div class="card rise-2" style="border-color:var(--crimson);margin-top:6px">
+              <p style="font-size:17px">"在板子上做一个网页：大字显示 CPU 当前温度，每 2 秒自动刷新，让我用手机能访问。"</p>
+            </div>
+            <ul class="clean" style="margin-top:14px;gap:10px">
+              <li class="frag"><span class="mk">🧩</span><div><b>看它怎么拆任务</b><span class="sub">选方案 → 写服务 → 起端口 → 自己验证</span></div></li>
+              <li class="frag"><span class="mk">🩹</span><div><b>看它中途怎么自救</b><span class="sub">端口被占？换一个再来</span></div></li>
+              <li class="frag"><span class="mk">✅</span><div><b>看它怎么收工</b><span class="sub">自己 curl 一遍确认，再把网址交给你</span></div></li>
+            </ul>
+            <div class="okbox frag" style="margin-top:12px;font-size:17px">"做出来了" ≠ "你会了"——课后让它<b>逐行讲解</b>这份代码，才算真赚到。</div>
+          </div>
+          <div class="stack" style="gap:16px;align-items:center">
+            <div class="phone rise-2">
+              <div class="purl">http://192.168.1.50:8000</div>
+              <div class="ptemp">47.2℃</div>
+              <div class="plab">Titan CPU 温度 · 每 2 秒刷新</div>
+            </div>
+            <p style="font:600 13px var(--mono);color:var(--ink-faint)">现场以实际演示为准</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 20 4D 总览 ============ -->
+      <section class="slide" data-sec="用得好">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">17</span>&nbsp;方法论</span>
+          <h2 class="title">用得好的功夫：<span class="hl-bg">四门功课</span></h2>
+          <p class="lead" style="max-width:74ch">工具人人会装，用得好不好差别巨大。这套框架来自 Anthropic 的《AI Fluency》公开课。</p>
+        </div>
+        <div class="grid4">
+          <div class="card frag pop"><span class="ic">🎯</span><h3>委派 <span style="font:700 13px var(--mono);color:var(--ink-faint)">Delegation</span></h3><p>决定哪些事交给它、哪些事你自己来</p></div>
+          <div class="card frag pop"><span class="ic">🗣️</span><h3>描述 <span style="font:700 13px var(--mono);color:var(--ink-faint)">Description</span></h3><p>把任务讲清楚，让它一次听懂</p></div>
+          <div class="card frag pop"><span class="ic">🔍</span><h3>辨别 <span style="font:700 13px var(--mono);color:var(--ink-faint)">Discernment</span></h3><p>判断它交的活到底行不行</p></div>
+          <div class="card frag pop"><span class="ic">🛡️</span><h3>尽责 <span style="font:700 13px var(--mono);color:var(--ink-faint)">Diligence</span></h3><p>活是它干的，责任是你的</p></div>
+        </div>
+        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:17px;margin-top:22px">接下来几页，每门功课给你一套<b>能直接上手的招式</b>。</p>
+      </section>
+
+      <!-- ============ 21 描述 ============ -->
+      <section class="slide" data-sec="用得好">
+        <div class="stack" style="margin-bottom:18px">
+          <span class="eyebrow"><span class="n">18</span>&nbsp;功课一 · 描述</span>
+          <h2 class="title">写一份<span class="hl-bg">好的任务说明书</span></h2>
+        </div>
+        <div class="grid2" style="gap:18px">
+          <div class="card frag" style="background:#FBF1F1;border-color:#D8B9B9;padding:20px 24px">
+            <h3 style="color:var(--crimson-deep)">❌ "帮我写个温度程序"</h3>
+            <p style="margin-top:8px;font-size:16px;line-height:1.6">它只能瞎猜：什么温度？多久测一次？存哪里？<br>猜错 → 返工 → 你还嫌它笨。</p>
+          </div>
+          <div class="card frag" style="background:var(--ok-soft);border-color:#A9D8C9;padding:20px 24px">
+            <h3 style="color:var(--ok)">✅ 目标 + 材料 + 验收标准</h3>
+            <p style="margin-top:8px;font-size:15.5px;line-height:1.65">"写 Python 脚本 cpu_temp.py：<br>① 每 5 秒读一次 CPU 温度<br>② 追加写入 temp.log，每行"时间 温度"<br>③ <b>验收：跑 1 分钟，文件里正好 12 行</b>"</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px;justify-content:center;flex-wrap:wrap">
+          <span class="chip frag"><span class="d"></span>目标：做什么</span>
+          <span class="chip frag"><span class="d"></span>材料：报错原文 / 相关文件 / 背景</span>
+          <span class="chip frag"><span class="d"></span>验收：怎么算做好了</span>
+        </div>
+        <div class="okbox frag" style="margin-top:16px;text-align:center">拿不准就加一句：<b>"动手前，先把你的计划列给我看。"</b>——纠计划一句话，纠代码半小时。</div>
+      </section>
+
+      <!-- ============ 22 委派 + 反馈闭环 ============ -->
+      <section class="slide" data-sec="用得好">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">19</span>&nbsp;功课二 · 委派</span>
+            <h2 class="title">哪些给它，<br>哪些<span class="hl">你把关</span></h2>
+            <ul class="clean" style="margin-top:14px">
+              <li class="frag"><span class="mk">🤖</span><div><b>放心交给它</b><span class="sub">繁琐重复、样板代码、查资料、第一版草稿</span></div></li>
+              <li class="frag"><span class="mk">🧑‍🎓</span><div><b>你牢牢握住</b><span class="sub">要做什么（需求）、关键选择、最终验收</span></div></li>
+              <li class="frag"><span class="mk">🎬</span><div><b>比喻</b><span class="sub">你是导演，它是剧组——戏怎么拍它来，拍什么你定</span></div></li>
+            </ul>
+          </div>
+          <div class="card rise-2" style="padding:24px 26px">
+            <h3 style="font-size:21px">🔁 派活的最高技巧：给它"反馈闭环"</h3>
+            <p style="font-size:16px;margin-top:8px;line-height:1.6">好任务自带<b>它能自己跑的检查</b>——它错了能自己发现、自己改，不用你盯。</p>
+            <div class="term" style="margin-top:14px;box-shadow:none">
+              <div class="term-body" style="padding:14px 18px;font-size:14.5px;line-height:1.7">
+<span class="ln cm"># 验收命令在手，它就能自己转圈：</span>
+<span class="ln"><span class="cmd">python3 cpu_temp.py --seconds 60</span></span>
+<div class="frag">
+<span class="ln"><span class="em">✗ temp.log 只有 3 行（应为 12）</span> <span class="cm">→ 它自己改</span></span>
+</div>
+<div class="frag">
+<span class="ln"><span class="cmd">python3 cpu_temp.py --seconds 60</span></span>
+<span class="ln ok">✓ 12 行，通过</span>
+</div>
+              </div>
+            </div>
+            <p class="frag" style="font-size:15px;color:var(--ink-soft);margin-top:12px">跑偏了？随时<b>打断</b>，补一句话把它拉回来——别等它跑完。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 23 辨别 ============ -->
+      <section class="slide" data-sec="用得好">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">20</span>&nbsp;功课三 · 辨别</span>
+          <h2 class="title">它交活了，你怎么<span class="hl-bg">验收</span>？</h2>
+        </div>
+        <div class="grid3">
+          <div class="card frag pop" style="padding:24px 24px"><span class="ic">🏃</span><h3>1. 跑一遍</h3><p style="margin-top:6px;line-height:1.55">最硬的道理：能不能跑？结果对不对？<b>换个输入</b>还对吗？</p></div>
+          <div class="card frag pop" style="padding:24px 24px"><span class="ic">🗣️</span><h3>2. 让它讲给你听</h3><p style="margin-top:6px;line-height:1.55">"逐行解释一下。"讲不圆 = 有鬼；讲圆了，你也学会了。</p></div>
+          <div class="card frag pop" style="padding:24px 24px"><span class="ic">👀</span><h3>3. 换双眼睛</h3><p style="margin-top:6px;line-height:1.55">开个<b>新会话</b>（甚至换个模型）冷眼复审："这段代码有什么问题？"</p></div>
+        </div>
+        <div class="warn frag" style="margin-top:24px"><span class="ic">⚠️</span><div>它说"我已经修好了" <b>≠</b> 真的修好了。以<b>运行结果</b>为准，不以它的汇报为准。</div></div>
+      </section>
+
+      <!-- ============ 24 记性与技能 ============ -->
+      <section class="slide" data-sec="用得好">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">21</span>&nbsp;收拾书桌</span>
+          <h2 class="title">给它配上<span class="hl-bg">备忘录</span>和<span class="hl-bg">秘籍</span></h2>
+        </div>
+        <div class="grid3">
+          <div class="card frag pop" style="padding:22px 22px">
+            <span class="ic">🧹</span><h3>一事一会话</h3>
+            <p style="margin-top:6px;line-height:1.55">新任务开新会话，别一锅粥。聊太长它会自动<b>压缩</b>前文（细节会丢）。</p>
+          </div>
+          <div class="card frag pop" style="padding:22px 22px;border-color:var(--crimson)">
+            <span class="ic">📌</span><h3>AGENTS.md 备忘录</h3>
+            <p style="margin-top:6px;line-height:1.55">写进去的规矩<b>每次开工自动带上</b>："回答用中文 / 代码都放 ~/projects / 改完自己跑一遍验证"。</p>
+          </div>
+          <div class="card frag pop" style="padding:22px 22px">
+            <span class="ic">🧰</span><h3>技能包 skills</h3>
+            <p style="margin-top:6px;line-height:1.55">打包好的"武功秘籍"，用时才翻开。<code class="inline">openclaw skills install …</code> 一键装别人写好的。</p>
+          </div>
+        </div>
+        <div class="okbox frag" style="margin-top:22px;text-align:center">还记得"书桌"吗？这三招就是：<b>桌面常清空、规矩贴墙上、秘籍放抽屉。</b></div>
+      </section>
+
+      <!-- ============ 25 进阶一瞥 ============ -->
+      <section class="slide" data-sec="用得好">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">22</span>&nbsp;学有余力</span>
+          <h2 class="title">三扇<span class="hl-bg">进阶的门</span>，先认个脸</h2>
+        </div>
+        <div class="grid3">
+          <div class="card frag pop" style="padding:24px"><span class="ic">🤝</span><h3>并行开工</h3><p style="margin-top:6px;line-height:1.55">同时开几个智能体各干各的；或同一任务跑两份，挑好的要。</p></div>
+          <div class="card frag pop" style="padding:24px"><span class="ic">🔌</span><h3>MCP 万能插座</h3><p style="margin-top:6px;line-height:1.55">一个开放协议，把日历、文档、浏览器……都"插"给它当工具用。</p></div>
+          <div class="card frag pop" style="padding:24px"><span class="ic">⏰</span><h3>全天候管家</h3><p style="margin-top:6px;line-height:1.55">OpenClaw 支持定时任务：每天 8 点检查板子温度日志，异常了主动喊你。</p></div>
+        </div>
+        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:17px;margin-top:22px">今天不展开——知道有这几扇门，以后自己推开。</p>
+      </section>
+
+      <!-- ============ 26 坑一：一本正经地胡说 ============ -->
+      <section class="slide" data-sec="避坑">
+        <div class="two" style="grid-template-columns:1fr 1.02fr">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">23</span>&nbsp;坑一</span>
+            <h2 class="title">它会<span class="hl">一本正经</span><br>地胡说</h2>
+            <p class="lead" style="margin-top:4px">它本质是"猜下一个字"——猜得<b>像</b>，不等于<b>对</b>。这叫"幻觉"。</p>
+            <ul class="clean" style="margin-top:16px">
+              <li class="frag"><span class="mk">👻</span><div><b>编造不存在的东西</b><span class="sub">没有的库、没有的命令、没有的参数</span></div></li>
+              <li class="frag"><span class="mk">🔀</span><div><b>张冠李戴</b><span class="sub">把你电脑的路径当成板子的路径</span></div></li>
+              <li class="frag"><span class="mk">🎭</span><div><b>嘴上"修好了"，其实没跑过</b><span class="sub">汇报得自信满满，一跑就穿帮</span></div></li>
+            </ul>
+          </div>
+          <div class="stack" style="gap:14px">
+            <div class="chat rise-2">
+              <div class="chat-bar"><span class="cic">🦞</span>OpenClaw<span class="st">翻车现场</span></div>
+              <div class="chat-body">
+                <div class="bub ai">搞定！我用 <span style="font:600 13.5px var(--mono)">py-cputemp</span> 库重写了脚本，更专业 ✨</div>
+                <div class="bub me frag">？pip 说这个库根本不存在……</div>
+                <div class="bub ai frag">抱歉，你说得对——那个库是我记错了。改用 /sys 温度接口，这次我<b>先跑通再汇报</b>。</div>
+              </div>
+            </div>
+            <div class="warn frag"><span class="ic">📏</span><div><b>规矩：AI 写的 ≠ 对的。</b>重要的结果，必须用"辨别三招"亲自验收。</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 27 坑二：兔子洞 ============ -->
+      <section class="slide" data-sec="避坑">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">24</span>&nbsp;坑二</span>
+            <h2 class="title"><span class="hl-bg">越修越坏</span>的兔子洞</h2>
+            <p class="lead" style="margin-top:2px">症状：同一个错试到第 5 次、每次"就差一点"、开始自我辩解。像实习生一条道走到黑——好老板要及时喊停。</p>
+            <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px">
+              <span class="chip frag" style="background:#FBF1F1;border-color:#D8B9B9">🌀 绕圈子</span>
+              <span class="chip frag" style="background:#FBF1F1;border-color:#D8B9B9">🩹 补丁摞补丁</span>
+              <span class="chip frag" style="background:#FBF1F1;border-color:#D8B9B9">🗣️ 开始嘴硬</span>
+            </div>
+          </div>
+          <div class="stack" style="gap:0">
+            <ul class="clean" style="gap:10px">
+              <li class="frag right" style="font-size:19px"><span class="step-n" style="width:38px;height:38px;font-size:18px">1</span><div><b>喊停</b><span class="sub" style="font-size:15px">打断它——别看着它把代码越改越花</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="step-n" style="width:38px;height:38px;font-size:18px">2</span><div><b>回退</b><span class="sub" style="font-size:15px">回到上一个能跑的版本（备份 / git）</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="step-n" style="width:38px;height:38px;font-size:18px">3</span><div><b>换个开局</b><span class="sub" style="font-size:15px">开新会话，换个说法从头描述问题</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="step-n" style="width:38px;height:38px;font-size:18px">4</span><div><b>自己看两眼</b><span class="sub" style="font-size:15px">往往一分钟就看出它钻哪儿去了</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 28 坑三：拐杖 ============ -->
+      <section class="slide" data-sec="避坑">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">25</span>&nbsp;坑三 · 也是功课四"尽责"</span>
+          <h2 class="title">别把它当<span class="hl">拐杖</span></h2>
+        </div>
+        <div class="grid3">
+          <div class="card frag pop" style="padding:24px"><span class="ic">🙈</span><h3>看不懂的，别交差</h3><p style="margin-top:6px;line-height:1.55">交出去的每一行代码，你都应该能讲明白——讲不明白，就让它给你讲到明白。</p></div>
+          <div class="card frag pop" style="padding:24px"><span class="ic">📢</span><h3>它是放大器</h3><p style="margin-top:6px;line-height:1.55">你越懂，它越强；你全不懂，它带你跑偏你都发现不了。</p></div>
+          <div class="card frag pop" style="padding:24px"><span class="ic">🧠</span><h3>计算思维仍是你的</h3><p style="margin-top:6px;line-height:1.55">拆问题、想边界、设计验收——这是指挥官的本事，AI 替代不了。</p></div>
+        </div>
+        <div class="warn frag" style="margin-top:22px"><span class="ic">🔒</span><div><b>安全底线：</b>API key、密码，永远别贴进对话里；只让它碰<b>你自己的</b>电脑和板子。</div></div>
+      </section>
+
+      <!-- ============ 29 回顾 + 下午预告 ============ -->
+      <section class="slide" data-sec="收尾">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">26</span>&nbsp;你已经会了</span>
+            <h2 class="title">回顾：<br>今天装进兜里的</h2>
+            <ul class="clean" style="margin-top:10px;gap:9px">
+              <li class="frag right" style="font-size:19px"><span class="mk">🤖</span><div><b>智能体 = 大模型 + 工具 + 想做看循环</b><span class="sub" style="font-size:15px">书桌（上下文）有限，要帮它收拾</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="mk">🦞</span><div><b>上手 OpenClaw</b><span class="sub" style="font-size:15px">装进板子 · 自己的钥匙 · 请示审批</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="mk">🛠️</span><div><b>七般武艺</b><span class="sub" style="font-size:15px">修报错 · 万能终端 · 讲代码 · 纯嘴编程…</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="mk">🎓</span><div><b>四门功课</b><span class="sub" style="font-size:15px">委派 · 描述 · 辨别 · 尽责</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="mk">⚠️</span><div><b>三个坑</b><span class="sub" style="font-size:15px">胡说 · 兔子洞 · 拐杖</span></div></li>
+            </ul>
+          </div>
+          <div class="card frag right" style="background:var(--crimson);border-color:var(--crimson-deep);color:#fff;padding:26px 28px">
+            <span class="ic" style="font-size:34px">⌨️</span>
+            <h3 style="color:#fff;font-size:23px;margin-bottom:10px">今天下午 · 上机实验</h3>
+            <ul class="clean" style="gap:11px">
+              <li style="color:#fff;font-size:17px"><span style="color:#ffd7dd">▸</span> 注册 DeepSeek，办好<b>你自己的</b> API key</li>
+              <li style="color:#fff;font-size:17px"><span style="color:#ffd7dd">▸</span> SSH 进<b>你的</b> Titan，一键脚本装好 OpenClaw</li>
+              <li style="color:#fff;font-size:17px"><span style="color:#ffd7dd">▸</span> 浏览器连上板子，指挥它做出"温度仪表盘"</li>
+            </ul>
+            <p style="color:#ffd7dd;margin-top:14px;font-size:15px">上午我演示的，下午你来当指挥官——你的电脑有浏览器就行。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 30 谢谢 + 小抄 ============ -->
+      <section class="slide" data-sec="收尾">
+        <div class="two" style="align-items:center">
+          <div class="stack">
+            <div class="medallion rise" style="width:84px;height:84px;margin-bottom:16px"><img src="sjtu.png" alt="SJTU" style="width:58px;height:58px"></div>
+            <h2 class="title">谢谢！<br>去指挥你的 AI 吧 🚀</h2>
+            <p class="lead" style="margin-top:6px">课后想深入，跟着这四个资源走：</p>
+            <div class="stack" style="gap:9px;margin-top:14px">
+              <div class="card frag right" style="display:flex;align-items:center;gap:13px;padding:10px 16px"><span style="font-size:22px">📚</span><div style="font-size:15.5px"><b>MIT Missing Semester 2026 · Agentic Coding</b><br><span class="link" style="font-size:16px">missing.csail.mit.edu/2026</span></div></div>
+              <div class="card frag right" style="display:flex;align-items:center;gap:13px;padding:10px 16px"><span style="font-size:22px">🎓</span><div style="font-size:15.5px"><b>Anthropic《AI Fluency》· 4D 框架公开课</b><br><span class="link" style="font-size:16px">anthropic.skilljar.com</span></div></div>
+              <div class="card frag right" style="display:flex;align-items:center;gap:13px;padding:10px 16px"><span style="font-size:22px">🦞</span><div style="font-size:15.5px"><b>OpenClaw 官方文档</b><br><span class="link" style="font-size:16px">docs.openclaw.ai</span></div></div>
+              <div class="card frag right" style="display:flex;align-items:center;gap:13px;padding:10px 16px"><span style="font-size:22px">🔑</span><div style="font-size:15.5px"><b>DeepSeek 开放平台（办你的 API key）</b><br><span class="link" style="font-size:16px">platform.deepseek.com</span></div></div>
+            </div>
+          </div>
+          <div class="card frag right" style="padding:18px 22px">
+            <div class="eyebrow" style="margin-bottom:10px">指挥官小抄</div>
+            <div class="cheat" style="font-size:15px">
+              <div class="row" style="padding:5px 0"><code>派活</code><span>目标 + 材料 + 验收标准</span></div>
+              <div class="row" style="padding:5px 0"><code>修错</code><span>报错原文，原样贴给它</span></div>
+              <div class="row" style="padding:5px 0"><code>闭环</code><span>给它一条能自己跑的验收命令</span></div>
+              <div class="row" style="padding:5px 0"><code>会话</code><span>新任务 → 新会话</span></div>
+              <div class="row" style="padding:5px 0"><code>规矩</code><span>常用要求写进 AGENTS.md</span></div>
+              <div class="row" style="padding:5px 0"><code>验收</code><span>跑一遍 · 让它讲 · 换眼睛</span></div>
+              <div class="row" style="padding:5px 0"><code>刹车</code><span>绕圈就喊停，回退重来</span></div>
+              <div class="row" style="background:var(--crimson-soft);border-radius:8px;padding:9px 12px;border:none;margin-top:4px"><code style="color:var(--crimson-deep)">心法</code><span style="color:var(--crimson-deep);font-weight:700">你说目标，它来动手 ★</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /#deck -->
+
+    <!-- ===== 底栏 ===== -->
+    <div class="chrome chrome-bot">
+      <div class="counter">第 <b id="cur">01</b> / <span id="total">30</span> 页</div>
+      <div class="hint"><span class="kbd">→</span><span class="kbd">空格</span> 下一步 · <span class="kbd">←</span> 返回 · <span class="kbd">F</span> 全屏</div>
+    </div>
+    <div id="progress"></div>
+    <div class="nav" id="prev" title="上一页">‹</div>
+    <div class="nav" id="next" title="下一页">›</div>
+
+  </div><!-- /#stage -->
+</div><!-- /#app -->
+
+<!-- =========================================================================
+     翻页引擎：与 template.html 一致，无需修改。
+     ========================================================================= -->
+<script>
+(function(){
+  "use strict";
+  var stage=document.getElementById('stage'),deck=document.getElementById('deck');
+  var slides=[].slice.call(deck.querySelectorAll('.slide'));
+  var secTag=document.getElementById('secTag'),curEl=document.getElementById('cur');
+  var totalEl=document.getElementById('total'),progress=document.getElementById('progress');
+  var cur=0,frag=0;
+  totalEl.textContent=pad(slides.length);
+  function pad(n){return (n<10?'0':'')+n;}
+  function fragsOf(i){return [].slice.call(slides[i].querySelectorAll('.frag'));}
+  function render(){
+    for(var i=0;i<slides.length;i++){slides[i].classList.toggle('active',i===cur);slides[i].classList.toggle('past',i<cur);}
+    var fr=fragsOf(cur);for(var j=0;j<fr.length;j++){fr[j].classList.toggle('revealed',j<frag);}
+    curEl.textContent=pad(cur+1);secTag.textContent=slides[cur].getAttribute('data-sec')||'';
+    progress.style.width=((cur+1)/slides.length*100)+'%';
+  }
+  function next(){var fr=fragsOf(cur);if(frag<fr.length){frag++;render();return;}if(cur<slides.length-1){cur++;frag=0;render();}}
+  function prev(){if(frag>0){frag--;render();return;}if(cur>0){cur--;frag=fragsOf(cur).length;render();}}
+  function goTo(i){cur=Math.max(0,Math.min(slides.length-1,i));frag=0;render();}
+  document.addEventListener('keydown',function(e){
+    switch(e.key){
+      case 'ArrowRight':case ' ':case 'PageDown':case 'Enter':e.preventDefault();next();break;
+      case 'ArrowLeft':case 'PageUp':case 'Backspace':e.preventDefault();prev();break;
+      case 'Home':e.preventDefault();goTo(0);break;
+      case 'End':e.preventDefault();goTo(slides.length-1);break;
+      case 'f':case 'F':if(document.fullscreenElement){document.exitFullscreen();}else if(document.documentElement.requestFullscreen){document.documentElement.requestFullscreen();}break;
+    }
+  });
+  document.getElementById('next').addEventListener('click',function(e){e.stopPropagation();next();});
+  document.getElementById('prev').addEventListener('click',function(e){e.stopPropagation();prev();});
+  document.getElementById('app').addEventListener('click',function(e){if(e.target.closest('a,button,.nav'))return;next();});
+  var tx=0;
+  document.addEventListener('touchstart',function(e){tx=e.changedTouches[0].clientX;},{passive:true});
+  document.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?next():prev();}},{passive:true});
+  function fit(){var s=Math.min((window.innerWidth-24)/1280,(window.innerHeight-24)/720);stage.style.transform='translate(-50%,-50%) scale('+s+')';}
+  window.addEventListener('resize',fit);fit();
+  render();
+})();
+</script>
+</body>
+</html>
