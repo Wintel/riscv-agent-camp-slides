@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 智能体具体应用 · 学森暑期营 · 智能体介绍 III</title>
+<!-- =========================================================================
+     SJTU 学森暑期营 · 智能体介绍 III：AI 智能体具体应用
+     承接上一讲“使用入门”，本讲聚焦：真实任务、设计方法、案例拆解、动手体验。
+     继续沿用 template.html 与 agent-intro-slides.html 的设计系统和翻页引擎。
+     放映：浏览器打开本文件（sjtu.png 同目录），F 全屏，→/空格 翻页。
+     ========================================================================= -->
+<style>
+:root{
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2; --crimson-bright:#E85D74;
+  --paper:#F4F2EE; --paper-2:#ECE8E1; --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88;
+  --line:#DCD4C8; --letterbox:#16130F; --ok:#1E8A6E; --ok-soft:#DCEFE8;
+  --term-bg:#14171E; --term-bar:#1B1F28; --term-line:#2A2F3A; --term-fg:#E7EAF0;
+  --term-green:#57D07E; --term-cyan:#54C4D4; --term-blue:#8AA6D6; --term-dim:#8891A0;
+  --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",system-ui,sans-serif;
+  --mono:"Cascadia Code","JetBrains Mono","Consolas","Menlo",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--letterbox);font-family:var(--sans);color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+/* ---------- 舞台：1280×720 逻辑画布，等比缩放铺满屏幕 ---------- */
+#app{position:fixed;inset:0;overflow:hidden;background:radial-gradient(1200px 700px at 50% -10%,#241d18,var(--letterbox) 60%)}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center;
+  background:var(--paper);border-radius:10px;overflow:hidden;
+  box-shadow:0 40px 120px -30px rgba(0,0,0,.7),0 0 0 1px rgba(0,0,0,.25)}
+#stage::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(173,23,48,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(173,23,48,.045) 1px,transparent 1px);
+  background-size:40px 40px}
+
+/* ---------- 顶栏 / 底栏 ---------- */
+.chrome{position:absolute;left:0;right:0;z-index:20;display:flex;align-items:center;padding:0 56px;pointer-events:none}
+.chrome-top{top:0;height:74px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{width:42px;height:42px;display:block}
+.brand .b-1{font-weight:700;font-size:16px}
+.brand .b-2{font:600 11px var(--mono);letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase}
+.sec-tag{font:600 12px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);display:flex;align-items:center;gap:9px}
+.sec-tag::before{content:"";width:20px;height:2px;background:var(--crimson)}
+.chrome-bot{bottom:0;height:56px;justify-content:space-between}
+.counter{font:600 13px var(--mono);color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.counter b{color:var(--crimson)}
+.hint{font-size:12px;color:var(--ink-faint);display:flex;gap:8px;align-items:center}
+.kbd{font:600 11px var(--mono);background:#fff;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:2px 7px;color:var(--ink-soft)}
+#progress{position:absolute;left:0;bottom:0;height:4px;width:0;background:var(--crimson);z-index:25;transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+/* ---------- 幻灯片切换 ---------- */
+#deck{position:absolute;inset:0;z-index:5}
+.slide{position:absolute;inset:74px 56px 56px;opacity:0;pointer-events:none;
+  transform:translateX(70px) scale(.985);transition:opacity .5s ease,transform .55s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;justify-content:center}
+.slide.active{opacity:1;pointer-events:auto;transform:none}
+.slide.past{opacity:0;transform:translateX(-70px) scale(.985)}
+
+/* ---------- 布局 & 排版组件 ---------- */
+.two{display:grid;grid-template-columns:1.02fr 1fr;gap:52px;align-items:center;width:100%}
+.two.v{align-items:center}
+.stack{display:flex;flex-direction:column}
+.eyebrow{font:600 14px var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--crimson);display:inline-flex;align-items:center;gap:11px;margin-bottom:18px}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--crimson)}
+.eyebrow .n{color:var(--ink-faint)}
+h1.title{font-size:74px;line-height:1.04;font-weight:800;margin:0;text-wrap:balance}
+h2.title{font-size:46px;line-height:1.12;font-weight:800;margin:0 0 16px;text-wrap:balance}
+.mono-accent{font-family:var(--mono);color:var(--crimson);font-weight:700}
+.lead{font-size:23px;line-height:1.55;color:var(--ink-soft);margin:0;max-width:36ch}
+.hl{color:var(--crimson);font-weight:700}
+.hl-bg{background:linear-gradient(transparent 58%,var(--crimson-soft) 58%);padding:0 2px}
+code.inline{font-family:var(--mono);background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:.9em;color:var(--crimson-deep);font-weight:600}
+.key{font:600 15px var(--mono);background:#fff;border:1px solid var(--line);border-bottom-width:3px;border-radius:8px;padding:3px 11px}
+.soft{color:var(--ink-soft)}
+.mini{font-size:15px;color:var(--ink-soft);line-height:1.5}
+
+ul.clean{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px}
+ul.clean li{display:flex;gap:14px;align-items:flex-start;font-size:21px;line-height:1.45}
+ul.clean li .mk{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--crimson-soft);color:var(--crimson);font:700 15px var(--mono);margin-top:2px}
+ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-height:1.4;margin-top:3px;font-weight:400}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+.card h3{margin:0 0 6px;font-size:20px}
+.card p{margin:0;font-size:16px;color:var(--ink-soft);line-height:1.45}
+.card .ic{font-size:26px;margin-bottom:10px;display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.accepts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.accept{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 18px}
+.accept b{display:block;font-size:18px;margin-bottom:7px}
+.accept span{display:block;color:var(--ink-soft);font-size:15px;line-height:1.5}
+.chip{display:inline-flex;align-items:center;gap:8px;background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-size:16px;font-weight:600}
+.chip .d{width:9px;height:9px;border-radius:50%;background:var(--crimson)}
+.chip.mono{font-family:var(--mono);font-size:15px}
+.okbox{background:var(--ok-soft);border:1px solid #A9D8C9;border-radius:12px;padding:14px 18px;font-size:18px}
+.warn{background:#fff;border:1px solid var(--crimson);border-left:5px solid var(--crimson);border-radius:12px;
+  padding:14px 18px;display:flex;gap:14px;align-items:flex-start;font-size:17px;line-height:1.5}
+.warn .ic{font-size:24px;flex:none}
+.warn b{color:var(--crimson-deep)}
+.link{font-family:var(--mono);font-weight:700;color:var(--crimson);font-size:18px}
+.cmd-pill{font-family:var(--mono);font-weight:700;background:var(--ink);color:#fff;border-radius:8px;padding:3px 10px;font-size:.92em;white-space:nowrap}
+.step-n{flex:none;width:46px;height:46px;border-radius:12px;background:var(--crimson);color:#fff;
+  font:800 22px var(--mono);display:grid;place-items:center;box-shadow:0 8px 20px -8px var(--crimson)}
+.looprow{display:flex;gap:12px;flex-wrap:wrap}
+.loopstep{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;text-align:center;min-width:158px}
+.loopstep .li{font-size:30px;line-height:1}
+.loopstep b{display:block;margin-top:8px;font-size:19px}
+.loopstep span{color:var(--ink-soft);font-size:14px;display:block;margin-top:2px}
+.loopstep.hot{border-color:var(--crimson);background:var(--crimson-soft)}
+.promptbox{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;
+  font:600 16px/1.7 var(--mono);white-space:pre-wrap;color:var(--ink)}
+
+/* ---------- 命令速查小抄 ---------- */
+.cheat{display:grid;grid-template-columns:1fr;gap:8px;font-size:16px}
+.cheat .row{display:flex;justify-content:space-between;gap:16px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.cheat .row code{font-family:var(--mono);font-weight:700;color:var(--crimson-deep)}
+.cheat .row span{color:var(--ink-soft)}
+
+/* ---------- 终端窗口 ---------- */
+.term{background:var(--term-bg);border-radius:14px;overflow:hidden;font-family:var(--mono);border:1px solid var(--term-line);box-shadow:0 30px 70px -28px rgba(0,0,0,.55)}
+.term-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--term-bar);border-bottom:1px solid var(--term-line)}
+.term-bar .dot{width:12px;height:12px;border-radius:50%}
+.term-bar .t-title{font:600 12px var(--mono);color:var(--term-dim);margin-left:6px;letter-spacing:.06em}
+.term-body{padding:18px 22px;font-size:17px;line-height:1.75;color:var(--term-fg)}
+.term .ln{display:block;white-space:pre-wrap;word-break:break-word}
+.term .u{color:var(--term-green)} .term .p{color:var(--term-blue)} .term .cmd{color:#fff;font-weight:600} .term .out{color:var(--term-dim)}
+.term .em{color:var(--crimson-bright);font-weight:700} .term .ok{color:var(--term-green)} .term .cm{color:var(--term-dim);font-style:italic}
+.cursor{display:inline-block;width:11px;height:1.05em;background:var(--term-green);vertical-align:-.18em;margin-left:2px;animation:blink 1.05s steps(1) infinite}
+
+/* ---------- 聊天窗口 mockup ---------- */
+.chat{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 30px 70px -28px rgba(0,0,0,.3)}
+.chat-bar{display:flex;align-items:center;gap:10px;padding:11px 16px;background:var(--paper-2);border-bottom:1px solid var(--line);font-weight:700;font-size:14px}
+.chat-bar .cic{width:26px;height:26px;border-radius:8px;background:var(--crimson);color:#fff;display:grid;place-items:center;font-size:15px}
+.chat-bar .st{margin-left:auto;font:600 11px var(--mono);color:var(--ink-faint);letter-spacing:.06em}
+.chat-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;font-size:16px;line-height:1.5}
+.bub{max-width:88%;padding:9px 14px;border-radius:13px}
+.bub.me{align-self:flex-end;background:var(--crimson);color:#fff;border-bottom-right-radius:4px}
+.bub.ai{align-self:flex-start;background:var(--paper);border:1px solid var(--line);border-bottom-left-radius:4px}
+.tooluse{align-self:flex-start;width:92%;background:var(--term-bg);color:var(--term-fg);border-radius:10px;padding:8px 13px;font:13.5px/1.65 var(--mono)}
+.tooluse .tl{display:block;white-space:pre-wrap;word-break:break-word}
+.tooluse .tl.hd{color:var(--term-cyan);font-weight:700}
+.tooluse .tl.okk{color:var(--term-green)}
+.tooluse .tl.dim{color:var(--term-dim)}
+.appr{align-self:flex-start;width:92%;background:#fff;border:1.5px solid var(--crimson);border-radius:12px;padding:11px 14px}
+.appr .at{font-weight:700;font-size:14.5px;display:flex;gap:8px;align-items:center;color:var(--crimson-deep)}
+.appr .acmd{font:600 13.5px var(--mono);background:var(--paper-2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-top:8px;color:var(--ink)}
+.appr .btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.abtn{font:700 13px var(--sans);border:1px solid var(--line);border-bottom-width:3px;border-radius:8px;padding:4px 12px;background:var(--paper-2);color:var(--ink-soft)}
+.abtn.yes{background:var(--ok-soft);border-color:#A9D8C9;color:var(--ok)}
+.abtn.no{color:var(--crimson-deep)}
+
+/* ---------- 链路图：你 → 智能体 → 板子 ---------- */
+.chainrow{display:flex;align-items:center;justify-content:center;gap:14px;width:100%}
+.cnode{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 22px;text-align:center;min-width:178px}
+.cnode .ci{font-size:34px;line-height:1}
+.cnode b{display:block;margin-top:7px;font-size:19px}
+.cnode span{display:block;color:var(--ink-soft);font-size:14px;margin-top:2px}
+.cnode.hot{border-color:var(--crimson);background:var(--crimson-soft);box-shadow:0 14px 34px -18px var(--crimson)}
+.carrow{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--crimson);font-weight:700}
+.carrow .aa{font-size:30px;line-height:1}
+.carrow .al{font:700 13px var(--mono);color:var(--ink-soft);background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:3px 11px;white-space:nowrap}
+
+/* ---------- “书桌”上下文示意 ---------- */
+.ctxrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font:600 13px var(--mono)}
+.ctxrow .rlab{font:700 14px var(--sans);color:var(--ink-soft);width:64px;flex:none}
+.ctxrow .seg{border:1px solid var(--line);border-radius:7px;padding:5px 9px;background:#fff;white-space:nowrap}
+.ctxrow .seg.old{background:var(--paper-2);color:var(--ink-soft)}
+.ctxrow .seg.new{background:var(--crimson-soft);border-color:var(--crimson);color:var(--crimson-deep);font-weight:700}
+
+/* ---------- 手机成品 mockup ---------- */
+.phone{width:232px;border:2px solid var(--ink);border-radius:26px;padding:13px 12px 20px;background:#fff;box-shadow:0 30px 60px -30px rgba(0,0,0,.45);margin:0 auto}
+.phone .purl{font:600 11px var(--mono);background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;text-align:center;color:var(--ink-soft)}
+.phone .ptitle{font-size:15px;font-weight:800;text-align:center;margin-top:16px}
+.phone .prow{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.phone .prow b{font-size:13px}
+.phone .ptemp{font:800 52px var(--mono);text-align:center;margin:18px 0 4px;color:var(--crimson)}
+.phone .plab{text-align:center;color:var(--ink-soft);font-size:13px}
+.phone .pbtn{margin:14px auto 0;width:88%;text-align:center;padding:8px 10px;border-radius:10px;background:var(--crimson);color:#fff;font-size:13px;font-weight:700}
+
+/* ---------- 逐步出现 ---------- */
+.frag{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s cubic-bezier(.3,1,.5,1)}
+.frag.revealed{opacity:1;transform:none}
+.frag.pop{transform:scale(.9)} .frag.pop.revealed{transform:none}
+.frag.right{transform:translateX(26px)} .frag.right.revealed{transform:none}
+
+/* ---------- 进入当前页时播放的入场动画 ---------- */
+@keyframes blink{50%{opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.slide.active .rise{animation:fadeUp .7s both}
+.slide.active .rise-2{animation:fadeUp .7s .12s both}
+.slide.active .rise-3{animation:fadeUp .7s .24s both}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------- 封面 ---------- */
+.cover{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 84px}
+.medallion{width:120px;height:120px;border-radius:50%;background:#fff;display:grid;place-items:center;
+  box-shadow:0 0 0 2px var(--crimson),0 18px 40px -18px rgba(173,23,48,.55);margin-bottom:30px}
+.medallion img{width:86px;height:86px}
+.cover h1{font-size:76px;line-height:1.02;font-weight:800;margin:0}
+.cover .sub{font-size:25px;color:var(--ink-soft);margin:22px 0 0;font-weight:500}
+.cover .meta{margin-top:36px;display:flex;gap:14px;flex-wrap:wrap}
+.decor-ring{position:absolute;right:-160px;top:-160px;width:560px;height:560px;border-radius:50%;
+  border:2px dashed rgba(173,23,48,.18);pointer-events:none}
+.decor-ring.two{right:-120px;top:-120px;width:480px;height:480px;border-style:solid;border-color:rgba(173,23,48,.08)}
+.slide.active .decor-ring{animation:spin 90s linear infinite}
+
+/* ---------- 鼠标导航箭头 ---------- */
+.nav{position:absolute;bottom:14px;z-index:30;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.85);display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);font-size:16px;transition:.2s}
+.nav:hover{border-color:var(--crimson);color:var(--crimson)}
+#prev{right:112px}#next{right:70px}
+
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.06ms!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+
+    <!-- ===== 顶栏 ===== -->
+    <div class="chrome chrome-top">
+      <div class="brand">
+        <img src="sjtu.png" alt="上海交通大学">
+        <div>
+          <div class="b-1">零基础 RISC-V 芯片智能体开发</div>
+          <div class="b-2">上海交通大学学森暑期营 · SJTU</div>
+        </div>
+      </div>
+      <div class="sec-tag" id="secTag">开始</div>
+    </div>
+
+    <!-- ===== 幻灯片区 ===== -->
+    <div id="deck">
+
+      <!-- ============ 01 封面 ============ -->
+      <section class="slide" data-sec="开始">
+        <div class="cover">
+          <div class="decor-ring"></div>
+          <div class="decor-ring two"></div>
+          <div class="medallion rise"><img src="sjtu.png" alt="SJTU"></div>
+          <div class="rise" style="margin-bottom:16px;font-weight:700;font-size:17px;color:var(--crimson);letter-spacing:.02em;display:flex;align-items:center;gap:11px"><span style="width:26px;height:2px;background:var(--crimson)"></span>智能体介绍 III · 具体应用</div>
+          <h1 class="rise-2">把 <span class="mono-accent">AI 智能体</span><br>请进真实任务</h1>
+          <p class="sub rise-3">今天不再只讲“它是什么”，而是讲“它怎样在 Titan 上真正帮你干活”。<span class="cursor"></span></p>
+          <div class="meta rise-3">
+            <span class="chip"><span class="d"></span>第三讲</span>
+            <span class="chip">案例驱动</span>
+            <span class="chip mono">Titan · OpenClaw · HTML</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 02 昨天学了什么 ============ -->
+      <section class="slide" data-sec="开始">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">01</span>&nbsp;recap</span>
+            <h2 class="title">昨天，我们已经把<br><span class="hl-bg">工具箱打开</span>了</h2>
+            <ul class="clean" style="margin-top:14px">
+              <li class="frag right"><span class="mk">1</span><div><b>智能体不是聊天框升级版</b><span class="sub">它会读文件、改代码、跑命令、看结果，再继续往前推任务。</span></div></li>
+              <li class="frag right"><span class="mk">2</span><div><b>OpenClaw 是你的指挥台</b><span class="sub">你在自己的电脑里说目标，智能体通过 SSH 去操控 Titan。</span></div></li>
+              <li class="frag right"><span class="mk">3</span><div><b>关键不是“神不神”</b><span class="sub">关键是：你能不能把任务说清楚，能不能自己验收结果。</span></div></li>
+            </ul>
+          </div>
+          <div class="stack rise-2" style="gap:18px">
+            <div class="chainrow">
+              <div class="cnode">
+                <div class="ci">👤</div><b>你</b><span>说目标，给材料</span>
+              </div>
+              <div class="carrow"><div class="aa">→</div><div class="al">自然语言</div></div>
+              <div class="cnode hot">
+                <div class="ci">🤖</div><b>智能体</b><span>计划、调用工具</span>
+              </div>
+              <div class="carrow"><div class="aa">→</div><div class="al">SSH / 命令</div></div>
+              <div class="cnode">
+                <div class="ci">🖥️</div><b>Titan</b><span>真正执行与返回</span>
+              </div>
+            </div>
+            <div class="okbox frag">这一讲要做的事：把这条链路从“能用”推进到“会做真实项目”。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 03 七般武艺 ============ -->
+      <section class="slide" data-sec="开始">
+        <div class="stack" style="margin-bottom:26px">
+          <span class="eyebrow"><span class="n">02</span>&nbsp;recap</span>
+          <h2 class="title">昨天见过的<br>七般武艺</h2>
+          <p class="lead">不必死记命令名，先记住它会做哪些<span class="hl">动作</span>。</p>
+        </div>
+        <div class="grid4">
+          <div class="card frag pop"><span class="ic">📄</span><h3>读文件</h3><p>先看清现状，再决定怎么改。</p></div>
+          <div class="card frag pop"><span class="ic">✍️</span><h3>改代码</h3><p>小步修改，避免一口气重写全部。</p></div>
+          <div class="card frag pop"><span class="ic">⌨️</span><h3>跑命令</h3><p>去终端里做事，而不是只会嘴上说。</p></div>
+          <div class="card frag pop"><span class="ic">🔎</span><h3>找信息</h3><p>搜索文件、变量、报错位置和配置。</p></div>
+          <div class="card frag pop"><span class="ic">🧪</span><h3>跑验证</h3><p>运行脚本、测试或预览命令验证结果。</p></div>
+          <div class="card frag pop"><span class="ic">🩺</span><h3>修报错</h3><p>从报错出发，定位、修改、复测。</p></div>
+          <div class="card frag pop"><span class="ic">🗣️</span><h3>讲代码</h3><p>把陌生文件翻译成你能听懂的话。</p></div>
+          <div class="card frag pop" style="background:var(--crimson-soft);border-color:var(--crimson)"><span class="ic">🧩</span><h3>拼任务</h3><p>把“读、改、跑、验”串成一个完整闭环。</p></div>
+        </div>
+      </section>
+
+      <!-- ============ 04 4D 和三个坑 ============ -->
+      <section class="slide" data-sec="开始">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">03</span>&nbsp;recap</span>
+            <h2 class="title">会用，还不够<br>还要会<span class="hl-bg">带队</span></h2>
+            <div class="looprow" style="margin-top:14px">
+              <div class="loopstep frag pop hot"><div class="li">📝</div><b>描述</b><span>目标说清楚</span></div>
+              <div class="loopstep frag pop"><div class="li">📤</div><b>委派</b><span>把活派下去</span></div>
+              <div class="loopstep frag pop"><div class="li">🧭</div><b>辨别</b><span>判断它对不对</span></div>
+              <div class="loopstep frag pop"><div class="li">✅</div><b>尽责</b><span>最后由你拍板</span></div>
+            </div>
+            <p class="lead" style="margin-top:24px;max-width:34ch">今天这节课，本质上是在练：怎样把这四件事放进真实任务里。</p>
+          </div>
+          <div class="card rise-2" style="padding:24px 26px">
+            <div class="eyebrow" style="margin-bottom:10px">三个坑</div>
+            <ul class="clean" style="gap:12px">
+              <li class="frag right" style="font-size:18px"><span class="mk">⚠</span><div><b>一本正经地胡说</b><span class="sub" style="font-size:15px">它可能说得很像真的，所以必须验。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">↺</span><div><b>兔子洞</b><span class="sub" style="font-size:15px">它可能越修越远，忘了原始目标。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">🩼</span><div><b>拐杖</b><span class="sub" style="font-size:15px">如果你从不检查，就会慢慢失去判断力。</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 05 今日目标 ============ -->
+      <section class="slide" data-sec="开始">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">04</span>&nbsp;今天要拿走什么</span>
+            <h2 class="title">三件事：<br>选任务，写任务书，做验收</h2>
+            <ul class="clean" style="margin-top:12px">
+              <li class="frag right"><span class="mk">A</span><div><b>会判断</b><span class="sub">知道什么活适合交给智能体，什么活暂时别交。</span></div></li>
+              <li class="frag right"><span class="mk">B</span><div><b>会设计</b><span class="sub">把目标、上下文、限制、输出物说清楚。</span></div></li>
+              <li class="frag right"><span class="mk">C</span><div><b>会闭环</b><span class="sub">不是“它说完成了”，而是“你真的检查过了”。</span></div></li>
+            </ul>
+          </div>
+          <div class="card frag right" style="background:var(--crimson);border-color:var(--crimson-deep);color:#fff;padding:28px 30px">
+            <span class="ic" style="font-size:34px">🎯</span>
+            <h3 style="color:#fff;font-size:24px;margin-bottom:10px">本讲终点</h3>
+            <p style="color:#ffd7dd;font-size:18px;line-height:1.6">课讲完时，你应该已经能把一句模糊想法，变成一个<span style="color:#fff;font-weight:800">可执行、可检查、可迭代</span>的 Agent 任务。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 06 应用全景 ============ -->
+      <section class="slide" data-sec="真实案例">
+        <div class="stack" style="margin-bottom:28px">
+          <span class="eyebrow"><span class="n">05</span>&nbsp;能做什么</span>
+          <h2 class="title">先看全景：<br>Agent 不只会写代码</h2>
+        </div>
+        <div class="grid4">
+          <div class="card frag pop"><span class="ic">📚</span><h3>学习助手</h3><p>解释命令、翻译报错、把陌生概念讲成人话。</p></div>
+          <div class="card frag pop"><span class="ic">🛠️</span><h3>开发搭子</h3><p>读项目、改文件、修 bug、写小功能、补测试。</p></div>
+          <div class="card frag pop"><span class="ic">🧪</span><h3>实验助手</h3><p>收集系统信息、整理实验记录、生成结果摘要。</p></div>
+          <div class="card frag pop"><span class="ic">🌐</span><h3>产品合伙人</h3><p>从需求出发，搭网页、做演示、形成可展示成品。</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:24px;text-align:center">它最擅长的不是“天才创造”，而是把<span class="hl">重复劳动 + 工具操作 + 初稿生成</span>连起来。</div>
+      </section>
+
+      <!-- ============ 07 什么适合交给 Agent ============ -->
+      <section class="slide" data-sec="真实案例">
+        <div class="stack" style="margin-bottom:26px">
+          <span class="eyebrow"><span class="n">06</span>&nbsp;任务筛选</span>
+          <h2 class="title">不是所有任务都适合<br>一股脑丢给 Agent</h2>
+        </div>
+        <div class="compare">
+          <div class="card rise" style="border-color:#A9D8C9;background:var(--ok-soft)">
+            <div class="eyebrow" style="margin-bottom:10px;color:var(--ok)"><span style="background:var(--ok);width:26px;height:2px;display:inline-block"></span>适合</div>
+            <ul class="clean" style="gap:11px">
+              <li class="frag right" style="font-size:18px"><span class="mk" style="background:#fff;color:var(--ok)">✓</span><div><b>目标清楚</b><span class="sub" style="font-size:15px">知道最后要交付什么。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk" style="background:#fff;color:var(--ok)">✓</span><div><b>步骤可拆</b><span class="sub" style="font-size:15px">可以拆成查、改、跑、验几个动作。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk" style="background:#fff;color:var(--ok)">✓</span><div><b>结果可验</b><span class="sub" style="font-size:15px">有命令、页面、测试、文件能检查。</span></div></li>
+            </ul>
+          </div>
+          <div class="card rise-2" style="border-color:var(--crimson);background:var(--crimson-soft)">
+            <div class="eyebrow" style="margin-bottom:10px"><span style="background:var(--crimson);width:26px;height:2px;display:inline-block"></span>不适合</div>
+            <ul class="clean" style="gap:11px">
+              <li class="frag right" style="font-size:18px"><span class="mk">!</span><div><b>高风险不可逆</b><span class="sub" style="font-size:15px">删库、覆盖重要文件、泄露秘密。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">?</span><div><b>目标很虚</b><span class="sub" style="font-size:15px">“做得高级一点”这种指令太空。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">×</span><div><b>无法验证</b><span class="sub" style="font-size:15px">做完也不知道真假，就容易被它糊弄。</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 08 案例 1 ============ -->
+      <section class="slide" data-sec="真实案例">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">07</span>&nbsp;案例 1</span>
+            <h2 class="title">板子体检员：<br>先弄清 Titan 现在是什么状态</h2>
+            <p class="lead">场景很常见：你刚连上一块板子，不知道系统版本、磁盘余量、内存够不够、网卡有没有起来。</p>
+            <ul class="clean" style="margin-top:18px;gap:12px">
+              <li class="frag right" style="font-size:18px"><span class="mk">①</span><div><b>把检查项列出来</b><span class="sub" style="font-size:15px">系统、CPU 架构、内存、磁盘、IP。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">②</span><div><b>让 Agent 去跑命令</b><span class="sub" style="font-size:15px">它负责敲命令，你负责看有没有查到关键项。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">③</span><div><b>把结果整理成报告</b><span class="sub" style="font-size:15px">不是把原始输出堆给你，而是整理成可读结论。</span></div></li>
+            </ul>
+          </div>
+          <div class="term rise-2">
+            <div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t-title">titan-check</span></div>
+            <div class="term-body">
+<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">uname -a</span></span>
+<span class="ln out">Linux titan 6.6.0 riscv64 GNU/Linux</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">free -h</span></span>
+<span class="ln out">Mem: 15Gi   used 3.1Gi   free 10Gi</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">df -h /</span></span>
+<span class="ln out">/dev/nvme0n1p2   120G   28G   87G   25%</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">ip -4 addr show eth0</span></span>
+<span class="ln out">inet 192.168.1.50/24 brd 192.168.1.255</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cursor"></span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 09 案例 1 拆解 ============ -->
+      <section class="slide" data-sec="真实案例">
+        <div class="stack" style="margin-bottom:28px">
+          <span class="eyebrow"><span class="n">08</span>&nbsp;案例 1 拆解</span>
+          <h2 class="title">这类任务为什么适合<br>交给 Agent</h2>
+        </div>
+        <div class="chainrow rise">
+          <div class="cnode"><div class="ci">🗂️</div><b>检查清单</b><span>先确定要看什么</span></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">命令</div></div>
+          <div class="cnode hot"><div class="ci">⌨️</div><b>跑命令</b><span>快速收集原始信息</span></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">整理</div></div>
+          <div class="cnode"><div class="ci">📋</div><b>生成摘要</b><span>告诉你哪里正常</span></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">判断</div></div>
+          <div class="cnode"><div class="ci">🧠</div><b>你拍板</b><span>决定下一步装什么、做什么</span></div>
+        </div>
+        <div class="grid3" style="margin-top:28px">
+          <div class="card frag pop"><span class="ic">快</span><h3>省去手抄命令</h3><p>尤其是刚入门时，不必一条条查手册再照打。</p></div>
+          <div class="card frag pop"><span class="ic">稳</span><h3>结果更整洁</h3><p>它能把散乱输出整理成“板子状态报告”。</p></div>
+          <div class="card frag pop"><span class="ic">准</span><h3>但仍要复核</h3><p>事实来自命令输出，不来自它的嘴。</p></div>
+        </div>
+      </section>
+
+      <!-- ============ 10 案例 2 ============ -->
+      <section class="slide" data-sec="真实案例">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">09</span>&nbsp;案例 2</span>
+            <h2 class="title">修 bug 搭子：<br>从报错出发，不靠猜</h2>
+            <p class="lead">很多初学者最容易卡住的，不是“不会写”，而是“一报错就不知道下一步该干嘛”。</p>
+            <ul class="clean" style="margin-top:16px;gap:11px">
+              <li class="frag right" style="font-size:18px"><span class="mk">贴</span><div><b>先贴原始报错</b><span class="sub" style="font-size:15px">不要自己改写；原文最有价值。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">查</span><div><b>让它读相关文件</b><span class="sub" style="font-size:15px">不要只让它凭空猜。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">测</span><div><b>改完必须复跑</b><span class="sub" style="font-size:15px">没有复跑，就不算真的修好。</span></div></li>
+            </ul>
+          </div>
+          <div class="chat rise-2">
+            <div class="chat-bar"><span class="cic">🤖</span>OpenClaw<span class="st">debug mode</span></div>
+            <div class="chat-body">
+              <div class="bub me">运行脚本时报错了。先帮我定位原因，不要一上来大改。</div>
+              <div class="bub ai">可以。我会先看 traceback、再读相关文件、给出最小修复方案。</div>
+              <div class="tooluse">
+                <span class="tl hd">tool: read file</span>
+                <span class="tl">open data_parser.py</span>
+                <span class="tl dim">looking for line around parse_temperature()</span>
+              </div>
+              <div class="bub ai">问题像是空字符串被直接转成整数。我先确认输入来源，再改一处保护逻辑。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 11 案例 2 拆解 ============ -->
+      <section class="slide" data-sec="真实案例">
+        <div class="two">
+          <div class="term rise">
+            <div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t-title">bug-loop</span></div>
+            <div class="term-body">
+<span class="ln"><span class="u">student</span><span class="p">@titan:~/demo$</span> <span class="cmd">python3 app.py</span></span>
+<span class="ln out">Traceback (most recent call last):</span>
+<span class="ln out">  File "app.py", line 42, in &lt;module&gt;</span>
+<span class="ln out">    temp = int(read_sensor())</span>
+<span class="ln out"><span class="em">ValueError:</span> invalid literal for int() with base 10: ''</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~/demo$</span> <span class="cmd">python3 app.py --self-check</span></span>
+<span class="ln out"><span class="ok">OK</span> fallback value used when sensor is empty</span>
+            </div>
+          </div>
+          <div class="stack">
+            <span class="eyebrow"><span class="n">10</span>&nbsp;案例 2 拆解</span>
+            <h2 class="title">定位 → 修改 → 复测<br>这个闭环不能少</h2>
+            <ul class="clean" style="margin-top:12px">
+              <li class="frag right"><span class="mk">1</span><div><b>先证明它在哪里坏</b><span class="sub">traceback 是起点，不是终点。</span></div></li>
+              <li class="frag right"><span class="mk">2</span><div><b>只改最小必要部分</b><span class="sub">越大改动，越难知道是哪一处生效。</span></div></li>
+              <li class="frag right"><span class="mk">3</span><div><b>复跑原命令和检查命令</b><span class="sub">原报错消失，且没有引入新问题，才算真的修复。</span></div></li>
+            </ul>
+            <div class="okbox frag" style="margin-top:18px">好 Agent 不是“一把梭哈全重构”，而是先用<span class="hl">最小修复</span>把你带回可运行状态。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 12 案例 3 ============ -->
+      <section class="slide" data-sec="真实案例">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">11</span>&nbsp;案例 3</span>
+            <h2 class="title">小产品合伙人：<br>从一句需求到一个可看的成品</h2>
+            <p class="lead">智能体最有意思的地方，是它能把命令行里的信息，变成一个别人也能看懂的小产品。</p>
+            <ul class="clean" style="margin-top:16px;gap:11px">
+              <li class="frag right" style="font-size:18px"><span class="mk">想</span><div><b>先说清成品长什么样</b><span class="sub" style="font-size:15px">比如：单页网页、移动端也能看、展示 4 项状态。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">做</span><div><b>让它生成 HTML、样式和取数逻辑</b><span class="sub" style="font-size:15px">把“会用命令”推进到“会做展示”。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">看</span><div><b>自己打开页面检查</b><span class="sub" style="font-size:15px">内容对不对、布局能不能看、能否继续迭代。</span></div></li>
+            </ul>
+          </div>
+          <div class="phone rise-2">
+            <div class="purl">http://titan.local:8000</div>
+            <div class="ptitle">Titan 状态看板</div>
+            <div class="ptemp">OK</div>
+            <div class="plab">Board Ready</div>
+            <div class="prow"><b>主机名</b><span>titan</span></div>
+            <div class="prow"><b>架构</b><span>riscv64</span></div>
+            <div class="prow"><b>内存</b><span>3.1 / 15 GiB</span></div>
+            <div class="prow"><b>磁盘</b><span>25% used</span></div>
+            <div class="pbtn">刷新状态</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 13 案例 3 拆解 ============ -->
+      <section class="slide" data-sec="真实案例">
+        <div class="stack" style="margin-bottom:28px">
+          <span class="eyebrow"><span class="n">12</span>&nbsp;案例 3 拆解</span>
+          <h2 class="title">从命令行，走到网页成品</h2>
+        </div>
+        <div class="chainrow rise">
+          <div class="cnode"><div class="ci">💬</div><b>需求</b><span>说清页面和数据项</span></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">生成</div></div>
+          <div class="cnode hot"><div class="ci">🧱</div><b>HTML/CSS</b><span>先做出骨架</span></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">取数</div></div>
+          <div class="cnode"><div class="ci">📡</div><b>系统信息</b><span>从命令或脚本读取</span></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">预览</div></div>
+          <div class="cnode"><div class="ci">👀</div><b>你验收</b><span>看得到、说得清、改得动</span></div>
+        </div>
+        <div class="grid2" style="margin-top:26px">
+          <div class="card frag pop"><span class="ic">🌱</span><h3>这就是小产品雏形</h3><p>哪怕只是一个单页网页，也已经从“命令行输出”升级成了“可展示成品”。</p></div>
+          <div class="card frag pop"><span class="ic">🔁</span><h3>下一轮迭代很自然</h3><p>你可以继续加刷新、警示色、手机适配、说明文字，而不是重新从零开始。</p></div>
+        </div>
+      </section>
+
+      <!-- ============ 14 更多应用 ============ -->
+      <section class="slide" data-sec="真实案例">
+        <div class="stack" style="margin-bottom:26px">
+          <span class="eyebrow"><span class="n">13</span>&nbsp;更多例子</span>
+          <h2 class="title">除了这三个，<br>还有很多轻量任务适合它</h2>
+        </div>
+        <div class="grid4">
+          <div class="card frag pop"><span class="ic">🗒️</span><h3>实验记录员</h3><p>把命令、输出、结论整理成一份实验日志。</p></div>
+          <div class="card frag pop"><span class="ic">📘</span><h3>命令讲解器</h3><p>解释 <code class="inline">ls -la</code>、<code class="inline">scp</code> 到底每一段什么意思。</p></div>
+          <div class="card frag pop"><span class="ic">📂</span><h3>资料整理员</h3><p>把 README、日志和配置文件的重点先帮你读一遍。</p></div>
+          <div class="card frag pop"><span class="ic">📈</span><h3>结果摘要员</h3><p>收集若干次实验结果，帮你归纳变化趋势。</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:24px">判断标准仍然一样：<b>目标清楚</b>、<b>步骤可拆</b>、<b>结果可验</b>。</div>
+      </section>
+
+      <!-- ============ 15 设计方法总览 ============ -->
+      <section class="slide" data-sec="设计方法">
+        <div class="stack">
+          <span class="eyebrow"><span class="n">14</span>&nbsp;如何设计</span>
+          <h2 class="title">把一句想法变成<br>可执行任务的五件事</h2>
+          <div class="looprow" style="margin-top:18px">
+            <div class="loopstep frag pop hot"><div class="li">🎁</div><b>输出物</b><span>最后要交什么</span></div>
+            <div class="loopstep frag pop"><div class="li">🗃️</div><b>上下文</b><span>它有哪些材料</span></div>
+            <div class="loopstep frag pop"><div class="li">🧰</div><b>工具</b><span>允许它用什么</span></div>
+            <div class="loopstep frag pop"><div class="li">🧱</div><b>约束</b><span>哪些事不能做</span></div>
+            <div class="loopstep frag pop"><div class="li">✅</div><b>验证</b><span>你怎样判断完成</span></div>
+          </div>
+          <div class="okbox frag" style="margin-top:28px">这五件事越清楚，智能体越像好队友；越模糊，它越容易跑偏。</div>
+        </div>
+      </section>
+
+      <!-- ============ 16 输出物 ============ -->
+      <section class="slide" data-sec="设计方法">
+        <div class="stack" style="margin-bottom:24px">
+          <span class="eyebrow"><span class="n">15</span>&nbsp;第一件事</span>
+          <h2 class="title">先写清输出物：<br>坏指令和好指令差很多</h2>
+        </div>
+        <div class="compare">
+          <div class="card rise" style="border-color:var(--line)">
+            <div class="eyebrow" style="margin-bottom:10px;color:var(--ink-faint)"><span style="background:var(--ink-faint);width:26px;height:2px;display:inline-block"></span>太模糊</div>
+            <div class="promptbox" style="font-size:17px">帮我做个页面，展示一下 Titan 的情况。</div>
+            <p style="margin-top:14px;font-size:17px;color:var(--ink-soft)">问题：不知道展示哪些项，不知道页面长什么样，不知道如何验收。</p>
+          </div>
+          <div class="card rise-2" style="border-color:var(--crimson);background:var(--crimson-soft)">
+            <div class="eyebrow" style="margin-bottom:10px"><span style="background:var(--crimson);width:26px;height:2px;display:inline-block"></span>更可执行</div>
+            <div class="promptbox" style="font-size:16px;background:#fff">请在当前目录做一个单页网页，展示 Titan 的主机名、当前时间、CPU 架构、内存占用、磁盘占用；不要安装新依赖；完成后用本地服务预览。</div>
+            <p style="margin-top:14px;font-size:17px;color:var(--crimson-deep)">好处：有范围、有字段、有形式、有约束、有验收方式。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 17 上下文 ============ -->
+      <section class="slide" data-sec="设计方法">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">16</span>&nbsp;第二件事</span>
+            <h2 class="title">再给上下文：<br>别让它闭眼瞎猜</h2>
+            <ul class="clean" style="margin-top:12px">
+              <li class="frag right"><span class="mk">目</span><div><b>当前目录和已有文件</b><span class="sub">告诉它在哪里工作，哪些内容已经存在。</span></div></li>
+              <li class="frag right"><span class="mk">境</span><div><b>系统环境</b><span class="sub">比如是 Titan、是 Linux、能否联网、是否有 Python。</span></div></li>
+              <li class="frag right"><span class="mk">限</span><div><b>边界条件</b><span class="sub">不要碰哪些目录，不要安装哪些依赖。</span></div></li>
+            </ul>
+          </div>
+          <div class="card rise-2">
+            <div class="eyebrow" style="margin-bottom:12px">上下文像一张书桌</div>
+            <div class="stack" style="gap:10px">
+              <div class="ctxrow"><span class="rlab">目录</span><span class="seg new">~/demo/status-board</span><span class="seg old">不要跳到别处</span></div>
+              <div class="ctxrow"><span class="rlab">文件</span><span class="seg">README.md</span><span class="seg">app.py</span><span class="seg old">已有 index.html</span></div>
+              <div class="ctxrow"><span class="rlab">环境</span><span class="seg">Titan</span><span class="seg">Linux</span><span class="seg">python3</span></div>
+              <div class="ctxrow"><span class="rlab">禁止</span><span class="seg new">不装新依赖</span><span class="seg new">不删现有文件</span></div>
+              <div class="ctxrow"><span class="rlab">验收</span><span class="seg">网页可打开</span><span class="seg">信息正确</span><span class="seg">结构整洁</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 18 工具与权限 ============ -->
+      <section class="slide" data-sec="设计方法">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">17</span>&nbsp;第三件事</span>
+            <h2 class="title">工具与权限：<br>先低风险，再升级</h2>
+            <ul class="clean" style="margin-top:14px">
+              <li class="frag right"><span class="mk">读</span><div><b>先从读取开始</b><span class="sub">看文件、看目录、看系统信息，一般风险最低。</span></div></li>
+              <li class="frag right"><span class="mk">写</span><div><b>写文件前说清会改哪里</b><span class="sub">尤其在陌生项目里，先计划再动手。</span></div></li>
+              <li class="frag right"><span class="mk">装</span><div><b>装依赖、联网、删除前先请示</b><span class="sub">这些动作风险更高，也更容易把环境弄乱。</span></div></li>
+            </ul>
+          </div>
+          <div class="chat rise-2">
+            <div class="chat-bar"><span class="cic">🤖</span>OpenClaw<span class="st">permission check</span></div>
+            <div class="chat-body">
+              <div class="bub ai">我已经看过目录和现有文件。下一步如果要安装包，我会先请示。</div>
+              <div class="appr">
+                <div class="at">⚠️ 需要更高权限</div>
+                <div class="acmd">sudo apt install python3-psutil</div>
+                <div class="btns">
+                  <span class="abtn yes">允许一次</span>
+                  <span class="abtn">允许同类</span>
+                  <span class="abtn no">拒绝</span>
+                </div>
+              </div>
+              <div class="bub ai">如果不允许安装，我可以退回到只用现有命令和标准库的方案。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 19 验证与回滚 ============ -->
+      <section class="slide" data-sec="设计方法">
+        <div class="two">
+          <div class="term rise">
+            <div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t-title">verify-first</span></div>
+            <div class="term-body">
+<span class="ln"><span class="u">student</span><span class="p">@titan:~/status-board$</span> <span class="cmd">ls</span></span>
+<span class="ln out">index.html  server.py  README.md</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~/status-board$</span> <span class="cmd">python3 server.py</span></span>
+<span class="ln out"><span class="ok">Serving</span> at http://127.0.0.1:8000</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~/status-board$</span> <span class="cmd">git diff -- index.html</span></span>
+<span class="ln out">+ added status cards and refresh button</span>
+            </div>
+          </div>
+          <div class="stack">
+            <span class="eyebrow"><span class="n">18</span>&nbsp;第四件事</span>
+            <h2 class="title">验证与回滚点：<br>别只听“我做完了”</h2>
+            <ul class="clean" style="margin-top:12px">
+              <li class="frag right"><span class="mk">看</span><div><b>看成品</b><span class="sub">网页能不能打开，布局是不是合理。</span></div></li>
+              <li class="frag right"><span class="mk">跑</span><div><b>跑命令</b><span class="sub">原始命令、验证命令、预览命令都要能复现。</span></div></li>
+              <li class="frag right"><span class="mk">查</span><div><b>查改动</b><span class="sub">文件改了哪些地方，有没有误伤别的内容。</span></div></li>
+              <li class="frag right"><span class="mk">留</span><div><b>留回退点</b><span class="sub">每次只做一小步，出问题才知道退到哪里。</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 20 人机分工 ============ -->
+      <section class="slide" data-sec="设计方法">
+        <div class="stack" style="margin-bottom:24px">
+          <span class="eyebrow"><span class="n">19</span>&nbsp;第五件事</span>
+          <h2 class="title">人机分工：<br>AI 负责体力活，人负责拍板</h2>
+        </div>
+        <div class="compare">
+          <div class="card rise" style="background:var(--crimson-soft);border-color:var(--crimson)">
+            <h3 style="font-size:24px;margin-bottom:14px">智能体更适合做</h3>
+            <ul class="clean" style="gap:11px">
+              <li class="frag right" style="font-size:18px"><span class="mk">搜</span><div><b>搜集和整理</b><span class="sub" style="font-size:15px">读一堆文件，提炼重点。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">试</span><div><b>执行重复动作</b><span class="sub" style="font-size:15px">跑命令、改小处、反复验证。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">生</span><div><b>生成初稿</b><span class="sub" style="font-size:15px">网页骨架、脚本雏形、说明文档。</span></div></li>
+            </ul>
+          </div>
+          <div class="card rise-2">
+            <h3 style="font-size:24px;margin-bottom:14px">你必须自己做</h3>
+            <ul class="clean" style="gap:11px">
+              <li class="frag right" style="font-size:18px"><span class="mk">定</span><div><b>定义目标</b><span class="sub" style="font-size:15px">到底要交什么、给谁看、到什么程度算完成。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">判</span><div><b>判断质量</b><span class="sub" style="font-size:15px">结果是否可信、是否好用、是否值得继续。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">拍</span><div><b>最终拍板</b><span class="sub" style="font-size:15px">哪些改动接受，哪些风险不接受。</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 21 Prompt 模板 ============ -->
+      <section class="slide" data-sec="设计方法">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">20</span>&nbsp;模板</span>
+            <h2 class="title">一张可复用的<br>任务书模板</h2>
+            <p class="lead">以后你不必每次都从零组织语言。按这个框架写，已经很够用了。</p>
+          </div>
+          <div class="promptbox rise-2">任务：
+请你在【这里填目标】。
+
+背景：
+当前环境是【Titan / Linux / 某个项目目录】。
+已有文件有【列出关键文件】。
+
+限制：
+- 不要安装新依赖
+- 不要改动【某些文件或目录】
+- 如果要做高风险动作，先请示
+
+验收：
+- 运行【某条命令】应该成功
+- 生成【某个文件或页面】
+- 最后用 3 句话汇报你做了什么</div>
+        </div>
+      </section>
+
+      <!-- ============ 22 实战题 ============ -->
+      <section class="slide" data-sec="动手体验">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">21</span>&nbsp;今天的实战</span>
+            <h2 class="title">任务：做一个<br><span class="mono-accent">Titan 状态看板</span></h2>
+            <p class="lead">这是一个很好的练手题，因为它刚好把<span class="hl">查信息、生成页面、运行预览、自己验收</span>全串起来了。</p>
+          </div>
+          <div class="accepts rise-2">
+            <div class="accept"><b>看得到</b><span>网页能打开，布局清楚，手机宽度下也不乱。</span></div>
+            <div class="accept"><b>说得准</b><span>主机名、时间、架构、内存、磁盘信息都准确。</span></div>
+            <div class="accept"><b>改得动</b><span>结构不乱，下一轮能继续加按钮、颜色和说明。</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 23 第一步：任务书 ============ -->
+      <section class="slide" data-sec="动手体验">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">22</span>&nbsp;step 1</span>
+          <h2 class="title">第一步：先把任务书<br>交给智能体</h2>
+        </div>
+        <div class="promptbox rise">请在当前目录做一个单页网页，名字叫 Titan 状态看板。
+网页需要展示：主机名、当前时间、CPU 架构、内存占用、磁盘占用。
+要求：
+- 不要安装新依赖
+- 优先使用现有命令或 Python 标准库
+- 每做一步先告诉我计划，再执行
+- 完成后用本地服务预览
+- 最后告诉我哪些文件被创建或修改了</div>
+        <div class="okbox frag" style="margin-top:18px">注意这条任务书里已经有：输出物、字段范围、工具约束、执行节奏、最终汇报方式。</div>
+      </section>
+
+      <!-- ============ 24 第二步：执行 ============ -->
+      <section class="slide" data-sec="动手体验">
+        <div class="two">
+          <div class="chat rise">
+            <div class="chat-bar"><span class="cic">🤖</span>OpenClaw<span class="st">plan then act</span></div>
+            <div class="chat-body">
+              <div class="bub me">请先给计划，再开始做。</div>
+              <div class="bub ai">计划如下：1) 读取系统信息；2) 生成网页；3) 启动本地预览；4) 汇报改动文件。</div>
+              <div class="tooluse">
+                <span class="tl hd">tool: shell</span>
+                <span class="tl">hostname</span>
+                <span class="tl">uname -m</span>
+                <span class="tl">free -h</span>
+                <span class="tl">df -h /</span>
+              </div>
+              <div class="bub ai">系统信息已经拿到，下一步我会生成 <code class="inline">index.html</code> 和一个简易服务脚本。</div>
+            </div>
+          </div>
+          <div class="term rise-2">
+            <div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t-title">build-status-board</span></div>
+            <div class="term-body">
+<span class="ln"><span class="u">student</span><span class="p">@titan:~/status-board$</span> <span class="cmd">hostname</span></span>
+<span class="ln out">titan</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~/status-board$</span> <span class="cmd">uname -m</span></span>
+<span class="ln out">riscv64</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~/status-board$</span> <span class="cmd">python3 -m http.server 8000</span></span>
+<span class="ln out">Serving HTTP on 0.0.0.0 port 8000 ...</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~/status-board$</span> <span class="cursor"></span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 25 第三步：验收 ============ -->
+      <section class="slide" data-sec="动手体验">
+        <div class="two">
+          <div class="phone rise">
+            <div class="purl">http://127.0.0.1:8000</div>
+            <div class="ptitle">Titan 状态看板</div>
+            <div class="ptemp">15G</div>
+            <div class="plab">Memory Total</div>
+            <div class="prow"><b>主机名</b><span>titan</span></div>
+            <div class="prow"><b>时间</b><span>10:32</span></div>
+            <div class="prow"><b>架构</b><span>riscv64</span></div>
+            <div class="prow"><b>磁盘</b><span>25% used</span></div>
+            <div class="pbtn">刷新状态</div>
+          </div>
+          <div class="stack">
+            <span class="eyebrow"><span class="n">23</span>&nbsp;step 3</span>
+            <h2 class="title">第三步：自己验收<br>不要只看它的汇报</h2>
+            <ul class="clean" style="margin-top:12px">
+              <li class="frag right"><span class="mk">看</span><div><b>页面能不能打开</b><span class="sub">没有预览，就不知道成品到底长什么样。</span></div></li>
+              <li class="frag right"><span class="mk">对</span><div><b>信息是不是对的</b><span class="sub">主机名、架构、内存、磁盘要和命令输出一致。</span></div></li>
+              <li class="frag right"><span class="mk">查</span><div><b>目录是不是干净</b><span class="sub">它有没有偷偷写出一堆不需要的文件。</span></div></li>
+              <li class="frag right"><span class="mk">问</span><div><b>让它解释设计</b><span class="sub">它为什么这样布局，下一轮准备怎么改。</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 26 第四步：继续迭代 ============ -->
+      <section class="slide" data-sec="动手体验">
+        <div class="stack" style="margin-bottom:24px">
+          <span class="eyebrow"><span class="n">24</span>&nbsp;step 4</span>
+          <h2 class="title">第四步：继续迭代<br>把反馈说具体</h2>
+        </div>
+        <div class="compare">
+          <div class="card rise">
+            <h3 style="font-size:24px;margin-bottom:12px">第一轮已经有</h3>
+            <ul class="clean" style="gap:11px">
+              <li class="frag right" style="font-size:18px"><span class="mk">页</span><div><b>单页网页</b><span class="sub" style="font-size:15px">已经能打开，也能看到关键字段。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">数</span><div><b>状态信息</b><span class="sub" style="font-size:15px">主机名、时间、架构、内存、磁盘。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">服</span><div><b>本地预览</b><span class="sub" style="font-size:15px">可以通过浏览器访问。</span></div></li>
+            </ul>
+          </div>
+          <div class="card rise-2" style="background:var(--crimson-soft);border-color:var(--crimson)">
+            <h3 style="font-size:24px;margin-bottom:12px">第二轮可以补充</h3>
+            <ul class="clean" style="gap:11px">
+              <li class="frag right" style="font-size:18px"><span class="mk">刷</span><div><b>加刷新按钮</b><span class="sub" style="font-size:15px">点击即可重新读取状态。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">警</span><div><b>加颜色警示</b><span class="sub" style="font-size:15px">磁盘或内存占用高时变成红色。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">适</span><div><b>做手机适配</b><span class="sub" style="font-size:15px">窄屏下仍能清楚显示。</span></div></li>
+            </ul>
+          </div>
+        </div>
+        <div class="okbox frag" style="margin-top:22px">反馈越具体，第二轮越有效。不要只说“再高级一点”，要说“加哪个功能、改哪个地方”。</div>
+      </section>
+
+      <!-- ============ 27 下午实践菜单 ============ -->
+      <section class="slide" data-sec="动手体验">
+        <div class="stack" style="margin-bottom:26px">
+          <span class="eyebrow"><span class="n">25</span>&nbsp;下午练手</span>
+          <h2 class="title">给你三个实践菜单<br>任选一个就能开干</h2>
+        </div>
+        <div class="grid3">
+          <div class="card frag pop">
+            <span class="ic">A</span>
+            <h3>状态看板</h3>
+            <p>做一个显示 Titan 关键状态的网页。</p>
+            <p style="margin-top:10px"><b>验收：</b>网页能打开，字段完整，布局清楚。</p>
+          </div>
+          <div class="card frag pop">
+            <span class="ic">B</span>
+            <h3>错误猎人</h3>
+            <p>准备一段会报错的脚本，让 Agent 帮你定位并修复。</p>
+            <p style="margin-top:10px"><b>验收：</b>原报错消失，修复后能复跑通过。</p>
+          </div>
+          <div class="card frag pop">
+            <span class="ic">C</span>
+            <h3>命令讲解器</h3>
+            <p>做一个能解释常见 Linux 命令的小工具或小页面。</p>
+            <p style="margin-top:10px"><b>验收：</b>至少包含 5 条命令及解释示例。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 28 常见卡点 ============ -->
+      <section class="slide" data-sec="动手体验">
+        <div class="stack" style="margin-bottom:24px">
+          <span class="eyebrow"><span class="n">26</span>&nbsp;常见卡点</span>
+          <h2 class="title">如果它开始跑偏<br>大概率是这几种原因</h2>
+        </div>
+        <div class="grid2">
+          <div class="warn frag"><span class="ic">1</span><div><b>任务太大</b><br>一句话里塞了太多目标，最好拆成两个会话或两个阶段。</div></div>
+          <div class="warn frag"><span class="ic">2</span><div><b>上下文太少</b><br>它不知道在哪个目录、有哪些文件、哪些内容不能碰。</div></div>
+          <div class="warn frag"><span class="ic">3</span><div><b>没有验收标准</b><br>做完不知道怎么看好坏，它就容易拿“看起来完成”糊弄你。</div></div>
+          <div class="warn frag"><span class="ic">4</span><div><b>绕圈不止</b><br>看到它反复试错却没变好，就该停下来，重新缩小问题。</div></div>
+        </div>
+      </section>
+
+      <!-- ============ 29 回顾 ============ -->
+      <section class="slide" data-sec="收尾">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">27</span>&nbsp;回顾</span>
+            <h2 class="title">从“会用”走到<br>“会设计任务”</h2>
+            <ul class="clean" style="margin-top:10px;gap:9px">
+              <li class="frag right" style="font-size:19px"><span class="mk">选</span><div><b>选对任务</b><span class="sub" style="font-size:15px">清楚、可拆、可验的任务最适合先交给 Agent。</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="mk">写</span><div><b>写好任务书</b><span class="sub" style="font-size:15px">目标、上下文、限制、验收要一次讲清。</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="mk">看</span><div><b>盯住执行过程</b><span class="sub" style="font-size:15px">先读后写，先低风险后高风险。</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="mk">验</span><div><b>自己做验收</b><span class="sub" style="font-size:15px">看页面、跑命令、查改动，不被嘴上的“完成”骗到。</span></div></li>
+            </ul>
+          </div>
+          <div class="card frag right" style="background:var(--crimson);border-color:var(--crimson-deep);color:#fff;padding:28px 30px">
+            <span class="ic" style="font-size:34px">🧭</span>
+            <h3 style="color:#fff;font-size:24px;margin-bottom:12px">一句心法</h3>
+            <p style="color:#ffd7dd;font-size:19px;line-height:1.65">不要把智能体当“自动答题器”。<br>把它当成<span style="color:#fff;font-weight:800">会敲键盘、会用工具、但需要你带队</span>的搭子。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 30 谢谢 + 资源 ============ -->
+      <section class="slide" data-sec="收尾">
+        <div class="two" style="align-items:center">
+          <div class="stack">
+            <div class="medallion rise" style="width:84px;height:84px;margin-bottom:16px"><img src="sjtu.png" alt="SJTU" style="width:58px;height:58px"></div>
+            <h2 class="title">谢谢！<br>去做你自己的小 Agent 项目</h2>
+            <p class="lead" style="margin-top:6px">课后继续往下玩，可以先沿着这几条线走：</p>
+            <div class="stack" style="gap:9px;margin-top:14px">
+              <div class="card frag right" style="display:flex;align-items:center;gap:13px;padding:10px 16px"><span style="font-size:22px">📄</span><div style="font-size:15.5px"><b>上一讲：智能体使用入门</b><br><span class="link" style="font-size:16px">agent-intro-slides.html</span></div></div>
+              <div class="card frag right" style="display:flex;align-items:center;gap:13px;padding:10px 16px"><span style="font-size:22px">📚</span><div style="font-size:15.5px"><b>MIT Missing Semester（中文）</b><br><span class="link" style="font-size:16px">missing-semester-cn.github.io</span></div></div>
+              <div class="card frag right" style="display:flex;align-items:center;gap:13px;padding:10px 16px"><span style="font-size:22px">🖥️</span><div style="font-size:15.5px"><b>Milk-V Titan 资料</b><br><span class="link" style="font-size:16px">milkv.io/titan</span></div></div>
+            </div>
+          </div>
+          <div class="card frag right" style="padding:18px 22px">
+            <div class="eyebrow" style="margin-bottom:10px">课后挑战</div>
+            <div class="cheat" style="font-size:15px">
+              <div class="row" style="padding:5px 0"><code>挑战 1</code><span>给状态看板加“刷新”按钮</span></div>
+              <div class="row" style="padding:5px 0"><code>挑战 2</code><span>把高占用状态做成红色警示</span></div>
+              <div class="row" style="padding:5px 0"><code>挑战 3</code><span>再加一个“最近 1 分钟”小日志区</span></div>
+              <div class="row" style="padding:5px 0"><code>挑战 4</code><span>让 Agent 用你的提示词模板完成一次迭代</span></div>
+              <div class="row" style="background:var(--crimson-soft);border-radius:8px;padding:9px 12px;border:none;margin-top:4px"><code style="color:var(--crimson-deep)">目标</code><span style="color:var(--crimson-deep);font-weight:700">让智能体帮你推进真实任务，而不是替你停止思考</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /#deck -->
+
+    <!-- ===== 底栏 ===== -->
+    <div class="chrome chrome-bot">
+      <div class="counter">第 <b id="cur">01</b> / <span id="total">30</span> 页</div>
+      <div class="hint"><span class="kbd">→</span><span class="kbd">空格</span> 下一步 · <span class="kbd">←</span> 返回 · <span class="kbd">F</span> 全屏</div>
+    </div>
+    <div id="progress"></div>
+    <div class="nav" id="prev" title="上一页">‹</div>
+    <div class="nav" id="next" title="下一页">›</div>
+
+  </div><!-- /#stage -->
+</div><!-- /#app -->
+
+<!-- =========================================================================
+     翻页引擎：与 template.html 一致，无需修改。
+     ========================================================================= -->
+<script>
+(function(){
+  "use strict";
+  var stage=document.getElementById('stage'),deck=document.getElementById('deck');
+  var slides=[].slice.call(deck.querySelectorAll('.slide'));
+  var secTag=document.getElementById('secTag'),curEl=document.getElementById('cur');
+  var totalEl=document.getElementById('total'),progress=document.getElementById('progress');
+  var cur=0,frag=0;
+  totalEl.textContent=pad(slides.length);
+  function pad(n){return (n<10?'0':'')+n;}
+  function fragsOf(i){return [].slice.call(slides[i].querySelectorAll('.frag'));}
+  function render(){
+    for(var i=0;i<slides.length;i++){slides[i].classList.toggle('active',i===cur);slides[i].classList.toggle('past',i<cur);}
+    var fr=fragsOf(cur);for(var j=0;j<fr.length;j++){fr[j].classList.toggle('revealed',j<frag);}
+    curEl.textContent=pad(cur+1);secTag.textContent=slides[cur].getAttribute('data-sec')||'';
+    progress.style.width=((cur+1)/slides.length*100)+'%';
+  }
+  function next(){var fr=fragsOf(cur);if(frag<fr.length){frag++;render();return;}if(cur<slides.length-1){cur++;frag=0;render();}}
+  function prev(){if(frag>0){frag--;render();return;}if(cur>0){cur--;frag=fragsOf(cur).length;render();}}
+  function goTo(i){cur=Math.max(0,Math.min(slides.length-1,i));frag=0;render();}
+  document.addEventListener('keydown',function(e){
+    switch(e.key){
+      case 'ArrowRight':case ' ':case 'PageDown':case 'Enter':e.preventDefault();next();break;
+      case 'ArrowLeft':case 'PageUp':case 'Backspace':e.preventDefault();prev();break;
+      case 'Home':e.preventDefault();goTo(0);break;
+      case 'End':e.preventDefault();goTo(slides.length-1);break;
+      case 'f':case 'F':if(document.fullscreenElement){document.exitFullscreen();}else if(document.documentElement.requestFullscreen){document.documentElement.requestFullscreen();}break;
+    }
+  });
+  document.getElementById('next').addEventListener('click',function(e){e.stopPropagation();next();});
+  document.getElementById('prev').addEventListener('click',function(e){e.stopPropagation();prev();});
+  document.getElementById('app').addEventListener('click',function(e){if(e.target.closest('a,button,.nav'))return;next();});
+  var tx=0;
+  document.addEventListener('touchstart',function(e){tx=e.changedTouches[0].clientX;},{passive:true});
+  document.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?next():prev();}},{passive:true});
+  function fit(){var s=Math.min((window.innerWidth-24)/1280,(window.innerHeight-24)/720);stage.style.transform='translate(-50%,-50%) scale('+s+')';}
+  window.addEventListener('resize',fit);fit();
+  render();
+})();
+</script>
+</body>
+</html>

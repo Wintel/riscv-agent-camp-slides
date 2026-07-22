@@ -1,6 +1,6 @@
 # 零基础 RISC-V 芯片智能体开发 · 夏令营
 
-上海交通大学夏令营 **「零基础 RISC-V 芯片智能体开发」** 教学材料。第 1 课讲义：通过连接 RISC-V 板子（Milk-V Titan），学习 Linux 基础、网络与 SSH 远程连接，为后续"在板子上开发 AI 智能体"打底。参考 MIT [Missing Semester 中文版](https://missing-semester-cn.github.io/)。
+上海交通大学夏令营 **「零基础 RISC-V 芯片智能体开发」** 教学材料。内容目前包含：第 1 课 Linux / 网络 / SSH 基础，第 2 课智能体使用入门，第 3 课智能体具体应用，以及一份“更酷的 Agent 案例”补充讲义。参考 MIT [Missing Semester 中文版](https://missing-semester-cn.github.io/)。
 
 纯 HTML 单文件幻灯片：**可离线、可投影、动画丰富、易编辑**，无需安装任何软件。
 
@@ -11,10 +11,13 @@
 | 文件 | 用途 |
 |---|---|
 | `linux-camp-slides.html` | **第 1 课完整讲义**，25 页，图 + 动画丰富 |
+| `agent-intro-slides.html` | **第 2 课讲义**，30 页，聚焦智能体使用入门 |
+| `agent-demos-slides.html` | **第 3 课讲义**，30 页，聚焦智能体具体应用 |
+| `agent-showcase-slides.html` | **案例加餐讲义**，20 页，聚焦 GUI / Web / Multi-Agent / Titan 控制中心 |
 | `template.html` | **简洁模板**（4 页示例 + 注释），做新课程时复制它 |
-| `sjtu.png` | 上海交通大学 logo，被上面两份 html 引用 |
+| `sjtu.png` | 上海交通大学 logo，被这些 html 幻灯片引用 |
 
-> ⚠️ 三个文件必须放在**同一文件夹**里，否则幻灯片里的 logo 显示不出来。
+> ⚠️ 所有 html 幻灯片和 `sjtu.png` 最好放在**同一文件夹**里，否则 logo 可能显示不出来。
 
 ---
 

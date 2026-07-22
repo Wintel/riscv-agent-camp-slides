@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 智能体酷案例 · 学森暑期营 · Agent Showcase</title>
+<!-- =========================================================================
+     SJTU 学森暑期营 · 智能体案例加餐：更酷的 Agent 示例
+     主题：GUI Agent 框架、用 Agent 开发网页系统、多 Agent 流水线、Titan 实验室控制中心。
+     基于现有 HTML 幻灯片系统与设计语言。
+     ========================================================================= -->
+<style>
+:root{
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2; --crimson-bright:#E85D74;
+  --paper:#F4F2EE; --paper-2:#ECE8E1; --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88;
+  --line:#DCD4C8; --letterbox:#16130F; --ok:#1E8A6E; --ok-soft:#DCEFE8; --warn:#C06C11; --warn-soft:#F8E8D0;
+  --term-bg:#14171E; --term-bar:#1B1F28; --term-line:#2A2F3A; --term-fg:#E7EAF0;
+  --term-green:#57D07E; --term-cyan:#54C4D4; --term-blue:#8AA6D6; --term-dim:#8891A0;
+  --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",system-ui,sans-serif;
+  --mono:"Cascadia Code","JetBrains Mono","Consolas","Menlo",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--letterbox);font-family:var(--sans);color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased}
+#app{position:fixed;inset:0;overflow:hidden;background:radial-gradient(1200px 700px at 50% -10%,#241d18,var(--letterbox) 60%)}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center;
+  background:var(--paper);border-radius:10px;overflow:hidden;
+  box-shadow:0 40px 120px -30px rgba(0,0,0,.7),0 0 0 1px rgba(0,0,0,.25)}
+#stage::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(173,23,48,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(173,23,48,.045) 1px,transparent 1px);
+  background-size:40px 40px}
+
+.chrome{position:absolute;left:0;right:0;z-index:20;display:flex;align-items:center;padding:0 56px;pointer-events:none}
+.chrome-top{top:0;height:74px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{width:42px;height:42px;display:block}
+.brand .b-1{font-weight:700;font-size:16px}
+.brand .b-2{font:600 11px var(--mono);letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase}
+.sec-tag{font:600 12px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);display:flex;align-items:center;gap:9px}
+.sec-tag::before{content:"";width:20px;height:2px;background:var(--crimson)}
+.chrome-bot{bottom:0;height:56px;justify-content:space-between}
+.counter{font:600 13px var(--mono);color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.counter b{color:var(--crimson)}
+.hint{font-size:12px;color:var(--ink-faint);display:flex;gap:8px;align-items:center}
+.kbd{font:600 11px var(--mono);background:#fff;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:2px 7px;color:var(--ink-soft)}
+#progress{position:absolute;left:0;bottom:0;height:4px;width:0;background:var(--crimson);z-index:25;transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+#deck{position:absolute;inset:0;z-index:5}
+.slide{position:absolute;inset:74px 56px 56px;opacity:0;pointer-events:none;
+  transform:translateX(70px) scale(.985);transition:opacity .5s ease,transform .55s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;justify-content:center}
+.slide.active{opacity:1;pointer-events:auto;transform:none}
+.slide.past{opacity:0;transform:translateX(-70px) scale(.985)}
+
+.two{display:grid;grid-template-columns:1.02fr 1fr;gap:52px;align-items:center;width:100%}
+.stack{display:flex;flex-direction:column}
+.eyebrow{font:600 14px var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--crimson);display:inline-flex;align-items:center;gap:11px;margin-bottom:18px}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--crimson)}
+.eyebrow .n{color:var(--ink-faint)}
+h1.title{font-size:74px;line-height:1.04;font-weight:800;margin:0;text-wrap:balance}
+h2.title{font-size:46px;line-height:1.12;font-weight:800;margin:0 0 16px;text-wrap:balance}
+.mono-accent{font-family:var(--mono);color:var(--crimson);font-weight:700}
+.lead{font-size:23px;line-height:1.55;color:var(--ink-soft);margin:0;max-width:36ch}
+.hl{color:var(--crimson);font-weight:700}
+.hl-bg{background:linear-gradient(transparent 58%,var(--crimson-soft) 58%);padding:0 2px}
+code.inline{font-family:var(--mono);background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:.9em;color:var(--crimson-deep);font-weight:600}
+
+ul.clean{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px}
+ul.clean li{display:flex;gap:14px;align-items:flex-start;font-size:20px;line-height:1.45}
+ul.clean li .mk{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--crimson-soft);color:var(--crimson);font:700 15px var(--mono);margin-top:2px}
+ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:1.4;margin-top:3px;font-weight:400}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+.card h3{margin:0 0 6px;font-size:20px}
+.card p{margin:0;font-size:16px;color:var(--ink-soft);line-height:1.45}
+.card .ic{font-size:26px;margin-bottom:10px;display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.chip{display:inline-flex;align-items:center;gap:8px;background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-size:16px;font-weight:600}
+.chip .d{width:9px;height:9px;border-radius:50%;background:var(--crimson)}
+.chip.mono{font-family:var(--mono);font-size:15px}
+.okbox{background:var(--ok-soft);border:1px solid #A9D8C9;border-radius:12px;padding:14px 18px;font-size:18px}
+.warnbox{background:var(--warn-soft);border:1px solid #E2C48D;border-radius:12px;padding:14px 18px;font-size:18px}
+.promptbox{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;font:600 15px/1.7 var(--mono);white-space:pre-wrap;color:var(--ink)}
+
+.term{background:var(--term-bg);border-radius:14px;overflow:hidden;font-family:var(--mono);border:1px solid var(--term-line);box-shadow:0 30px 70px -28px rgba(0,0,0,.55)}
+.term-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--term-bar);border-bottom:1px solid var(--term-line)}
+.term-bar .dot{width:12px;height:12px;border-radius:50%}
+.term-bar .t-title{font:600 12px var(--mono);color:var(--term-dim);margin-left:6px;letter-spacing:.06em}
+.term-body{padding:18px 22px;font-size:17px;line-height:1.75;color:var(--term-fg)}
+.term .ln{display:block;white-space:pre-wrap;word-break:break-word}
+.term .u{color:var(--term-green)} .term .p{color:var(--term-blue)} .term .cmd{color:#fff;font-weight:600} .term .out{color:var(--term-dim)}
+.term .ok{color:var(--term-green)} .term .em{color:var(--crimson-bright);font-weight:700}
+.cursor{display:inline-block;width:11px;height:1.05em;background:var(--term-green);vertical-align:-.18em;margin-left:2px;animation:blink 1.05s steps(1) infinite}
+
+.chat{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 30px 70px -28px rgba(0,0,0,.3)}
+.chat-bar{display:flex;align-items:center;gap:10px;padding:11px 16px;background:var(--paper-2);border-bottom:1px solid var(--line);font-weight:700;font-size:14px}
+.chat-bar .cic{width:26px;height:26px;border-radius:8px;background:var(--crimson);color:#fff;display:grid;place-items:center;font-size:15px}
+.chat-bar .st{margin-left:auto;font:600 11px var(--mono);color:var(--ink-faint);letter-spacing:.06em}
+.chat-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;font-size:16px;line-height:1.5}
+.bub{max-width:88%;padding:9px 14px;border-radius:13px}
+.bub.me{align-self:flex-end;background:var(--crimson);color:#fff;border-bottom-right-radius:4px}
+.bub.ai{align-self:flex-start;background:var(--paper);border:1px solid var(--line);border-bottom-left-radius:4px}
+.tooluse{align-self:flex-start;width:92%;background:var(--term-bg);color:var(--term-fg);border-radius:10px;padding:8px 13px;font:13px/1.6 var(--mono)}
+.tooluse .tl{display:block;white-space:pre-wrap;word-break:break-word}
+.tooluse .hd{color:var(--term-cyan);font-weight:700}
+.tooluse .okl{color:var(--term-green)}
+.tooluse .dim{color:var(--term-dim)}
+
+.chainrow{display:flex;align-items:center;justify-content:center;gap:14px;width:100%}
+.cnode{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 22px;text-align:center;min-width:168px}
+.cnode .ci{font-size:34px;line-height:1}
+.cnode b{display:block;margin-top:7px;font-size:19px}
+.cnode span{display:block;color:var(--ink-soft);font-size:14px;margin-top:2px}
+.cnode.hot{border-color:var(--crimson);background:var(--crimson-soft);box-shadow:0 14px 34px -18px var(--crimson)}
+.carrow{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--crimson);font-weight:700}
+.carrow .aa{font-size:30px;line-height:1}
+.carrow .al{font:700 13px var(--mono);color:var(--ink-soft);background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:3px 11px;white-space:nowrap}
+
+.appwin{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 30px 70px -28px rgba(0,0,0,.28)}
+.appbar{display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--paper-2);border-bottom:1px solid var(--line)}
+.appbar .dot{width:11px;height:11px;border-radius:50%}
+.appbar .name{font:700 13px var(--mono);color:var(--ink-soft);margin-left:6px}
+.appmain{display:grid;grid-template-columns:160px 1fr 220px;min-height:360px}
+.pane{border-right:1px solid var(--line);padding:14px}
+.pane:last-child{border-right:none}
+.phead{font:700 12px var(--mono);letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:10px}
+.plist{display:flex;flex-direction:column;gap:8px}
+.item{border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#fff;font-size:13px;color:var(--ink-soft)}
+.item.hot{background:var(--crimson-soft);border-color:var(--crimson);color:var(--crimson-deep);font-weight:700}
+.preview{background:linear-gradient(180deg,#fff,#F8F5F1);border:1px solid var(--line);border-radius:14px;padding:14px;min-height:220px}
+.pv-top{display:flex;justify-content:space-between;align-items:center}
+.pv-title{font-weight:800;font-size:18px}
+.pv-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.pv-card{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+.pv-card b{display:block;font-size:13px;color:var(--ink-soft)}
+.pv-card span{display:block;margin-top:4px;font:800 22px var(--mono);color:var(--crimson)}
+.side-note{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 11px;font-size:13px;color:var(--ink-soft);line-height:1.5}
+
+.browser{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 30px 70px -28px rgba(0,0,0,.28)}
+.browser-top{display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--paper-2);border-bottom:1px solid var(--line)}
+.addr{margin-left:8px;flex:1;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font:600 12px var(--mono);color:var(--ink-soft)}
+.browser-body{padding:18px}
+.hero-card{background:linear-gradient(140deg,var(--crimson),var(--crimson-deep));color:#fff;border-radius:18px;padding:20px 22px}
+.hero-card h3{margin:0;font-size:28px}
+.hero-card p{margin:8px 0 0;color:#ffd7dd;font-size:15px;line-height:1.5}
+.module-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.module{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+.module b{display:block;font-size:15px}
+.module span{display:block;margin-top:5px;color:var(--ink-soft);font-size:13px;line-height:1.45}
+
+.pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.step{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px}
+.step .num{width:34px;height:34px;border-radius:10px;background:var(--crimson);color:#fff;display:grid;place-items:center;font:800 16px var(--mono);margin-bottom:10px}
+.step b{display:block;font-size:18px}
+.step span{display:block;margin-top:6px;color:var(--ink-soft);font-size:14px;line-height:1.45}
+
+.tree{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;font:600 16px/1.65 var(--mono);white-space:pre-wrap}
+.tree .f{color:var(--crimson-deep)}
+.tree .d{color:var(--ink-soft)}
+
+.frag{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s cubic-bezier(.3,1,.5,1)}
+.frag.revealed{opacity:1;transform:none}
+.frag.pop{transform:scale(.9)} .frag.pop.revealed{transform:none}
+.frag.right{transform:translateX(26px)} .frag.right.revealed{transform:none}
+
+@keyframes blink{50%{opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.slide.active .rise{animation:fadeUp .7s both}
+.slide.active .rise-2{animation:fadeUp .7s .12s both}
+.slide.active .rise-3{animation:fadeUp .7s .24s both}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.cover{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 84px}
+.medallion{width:120px;height:120px;border-radius:50%;background:#fff;display:grid;place-items:center;
+  box-shadow:0 0 0 2px var(--crimson),0 18px 40px -18px rgba(173,23,48,.55);margin-bottom:30px}
+.medallion img{width:86px;height:86px}
+.cover .sub{font-size:25px;color:var(--ink-soft);margin:22px 0 0;font-weight:500}
+.cover .meta{margin-top:36px;display:flex;gap:14px;flex-wrap:wrap}
+.decor-ring{position:absolute;right:-160px;top:-160px;width:560px;height:560px;border-radius:50%;
+  border:2px dashed rgba(173,23,48,.18);pointer-events:none}
+.decor-ring.two{right:-120px;top:-120px;width:480px;height:480px;border-style:solid;border-color:rgba(173,23,48,.08)}
+.slide.active .decor-ring{animation:spin 90s linear infinite}
+
+.nav{position:absolute;bottom:14px;z-index:30;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.85);display:grid;place-items:center;cursor:pointer;color:var(--ink-soft);font-size:16px;transition:.2s}
+.nav:hover{border-color:var(--crimson);color:var(--crimson)}
+#prev{right:112px}#next{right:70px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.06ms!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+
+    <div class="chrome chrome-top">
+      <div class="brand">
+        <img src="sjtu.png" alt="上海交通大学">
+        <div>
+          <div class="b-1">零基础 RISC-V 芯片智能体开发</div>
+          <div class="b-2">上海交通大学学森暑期营 · SJTU</div>
+        </div>
+      </div>
+      <div class="sec-tag" id="secTag">开始</div>
+    </div>
+
+    <div id="deck">
+
+      <!-- 01 -->
+      <section class="slide" data-sec="开始">
+        <div class="cover">
+          <div class="decor-ring"></div>
+          <div class="decor-ring two"></div>
+          <div class="medallion rise"><img src="sjtu.png" alt="SJTU"></div>
+          <div class="rise" style="margin-bottom:16px;font-weight:700;font-size:17px;color:var(--crimson);letter-spacing:.02em;display:flex;align-items:center;gap:11px"><span style="width:26px;height:2px;background:var(--crimson)"></span>案例加餐 · Agent Showcase</div>
+          <h1 class="title rise-2">更酷的 <span class="mono-accent">Agent</span><br>可以长什么样</h1>
+          <p class="sub rise-3">不是只会修 bug，也不是只会敲命令。它还能长成 GUI 工具、网页系统、多 Agent 流水线。<span class="cursor"></span></p>
+          <div class="meta rise-3">
+            <span class="chip"><span class="d"></span>20 页</span>
+            <span class="chip">4 个案例</span>
+            <span class="chip mono">GUI · Web · Multi-Agent · Titan Ops</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 -->
+      <section class="slide" data-sec="开始">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">01</span>&nbsp;为什么要看这些</span>
+            <h2 class="title">真正让人兴奋的<br>不是“会回答”</h2>
+            <p class="lead">而是它能把聊天、文件、终端、网页、预览、审批这些东西连成一套<span class="hl">完整工作流</span>。</p>
+            <ul class="clean" style="margin-top:18px">
+              <li class="frag right"><span class="mk">看</span><div><b>更强的产品感</b><span class="sub">你会看到 Agent 不只是幕后助手，还能长成一个真的软件。</span></div></li>
+              <li class="frag right"><span class="mk">学</span><div><b>更完整的系统观</b><span class="sub">前端、后端、终端、文件系统、审批机制会同时出现。</span></div></li>
+              <li class="frag right"><span class="mk">借</span><div><b>借它找项目灵感</b><span class="sub">你下午或课后要做的作品，很可能就从这里面变出来。</span></div></li>
+            </ul>
+          </div>
+          <div class="card rise-2" style="background:var(--crimson);border-color:var(--crimson-deep);color:#fff;padding:28px 30px">
+            <span class="ic" style="font-size:34px">🚀</span>
+            <h3 style="color:#fff;font-size:24px;margin-bottom:10px">今天看什么</h3>
+            <p style="color:#ffd7dd;font-size:18px;line-height:1.6">4 个案例都围绕一件事：<br><span style="color:#fff;font-weight:800">让 Agent 不只是“做一件事”，而是“组织一整套交互”</span>。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 -->
+      <section class="slide" data-sec="开始">
+        <div class="stack" style="margin-bottom:26px">
+          <span class="eyebrow"><span class="n">02</span>&nbsp;案例地图</span>
+          <h2 class="title">今天这 4 个案例<br>各酷在不同地方</h2>
+        </div>
+        <div class="grid4">
+          <div class="card frag pop"><span class="ic">🖥️</span><h3>GUI Agent Studio</h3><p>聊天、文件树、终端、预览同屏出现，像真正的开发环境。</p></div>
+          <div class="card frag pop"><span class="ic">🌐</span><h3>Agent 做网页系统</h3><p>从需求到页面到接口到上线预览，直接走完整 Web 流程。</p></div>
+          <div class="card frag pop"><span class="ic">🧠</span><h3>多 Agent 流水线</h3><p>一个人做调度，多个 Agent 分工合作：策划、设计、编码、审查。</p></div>
+          <div class="card frag pop"><span class="ic">🛰️</span><h3>Titan 控制中心</h3><p>把多块板子的状态、日志和远程动作收进一个仪表盘。</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:24px;text-align:center">看完你会发现：酷项目并不一定更难，关键在于<span class="hl">任务拆得好、边界画得清、结果验得住</span>。</div>
+      </section>
+
+      <!-- 04 -->
+      <section class="slide" data-sec="案例一">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">03</span>&nbsp;案例一</span>
+            <h2 class="title">做一个带 GUI 的<br><span class="hl-bg">Agent Studio</span></h2>
+            <p class="lead">想象一下：左边是项目文件，中间是对话和计划，右边是预览，底下还有终端。你像指挥开发团队一样指挥 Agent。</p>
+            <ul class="clean" style="margin-top:18px">
+              <li class="frag right"><span class="mk">界</span><div><b>不再只有聊天框</b><span class="sub">因为做项目时，你总要同时看文件、看输出、看结果。</span></div></li>
+              <li class="frag right"><span class="mk">控</span><div><b>把权限和审批也放进界面</b><span class="sub">比如装依赖、删文件、联网请求，都先弹出请示卡。</span></div></li>
+              <li class="frag right"><span class="mk">连</span><div><b>聊天和执行真正打通</b><span class="sub">说一句话，界面里能直接看到它改了什么、跑了什么。</span></div></li>
+            </ul>
+          </div>
+          <div class="appwin rise-2">
+            <div class="appbar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="name">Agent Studio</span></div>
+            <div class="appmain">
+              <div class="pane">
+                <div class="phead">Project</div>
+                <div class="plist">
+                  <div class="item hot">index.html</div>
+                  <div class="item">server.py</div>
+                  <div class="item">README.md</div>
+                  <div class="item">styles.css</div>
+                </div>
+              </div>
+              <div class="pane">
+                <div class="phead">Chat & Plan</div>
+                <div class="side-note">用户：做一个 Titan 状态网页，先读现有文件，再规划。</div>
+                <div class="side-note" style="margin-top:10px;background:var(--crimson-soft);border-color:var(--crimson)">Agent：1) 查目录 2) 读取系统信息 3) 生成页面 4) 本地预览</div>
+                <div class="preview" style="margin-top:12px">
+                  <div class="pv-top"><div class="pv-title">Preview</div><span class="chip mono">localhost:8000</span></div>
+                  <div class="pv-grid">
+                    <div class="pv-card"><b>HOSTNAME</b><span>titan</span></div>
+                    <div class="pv-card"><b>ARCH</b><span>riscv64</span></div>
+                    <div class="pv-card"><b>MEM</b><span>15G</span></div>
+                    <div class="pv-card"><b>DISK</b><span>25%</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="pane">
+                <div class="phead">Actions</div>
+                <div class="item">Read file</div>
+                <div class="item">Run command</div>
+                <div class="item hot">Needs approval</div>
+                <div class="item">Open preview</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 -->
+      <section class="slide" data-sec="案例一">
+        <div class="stack" style="margin-bottom:28px">
+          <span class="eyebrow"><span class="n">04</span>&nbsp;案例一拆解</span>
+          <h2 class="title">这个 GUI 框架里<br>最关键的 4 个区块</h2>
+        </div>
+        <div class="pipeline">
+          <div class="step frag pop"><div class="num">1</div><b>聊天区</b><span>负责任务目标、计划解释、结果汇报。</span></div>
+          <div class="step frag pop"><div class="num">2</div><b>文件区</b><span>让用户知道它在看什么、改什么、有没有越界。</span></div>
+          <div class="step frag pop"><div class="num">3</div><b>终端区</b><span>把真实执行暴露出来，避免“假装完成”。</span></div>
+          <div class="step frag pop"><div class="num">4</div><b>预览区</b><span>网页、图像、日志、图表都能直接验收。</span></div>
+        </div>
+        <div class="chainrow rise" style="margin-top:30px">
+          <div class="cnode"><div class="ci">💬</div><b>对话</b><span>目标入口</span></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">计划</div></div>
+          <div class="cnode hot"><div class="ci">🛠️</div><b>工具执行</b><span>文件 / 终端 / 网络</span></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">结果</div></div>
+          <div class="cnode"><div class="ci">👀</div><b>预览验收</b><span>马上看到成品</span></div>
+        </div>
+      </section>
+
+      <!-- 06 -->
+      <section class="slide" data-sec="案例一">
+        <div class="two">
+          <div class="term rise">
+            <div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t-title">gui-agent-stack</span></div>
+            <div class="term-body">
+<span class="ln"><span class="u">idea</span><span class="p">@whiteboard:~$</span> <span class="cmd">stack</span></span>
+<span class="ln out">frontend: HTML / CSS / JS or React</span>
+<span class="ln out">shell: local terminal runner</span>
+<span class="ln out">agent: model + tools + approval layer</span>
+<span class="ln out">preview: browser / logs / charts</span>
+<span class="ln out"><span class="ok">goal</span>: see plan, execution, and result on one screen</span>
+            </div>
+          </div>
+          <div class="stack">
+            <span class="eyebrow"><span class="n">05</span>&nbsp;为什么这个例子酷</span>
+            <h2 class="title">它把“智能体”<br>做成了一个真正的软件</h2>
+            <ul class="clean" style="margin-top:12px">
+              <li class="frag right"><span class="mk">软</span><div><b>像产品，不像脚本</b><span class="sub">用户感受到的是完整交互，而不是散落的命令。</span></div></li>
+              <li class="frag right"><span class="mk">透</span><div><b>更透明</b><span class="sub">它在做什么、下一步是什么、哪里需要你批准，都看得见。</span></div></li>
+              <li class="frag right"><span class="mk">扩</span><div><b>很容易长新功能</b><span class="sub">后续能加文件 diff、语音输入、视觉预览、远程设备连接。</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 07 -->
+      <section class="slide" data-sec="案例二">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">06</span>&nbsp;案例二</span>
+            <h2 class="title">让 Agent 直接开发<br>一个网页系统</h2>
+            <p class="lead">不是做一个静态小页，而是完整走一遍：需求梳理、页面布局、数据接口、预览验收、继续迭代。</p>
+            <ul class="clean" style="margin-top:16px">
+              <li class="frag right"><span class="mk">需</span><div><b>先把需求写成产品说明</b><span class="sub">比如“做一个夏令营报名与看板系统”。</span></div></li>
+              <li class="frag right"><span class="mk">拆</span><div><b>再拆前端、后端、数据</b><span class="sub">页面长什么样，数据怎么存，哪些动作要支持。</span></div></li>
+              <li class="frag right"><span class="mk">迭</span><div><b>最后像产品经理一样迭代</b><span class="sub">再补搜索、筛选、移动端适配、状态标签。</span></div></li>
+            </ul>
+          </div>
+          <div class="browser rise-2">
+            <div class="browser-top"><span class="dot" style="background:#e0506a;width:11px;height:11px;border-radius:50%"></span><span class="dot" style="background:#f5b940;width:11px;height:11px;border-radius:50%"></span><span class="dot" style="background:#3fbb6d;width:11px;height:11px;border-radius:50%"></span><div class="addr">https://camp-board.local</div></div>
+            <div class="browser-body">
+              <div class="hero-card">
+                <h3>Camp Mission Board</h3>
+                <p>学生任务、完成度、设备状态、今日安排，全部收进一个 Web 系统。</p>
+              </div>
+              <div class="module-grid">
+                <div class="module"><b>任务面板</b><span>待做 / 进行中 / 已完成，卡片拖动更新状态。</span></div>
+                <div class="module"><b>设备状态</b><span>Titan 在线情况、IP、负载、最近心跳。</span></div>
+                <div class="module"><b>学生分组</b><span>查看每组项目、成员、负责老师。</span></div>
+                <div class="module"><b>公告区</b><span>今日安排、临时通知、资源链接。</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 08 -->
+      <section class="slide" data-sec="案例二">
+        <div class="stack" style="margin-bottom:28px">
+          <span class="eyebrow"><span class="n">07</span>&nbsp;案例二拆解</span>
+          <h2 class="title">Agent 开网页系统时<br>典型的工作流</h2>
+        </div>
+        <div class="pipeline">
+          <div class="step frag pop"><div class="num">1</div><b>产品稿</b><span>先把页面、角色、功能、状态写明白。</span></div>
+          <div class="step frag pop"><div class="num">2</div><b>页面骨架</b><span>首页、列表页、详情页、表单页先做出来。</span></div>
+          <div class="step frag pop"><div class="num">3</div><b>接口与数据</b><span>需要哪些 JSON、表结构、读写动作。</span></div>
+          <div class="step frag pop"><div class="num">4</div><b>预览与迭代</b><span>自己点一遍，再把问题具体地反馈回去。</span></div>
+        </div>
+        <div class="promptbox frag" style="margin-top:22px">请做一个“夏令营任务看板”网页系统。
+包含：任务列表、设备状态、学生分组、公告区。
+要求：
+- 桌面和手机都能看
+- 先做静态页面骨架，再补交互
+- 所有页面都要能本地预览
+- 完成后告诉我哪些文件改了，哪些功能还只是占位</div>
+      </section>
+
+      <!-- 09 -->
+      <section class="slide" data-sec="案例二">
+        <div class="two">
+          <div class="chat rise">
+            <div class="chat-bar"><span class="cic">🤖</span>Web Builder Agent<span class="st">product loop</span></div>
+            <div class="chat-body">
+              <div class="bub me">先做首页和任务列表页，风格清楚一点，不要一上来做复杂后端。</div>
+              <div class="bub ai">收到。我会先交一个可点击的静态原型，再根据你的反馈补接口和状态更新。</div>
+              <div class="tooluse">
+                <span class="tl hd">tool: create files</span>
+                <span class="tl">pages/index.html</span>
+                <span class="tl">pages/tasks.html</span>
+                <span class="tl">styles/main.css</span>
+                <span class="tl dim">preview with local server</span>
+              </div>
+              <div class="bub ai">第一轮重点是结构清楚、信息层级清楚，而不是功能一步到位。</div>
+            </div>
+          </div>
+          <div class="stack">
+            <span class="eyebrow"><span class="n">08</span>&nbsp;这类项目的关键</span>
+            <h2 class="title">先让它交原型<br>再逐层加功能</h2>
+            <ul class="clean" style="margin-top:12px">
+              <li class="frag right"><span class="mk">先</span><div><b>先看页面结构</b><span class="sub">你一眼就能看出信息组织对不对。</span></div></li>
+              <li class="frag right"><span class="mk">后</span><div><b>后补后端逻辑</b><span class="sub">接口、状态、数据库在第二阶段更稳。</span></div></li>
+              <li class="frag right"><span class="mk">省</span><div><b>省掉无效返工</b><span class="sub">页面方向错了，再精细编码也只是白忙一场。</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section class="slide" data-sec="案例三">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">09</span>&nbsp;案例三</span>
+            <h2 class="title">多 Agent 流水线：<br>一个人调度，一群 Agent 分工</h2>
+            <p class="lead">单个 Agent 已经能做很多事，但复杂项目里，你可以让不同 Agent 扮演不同角色：产品、设计、编码、审查。</p>
+            <ul class="clean" style="margin-top:16px">
+              <li class="frag right"><span class="mk">分</span><div><b>把职责拆开</b><span class="sub">谁写方案，谁做界面，谁写代码，谁做复查。</span></div></li>
+              <li class="frag right"><span class="mk">接</span><div><b>让输出接得上</b><span class="sub">前一个 Agent 的产物，要变成下一个 Agent 的输入。</span></div></li>
+              <li class="frag right"><span class="mk">控</span><div><b>人负责总控</b><span class="sub">你像导演，不是亲自做每个动作，而是把片子拍顺。</span></div></li>
+            </ul>
+          </div>
+          <div class="chainrow rise-2" style="flex-wrap:wrap;gap:10px">
+            <div class="cnode"><div class="ci">📋</div><b>Planner</b><span>拆任务</span></div>
+            <div class="carrow"><div class="aa">→</div><div class="al">spec</div></div>
+            <div class="cnode"><div class="ci">🎨</div><b>Designer</b><span>做界面</span></div>
+            <div class="carrow"><div class="aa">→</div><div class="al">ui</div></div>
+            <div class="cnode hot"><div class="ci">⌨️</div><b>Coder</b><span>实现功能</span></div>
+            <div class="carrow"><div class="aa">→</div><div class="al">review</div></div>
+            <div class="cnode"><div class="ci">🧪</div><b>Reviewer</b><span>复核与测试</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section class="slide" data-sec="案例三">
+        <div class="stack" style="margin-bottom:28px">
+          <span class="eyebrow"><span class="n">10</span>&nbsp;案例三拆解</span>
+          <h2 class="title">多 Agent 最难的<br>不是“多”，而是“交接”</h2>
+        </div>
+        <div class="grid2">
+          <div class="card frag pop">
+            <span class="ic">📦</span>
+            <h3>每个角色都要有标准输出</h3>
+            <p>比如 Planner 交 PRD，Designer 交页面清单与风格稿，Coder 交代码与运行命令，Reviewer 交发现清单。</p>
+          </div>
+          <div class="card frag pop">
+            <span class="ic">🔗</span>
+            <h3>前后环节必须接得上</h3>
+            <p>如果上一个 Agent 只留一堆空话，下一个 Agent 就只能重新猜，效率会立刻掉下来。</p>
+          </div>
+          <div class="card frag pop">
+            <span class="ic">🧭</span>
+            <h3>人类是总导演</h3>
+            <p>哪个结果值得继续，哪个方向要终止，还是由你来定，不是让链条自己无限跑。</p>
+          </div>
+          <div class="card frag pop">
+            <span class="ic">📛</span>
+            <h3>最好给每个角色一张工牌</h3>
+            <p>它的目标、权限、输入格式、输出格式，都要写清楚，不然“分工”很容易变成“互相甩锅”。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 12 -->
+      <section class="slide" data-sec="案例三">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">11</span>&nbsp;风险控制</span>
+            <h2 class="title">多 Agent 很酷<br>但更容易失控</h2>
+            <ul class="clean" style="margin-top:12px">
+              <li class="frag right"><span class="mk">绕</span><div><b>链条越长，越容易绕圈</b><span class="sub">Planner 重新改需求，Coder 又重做，Reviewer 再打回，循环反复。</span></div></li>
+              <li class="frag right"><span class="mk">糊</span><div><b>责任边界容易变糊</b><span class="sub">谁该看风险，谁该验收，谁该停手，不写清就会乱。</span></div></li>
+              <li class="frag right"><span class="mk">贵</span><div><b>成本更高</b><span class="sub">更多会话、更多上下文、更多协调，也意味着更高的模型调用成本。</span></div></li>
+            </ul>
+          </div>
+          <div class="warnbox rise-2">
+            <b style="display:block;font-size:22px;color:#935000;margin-bottom:10px">适合什么时候用</b>
+            <p style="margin:0;font-size:17px;line-height:1.6;color:#7A5D33">当项目里真的有几种明显不同的工作类型，而且单个 Agent 容易“顾此失彼”时，多 Agent 才值得上。否则，先把单 Agent 用明白，往往更划算。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13 -->
+      <section class="slide" data-sec="案例四">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">12</span>&nbsp;案例四</span>
+            <h2 class="title">Titan 实验室控制中心：<br>让 Agent 盯住一群板子</h2>
+            <p class="lead">如果实验室里不止一块 Titan，你很快就会需要一个“舰桥”：谁在线、谁掉线、谁负载高、谁刚跑完任务，一眼能看见。</p>
+            <ul class="clean" style="margin-top:16px">
+              <li class="frag right"><span class="mk">看</span><div><b>状态看板</b><span class="sub">IP、在线状态、温度、内存、磁盘、最近心跳。</span></div></li>
+              <li class="frag right"><span class="mk">控</span><div><b>远程动作</b><span class="sub">重启服务、拉日志、执行体检脚本、分发文件。</span></div></li>
+              <li class="frag right"><span class="mk">记</span><div><b>事件记录</b><span class="sub">什么时候谁点了什么动作，哪台机器返回了什么。</span></div></li>
+            </ul>
+          </div>
+          <div class="browser rise-2">
+            <div class="browser-top"><span class="dot" style="background:#e0506a;width:11px;height:11px;border-radius:50%"></span><span class="dot" style="background:#f5b940;width:11px;height:11px;border-radius:50%"></span><span class="dot" style="background:#3fbb6d;width:11px;height:11px;border-radius:50%"></span><div class="addr">https://lab-ops.local</div></div>
+            <div class="browser-body">
+              <div class="module-grid" style="margin-top:0">
+                <div class="module"><b>Titan-A</b><span>online · riscv64 · mem 22% · disk 31%</span></div>
+                <div class="module"><b>Titan-B</b><span>online · riscv64 · mem 41% · disk 46%</span></div>
+                <div class="module"><b>Titan-C</b><span>warning · temp high · last seen 8s ago</span></div>
+                <div class="module"><b>Titan-D</b><span>offline · waiting for reconnect</span></div>
+              </div>
+              <div class="hero-card" style="margin-top:14px">
+                <h3>Actions</h3>
+                <p>pull logs · run health-check · restart service · sync demo files</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 14 -->
+      <section class="slide" data-sec="案例四">
+        <div class="stack" style="margin-bottom:28px">
+          <span class="eyebrow"><span class="n">13</span>&nbsp;案例四拆解</span>
+          <h2 class="title">这个控制中心的底层<br>其实是几种普通能力的组合</h2>
+        </div>
+        <div class="chainrow rise">
+          <div class="cnode"><div class="ci">📡</div><b>采集</b><span>各板子定时上报状态</span></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">store</div></div>
+          <div class="cnode hot"><div class="ci">🗃️</div><b>汇总</b><span>后端存成统一结构</span></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">view</div></div>
+          <div class="cnode"><div class="ci">📊</div><b>可视化</b><span>浏览器里看状态卡</span></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">act</div></div>
+          <div class="cnode"><div class="ci">🤖</div><b>Agent 操作</b><span>根据你的命令触发动作</span></div>
+        </div>
+        <div class="okbox frag" style="margin-top:26px">“酷”的秘密往往不是单一黑科技，而是把很多普通能力：<b>SSH</b>、<b>网页</b>、<b>日志</b>、<b>审批</b>、<b>可视化</b>，拼成一整套体验。</div>
+      </section>
+
+      <!-- 15 -->
+      <section class="slide" data-sec="共性">
+        <div class="stack" style="margin-bottom:26px">
+          <span class="eyebrow"><span class="n">14</span>&nbsp;四个案例的共性</span>
+          <h2 class="title">这些项目虽然长得不一样<br>底层套路却很像</h2>
+        </div>
+        <div class="grid4">
+          <div class="card frag pop"><span class="ic">🎯</span><h3>目标具体</h3><p>不是“做个厉害的东西”，而是“做个看板 / 控制台 / Web 系统”。</p></div>
+          <div class="card frag pop"><span class="ic">🧰</span><h3>工具清楚</h3><p>文件、终端、浏览器、接口、日志各自负责什么都很明确。</p></div>
+          <div class="card frag pop"><span class="ic">🧱</span><h3>边界清楚</h3><p>什么能自动做，什么要审批，什么地方不能碰。</p></div>
+          <div class="card frag pop"><span class="ic">✅</span><h3>验收清楚</h3><p>有页面可看、有命令可跑、有日志可查，不靠嘴说完成。</p></div>
+        </div>
+      </section>
+
+      <!-- 16 -->
+      <section class="slide" data-sec="共性">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">15</span>&nbsp;项目脚手架</span>
+            <h2 class="title">如果你也想做一个<br>“酷 Agent 项目”</h2>
+            <p class="lead">最稳妥的方式不是一口气写满，而是先搭出一个很小但完整的骨架。</p>
+            <ul class="clean" style="margin-top:16px">
+              <li class="frag right"><span class="mk">骨</span><div><b>先定目录结构</b><span class="sub">前端、后端、文档、数据、脚本各自分开放。</span></div></li>
+              <li class="frag right"><span class="mk">规</span><div><b>再写项目规矩</b><span class="sub">告诉 Agent 该怎么命名、怎么汇报、怎么验证。</span></div></li>
+              <li class="frag right"><span class="mk">小</span><div><b>先做最小可演示版本</b><span class="sub">哪怕只有一个页面和一个按钮，也比空喊“大系统”强。</span></div></li>
+            </ul>
+          </div>
+          <div class="tree rise-2"><span class="d">project/</span>
+├─ <span class="f">README.md</span>
+├─ <span class="f">AGENTS.md</span>
+├─ <span class="d">frontend/</span>
+│  ├─ <span class="f">index.html</span>
+│  └─ <span class="f">styles.css</span>
+├─ <span class="d">backend/</span>
+│  ├─ <span class="f">server.py</span>
+│  └─ <span class="f">collect.py</span>
+├─ <span class="d">data/</span>
+│  └─ <span class="f">sample.json</span>
+└─ <span class="d">scripts/</span>
+   └─ <span class="f">health_check.sh</span></div>
+        </div>
+      </section>
+
+      <!-- 17 -->
+      <section class="slide" data-sec="共性">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">16</span>&nbsp;任务书模板</span>
+          <h2 class="title">给这种项目派活时<br>提示词要更像任务单</h2>
+        </div>
+        <div class="promptbox rise">目标：
+请做一个【GUI Agent 工具 / Web 系统 / 控制中心】。
+
+第一阶段：
+先交一个最小可演示版本，只包含【列 3 个最重要功能】。
+
+限制：
+- 先不要做复杂后端
+- 不要安装额外依赖，除非先说明原因
+- 每次改动后告诉我改了哪些文件
+
+验收：
+- 能本地预览
+- 我可以点 1 到 2 个关键交互
+- 结构清楚，下一轮容易继续加功能
+
+汇报：
+最后告诉我：已完成 / 未完成 / 下一轮建议</div>
+        <div class="warnbox frag" style="margin-top:18px">越是“酷项目”，越不能只说“你自由发挥”。自由发挥很容易直接把项目带进兔子洞。</div>
+      </section>
+
+      <!-- 18 -->
+      <section class="slide" data-sec="实践">
+        <div class="stack" style="margin-bottom:26px">
+          <span class="eyebrow"><span class="n">17</span>&nbsp;可以立刻动手</span>
+          <h2 class="title">从这 3 个练习里选一个<br>你今天就能开始搭</h2>
+        </div>
+        <div class="grid3">
+          <div class="card frag pop">
+            <span class="ic">①</span>
+            <h3>Mini Agent Studio</h3>
+            <p>用网页做一个三栏界面：聊天、文件清单、预览区。</p>
+            <p style="margin-top:10px"><b>挑战：</b>加一个“需要批准”的动作按钮。</p>
+          </div>
+          <div class="card frag pop">
+            <span class="ic">②</span>
+            <h3>Camp Board</h3>
+            <p>做一个任务看板网页，展示小组、任务、设备状态。</p>
+            <p style="margin-top:10px"><b>挑战：</b>完成桌面 + 手机两套布局。</p>
+          </div>
+          <div class="card frag pop">
+            <span class="ic">③</span>
+            <h3>Titan Fleet Panel</h3>
+            <p>用样例数据做一个多板子状态控制台。</p>
+            <p style="margin-top:10px"><b>挑战：</b>给异常状态做颜色告警和日志区。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 19 -->
+      <section class="slide" data-sec="收尾">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">18</span>&nbsp;回顾</span>
+            <h2 class="title">看完这些酷案例<br>你该记住什么</h2>
+            <ul class="clean" style="margin-top:10px;gap:9px">
+              <li class="frag right" style="font-size:19px"><span class="mk">1</span><div><b>Agent 可以长成产品</b><span class="sub" style="font-size:15px">GUI、网页、控制中心，都只是它的不同外壳。</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="mk">2</span><div><b>酷不等于乱</b><span class="sub" style="font-size:15px">项目越酷，越需要清楚的任务边界和验收标准。</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="mk">3</span><div><b>先做小闭环</b><span class="sub" style="font-size:15px">先有最小演示，再一轮一轮往上长。</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="mk">4</span><div><b>你还是总导演</b><span class="sub" style="font-size:15px">人负责方向、取舍、风险和最终拍板。</span></div></li>
+            </ul>
+          </div>
+          <div class="card frag right" style="background:var(--crimson);border-color:var(--crimson-deep);color:#fff;padding:28px 30px">
+            <span class="ic" style="font-size:34px">🧠</span>
+            <h3 style="color:#fff;font-size:24px;margin-bottom:12px">一句总结</h3>
+            <p style="color:#ffd7dd;font-size:19px;line-height:1.65">Agent 的上限，不在“它能说多少”，而在<br><span style="color:#fff;font-weight:800">你能不能把它组织成一个真正的系统</span>。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 20 -->
+      <section class="slide" data-sec="收尾">
+        <div class="two" style="align-items:center">
+          <div class="stack">
+            <div class="medallion rise" style="width:84px;height:84px;margin-bottom:16px"><img src="sjtu.png" alt="SJTU" style="width:58px;height:58px"></div>
+            <h2 class="title">谢谢！<br>下一步，做你自己的酷案例</h2>
+            <p class="lead" style="margin-top:6px">最适合做展示的项目，往往不是最大的，而是“最完整的一小步”。</p>
+            <div class="stack" style="gap:9px;margin-top:14px">
+              <div class="card frag right" style="display:flex;align-items:center;gap:13px;padding:10px 16px"><span style="font-size:22px">🤖</span><div style="font-size:15.5px"><b>上一讲：Agent 使用入门</b><br><span style="font-family:var(--mono);color:var(--crimson);font-weight:700">agent-intro-slides.html</span></div></div>
+              <div class="card frag right" style="display:flex;align-items:center;gap:13px;padding:10px 16px"><span style="font-size:22px">🧩</span><div style="font-size:15.5px"><b>第三讲：Agent 具体应用</b><br><span style="font-family:var(--mono);color:var(--crimson);font-weight:700">agent-demos-slides.html</span></div></div>
+              <div class="card frag right" style="display:flex;align-items:center;gap:13px;padding:10px 16px"><span style="font-size:22px">📚</span><div style="font-size:15.5px"><b>MIT Missing Semester（中文）</b><br><span style="font-family:var(--mono);color:var(--crimson);font-weight:700">missing-semester-cn.github.io</span></div></div>
+            </div>
+          </div>
+          <div class="card frag right" style="padding:18px 22px">
+            <div class="eyebrow" style="margin-bottom:10px">课后挑战</div>
+            <ul class="clean" style="gap:10px">
+              <li style="font-size:17px"><span class="mk">A</span><div><b>做一个三栏 Agent GUI</b><span class="sub" style="font-size:14px">聊天 + 文件 + 预览就够。</span></div></li>
+              <li style="font-size:17px"><span class="mk">B</span><div><b>做一个任务看板网页</b><span class="sub" style="font-size:14px">先静态，再交互。</span></div></li>
+              <li style="font-size:17px"><span class="mk">C</span><div><b>做一个 Titan 小舰桥</b><span class="sub" style="font-size:14px">多板子状态 + 异常提示。</span></div></li>
+            </ul>
+            <div class="okbox" style="margin-top:14px;font-size:16px">从一个最小闭环开始：<b>能打开、能点击、能解释、能继续改</b>。</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="chrome chrome-bot">
+      <div class="counter">第 <b id="cur">01</b> / <span id="total">20</span> 页</div>
+      <div class="hint"><span class="kbd">→</span><span class="kbd">空格</span> 下一步 · <span class="kbd">←</span> 返回 · <span class="kbd">F</span> 全屏</div>
+    </div>
+    <div id="progress"></div>
+    <div class="nav" id="prev" title="上一页">‹</div>
+    <div class="nav" id="next" title="下一页">›</div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var stage=document.getElementById('stage'),deck=document.getElementById('deck');
+  var slides=[].slice.call(deck.querySelectorAll('.slide'));
+  var secTag=document.getElementById('secTag'),curEl=document.getElementById('cur');
+  var totalEl=document.getElementById('total'),progress=document.getElementById('progress');
+  var cur=0,frag=0;
+  totalEl.textContent=pad(slides.length);
+  function pad(n){return (n<10?'0':'')+n;}
+  function fragsOf(i){return [].slice.call(slides[i].querySelectorAll('.frag'));}
+  function render(){
+    for(var i=0;i<slides.length;i++){slides[i].classList.toggle('active',i===cur);slides[i].classList.toggle('past',i<cur);}
+    var fr=fragsOf(cur);for(var j=0;j<fr.length;j++){fr[j].classList.toggle('revealed',j<frag);}
+    curEl.textContent=pad(cur+1);secTag.textContent=slides[cur].getAttribute('data-sec')||'';
+    progress.style.width=((cur+1)/slides.length*100)+'%';
+  }
+  function next(){var fr=fragsOf(cur);if(frag<fr.length){frag++;render();return;}if(cur<slides.length-1){cur++;frag=0;render();}}
+  function prev(){if(frag>0){frag--;render();return;}if(cur>0){cur--;frag=fragsOf(cur).length;render();}}
+  function goTo(i){cur=Math.max(0,Math.min(slides.length-1,i));frag=0;render();}
+  document.addEventListener('keydown',function(e){
+    switch(e.key){
+      case 'ArrowRight':case ' ':case 'PageDown':case 'Enter':e.preventDefault();next();break;
+      case 'ArrowLeft':case 'PageUp':case 'Backspace':e.preventDefault();prev();break;
+      case 'Home':e.preventDefault();goTo(0);break;
+      case 'End':e.preventDefault();goTo(slides.length-1);break;
+      case 'f':case 'F':if(document.fullscreenElement){document.exitFullscreen();}else if(document.documentElement.requestFullscreen){document.documentElement.requestFullscreen();}break;
+    }
+  });
+  document.getElementById('next').addEventListener('click',function(e){e.stopPropagation();next();});
+  document.getElementById('prev').addEventListener('click',function(e){e.stopPropagation();prev();});
+  document.getElementById('app').addEventListener('click',function(e){if(e.target.closest('a,button,.nav'))return;next();});
+  var tx=0;
+  document.addEventListener('touchstart',function(e){tx=e.changedTouches[0].clientX;},{passive:true});
+  document.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?next():prev();}},{passive:true});
+  function fit(){var s=Math.min((window.innerWidth-24)/1280,(window.innerHeight-24)/720);stage.style.transform='translate(-50%,-50%) scale('+s+')';}
+  window.addEventListener('resize',fit);fit();
+  render();
+})();
+</script>
+</body>
+</html>
