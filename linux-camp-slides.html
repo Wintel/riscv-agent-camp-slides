@@ -400,10 +400,37 @@ svg{overflow:visible}
         </div>
       </section>
 
+      <!-- ============ Linux 的故事 ============ -->
+      <section class="slide" data-sec="Linux 基础">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">05</span>&nbsp;冷知识时间</span>
+            <h2 class="title">一个大学生的<span class="hl">业余项目</span>，<br>怎么统治了世界</h2>
+            <p class="lead">1991 年，21 岁的芬兰大学生 <b>Linus Torvalds</b> 在宿舍写了个操作系统内核，发到网上，还谦虚地说这"只是个爱好"……</p>
+            <ul class="clean frag" style="margin-top:18px">
+              <li><span class="mk">🔓</span><div><b>开源 Open Source</b><span class="sub">源代码公开，谁都能看、能改、能免费用 —— 于是全世界一起把它越做越强</span></div></li>
+              <li><span class="mk">🐧</span><div><b>吉祥物是只企鹅 Tux</b><span class="sub">传说 Linus 逛动物园时被企鹅"咬"了一口，从此念念不忘</span></div></li>
+            </ul>
+          </div>
+          <div class="stack" style="gap:18px">
+            <div class="frag right term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">1991 · 一封改变世界的邮件</span></div>
+              <div class="term-body sm">
+<span class="ln cm"># comp.os.minix 论坛</span>
+<span class="ln out">Hello everybody — I'm doing a</span>
+<span class="ln out">(free) operating system,</span>
+<span class="ln out"><span class="em">just a hobby</span>, won't be big</span>
+<span class="ln out">and professional like gnu ...</span>
+<span class="ln"><span class="ok">                — Linus Torvalds</span></span>
+              </div></div>
+            <div class="okbox frag right" style="text-align:center">结果：这个"业余爱好"如今跑在<b>几十亿台设备</b>上 —— 也包括你面前这块 RISC-V 板子。</div>
+          </div>
+        </div>
+      </section>
+
       <!-- ============ 06 GUI vs CLI ============ -->
       <section class="slide" data-sec="Linux 基础">
         <div class="stack" style="margin-bottom:26px">
-          <span class="eyebrow"><span class="n">05</span>&nbsp;两种操作方式</span>
+          <span class="eyebrow"><span class="n">06</span>&nbsp;两种操作方式</span>
           <h2 class="title">用鼠标点，还是用键盘敲？</h2>
         </div>
         <div class="two" style="gap:40px;align-items:stretch">
@@ -431,7 +458,7 @@ svg{overflow:visible}
       <!-- ============ 07 终端与 Shell ============ -->
       <section class="slide" data-sec="Linux 基础">
         <div class="stack" style="margin-bottom:24px">
-          <span class="eyebrow"><span class="n">06</span>&nbsp;认识提示符</span>
+          <span class="eyebrow"><span class="n">07</span>&nbsp;认识提示符</span>
           <h2 class="title">终端、Shell 与提示符</h2>
           <p class="lead" style="max-width:62ch"><b>终端</b>是那个黑框框窗口；<b>Shell</b>（如 bash）是里面负责"听命令、办事情"的程序。它启动后会给你一个<b>提示符</b>，等你输入。</p>
         </div>
@@ -451,7 +478,7 @@ svg{overflow:visible}
       <section class="slide" data-sec="命令行基础">
         <div class="two v">
           <div class="stack">
-            <span class="eyebrow"><span class="n">07</span>&nbsp;动手第一步</span>
+            <span class="eyebrow"><span class="n">08</span>&nbsp;动手第一步</span>
             <h2 class="title">最先要会的<br>三个命令</h2>
             <ul class="clean" style="margin-top:14px">
               <li class="frag right"><span class="mk">1</span><div><b><code class="inline">pwd</code> —— 我在哪？</b><span class="sub">print working directory，打印当前目录</span></div></li>
@@ -473,11 +500,48 @@ svg{overflow:visible}
         <div class="okbox frag" style="margin-top:20px;text-align:center">小技巧：敲命令时按 <span class="key">Tab</span> 键可以<b>自动补全</b>文件名，按 <span class="key">↑</span> 可以<b>翻出上一条</b>命令 —— 少打很多字。</div>
       </section>
 
+      <!-- ============ 命令的结构 ============ -->
+      <section class="slide" data-sec="命令行基础">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">09</span>&nbsp;读懂一条命令</span>
+          <h2 class="title">一条命令 = 动词 + 怎么做 + 对谁做</h2>
+        </div>
+        <div style="display:flex;justify-content:center;margin:4px 0 26px">
+          <div style="font-family:var(--mono);font-weight:700;font-size:44px;display:flex;gap:22px;align-items:baseline;background:var(--term-bg);padding:18px 36px;border-radius:14px;box-shadow:0 20px 50px -24px rgba(0,0,0,.6)">
+            <span style="color:var(--term-green)">ls</span>
+            <span style="color:var(--term-cyan)">-l</span>
+            <span style="color:var(--term-blue)">/home</span>
+          </div>
+        </div>
+        <div class="grid3" style="gap:14px">
+          <div class="card frag pop"><b class="cmd-pill" style="background:var(--ok)">ls</b><h3 style="margin-top:10px">命令（动词）</h3><p>要做的事，这里是"列出文件"</p></div>
+          <div class="card frag pop"><b class="cmd-pill">-l</b><h3 style="margin-top:10px">选项 / 开关</h3><p>调整"怎么做"：<code class="inline">-l</code> = 显示详情。多个可合并成 <code class="inline">-la</code></p></div>
+          <div class="card frag pop"><b class="cmd-pill">/home</b><h3 style="margin-top:10px">参数（对谁）</h3><p>作用对象：要列哪个目录</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:20px;text-align:center">短选项一个横杠 <code class="inline">-l</code>，长选项两个横杠 <code class="inline">--all</code>。记不住某条命令？加上 <code class="inline">--help</code> 一问便知。</div>
+      </section>
+
+      <!-- ============ 键盘超能力 ============ -->
+      <section class="slide" data-sec="命令行基础">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">10</span>&nbsp;少打字 · 多干活</span>
+          <h2 class="title">键盘上的<span class="hl">超能力</span></h2>
+          <p class="lead" style="max-width:64ch">高手和新手的差距，一半藏在这几个快捷键里。今天先记住前三个。</p>
+        </div>
+        <div class="grid2" style="gap:14px">
+          <div class="card frag right" style="display:flex;gap:16px;align-items:center"><span class="key" style="flex:none">Tab</span><div><b>自动补全</b><p>打一半按 Tab，文件名 / 命令自动补齐，还顺手防打错</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:center"><span class="key" style="flex:none">↑ / ↓</span><div><b>翻历史命令</b><p>刚敲过的命令，按上箭头直接翻出来重用</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:center;border-color:var(--crimson)"><span class="key" style="flex:none">Ctrl+C</span><div><b>紧急刹车</b><p>命令卡住或跑飞了？按它立刻中断，回到提示符</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:center"><span class="key" style="flex:none">Ctrl+R</span><div><b>搜历史</b><p>输几个字，倒着搜出以前敲过的那条长命令</p></div></div>
+        </div>
+        <div class="okbox frag" style="margin-top:20px;text-align:center">还有：<span class="key">Ctrl+L</span> 清屏、连按两下 <span class="key">Tab</span> 列出所有候选。这些手感，多用几次就长在手上。</div>
+      </section>
+
       <!-- ============ 09 文件系统树 ============ -->
       <section class="slide" data-sec="命令行基础">
         <div class="two">
           <div class="stack">
-            <span class="eyebrow"><span class="n">08</span>&nbsp;文件系统</span>
+            <span class="eyebrow"><span class="n">11</span>&nbsp;文件系统</span>
             <h2 class="title">整台电脑，<br>是<span class="hl">一棵大树</span></h2>
             <p class="lead">所有文件都挂在唯一的树根 <code class="inline">/</code> 下面，一层层展开成文件夹。</p>
             <div class="stack frag" style="gap:10px;margin-top:20px">
@@ -508,10 +572,28 @@ svg{overflow:visible}
         </div>
       </section>
 
+      <!-- ============ 常见目录速览 ============ -->
+      <section class="slide" data-sec="命令行基础">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">12</span>&nbsp;东西都放哪儿</span>
+          <h2 class="title">Linux 的几个"标准房间"</h2>
+          <p class="lead" style="max-width:66ch">树根 <code class="inline">/</code> 下这几个文件夹，几乎每台 Linux 都有，各管一摊。认个脸熟就好。</p>
+        </div>
+        <div class="grid3" style="gap:14px">
+          <div class="card"><b class="cmd-pill">/home</b><p style="margin-top:8px">每个用户的"家"，你的文件都在 <code class="inline">/home/你</code></p></div>
+          <div class="card"><b class="cmd-pill">/etc</b><p style="margin-top:8px">系统的"设置面板"：各种配置文件</p></div>
+          <div class="card"><b class="cmd-pill">/bin</b><p style="margin-top:8px">命令们的家：<code class="inline">ls</code>、<code class="inline">cat</code> 这些程序本体</p></div>
+          <div class="card"><b class="cmd-pill">/tmp</b><p style="margin-top:8px">临时文件，重启可能就清空了</p></div>
+          <div class="card"><b class="cmd-pill">/var</b><p style="margin-top:8px">经常变动的东西，比如日志 log</p></div>
+          <div class="card"><b class="cmd-pill">/dev</b><p style="margin-top:8px">硬件也是"文件"：硬盘、串口都在这</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:20px;text-align:center">Linux 一大哲学：<b>一切皆文件</b> —— 连键盘、硬盘、串口，都被当成 <code class="inline">/dev</code> 下的文件来读写。</div>
+      </section>
+
       <!-- ============ 10 文件操作 ============ -->
       <section class="slide" data-sec="命令行基础">
         <div class="stack" style="margin-bottom:22px">
-          <span class="eyebrow"><span class="n">09</span>&nbsp;增删改查</span>
+          <span class="eyebrow"><span class="n">13</span>&nbsp;增删改查</span>
           <h2 class="title">操作文件的常用命令</h2>
         </div>
         <div class="grid3" style="gap:14px">
@@ -528,10 +610,35 @@ svg{overflow:visible}
         </div>
       </section>
 
+      <!-- ============ 通配符 ============ -->
+      <section class="slide" data-sec="命令行基础">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">14</span>&nbsp;一次搞定一批</span>
+            <h2 class="title">通配符：<br>给电脑下<span class="hl">"模糊指令"</span></h2>
+            <p class="lead">不想一个个点？用通配符一句话圈住一批文件。</p>
+            <ul class="clean frag" style="margin-top:20px">
+              <li><span class="mk" style="font-size:20px">*</span><div><b>星号 = 任意多个字符</b><span class="sub"><code class="inline">*.txt</code> = 所有以 .txt 结尾的文件</span></div></li>
+              <li><span class="mk" style="font-size:20px">?</span><div><b>问号 = 任意一个字符</b><span class="sub"><code class="inline">img_?.jpg</code> = img_1.jpg、img_a.jpg…</span></div></li>
+            </ul>
+          </div>
+          <div class="stack frag right" style="gap:16px">
+            <div class="term"><div class="term-body sm">
+<span class="ln cm"># 只看所有图片</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">ls</span> *.jpg</span>
+<span class="ln out">cat.jpg  dog.jpg  sea.jpg</span>
+<span class="ln cm"># 一次删掉所有日志</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">rm</span> *.log</span>
+            </div></div>
+            <div class="warn"><span class="ic">⚠️</span><div>危险的手滑：<code class="inline">rm *</code> 会删掉当前目录<b>所有文件</b>。用 <code class="inline">*</code> 之前，先用 <code class="inline">ls</code> 同样的写法看清命中了谁。</div></div>
+          </div>
+        </div>
+      </section>
+
       <!-- ============ 11 获取帮助 ============ -->
       <section class="slide" data-sec="命令行基础">
         <div class="stack" style="margin-bottom:26px">
-          <span class="eyebrow"><span class="n">10</span>&nbsp;不用背命令</span>
+          <span class="eyebrow"><span class="n">15</span>&nbsp;不用背命令</span>
           <h2 class="title">忘了怎么用？三条求助路径</h2>
           <p class="lead" style="max-width:62ch">没有人能记住所有命令和参数。会"查"，比会"背"重要得多。</p>
         </div>
@@ -547,7 +654,7 @@ svg{overflow:visible}
       <section class="slide" data-sec="命令行基础">
         <div class="two">
           <div class="stack">
-            <span class="eyebrow"><span class="n">11</span>&nbsp;命令的组合（进阶一瞥）</span>
+            <span class="eyebrow"><span class="n">16</span>&nbsp;命令的组合（进阶一瞥）</span>
             <h2 class="title">像搭积木一样<br>把命令<span class="hl">串起来</span></h2>
             <p class="lead">命令行真正的威力，在于把小工具拼在一起。现在看个眼熟就好。</p>
             <ul class="clean" style="margin-top:22px">
@@ -572,10 +679,202 @@ svg{overflow:visible}
         </div>
       </section>
 
+      <!-- ============ 查找 grep / find ============ -->
+      <section class="slide" data-sec="命令行进阶">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">17</span>&nbsp;大海捞针</span>
+            <h2 class="title">在<span class="hl">文件里</span>找字，<br>在<span class="hl">硬盘上</span>找文件</h2>
+            <ul class="clean" style="margin-top:16px">
+              <li class="frag right"><span class="mk">🔎</span><div><b>grep —— 在内容里搜</b><span class="sub">从一堆文本里，捞出含某个词的那几行</span></div></li>
+              <li class="frag right"><span class="mk">📁</span><div><b>find —— 按名字找文件</b><span class="sub">在整棵目录树里，按文件名 / 类型翻出文件</span></div></li>
+            </ul>
+            <div class="okbox frag" style="margin-top:18px">忘了某段代码写在哪个文件？<code class="inline">grep</code> 一下关键词，秒定位。</div>
+          </div>
+          <div class="stack frag right" style="gap:16px">
+            <div class="term"><div class="term-body sm">
+<span class="ln cm"># 在 notes.txt 里找含 titan 的行</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">grep</span> titan notes.txt</span>
+<span class="ln out">连上 titan：ssh student@192.168...</span>
+            </div></div>
+            <div class="term"><div class="term-body sm">
+<span class="ln cm"># 找出当前目录下所有 .py 文件</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">find</span> . -name <span class="ok">"*.py"</span></span>
+<span class="ln out">./hello.py</span>
+<span class="ln out">./demo/train.py</span>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 管道实战组合 ============ -->
+      <section class="slide" data-sec="命令行进阶">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">18</span>&nbsp;组合的威力</span>
+          <h2 class="title">小工具 + 管道 = 大本事</h2>
+          <p class="lead" style="max-width:68ch">Linux 的哲学：每个工具只做一件事、把它做到极致；再用管道 <code class="inline">|</code> 串成流水线。三个简单命令，就能回答真问题。</p>
+        </div>
+        <div class="grid3" style="gap:14px">
+          <div class="card frag pop"><div class="term" style="box-shadow:none;border-radius:10px"><div class="term-body" style="font-size:15px;line-height:1.5;padding:12px 14px"><span class="ln"><span class="cmd">history</span> | <span class="cmd">grep</span> ssh</span></div></div><p style="margin-top:10px">刚那条 ssh 命令咋敲的？从历史里挑出带 ssh 的</p></div>
+          <div class="card frag pop"><div class="term" style="box-shadow:none;border-radius:10px"><div class="term-body" style="font-size:15px;line-height:1.5;padding:12px 14px"><span class="ln"><span class="cmd">ls</span> | <span class="cmd">wc</span> -l</span></div></div><p style="margin-top:10px">这个目录里到底有多少个文件？数给我看</p></div>
+          <div class="card frag pop"><div class="term" style="box-shadow:none;border-radius:10px"><div class="term-body" style="font-size:15px;line-height:1.5;padding:12px 14px"><span class="ln"><span class="cmd">cat</span> log.txt | <span class="cmd">grep</span> ERROR</span></div></div><p style="margin-top:10px">几千行日志里，只挑出报错那几行</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:22px;text-align:center"><code class="inline">wc -l</code> = 数行数（word count 的 lines）。把命令像乐高一样拼起来，是命令行最迷人的地方。</div>
+      </section>
+
+      <!-- ============ 文本编辑器 nano ============ -->
+      <section class="slide" data-sec="命令行进阶">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">19</span>&nbsp;在命令行里写字</span>
+            <h2 class="title">改文件？<br>新手用 <span class="mono-accent">nano</span> 最省心</h2>
+            <p class="lead">命令行里也能编辑文本。先用 <b>nano</b> —— 屏幕底部那排就是它的说明书。</p>
+            <ul class="clean frag" style="margin-top:18px">
+              <li><span class="mk">1</span><div><b><code class="inline">nano hi.txt</code></b><span class="sub">打开文件（不存在就顺手新建）</span></div></li>
+              <li><span class="mk">2</span><div><b>直接打字修改</b><span class="sub">和记事本一样，移动光标、输入</span></div></li>
+              <li><span class="mk">3</span><div><b><span class="key">Ctrl+O</span> 保存 · <span class="key">Ctrl+X</span> 退出</b><span class="sub">底部的 <code class="inline">^</code> 就代表 Ctrl 键</span></div></li>
+            </ul>
+          </div>
+          <div class="stack frag right" style="gap:12px">
+            <div class="term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">GNU nano · hi.txt</span></div>
+              <div class="term-body sm">
+<span class="ln">Hello from my RISC-V board!</span>
+<span class="ln">今天我学会了 ssh 🎉</span>
+<span class="ln out">&nbsp;</span>
+<span class="ln" style="border-top:1px solid var(--term-line);padding-top:8px;color:var(--term-dim)"><span class="em">^O</span> 保存　<span class="em">^X</span> 退出　<span class="em">^W</span> 搜索</span>
+              </div></div>
+            <div class="okbox">进阶玩家爱用 <b>vim</b>（超强但门槛高）。保命一招：万一困在 vim 里，按 <span class="key">Esc</span>，再输 <code class="inline">:q!</code> 回车就能逃出来。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 权限与 sudo ============ -->
+      <section class="slide" data-sec="命令行进阶">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">20</span>&nbsp;谁有权动它</span>
+            <h2 class="title"><span class="mono-accent">sudo</span>：<br>临时借用<span class="hl">管理员钥匙</span></h2>
+            <p class="lead">Linux 里普通用户不能乱动系统文件（这是一种保护）。要装软件、改系统设置时，在命令前加 <code class="inline">sudo</code> 就行。</p>
+            <div class="tag-row frag" style="margin-top:20px">
+              <span class="chip mono">sudo apt install …</span>
+              <span class="chip mono">sudo reboot</span>
+            </div>
+            <div class="warn frag" style="margin-top:16px"><span class="ic">🔑</span><div><code class="inline">sudo</code> = "这一条用管理员身份跑"。它会先问你密码 —— 权力越大，回车前越要看清楚。</div></div>
+          </div>
+          <div class="frag right term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">ls -l 看权限</span></div>
+            <div class="term-body sm">
+<span class="ln"><span class="u">$</span> <span class="cmd">ls</span> -l</span>
+<span class="ln out"><span class="ok">-rw-r--r--</span>  student  hello.py</span>
+<span class="ln out"><span class="ok">-rwxr-xr-x</span>  student  <span class="em">run.sh</span></span>
+<span class="ln cm"># r 读 · w 写 · x 执行</span>
+<span class="ln cm"># 让脚本能被运行：</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">chmod</span> +x run.sh</span>
+            </div></div>
+        </div>
+      </section>
+
+      <!-- ============ 装软件 apt ============ -->
+      <section class="slide" data-sec="命令行进阶">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">21</span>&nbsp;给板子装东西</span>
+          <h2 class="title">apt：Linux 的<span class="hl">应用商店</span>（命令行版）</h2>
+          <p class="lead" style="max-width:66ch">想要个新工具，不用满世界找安装包。一条命令，自动下载、安装、连依赖一起配好。</p>
+        </div>
+        <div class="grid3" style="gap:14px">
+          <div class="card frag pop"><b class="cmd-pill">sudo apt update</b><p style="margin-top:8px">刷新"货架清单"，看看有哪些新版本</p></div>
+          <div class="card frag pop hot" style="border-color:var(--crimson)"><b class="cmd-pill red">sudo apt install</b><p style="margin-top:8px">装软件，比如 <code class="inline">git</code>、<code class="inline">python3</code>、<code class="inline">htop</code></p></div>
+          <div class="card frag pop"><b class="cmd-pill">sudo apt remove</b><p style="margin-top:8px">卸载不想要的</p></div>
+        </div>
+        <div class="term frag" style="margin-top:22px"><div class="term-body sm">
+<span class="ln"><span class="u">student@milkv</span><span class="p">:~$</span> <span class="cmd">sudo apt install cowsay</span></span>
+<span class="ln out">正在读取软件包列表... 完成</span>
+<span class="ln out">下载 cowsay (riscv64) ...</span>
+<span class="ln ok">安装完成 ✓  马上就能用 cowsay 了</span>
+        </div></div>
+      </section>
+
+      <!-- ============ 好玩的命令 ============ -->
+      <section class="slide" data-sec="命令行进阶">
+        <div class="stack" style="margin-bottom:16px">
+          <span class="eyebrow"><span class="n">22</span>&nbsp;放松一下 · 但都是真命令</span>
+          <h2 class="title">让命令行<span class="hl">好玩起来</span></h2>
+        </div>
+        <div class="two" style="gap:32px;align-items:stretch">
+          <div class="term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">秀一下你的板子</span></div>
+            <div class="term-body sm">
+<span class="ln"><span class="u">$</span> <span class="cmd">neofetch</span></span>
+<span class="ln out"><span class="em">OS:</span>   Ubuntu 24.04 (riscv64)</span>
+<span class="ln out"><span class="em">CPU:</span>  UR-DP1000 (8) @ 2.0GHz</span>
+<span class="ln out"><span class="em">Host:</span> Milk-V Titan</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">cowsay</span> 你好, RISC-V!</span>
+<span class="ln out"> ___________</span>
+<span class="ln out">&lt; 你好, RISC-V! &gt;</span>
+<span class="ln out"> -----------</span>
+<span class="ln out">        \   ^__^</span>
+<span class="ln out">         \  (oo)\_______</span>
+            </div></div>
+          <div class="stack" style="gap:12px">
+            <div class="card frag right"><b class="cmd-pill">neofetch</b><p style="margin-top:8px">一屏秀出这台机器的配置 —— 拿它截图炫耀你的 RISC-V 板</p></div>
+            <div class="card frag right"><b class="cmd-pill">cowsay 话</b><p style="margin-top:8px">让一头 ASCII 奶牛替你说话 🐮</p></div>
+            <div class="card frag right"><b class="cmd-pill">cal</b> &nbsp;<b class="cmd-pill">date</b><p style="margin-top:8px">日历和时间，随手就来</p></div>
+            <div class="card frag right"><b class="cmd-pill">figlet 字</b><p style="margin-top:8px">把文字变成大号艺术字招牌</p></div>
+          </div>
+        </div>
+        <div class="okbox frag" style="margin-top:14px;text-align:center">第一次用要先装（还记得上一页的 apt 吗）：<code class="inline">sudo apt install neofetch cowsay figlet</code></div>
+      </section>
+
+      <!-- ============ 进程 top ============ -->
+      <section class="slide" data-sec="命令行进阶">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">23</span>&nbsp;谁在偷偷占资源</span>
+            <h2 class="title">看看板子<br>正在<span class="hl">忙什么</span></h2>
+            <ul class="clean" style="margin-top:14px">
+              <li class="frag right"><span class="mk">📊</span><div><b>top / htop —— 任务管理器</b><span class="sub">实时看每个程序吃了多少 CPU 和内存，按 <span class="key">q</span> 退出</span></div></li>
+              <li class="frag right"><span class="mk">🆔</span><div><b>ps —— 列出在跑的程序</b><span class="sub">每个程序都有个编号 PID，像身份证号</span></div></li>
+              <li class="frag right"><span class="mk">✋</span><div><b>停掉它</b><span class="sub">前台程序按 <span class="key">Ctrl+C</span>；顽固的用 <code class="inline">kill PID</code></span></div></li>
+            </ul>
+          </div>
+          <div class="frag right term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">htop · 8 核 RISC-V</span></div>
+            <div class="term-body sm">
+<span class="ln out">CPU <span class="ok">[|||||      23%]</span>  内存 [|||   1.8G]</span>
+<span class="ln out"><span class="em">PID</span>   用户     %CPU  程序</span>
+<span class="ln out">1042  student   12.0  python3 train.py</span>
+<span class="ln out">1058  student    3.1  htop</span>
+<span class="ln cm"># 想结束 1042 号：kill 1042</span>
+            </div></div>
+        </div>
+      </section>
+
+      <!-- ============ alias 定制 ============ -->
+      <section class="slide" data-sec="命令行进阶">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">24</span>&nbsp;打造趁手的兵器</span>
+            <h2 class="title">给长命令<br>起个<span class="hl">外号</span></h2>
+            <p class="lead">老敲同一串长命令？用 <code class="inline">alias</code> 起个短外号，以后一个词搞定。</p>
+            <div class="tag-row frag" style="margin-top:20px">
+              <span class="chip">💡 写进 <code class="inline">~/.bashrc</code> 就能永久生效</span>
+            </div>
+            <p class="lead tight frag" style="margin-top:16px">这，就是每个老手电脑里那份<br>"私人配置"（<b>dotfiles</b>）的开端。</p>
+          </div>
+          <div class="frag right term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">~/.bashrc</span></div>
+            <div class="term-body sm">
+<span class="ln cm"># 给"连板子"起外号 titan</span>
+<span class="ln"><span class="cmd">alias</span> titan=<span class="ok">'ssh student@192.168.1.50'</span></span>
+<span class="ln cm"># 给"看详细列表"起外号 ll</span>
+<span class="ln"><span class="cmd">alias</span> ll=<span class="ok">'ls -alh'</span></span>
+<span class="ln out">&nbsp;</span>
+<span class="ln cm"># 以后只要：</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">titan</span>　　<span class="cm"># 一个词连上板子！</span></span>
+            </div></div>
+        </div>
+      </section>
+
       <!-- ============ 13 网络：计算机如何对话 ============ -->
       <section class="slide" data-sec="网络基础">
         <div class="stack" style="margin-bottom:20px">
-          <span class="eyebrow"><span class="n">12</span>&nbsp;网络基础</span>
+          <span class="eyebrow"><span class="n">25</span>&nbsp;网络基础</span>
           <h2 class="title">两台电脑，怎么"找到"彼此？</h2>
           <p class="lead" style="max-width:64ch">想连上板子，先得让你的电脑和板子能<span class="hl">互相通话</span>。这和寄快递很像 —— 数据被切成一个个小包裹，每个都写着地址，沿着网络送过去。</p>
         </div>
@@ -604,7 +903,7 @@ svg{overflow:visible}
       <section class="slide" data-sec="网络基础">
         <div class="two v">
           <div class="stack">
-            <span class="eyebrow"><span class="n">13</span>&nbsp;门牌号</span>
+            <span class="eyebrow"><span class="n">26</span>&nbsp;门牌号</span>
             <h2 class="title"><span class="mono-accent">IP</span> 地址<br>与局域网</h2>
             <p class="lead">IP 就是每台设备在网络里的<span class="hl">门牌号</span>，长这样：</p>
             <div class="chip mono frag" style="align-self:flex-start;font-size:22px;padding:10px 18px;margin-top:14px;background:var(--crimson-soft);border-color:var(--crimson)">192.168.1.50</div>
@@ -635,7 +934,7 @@ svg{overflow:visible}
       <section class="slide" data-sec="网络基础">
         <div class="two">
           <div class="stack">
-            <span class="eyebrow"><span class="n">14</span>&nbsp;找到它 · 试探它</span>
+            <span class="eyebrow"><span class="n">27</span>&nbsp;找到它 · 试探它</span>
             <h2 class="title">板子的 IP 是多少？</h2>
             <ul class="clean" style="margin-top:12px">
               <li class="frag right"><span class="mk">A</span><div><b>在板子上直接查</b><span class="sub">通过串口登录后运行 <code class="inline">ip addr</code>，找到 192.168 开头的那个</span></div></li>
@@ -660,7 +959,7 @@ svg{overflow:visible}
       <section class="slide" data-sec="网络基础">
         <div class="two v">
           <div class="stack">
-            <span class="eyebrow"><span class="n">15</span>&nbsp;最后一块拼图</span>
+            <span class="eyebrow"><span class="n">28</span>&nbsp;最后一块拼图</span>
             <h2 class="title">端口：<br>一台电脑的<span class="hl">很多扇门</span></h2>
             <p class="lead">找到了 IP（哪栋楼），还得知道敲<span class="hl">哪扇门</span>。一台电脑上跑着很多服务，每个都守着一个编号的"门" —— 这就是<b>端口</b>。</p>
             <div class="tag-row frag" style="margin-top:22px">
@@ -682,7 +981,7 @@ svg{overflow:visible}
       <!-- ============ 17 什么是 SSH ============ -->
       <section class="slide" data-sec="SSH 远程连接">
         <div class="stack" style="margin-bottom:24px">
-          <span class="eyebrow"><span class="n">16</span>&nbsp;今天的主角</span>
+          <span class="eyebrow"><span class="n">29</span>&nbsp;今天的主角</span>
           <h2 class="title"><span class="mono-accent">SSH</span> = Secure Shell</h2>
           <p class="lead" style="max-width:66ch">一句话：<span class="hl">安全地、从你的电脑，去操作另一台电脑的命令行</span>。板子没接屏幕、可能在别的房间甚至云端 —— SSH 让你像坐在它面前一样敲命令。</p>
         </div>
@@ -707,7 +1006,7 @@ svg{overflow:visible}
       <!-- ============ 18 SSH 如何工作 ============ -->
       <section class="slide" data-sec="SSH 远程连接">
         <div class="stack" style="margin-bottom:26px">
-          <span class="eyebrow"><span class="n">17</span>&nbsp;幕后发生了什么</span>
+          <span class="eyebrow"><span class="n">30</span>&nbsp;幕后发生了什么</span>
           <h2 class="title">SSH 连接的四步（简化版）</h2>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
@@ -722,22 +1021,19 @@ svg{overflow:visible}
       <!-- ============ 19 第一次连接（核心页）============ -->
       <section class="slide" data-sec="SSH 远程连接">
         <div class="stack" style="margin-bottom:16px">
-          <span class="eyebrow"><span class="n">18</span>&nbsp;★ 核心实操</span>
+          <span class="eyebrow"><span class="n">31</span>&nbsp;★ 核心实操</span>
           <h2 class="title">你的第一次 SSH 连接</h2>
         </div>
         <div class="two" style="gap:36px;align-items:center">
           <div class="term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">在你自己的电脑上</span></div>
             <div class="term-body sm">
 <span class="ln"><span class="u">$</span> <span class="cmd">ssh</span> <span class="em">student</span>@<span class="h">192.168.1.50</span></span>
-<span class="ln frag out">The authenticity of host ... can't be</span>
-<span class="ln frag out">established. ED25519 fingerprint is</span>
-<span class="ln frag out">SHA256:aBcD... Continue? <span class="ok">yes</span> ⏎</span>
+<div class="frag"><span class="ln out">The authenticity of host ... can't be</span><span class="ln out">established. ED25519 fingerprint is</span><span class="ln out">SHA256:aBcD... Continue? <span class="ok">yes</span> ⏎</span></div>
 <span class="ln frag out">student@192.168.1.50's password: <span class="ok">••••••</span></span>
-<span class="ln frag" style="color:var(--term-green)">Welcome to Ubuntu (RISC-V) 🎉</span>
-<span class="ln frag"><span class="u">student</span><span class="p">@</span><span class="h" style="color:var(--crimson-bright)">milkv</span><span class="p">:~$</span> <span class="cursor"></span></span>
+<div class="frag"><span class="ln" style="color:var(--term-green)">Welcome to Ubuntu (RISC-V) 🎉</span><span class="ln"><span class="u">student</span><span class="p">@</span><span class="h" style="color:var(--crimson-bright)">milkv</span><span class="p">:~$</span> <span class="cursor"></span></span></div>
             </div></div>
           <div class="stack" style="gap:16px">
-            <div class="card frag right"><b>格式：<code class="inline">ssh 用户名@板子IP</code></b><p style="margin-top:4px">就这一条命令，是今天最需要记住的。</p></div>
+            <div class="card"><b>格式：<code class="inline">ssh 用户名@板子IP</code></b><p style="margin-top:4px">就这一条命令，是今天最需要记住的。</p></div>
             <div class="warn frag right"><span class="ic">👀</span><div>第一次会问 <b>fingerprint</b>，确认后输 <b><code class="inline">yes</code></b> 回车。之后就不再问了。</div></div>
             <div class="warn frag right"><span class="ic">🙈</span><div>输密码时<b>屏幕不显示任何字符</b>，这是正常的安全设计 —— 别以为键盘坏了，照打回车即可。</div></div>
             <div class="okbox frag right">看到提示符从你电脑的名字，<b>变成了 <code class="inline">student@milkv</code></b> —— 恭喜，你已经在板子里面了！🎉</div>
@@ -749,7 +1045,7 @@ svg{overflow:visible}
       <section class="slide" data-sec="SSH 远程连接">
         <div class="two">
           <div class="stack">
-            <span class="eyebrow"><span class="n">19</span>&nbsp;进阶 · 可选</span>
+            <span class="eyebrow"><span class="n">32</span>&nbsp;进阶 · 可选</span>
             <h2 class="title">免密码登录：<br><span class="hl">SSH 密钥</span></h2>
             <p class="lead">每次输密码太麻烦，也不够安全。更好的方式是用一对"钥匙"。</p>
             <ul class="clean" style="margin-top:20px">
@@ -770,7 +1066,7 @@ svg{overflow:visible}
       <section class="slide" data-sec="SSH 远程连接">
         <div class="two v">
           <div class="stack">
-            <span class="eyebrow"><span class="n">20</span>&nbsp;顺手一招</span>
+            <span class="eyebrow"><span class="n">33</span>&nbsp;顺手一招</span>
             <h2 class="title">在两台电脑间<br><span class="hl">传文件</span></h2>
             <p class="lead"><code class="inline">scp</code>（secure copy）用的是同一套 SSH，把文件安全地拷来拷去。</p>
             <div class="tag-row frag" style="margin-top:22px">
@@ -793,10 +1089,35 @@ svg{overflow:visible}
         </div>
       </section>
 
+      <!-- ============ tmux 断线不怕 ============ -->
+      <section class="slide" data-sec="SSH 远程连接">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">34</span>&nbsp;断线也不怕</span>
+            <h2 class="title">合上笔记本，<br>板子上的活<span class="hl">继续跑</span></h2>
+            <p class="lead">SSH 一断，正在跑的程序通常也跟着没了。<b>tmux</b> 把会话"寄存"在板子上，让你随时断开、随时接回。</p>
+            <ul class="clean frag" style="margin-top:18px">
+              <li><span class="mk">▸</span><div><b>场景</b><span class="sub">板子上跑着要几小时的任务，你想合上电脑回家</span></div></li>
+              <li><span class="mk">✓</span><div><b>有了 tmux</b><span class="sub">断开连接，任务照跑；明天 ssh 回来，接着看</span></div></li>
+            </ul>
+          </div>
+          <div class="frag right term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">在板子上</span></div>
+            <div class="term-body sm">
+<span class="ln cm"># 开一个可寄存的会话</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">tmux</span></span>
+<span class="ln cm"># ...启动你的长任务...</span>
+<span class="ln cm"># 按 Ctrl+B 松手，再按 D = 离开</span>
+<span class="ln out">[detached]  ← 人走了，任务还在后台跑</span>
+<span class="ln cm"># 下次回来，一键接回：</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">tmux</span> attach</span>
+            </div></div>
+        </div>
+      </section>
+
       <!-- ============ 22 实战：连上 Titan + 规格 ============ -->
       <section class="slide" data-sec="实战与收尾">
         <div class="stack" style="margin-bottom:18px">
-          <span class="eyebrow"><span class="n">21</span>&nbsp;串起来 · 上手</span>
+          <span class="eyebrow"><span class="n">35</span>&nbsp;串起来 · 上手</span>
           <h2 class="title">实战：连上 Milk-V Titan</h2>
         </div>
         <div class="two" style="gap:40px;align-items:center">
@@ -820,12 +1141,12 @@ svg{overflow:visible}
               <rect x="34" y="140" width="34" height="24" rx="4" fill="var(--paper-2)" stroke="var(--line)"/><text x="51" y="156" text-anchor="middle" font-size="9" fill="var(--ink-soft)" font-family="var(--mono)">USB3</text>
               <rect x="34" y="180" width="34" height="18" rx="4" fill="var(--crimson-soft)" stroke="var(--crimson)"/><text x="51" y="193" text-anchor="middle" font-size="8" fill="var(--crimson-deep)" font-family="var(--mono)">Type-C</text>
             </svg>
-            <div class="tag-row" style="justify-content:center;margin-top:8px">
-              <span class="chip mono frag">8 核 RISC-V · 最高 2.0GHz</span>
-              <span class="chip mono frag">DDR4 · 最高 64GB</span>
-              <span class="chip mono frag">千兆网口</span>
-              <span class="chip mono frag">Ubuntu / Debian / Fedora</span>
-              <span class="chip mono frag">MINI-ITX 主板</span>
+            <div class="tag-row frag" style="justify-content:center;margin-top:8px">
+              <span class="chip mono">8 核 RISC-V · 最高 2.0GHz</span>
+              <span class="chip mono">DDR4 · 最高 64GB</span>
+              <span class="chip mono">千兆网口</span>
+              <span class="chip mono">Ubuntu / Debian / Fedora</span>
+              <span class="chip mono">MINI-ITX 主板</span>
             </div>
           </div>
           <div class="stack" style="gap:14px">
@@ -837,10 +1158,90 @@ svg{overflow:visible}
         </div>
       </section>
 
+      <!-- ============ Shell 脚本一瞥 ============ -->
+      <section class="slide" data-sec="实战与收尾">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">36</span>&nbsp;让电脑替你重复</span>
+            <h2 class="title">把命令写成<br><span class="hl">脚本</span>，一键重放</h2>
+            <p class="lead">老重复同样几步？把它们写进一个 <code class="inline">.sh</code> 文件，以后运行一次就全跑完 —— 这就是<b>自动化</b>的起点。</p>
+            <ul class="clean frag" style="margin-top:16px">
+              <li><span class="mk">1</span><div><b><code class="inline">nano hello.sh</code></b><span class="sub">写下要执行的命令</span></div></li>
+              <li><span class="mk">2</span><div><b><code class="inline">chmod +x hello.sh</code></b><span class="sub">给它"可执行"权限（还记得那个 x 吗）</span></div></li>
+              <li><span class="mk">3</span><div><b><code class="inline">./hello.sh</code></b><span class="sub">运行！</span></div></li>
+            </ul>
+          </div>
+          <div class="frag right term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">hello.sh</span></div>
+            <div class="term-body sm">
+<span class="ln cm">#!/bin/bash</span>
+<span class="ln cm"># 跟这台机器打个招呼</span>
+<span class="ln"><span class="cmd">echo</span> "我是 $(hostname)"</span>
+<span class="ln"><span class="cmd">echo</span> "现在 $(date)"</span>
+<span class="ln"><span class="cmd">for</span> i in 1 2 3; <span class="cmd">do</span></span>
+<span class="ln">　　<span class="cmd">echo</span> "第 $i 次 hello"</span>
+<span class="ln"><span class="cmd">done</span></span>
+            </div></div>
+        </div>
+      </section>
+
+      <!-- ============ Git 概念 ============ -->
+      <section class="slide" data-sec="实战与收尾">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">37</span>&nbsp;写代码的时光机</span>
+            <h2 class="title"><span class="mono-accent">Git</span>：<br>给代码存<span class="hl">存档点</span></h2>
+            <p class="lead">写程序像打游戏：改着改着就崩了，多想读档重来。<b>Git</b> 把每一步都存成存档，让你随时回到过去，也能和别人一起改同一份代码。</p>
+            <ul class="clean frag" style="margin-top:18px">
+              <li><span class="mk">🎮</span><div><b>commit = 存档</b><span class="sub">给此刻的代码拍张快照，附一句"这次改了啥"</span></div></li>
+              <li><span class="mk">↩️</span><div><b>回退 = 读档</b><span class="sub">改坏了？回到任何一个存过的档，干干净净</span></div></li>
+              <li><span class="mk">☁️</span><div><b>GitHub = 云备份 + 协作</b><span class="sub">把存档推到云上，多人一起干、还不怕丢</span></div></li>
+            </ul>
+          </div>
+          <div class="stack" style="gap:14px">
+            <div class="frag right term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">git log · 存档历史</span></div>
+              <div class="term-body sm">
+<span class="ln"><span class="u">$</span> <span class="cmd">git</span> log --oneline</span>
+<span class="ln out"><span class="em">a1b2c3d</span> 修好了刷新按钮 <span class="cm">← 现在</span></span>
+<span class="ln out"><span class="em">9f8e7d6</span> 加了状态卡片</span>
+<span class="ln out"><span class="em">3c2b1a0</span> 初稿：能跑的空页面</span>
+<span class="ln cm"># 每一行 = 一个存档点，都能回去</span>
+              </div></div>
+            <div class="okbox frag right" style="text-align:center">这不是"下一课"才用的东西 —— <b>今天写完第一个脚本，就能用它护着代码</b>。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Git 上手实操 ============ -->
+      <section class="slide" data-sec="实战与收尾">
+        <div class="two">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">38</span>&nbsp;真·上手</span>
+            <h2 class="title">存档三步，<br>外加一招<span class="hl">读档</span></h2>
+            <p class="lead">先装上：<code class="inline">sudo apt install git</code>。然后记住这套动作 —— 存档就三步。</p>
+            <ul class="clean frag" style="margin-top:16px">
+              <li><span class="mk">1</span><div><b><code class="inline">git init</code></b><span class="sub">在项目文件夹里开一个"存档柜"（每个项目只做一次）</span></div></li>
+              <li><span class="mk">2</span><div><b><code class="inline">git add .</code></b><span class="sub">把要存的改动挑进来（<code class="inline">.</code> = 当前目录全部）</span></div></li>
+              <li><span class="mk">3</span><div><b><code class="inline">git commit -m "说明"</code></b><span class="sub">正式存档，附一句人话说明</span></div></li>
+            </ul>
+          </div>
+          <div class="stack frag right" style="gap:14px">
+            <div class="term"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">存一个档</span></div>
+              <div class="term-body sm">
+<span class="ln"><span class="u">$</span> <span class="cmd">git</span> init</span>
+<span class="ln out">已初始化空仓库 ✓</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">git</span> add .</span>
+<span class="ln"><span class="u">$</span> <span class="cmd">git</span> commit -m <span class="ok">"我的第一个脚本"</span></span>
+<span class="ln ok">[main abc1234] 我的第一个脚本 ✓</span>
+              </div></div>
+            <div class="okbox"><b>改坏了想读档？</b>先 <code class="inline">git status</code> 看看动了啥，再用 <code class="inline">git restore 文件</code> 把它还原成上次存档的样子。</div>
+          </div>
+        </div>
+      </section>
+
       <!-- ============ 23 常见问题 ============ -->
       <section class="slide" data-sec="实战与收尾">
         <div class="stack" style="margin-bottom:22px">
-          <span class="eyebrow"><span class="n">22</span>&nbsp;卡住了别慌</span>
+          <span class="eyebrow"><span class="n">39</span>&nbsp;卡住了别慌</span>
           <h2 class="title">连不上？对照排查</h2>
         </div>
         <div class="grid2" style="gap:16px">
@@ -852,11 +1253,28 @@ svg{overflow:visible}
         <div class="okbox frag" style="margin-top:22px;text-align:center">📋 终极大招：把<b>完整的报错信息复制给大模型</b>，描述你做了什么，它几乎总能帮你定位问题。</div>
       </section>
 
+      <!-- ============ 闯关挑战 ============ -->
+      <section class="slide" data-sec="实战与收尾">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">40</span>&nbsp;现在轮到你了</span>
+          <h2 class="title">五个小关卡，闯闯看 🎮</h2>
+          <p class="lead" style="max-width:66ch">连上板子后挨个试。卡住了？先 <code class="inline">--help</code>，再把报错<b>丢给大模型</b>。</p>
+        </div>
+        <div class="grid2" style="gap:14px">
+          <div class="card" style="display:flex;gap:14px;align-items:flex-start"><div class="step-n">1</div><div><b>安个家</b><p style="margin-top:2px">在家目录建 <code class="inline">camp</code> 文件夹，进去，用 <code class="inline">pwd</code> 确认位置</p></div></div>
+          <div class="card" style="display:flex;gap:14px;align-items:flex-start"><div class="step-n">2</div><div><b>留个名</b><p style="margin-top:2px">用 nano 写个 <code class="inline">me.txt</code>，写上名字和今天日期</p></div></div>
+          <div class="card" style="display:flex;gap:14px;align-items:flex-start"><div class="step-n">3</div><div><b>点名机器</b><p style="margin-top:2px">跑 <code class="inline">neofetch</code>，截图你的 RISC-V 配置</p></div></div>
+          <div class="card" style="display:flex;gap:14px;align-items:flex-start"><div class="step-n">4</div><div><b>数一数</b><p style="margin-top:2px">用一条管道，数出 <code class="inline">/etc</code> 里有多少个东西</p></div></div>
+          <div class="card" style="display:flex;gap:14px;align-items:flex-start;border-color:var(--crimson)"><div class="step-n">5</div><div><b>自动化</b><p style="margin-top:2px">写个 <code class="inline">hi.sh</code>，运行后打印三行问候</p></div></div>
+          <div class="card frag right" style="display:flex;gap:14px;align-items:flex-start;background:var(--crimson);border-color:var(--crimson-deep)"><div class="step-n" style="background:#fff;color:var(--crimson)">★</div><div><b style="color:#fff">通关</b><p style="margin-top:2px;color:#ffd7dd">全搞定？你已经能用命令行操作一台真芯片了</p></div></div>
+        </div>
+      </section>
+
       <!-- ============ 24 下一步 + 总结 ============ -->
       <section class="slide" data-sec="实战与收尾">
         <div class="two">
           <div class="stack">
-            <span class="eyebrow"><span class="n">23</span>&nbsp;你已经会了</span>
+            <span class="eyebrow"><span class="n">41</span>&nbsp;你已经会了</span>
             <h2 class="title">回顾：<br>你今天掌握的</h2>
             <ul class="clean" style="margin-top:14px">
               <li class="frag right"><span class="mk">🐧</span><div><b>Linux &amp; 命令行</b><span class="sub">pwd / ls / cd / mkdir / cat …</span></div></li>
@@ -913,7 +1331,7 @@ svg{overflow:visible}
 
     <!-- 底栏 -->
     <div class="chrome chrome-bot">
-      <div class="counter">第 <b id="cur">01</b> / <span id="total">25</span> 页</div>
+      <div class="counter">第 <b id="cur">01</b> / <span id="total">43</span> 页</div>
       <div class="hint"><span class="kbd">→</span><span class="kbd">空格</span> 下一步 · <span class="kbd">←</span> 返回 · <span class="kbd">F</span> 全屏</div>
     </div>
     <div id="progress"></div>

@@ -16,7 +16,7 @@
 
 | 文件 | 说明 |
 |---|---|
-| `linux-camp-slides.html` | 第 1 课完整讲义，25 页，单文件 |
+| `linux-camp-slides.html` | 第 1 课完整讲义，43 页，单文件 |
 | `template.html` | 精简可复用模板（同一套设计系统 + 引擎） |
 | `sjtu.png` | 交大 logo（316×316 RGBA），被 html 以相对路径引用 |
 | `README.md` | 面向使用者的文档 |
