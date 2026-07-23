@@ -1,6 +1,6 @@
 # 零基础 RISC-V 芯片智能体开发 · 夏令营
 
-上海交通大学夏令营 **「零基础 RISC-V 芯片智能体开发」** 教学材料。内容目前包含：开营导论（芯片 → 系统 → 智能的全景），第 1 课 Linux / 网络 / SSH 基础，第 2 课智能体使用入门，第 3 课智能体具体应用，以及一份“更酷的 Agent 案例”补充讲义。参考 MIT [Missing Semester 中文版](https://missing-semester-cn.github.io/)。
+上海交通大学夏令营 **「零基础 RISC-V 芯片智能体开发」** 教学材料。内容目前包含：开营导论（芯片 → 系统 → 智能的全景），第 1 课 Linux / 命令行 / 网络 / SSH / Git 基础，第 2 课智能体使用入门，第 3 课智能体具体应用，以及一份“更酷的 Agent 案例”补充讲义。参考 MIT [Missing Semester 中文版](https://missing-semester-cn.github.io/)。
 
 纯 HTML 单文件幻灯片：**可离线、可投影、动画丰富、易编辑**，无需安装任何软件。
 
