@@ -280,6 +280,48 @@ svg{overflow:visible}
 .loopstep span{color:var(--ink-soft);font-size:14px}
 .loopstep.hot{border-color:var(--crimson);background:var(--crimson-soft)}
 
+/* 实证卡：左边一个日期胶囊，右边一句话 + 补充。用来给论点配上真实发生过的事 */
+.news{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 20px;display:flex;gap:16px;align-items:flex-start}
+.news .dt{flex:none;font:700 12px var(--mono);color:#fff;background:var(--crimson);border-radius:999px;
+  padding:5px 11px;margin-top:3px;letter-spacing:.03em}
+.news .nb{font-size:19px;line-height:1.4}
+.news .nb .s{display:block;color:var(--ink-soft);font-size:15.5px;margin-top:5px;line-height:1.42;font-weight:400}
+.news.soft .dt{background:var(--crimson-soft);color:var(--crimson-deep)}
+
+/* 路线图：四天 / 四步 横向排 */
+.road{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.road .rd{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 17px 18px}
+.road .rd .d{font:700 12px var(--mono);color:var(--crimson);letter-spacing:.12em}
+.road .rd b{display:block;margin:8px 0 6px;font-size:19px}
+.road .rd p{margin:0;font-size:15px;color:var(--ink-soft);line-height:1.42}
+.road .rd.now{border-color:var(--crimson);background:var(--crimson-soft)}
+
+/* 竖向时间线（讲来历用）*/
+.tl{display:flex;flex-direction:column;border-left:2px solid var(--line);margin-left:9px}
+.tl .ev{position:relative;padding:0 0 20px 26px}
+.tl .ev:last-child{padding-bottom:0}
+.tl .ev::before{content:"";position:absolute;left:-8px;top:5px;width:13px;height:13px;border-radius:50%;
+  background:var(--crimson);box-shadow:0 0 0 3px var(--paper)}
+.tl .ev .y{font:700 15px var(--mono);color:var(--crimson);letter-spacing:.04em}
+.tl .ev .t{font-size:19px;line-height:1.42;margin-top:2px}
+.tl .ev .t .s{display:block;color:var(--ink-soft);font-size:15.5px;margin-top:3px;line-height:1.4}
+
+/* 五步流水线（讲芯片怎么造）*/
+.fab{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.fab .st{background:#fff;border:1px solid var(--line);border-radius:13px;padding:15px 11px;text-align:center}
+.fab .st .i{font-size:29px;line-height:1}
+.fab .st b{display:block;margin:8px 0 5px;font-size:17px}
+.fab .st span{font-size:13.5px;color:var(--ink-soft);line-height:1.35;display:block}
+.fab .st.last{border-color:var(--crimson);background:var(--crimson-soft)}
+
+/* 简易对比表 */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);
+  border-radius:14px;overflow:hidden;font-size:17px}
+.tbl th,.tbl td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line)}
+.tbl thead th{background:var(--paper-2);font:700 14px var(--mono);color:var(--ink-soft);letter-spacing:.05em}
+.tbl tbody tr:last-child td{border-bottom:none}
+.tbl tr.me td{background:var(--crimson-soft);font-weight:700;color:var(--crimson-deep)}
+
 /* 减弱动画偏好 */
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.06ms!important}
@@ -322,10 +364,34 @@ svg{overflow:visible}
         </div>
       </section>
 
+      <!-- ============ 开场钩子：两条今年的新闻 ============ -->
+      <section class="slide" data-sec="序">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">01</span>&nbsp;开场</span>
+          <h2 class="title">先看两条<span class="hl-bg">今年的新闻</span></h2>
+        </div>
+        <div class="stack" style="gap:14px">
+          <div class="news frag right">
+            <span class="dt">2026.04</span>
+            <div class="nb">谷歌 CEO 说：公司现在 <b>75% 的新代码由 AI 生成</b>，再由工程师审核通过。
+              <span class="s">2024 年秋天这个数字还只是 25%。微软 CEO 2025 年也说过，自家约 30% 的代码出自 AI。</span></div>
+          </div>
+          <div class="news frag right">
+            <span class="dt">2026.07</span>
+            <div class="nb">就在这个月，<b>RISC-V 欧洲峰会</b>在意大利博洛尼亚开幕，主题是：数据中心、边缘 AI、航天。
+              <span class="s">高通、英伟达、Meta、谷歌、阿里，都已经把这套开放架构用进了自家产品。</span></div>
+          </div>
+        </div>
+        <div class="okbox frag" style="margin-top:24px;text-align:center;font-size:20px">
+          一条讲<b>谁来写代码</b>，一条讲<b>代码跑在什么芯片上</b>。<br>
+          这四天，你会把这两件事<span class="hl">同时</span>拿到手里。
+        </div>
+      </section>
+
       <!-- ============ 02 全景：三层塔 ============ -->
       <section class="slide" data-sec="序">
         <div class="stack" style="margin-bottom:22px">
-          <span class="eyebrow"><span class="n">01</span>&nbsp;全景</span>
+          <span class="eyebrow"><span class="n">02</span>&nbsp;全景</span>
           <h2 class="title">我们的舞台：<span class="hl-bg">一台 RISC-V 电脑，加一个 AI 助手</span></h2>
           <p class="lead" style="max-width:74ch">这四天，你会认识一台国产 RISC-V 小电脑（芯片 + Linux），并学会用 AI 智能体在它上面做开发。下面两层是你要开发的机器，最上面一层，是帮你开发的 AI。</p>
         </div>
@@ -337,11 +403,45 @@ svg{overflow:visible}
         <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:19px;margin-top:20px">今天四站：<b>① Linux</b> · <b>② RISC-V 架构</b> · <b>③ DP1000 芯片</b> · <b>④ 大模型与智能体</b></p>
       </section>
 
+      <!-- ============ 四天路线图 ============ -->
+      <section class="slide" data-sec="序">
+        <div class="stack" style="margin-bottom:24px">
+          <span class="eyebrow"><span class="n">03</span>&nbsp;路线图</span>
+          <h2 class="title">这四天，我们怎么走</h2>
+        </div>
+        <div class="road">
+          <div class="rd now frag pop"><div class="d">DAY 1 · 今天</div><b>看清全景</b><p>认识这台机器和这个 AI，下午一起把开发环境搭起来。</p></div>
+          <div class="rd frag pop"><div class="d">DAY 2</div><b>真的连上去</b><p>Linux 命令行、IP、SSH——从你的电脑远程住进板子里。</p></div>
+          <div class="rd frag pop"><div class="d">DAY 3</div><b>请 AI 进板子</b><p>让智能体住进 Titan，学会给它派活、看它干活。</p></div>
+          <div class="rd frag pop"><div class="d">DAY 4</div><b>做出点东西</b><p>用智能体在板子上做一个属于你自己的小项目。</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:26px;text-align:center;font-size:20px">
+          今天这节课＝<b>发给你一张地图</b>。后面三天，都是照着地图走路。<br>
+          <span style="color:var(--ink-soft);font-size:17px">所以今天听不懂细节没关系——记住"有这么个东西"就够了。</span>
+        </div>
+      </section>
+
+      <!-- ============ 预备：一台电脑由什么组成 ============ -->
+      <section class="slide" data-sec="Linux">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">04</span>&nbsp;第一站 · 先认零件</span>
+          <h2 class="title">先拆开看：一台电脑里<span class="hl">有什么</span></h2>
+          <p class="lead" style="max-width:72ch">不管是你的笔记本、你的手机，还是等下要发到你手上的这块板子，里面永远是这四样东西在配合。</p>
+        </div>
+        <div class="grid2" style="gap:16px">
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🧠</span><div><h3>CPU 处理器 —— 大脑</h3><p style="margin-top:4px">负责算。Titan 上是 <b>UR-DP1000，8 个核</b>，等下细讲。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">📖</span><div><h3>内存 DDR4 —— 书桌</h3><p style="margin-top:4px">正在用的东西摊在桌上，拿得飞快，<b>但一断电就全没了</b>。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🗄️</span><div><h3>硬盘 M.2 SSD —— 书柜</h3><p style="margin-top:4px">关机也留着。系统、你写的代码，都住在这儿。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🌐</span><div><h3>网口 —— 门</h3><p style="margin-top:4px">和外面世界说话的唯一通道。第 2 天你就是从这道门进去的。</p></div></div>
+        </div>
+        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:18px;margin-top:20px">这四样谁都有。Titan 特别的地方只有一个：它的<b>大脑</b>，用的是 RISC-V。</p>
+      </section>
+
       <!-- ============ 03 Linux（高层预览；命令行/SSH 深入留给实操课）============ -->
       <section class="slide" data-sec="Linux">
         <div class="two v">
           <div class="stack">
-            <span class="eyebrow"><span class="n">02</span>&nbsp;第一站 · 系统层</span>
+            <span class="eyebrow"><span class="n">05</span>&nbsp;第一站 · 系统层</span>
             <h2 class="title">先说 <span class="mono-accent">Linux</span>：<br>这台机器的操作系统</h2>
             <p class="lead">芯片是硬件，还得有个<span class="hl">操作系统</span>来指挥它、把程序跑起来。我们这台 RISC-V 电脑用的，就是 <span class="hl">Linux</span>。</p>
             <div class="okbox frag" style="margin-top:22px">至于怎么用命令行操作它、怎么用 SSH 远程连上板子——那是 <b>Linux 实操课</b>的动手内容；这节课先认识它就够了。</div>
@@ -354,11 +454,86 @@ svg{overflow:visible}
         </div>
       </section>
 
+      <!-- ============ 操作系统到底在干什么 ============ -->
+      <section class="slide" data-sec="Linux">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">06</span>&nbsp;第一站 · 系统层</span>
+          <h2 class="title">操作系统：这台机器的<span class="hl">大管家</span></h2>
+          <p class="lead" style="max-width:74ch">你双击一个图标就能打开程序，背后其实有个"管家"在忙。它一直做三件事：</p>
+        </div>
+        <div class="grid3" style="gap:16px">
+          <div class="card frag pop"><span class="ic">🗓️</span><h3>排班：分配资源</h3><p>8 个核、几十 GB 内存，谁先用、用多久、用多少——管家说了算。</p></div>
+          <div class="card frag pop"><span class="ic">📒</span><h3>记账：管好文件</h3><p>你的照片、代码在硬盘的哪个角落，它记着，你只要知道文件名。</p></div>
+          <div class="card frag pop"><span class="ic">🔌</span><h3>翻译：驱动硬件</h3><p>网口、硬盘、USB 各说各的"方言"，管家全都会翻译。</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:24px;text-align:center;font-size:20px">
+          没有操作系统，一颗芯片就只是<b>一块会发热的沙子</b>。<br>
+          <span style="color:var(--ink-soft);font-size:17px">我们的板子请来的这位管家，名字叫 Linux。</span>
+        </div>
+      </section>
+
+      <!-- ============ Linux 的来历（开源精神，呼应 RISC-V）============ -->
+      <section class="slide" data-sec="Linux">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">07</span>&nbsp;第一站 · 系统层</span>
+            <h2 class="title">Linux：一个大学生的<br><span class="hl-bg">业余项目</span></h2>
+            <p class="lead">它不是哪家大公司立项做出来的。它开头只是一个 21 岁芬兰学生，暑假在宿舍里写着玩的东西。</p>
+            <div class="okbox frag" style="margin-top:22px">
+              让它赢的不是某个天才，而是<b>开放</b>：代码公开，全世界的人一起改。<br>
+              <span style="color:var(--ink-soft);font-size:16px">记住这个词——等下讲 RISC-V，走的是同一条路。</span>
+            </div>
+          </div>
+          <div class="stack" style="justify-content:center">
+            <div class="tl">
+              <div class="ev frag right"><div class="y">1991</div><div class="t">Linus Torvalds 在网上发帖：<span class="s">"我在做一个操作系统，只是个业余爱好，不会很大。"</span></div></div>
+              <div class="ev frag right"><div class="y">之后的三十多年</div><div class="t">世界各地的人一起写、一起改<span class="s">谁都能看代码，谁都能提改进——这在当时非常反常。</span></div></div>
+              <div class="ev frag right"><div class="y">今天</div><div class="t">全球最快的 500 台超级计算机，<b>100% 跑 Linux</b><span class="s">安卓手机的底层是 Linux；几乎所有网站、云、AI 训练集群，也都是。</span></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 发行版是什么 ============ -->
+      <section class="slide" data-sec="Linux">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">08</span>&nbsp;第一站 · 系统层</span>
+          <h2 class="title">Ubuntu、Debian、Fedora——它们什么关系？</h2>
+          <p class="lead" style="max-width:76ch">常听到这些名字，其实它们共用同一台"发动机"（Linux 内核），只是<b>不同厂家组装的整车</b>：预装什么软件、长什么样、怎么装新程序，各有各的风格。</p>
+        </div>
+        <div class="grid3" style="gap:16px">
+          <div class="card frag pop" style="border-color:var(--crimson)"><span class="ic">🟠</span><h3>Ubuntu</h3><p>最流行、资料最多，新手友好。<br><span style="color:var(--crimson)">Titan 官方首选的系统</span></p></div>
+          <div class="card frag pop"><span class="ic">🌀</span><h3>Debian</h3><p>Ubuntu 的"爸爸"，稳重、保守，服务器上常见。</p></div>
+          <div class="card frag pop"><span class="ic">🔵</span><h3>Fedora</h3><p>喜欢尝鲜，新技术先在这里落地。</p></div>
+        </div>
+        <div class="news soft frag" style="margin-top:22px">
+          <span class="dt">2026</span>
+          <div class="nb">最新的 <b>Ubuntu 26.04 LTS</b> 已经完整支持 RISC-V 的 RVA23 标准。
+            <span class="s">翻译一下：给 RISC-V 装系统这件事，今年终于变得跟给普通电脑装系统一样正常了。</span></div>
+        </div>
+      </section>
+
+      <!-- ============ 为什么还要敲命令（本课主线伏笔）============ -->
+      <section class="slide" data-sec="Linux">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">09</span>&nbsp;第一站 · 系统层</span>
+            <h2 class="title">为什么还要<span class="hl">敲命令</span>？<br>鼠标不香吗</h2>
+            <p class="lead">因为这四天你要打交道的机器，大多数时候<b>连屏幕都没有</b>。</p>
+          </div>
+          <div class="stack" style="gap:14px">
+            <div class="card frag right" style="display:flex;gap:14px;align-items:flex-start"><span style="font-size:28px">🖥️</span><div><b>板子和服务器没有显示器</b><p style="margin-top:3px">你只能从自己的电脑远程连过去，用文字指挥它。</p></div></div>
+            <div class="card frag right" style="display:flex;gap:14px;align-items:flex-start"><span style="font-size:28px">📋</span><div><b>命令可以复制、可以重来</b><p style="margin-top:3px">同一行字，今天跑和明天跑一样，一台机器和一万台机器也一样。</p></div></div>
+            <div class="card frag right" style="display:flex;gap:14px;align-items:flex-start;border-color:var(--crimson)"><span style="font-size:28px">🤖</span><div><b style="color:var(--crimson-deep)">这是 AI 唯一能"动手"的地方</b><p style="margin-top:3px">智能体帮你干活，靠的就是<b>替你敲命令、看返回</b>。你懂命令，才验收得了它的活。</p></div></div>
+          </div>
+        </div>
+      </section>
+
       <!-- ============ 05 RISC-V：指令集架构 ============ -->
       <section class="slide" data-sec="RISC-V 架构">
         <div class="two v">
           <div class="stack">
-            <span class="eyebrow"><span class="n">03</span>&nbsp;第二站 · 硬件层</span>
+            <span class="eyebrow"><span class="n">10</span>&nbsp;第二站 · 硬件层</span>
             <h2 class="title">CPU 是怎么<br>"听懂"命令的？</h2>
             <p class="lead">芯片其实只认一小套最基础的动作：<b>加一下、把数据搬进来、再存回去</b>…… 这套"动作清单"就叫 <span class="hl">指令集架构（ISA）</span>。</p>
             <ul class="clean frag" style="margin-top:20px">
@@ -379,10 +554,79 @@ svg{overflow:visible}
         </div>
       </section>
 
+      <!-- ============ 同一段代码，两种机器语言 ============ -->
+      <section class="slide" data-sec="RISC-V 架构">
+        <div class="stack" style="margin-bottom:18px">
+          <span class="eyebrow"><span class="n">11</span>&nbsp;第二站 · 硬件层</span>
+          <h2 class="title">为什么手机上的 App，<span class="hl">装不到电脑上</span>？</h2>
+          <p class="lead" style="max-width:78ch">同样一句"把两个数加起来"，翻译成机器听得懂的话，不同架构说的是<b>不同方言</b>：</p>
+        </div>
+        <div class="two" style="gap:26px;align-items:start">
+          <div class="term frag right"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">编译到 x86-64（你的笔记本）</span></div>
+            <div class="term-body sm">
+<span class="ln"><span class="cm">// C 代码：int add(int a,int b){ return a+b; }</span></span>
+<span class="ln"><span class="cmd">lea</span>  eax, [rdi+rsi]</span>
+<span class="ln"><span class="cmd">ret</span></span>
+            </div></div>
+          <div class="term frag right"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">编译到 RISC-V（我们的 Titan）</span></div>
+            <div class="term-body sm">
+<span class="ln"><span class="cm">// 同一份 C 代码</span></span>
+<span class="ln"><span class="cmd">add</span>  a0, a0, a1</span>
+<span class="ln"><span class="cmd">ret</span></span>
+            </div></div>
+        </div>
+        <div class="okbox frag" style="margin-top:22px;text-align:center;font-size:19px">
+          谁多一条谁少一条<b>不重要</b>，重要的是：<span class="hl">它们互相不认识</span>。<br>
+          <span style="color:var(--ink-soft);font-size:16.5px">所以软件必须"为这个架构编译过"才能跑——这就是为什么大家老在说 RISC-V 的"生态"。</span>
+        </div>
+      </section>
+
+      <!-- ============ RISC 是什么意思 ============ -->
+      <section class="slide" data-sec="RISC-V 架构">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">12</span>&nbsp;第二站 · 硬件层</span>
+          <h2 class="title"><span class="mono-accent">RISC</span> 是什么意思？——菜单短，但够用</h2>
+        </div>
+        <div class="two" style="gap:30px;align-items:stretch">
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:10px">
+            <div class="chip" style="align-self:flex-start"><span class="d"></span>CISC · 复杂指令集（x86）</div>
+            <p style="margin:0;font-size:19px;line-height:1.5">菜单很长，还有不少"一道菜顶三道"的复杂大菜。<br>
+              <span style="color:var(--ink-soft);font-size:16.5px">点菜方便，但厨房（芯片）要能做几千道菜，设计非常复杂、耗电也大。</span></p>
+          </div>
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:10px;border-color:var(--crimson)">
+            <div class="chip" style="align-self:flex-start;background:var(--crimson-soft);border-color:var(--crimson)"><span class="d"></span>RISC · 精简指令集（RISC-V）</div>
+            <p style="margin:0;font-size:19px;line-height:1.5">菜单短而整齐，复杂的菜用几道简单的菜<b>拼出来</b>。<br>
+              <span style="color:var(--ink-soft);font-size:16.5px">厨房小、好造、省电，还容易验证有没有做错。</span></p>
+          </div>
+        </div>
+        <div class="okbox frag" style="margin-top:24px;text-align:center;font-size:20px">
+          那名字里的 <span class="mono-accent">V</span> 呢？它是罗马数字 <b>5</b>——伯克利做的<b>第五代</b> RISC 设计。
+        </div>
+      </section>
+
+      <!-- ============ RISC-V 的来历：也是一个暑期项目 ============ -->
+      <section class="slide" data-sec="RISC-V 架构">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">13</span>&nbsp;第二站 · 硬件层</span>
+            <h2 class="title">它<span class="hl-bg">也是一个<br>暑期项目</span></h2>
+            <p class="lead">2010 年夏天，加州大学伯克利分校的几位老师和学生想找一套"干净、能自由使用"的指令集来做研究。找了一圈没找到，于是决定<b>自己做一个</b>——原计划，三个月做完。</p>
+          </div>
+          <div class="stack" style="justify-content:center">
+            <div class="tl">
+              <div class="ev frag right"><div class="y">2010 · 夏</div><div class="t">伯克利的一个暑期小项目<span class="s">目标只是"够我们自己研究用"。</span></div></div>
+              <div class="ev frag right"><div class="y">2015</div><div class="t">成立基金会，后来总部落在<b>瑞士</b><span class="s">刻意保持中立：不被任何一个国家、任何一家公司说了算。</span></div></div>
+              <div class="ev frag right"><div class="y">今天</div><div class="t">上千家企业与机构加入<span class="s">小到耳机里的芯片，大到数据中心的服务器 CPU，都能看到它。</span></div></div>
+            </div>
+            <div class="warn frag" style="margin-top:18px"><span class="ic">💡</span><div>一个暑假开始的项目，十几年后成了全球标准。<br><b>而你们，现在也正在过一个暑期营。</b></div></div>
+          </div>
+        </div>
+      </section>
+
       <!-- ============ 06 RISC-V：开放免费 ============ -->
       <section class="slide" data-sec="RISC-V 架构">
         <div class="stack" style="margin-bottom:24px">
-          <span class="eyebrow"><span class="n">04</span>&nbsp;第二站 · 硬件层</span>
+          <span class="eyebrow"><span class="n">14</span>&nbsp;第二站 · 硬件层</span>
           <h2 class="title"><span class="mono-accent">RISC-V</span>：一套<span class="hl-bg">开放、免费</span>的指令集</h2>
           <p class="lead" style="max-width:72ch">过去主流指令集不是 Intel 的 <b>x86</b>，就是 <b>ARM</b>——想造芯片，得付高昂授权费、还处处受限。RISC-V 反过来：<b>开源、免费、谁都能用</b>。</p>
         </div>
@@ -396,31 +640,115 @@ svg{overflow:visible}
           <span class="chip">🔧 可定制：想加功能自己扩展</span>
           <span class="chip">⚖️ 中立开放：由国际基金会维护，不被一家公司说了算</span>
         </div>
+        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:18px;margin-top:20px">这不是理想主义：<b>高通、英伟达、Meta、谷歌、阿里</b>今年都已经把它用进了自家产品——不是试试看，是真在出货。</p>
+      </section>
+
+      <!-- ============ 模块化：像乐高（顺便解释 RV64GCBHX）============ -->
+      <section class="slide" data-sec="RISC-V 架构">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">15</span>&nbsp;第二站 · 硬件层</span>
+          <h2 class="title">为什么说 RISC-V 是<span class="hl-bg">乐高</span>？</h2>
+          <p class="lead" style="max-width:78ch">别家的指令集是"整套买"。RISC-V 是一小块<b>基础积木</b>，再按需要往上拼扩展——做耳机就拼小一点，做服务器就拼大一点。</p>
+        </div>
+        <div class="tag-row frag" style="gap:11px">
+          <span class="chip mono" style="background:var(--crimson-soft);border-color:var(--crimson)">RV64I 基础 · 整数运算</span>
+          <span class="chip mono">M 乘除</span>
+          <span class="chip mono">A 原子操作</span>
+          <span class="chip mono">F / D 浮点</span>
+          <span class="chip mono">C 压缩指令</span>
+          <span class="chip mono">B 位操作</span>
+          <span class="chip mono">H 虚拟化</span>
+          <span class="chip mono">V 向量 · 跑 AI 常用</span>
+        </div>
+        <div class="okbox frag" style="margin-top:22px;font-size:19px">
+          把最常用的几块打包，就简称 <b>G</b>。所以你在规格表里看到的那串天书——<br>
+          <span class="cmd-pill red" style="font-size:20px;margin-top:8px;display:inline-block">RV64GCBHX</span>
+          <span style="margin-left:10px">＝ 64 位 + 常用包 G + 压缩 C + 位操作 B + 虚拟化 H + 厂商自定义 X。</span>
+        </div>
+        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:18px;margin-top:14px">这正是我们板子上 <b>UR-DP1000</b> 的规格——现在你已经能读懂它了。<br>
+          不过自由也有代价：<b>拼法太多，软件就不知道该按哪套写</b>。这个麻烦怎么解决，两页之后见分晓。</p>
       </section>
 
       <!-- ============ 07 RISC-V：为什么重要 ============ -->
       <section class="slide" data-sec="RISC-V 架构">
         <div class="stack" style="margin-bottom:24px">
-          <span class="eyebrow"><span class="n">05</span>&nbsp;第二站 · 硬件层</span>
+          <span class="eyebrow"><span class="n">16</span>&nbsp;第二站 · 硬件层</span>
           <h2 class="title">为什么大家都在<span class="hl">押注 RISC-V</span>？</h2>
         </div>
         <div class="grid2" style="gap:16px">
           <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:34px">🌍</span><div><h3>正在成为潮流</h3><p style="margin-top:4px">从耳机、单片机到数据中心，越来越多芯片改用 RISC-V。</p></div></div>
-          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start;border-color:var(--crimson)"><span style="font-size:34px">🇨🇳</span><div><h3>自主可控</h3><p style="margin-top:4px">不必依赖国外授权，是国产芯片的重要机会——我们的 <b>DP1000</b> 就是国产 RISC-V。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start;border-color:var(--crimson)"><span style="font-size:34px">🔐</span><div><h3>自主可控</h3><p style="margin-top:4px">不必依赖国外授权，是国产芯片的重要机会——我们的 <b>DP1000</b> 就是国产 RISC-V。</p></div></div>
           <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:34px">🧩</span><div><h3>生态在长大</h3><p style="margin-top:4px">编译器、Linux、各种 AI 框架都陆续支持 RISC-V。</p></div></div>
           <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:34px">🎓</span><div><h3>特别适合学习</h3><p style="margin-top:4px">开放、资料公开，正好拿来教学和动手研究——就像现在。</p></div></div>
         </div>
-        <div class="okbox frag" style="margin-top:22px;text-align:center">一句话：现在学 RISC-V，就像当年早早学了 Linux——<b>站上了一条正在长大的赛道</b>。</div>
+        <div class="okbox frag" style="margin-top:22px;text-align:center">一句话：现在学 RISC-V，就像当年早早学了 Linux——<b>站上了一条正在长大的赛道</b>。<br>
+          <span style="color:var(--ink-soft);font-size:16.5px">这四条不是口号。接下来三页，我们拿今年真实发生的事，把前三条挨个验一遍。</span></div>
+      </section>
+
+      <!-- ============ 理由①「潮流」的实证：它已经进了哪些真产品 ============ -->
+      <section class="slide" data-sec="RISC-V 架构">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">17</span>&nbsp;第二站 · 硬件层</span>
+          <h2 class="title">"正在成为潮流"——<span class="hl">有多潮？</span></h2>
+        </div>
+        <div class="grid2" style="gap:16px">
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">💻</span><div><h3>笔记本电脑</h3><p style="margin-top:4px">DC-ROMA、MUSE Book 等 RISC-V 笔记本已经在卖；还有能直接换进 Framework 笔记本的 RISC-V 主板。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">📱</span><div><h3>手机系统</h3><p style="margin-top:4px">2026 年 2 月 FOSDEM 大会上，安卓（AOSP）移植到 RISC-V 已从"实验性"走向"能真用"。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🛰️</span><div><h3>航天与边缘 AI</h3><p style="margin-top:4px">欧洲正把它用在卫星和路边的 AI 盒子里——省电、可裁剪、还能自己验证。今年 7 月的欧洲峰会就在谈这些。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start;border-color:var(--crimson)"><span style="font-size:32px">🖥️</span><div><h3 style="color:var(--crimson-deep)">桌面工作站</h3><p style="margin-top:4px">比如——就是等下发到你面前的这块 <b>Milk-V Titan</b>。</p></div></div>
+        </div>
+      </section>
+
+      <!-- ============ 理由②「生态」的实证：软件正在追上来（含 RVA23 / CUDA）============ -->
+      <section class="slide" data-sec="RISC-V 架构">
+        <div class="stack" style="margin-bottom:16px">
+          <span class="eyebrow"><span class="n">18</span>&nbsp;第二站 · 硬件层</span>
+          <h2 class="title">"生态在长大"——<span class="hl">软件正在追上来</span></h2>
+          <p class="lead tight" style="max-width:80ch">还记得刚才那两种"方言"吗？芯片造出来只是一半，一个架构能不能活，看的是<b>有没有人愿意为它写软件</b>。</p>
+        </div>
+        <div class="grid2" style="gap:14px">
+          <div class="news frag right"><span class="dt">2024.10</span><div class="nb"><b>RVA23 规范批准</b>：给 RISC-V 定了一份"统一考纲"。
+            <span class="s">乐高拼法太自由也有麻烦——软件不知道该按哪套写。有了考纲，写一次就都能跑。</span></div></div>
+          <div class="news frag right"><span class="dt">2026</span><div class="nb"><b>服务器平台规范 1.0</b> 通过，UEFI、ACPI 都齐了。
+            <span class="s">说人话：RISC-V 机器现在能像普通电脑一样正常开机、装系统。</span></div></div>
+          <div class="news frag right"><span class="dt">2026</span><div class="nb"><b>Ubuntu 26.04 LTS</b> 完整支持 RVA23。
+            <span class="s">就是你们下午要往板子里装的那个系统。</span></div></div>
+          <div class="news frag right"><span class="dt">2025.07</span><div class="nb">英伟达宣布把 <b>CUDA</b> 移植到 RISC-V。
+            <span class="s">CUDA＝今天跑 AI 绕不开的那套 GPU 软件，过去只认 x86 和 ARM。</span></div></div>
+        </div>
+        <div class="warn frag" style="margin-top:16px"><span class="ic">⚠️</span><div>但要分清<b>"已宣布"和"已实现"</b>：CUDA 这件事目前还在做，官方没给时间表。<br>
+          <span style="color:var(--ink-soft);font-size:15.5px">看科技新闻养成这个习惯，比记住新闻本身有用。</span></div></div>
+      </section>
+
+      <!-- ============ 理由③「自主可控」的实证：中国队 ============ -->
+      <section class="slide" data-sec="RISC-V 架构">
+        <div class="stack" style="margin-bottom:18px">
+          <span class="eyebrow"><span class="n">19</span>&nbsp;第二站 · 硬件层</span>
+          <h2 class="title">"自主可控"——为什么<span class="hl">中国特别在意</span>它</h2>
+        </div>
+        <div class="stack" style="gap:12px">
+          <div class="news frag right"><span class="dt">2025</span><div class="nb">中央网信办等<b>八个部门</b>首次联合发布 RISC-V 发展指导意见。
+            <span class="s">国家层面第一次明确鼓励用这套开放架构——因为不用交授权费、也不怕被"卡脖子"。</span></div></div>
+          <div class="news frag right"><span class="dt">2025.03</span><div class="nb">阿里平头哥发布<b>玄铁 C930</b>：面向服务器的高性能 RISC-V 处理器核。
+            <span class="s">玄铁是目前国内出货量最大的 RISC-V 内核供应商。</span></div></div>
+          <div class="news frag right"><span class="dt">2026.03</span><div class="nb">中科院与北京开源芯片研究院的<b>"香山"（昆明湖）</b>完成首批产品级交付，预计年底量产。
+            <span class="s">它被认为是目前性能最高的开源 RISC-V 处理器核——注意，是<b>开源</b>：设计图纸本身就公开。配套还有"如意"操作系统。</span></div></div>
+        </div>
+        <div class="okbox frag" style="margin-top:20px;text-align:center;font-size:19px">
+          <b>开源的芯片 ＋ 开源的系统</b>——这是中国团队正在铺的一条路。<br>
+          <span style="color:var(--ink-soft);font-size:16.5px">而你们这四天要碰的 UR-DP1000，就是这条路上已经能买到的产品之一。</span>
+        </div>
       </section>
 
       <!-- ============ 08 DP1000 芯片 ============ -->
       <section class="slide" data-sec="DP1000 芯片">
         <div class="two">
           <div class="stack">
-            <span class="eyebrow"><span class="n">06</span>&nbsp;第三站 · 硬件层</span>
+            <span class="eyebrow"><span class="n">20</span>&nbsp;第三站 · 硬件层</span>
             <h2 class="title"><span class="mono-accent">UR-DP1000</span><br>把 RISC-V 变成真芯片</h2>
             <p class="lead">指令集是"设计图纸"，芯片才是造出来的"实物"。DP1000 就是一颗<b>国产的、基于 RISC-V 的处理器</b>，由 UltraRISC 出品。</p>
-            <div class="tag-row" style="margin-top:22px">
+            <p class="lead tight frag" style="margin-top:14px">它是 2025 年下半年<b>最受关注的三颗高性能 RISC-V 处理器</b>之一——不是老芯片，是刚出炉的。</p>
+            <div class="tag-row" style="margin-top:20px">
               <span class="chip mono frag">8 核 · RV64（RVA22）</span>
               <span class="chip mono frag">最高 2.0 GHz</span>
               <span class="chip mono frag">DDR4 · 最高 64 GB</span>
@@ -437,10 +765,55 @@ svg{overflow:visible}
         </div>
       </section>
 
+      <!-- ============ 芯片是怎么造出来的 ============ -->
+      <section class="slide" data-sec="DP1000 芯片">
+        <div class="stack" style="margin-bottom:24px">
+          <span class="eyebrow"><span class="n">21</span>&nbsp;第三站 · 硬件层</span>
+          <h2 class="title">一颗芯片，怎么从<span class="hl-bg">沙子</span>变出来</h2>
+          <p class="lead" style="max-width:78ch">指令集（RISC-V）只是"图纸用的语言"。真要变成能拿在手里的东西，得走完这五步：</p>
+        </div>
+        <div class="fab">
+          <div class="st frag pop"><div class="i">✏️</div><b>① 设计</b><span>用代码把电路描述出来，几百人画上一两年</span></div>
+          <div class="st frag pop"><div class="i">🔬</div><b>② 制晶圆</b><span>把沙子里的硅提纯到 99.9999999%，切成薄圆片</span></div>
+          <div class="st frag pop"><div class="i">💡</div><b>③ 光刻</b><span>用光把电路一层层"印"上去，最细的线只有几纳米</span></div>
+          <div class="st frag pop"><div class="i">🔍</div><b>④ 测试切割</b><span>挨个通电测试，挑出好的，切成一小颗一小颗</span></div>
+          <div class="st frag pop last"><div class="i">📦</div><b>⑤ 封装</b><span>装进外壳、接上引脚，就是我们看到的黑方块</span></div>
+        </div>
+        <div class="okbox frag" style="margin-top:26px;text-align:center;font-size:19px">
+          冷知识：现代芯片上有<b>几十亿到上千亿个晶体管</b>，每一个都是一个能开能关的小开关。<br>
+          <span style="color:var(--ink-soft);font-size:16.5px">你写的每一行代码，最后都是在指挥这些开关，一秒钟开关几十亿次。</span>
+        </div>
+      </section>
+
+      <!-- ============ 8 个核意味着什么 ============ -->
+      <section class="slide" data-sec="DP1000 芯片">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">22</span>&nbsp;第三站 · 硬件层</span>
+            <h2 class="title"><span class="hl">8 个核</span>，<br>到底快在哪？</h2>
+            <p class="lead">一个核 ＝ 一个厨师。8 核，就是厨房里站了 8 个厨师。</p>
+            <ul class="clean" style="margin-top:20px">
+              <li class="frag right"><span class="mk">⚡</span><div><b>单核快 = 厨师手快</b><span class="sub">决定"打开一个网页、跑一个程序"有多利索</span></div></li>
+              <li class="frag right"><span class="mk">👥</span><div><b>核多 = 厨师多</b><span class="sub">编译几百个文件、同时跑很多任务时，人多力量大</span></div></li>
+            </ul>
+            <div class="warn frag" style="margin-top:20px"><span class="ic">🍳</span><div>但核多<b>不等于</b>什么都快——有些活天生只能一个人干，比如"先炒好才能装盘"。</div></div>
+          </div>
+          <div class="stack" style="gap:14px;justify-content:center">
+            <div class="card rise-2"><h3>UR-DP1000 的成绩单</h3>
+              <ul class="clean" style="margin-top:12px;gap:11px">
+                <li><span class="mk">🧩</span><div style="font-size:19px"><b>8 核，分成两组，各 4 个</b><span class="sub">每组配 4MB 三级缓存，两组共 16MB 末级缓存——缓存＝厨师手边的备菜台</span></div></li>
+                <li><span class="mk">📈</span><div style="font-size:19px"><b>比同级国产 RISC-V 芯片</b><span class="sub">单核约快 30%，多核接近 2 倍（GeekBench 5 对比 ESWIN EIC7702X）</span></div></li>
+                <li><span class="mk">🔋</span><div style="font-size:19px"><b>空载约 14W，满载约 30W</b><span class="sub">比一盏台灯多一点，可以整天开着不心疼</span></div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ============ 09 Milk-V Titan 板子 ============ -->
       <section class="slide" data-sec="DP1000 芯片">
         <div class="stack" style="margin-bottom:14px">
-          <span class="eyebrow"><span class="n">07</span>&nbsp;第三站 · 硬件层</span>
+          <span class="eyebrow"><span class="n">23</span>&nbsp;第三站 · 硬件层</span>
           <h2 class="title">Milk-V Titan：我们要用的<span class="hl">开发板</span></h2>
         </div>
         <div class="two" style="gap:40px;align-items:center">
@@ -461,11 +834,50 @@ svg{overflow:visible}
         </div>
       </section>
 
+      <!-- ============ 认接口（直接服务下午的动手环节）============ -->
+      <section class="slide" data-sec="DP1000 芯片">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">24</span>&nbsp;第三站 · 动手前的准备</span>
+          <h2 class="title">认接口：板子上每个口是<span class="hl">干嘛的</span></h2>
+          <p class="lead" style="max-width:78ch">下午你要亲手接线，先把这几个口认清楚，省得插错。</p>
+        </div>
+        <div class="grid2" style="gap:14px">
+          <div class="card frag right" style="display:flex;gap:14px;align-items:center;padding:16px 20px"><span style="font-size:27px">🌐</span><div><b>千兆网口 RJ45</b><p style="margin-top:2px">板子的<b>大门</b>。第 2 天你就是从这里 SSH 进去的。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:14px;align-items:center;padding:16px 20px"><span style="font-size:27px">💾</span><div><b>M.2 NVMe 插槽</b><p style="margin-top:2px">硬盘住这儿。系统和你写的代码都存在上面。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:14px;align-items:center;padding:16px 20px"><span style="font-size:27px">🎛️</span><div><b>PCIe 4.0 ×16 插槽</b><p style="margin-top:2px">和台式机同款。将来可以插显卡或加速卡。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:14px;align-items:center;padding:16px 20px"><span style="font-size:27px">🔌</span><div><b>USB 3.0 ×4</b><p style="margin-top:2px">键盘、鼠标、U 盘。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:14px;align-items:center;padding:16px 20px;border-color:var(--crimson)"><span style="font-size:27px">🧵</span><div><b style="color:var(--crimson-deep)">Type-C 调试串口</b><p style="margin-top:2px"><b>急救通道</b>：系统起不来、网也不通的时候，只能靠它看到底怎么了。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:14px;align-items:center;padding:16px 20px"><span style="font-size:27px">⚡</span><div><b>12V DC / 24-pin ATX 供电</b><p style="margin-top:2px">接电源。插之前先确认电源是关的。</p></div></div>
+        </div>
+      </section>
+
+      <!-- ============ 横向对比：它到底算什么级别的机器 ============ -->
+      <section class="slide" data-sec="DP1000 芯片">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">25</span>&nbsp;第三站 · 硬件层</span>
+          <h2 class="title">它到底算<span class="hl">什么级别</span>的机器？</h2>
+        </div>
+        <table class="tbl rise-2">
+          <thead><tr><th style="width:23%">　</th><th>树莓派 5</th><th>普通笔记本</th><th>Milk-V Titan</th></tr></thead>
+          <tbody>
+            <tr><td><b>架构</b></td><td>ARM（要授权费）</td><td>x86（不对外授权）</td><td class="hl">RISC-V（开放免费）</td></tr>
+            <tr><td><b>处理器</b></td><td>4 核</td><td>常见 8～16 核</td><td>8 核 @ 最高 2.0GHz</td></tr>
+            <tr><td><b>内存上限</b></td><td>16GB</td><td>16～64GB</td><td>64GB DDR4（支持 ECC）</td></tr>
+            <tr><td><b>能插显卡吗</b></td><td>不能</td><td>一般不能</td><td>能，PCIe 4.0 ×16</td></tr>
+            <tr class="me"><td>价格</td><td>约 ¥600 起</td><td>￥4000 起</td><td>$329（约 ¥2400）</td></tr>
+          </tbody>
+        </table>
+        <div class="okbox frag" style="margin-top:22px;text-align:center;font-size:19px">
+          它不是最快的电脑。但它是一台<b>你能完全掌控、能拆开研究、还能自己往上加东西</b>的完整电脑——<br>
+          而且用的是<span class="hl">谁都能用</span>的架构。
+        </div>
+      </section>
+
       <!-- ============ 10 大模型是什么 ============ -->
       <section class="slide" data-sec="大模型与智能体">
         <div class="two v">
           <div class="stack">
-            <span class="eyebrow"><span class="n">08</span>&nbsp;第四站 · 智能层</span>
+            <span class="eyebrow"><span class="n">26</span>&nbsp;第四站 · 智能层</span>
             <h2 class="title">大模型（<span class="mono-accent">LLM</span>）<br>是什么？</h2>
             <p class="lead">用<b>海量文本</b>（几乎整个互联网）训练出来的超大"语言大脑"。它的核心本领简单得惊人：<span class="hl">看着前文，猜下一个字</span>。</p>
             <ul class="clean" style="margin-top:18px">
@@ -486,10 +898,54 @@ svg{overflow:visible}
         </div>
       </section>
 
+      <!-- ============ 训练 vs 使用 ============ -->
+      <section class="slide" data-sec="大模型与智能体">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">27</span>&nbsp;第四站 · 智能层</span>
+          <h2 class="title">它是怎么<span class="hl">"学会"</span>的？</h2>
+          <p class="lead" style="max-width:78ch">大模型的一生，其实只分两种时刻：<b>读书</b>和<b>答题</b>。</p>
+        </div>
+        <div class="two" style="gap:30px;align-items:stretch">
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:10px">
+            <div class="chip" style="align-self:flex-start"><span class="d"></span>训练 · 读书</div>
+            <div style="font-size:40px;text-align:center;line-height:1.1">📚</div>
+            <p style="margin:0;font-size:18px;line-height:1.5">把海量文本喂给它，让它反复练"猜下一个字"。<br>
+              <span style="color:var(--ink-soft);font-size:16px">要用成千上万张 GPU 卡、连着跑好几个月、烧掉数亿元。<b>一辈子只做有限的几次。</b></span></p>
+          </div>
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:10px;border-color:var(--crimson)">
+            <div class="chip" style="align-self:flex-start;background:var(--crimson-soft);border-color:var(--crimson)"><span class="d"></span>推理 · 答题</div>
+            <div style="font-size:40px;text-align:center;line-height:1.1">⚡</div>
+            <p style="margin:0;font-size:18px;line-height:1.5">你问一句，它算一遍，给你答案。<br>
+              <span style="color:var(--ink-soft);font-size:16px">几秒钟的事。<b>全世界每天要发生几十亿次</b>——你用的每一次都是这个。</span></p>
+          </div>
+        </div>
+        <div class="okbox frag" style="margin-top:24px;text-align:center;font-size:19px">
+          关键推论：它的知识<b>在训练那一刻就定格了</b>。<br>
+          <span style="color:var(--ink-soft);font-size:16.5px">这就是为什么它不知道今天的新闻——也是下一页要说的"天花板"。</span>
+        </div>
+      </section>
+
+      <!-- ============ token 与上下文 ============ -->
+      <section class="slide" data-sec="大模型与智能体">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">28</span>&nbsp;第四站 · 智能层</span>
+            <h2 class="title">它的<span class="hl-bg">书桌</span><br>有多大？</h2>
+            <p class="lead">模型读东西不是一个字一个字看，而是按 <b>token</b>（词块）看。中文里，一个汉字大约是 1～2 个 token。</p>
+            <div class="okbox frag" style="margin-top:20px">一次对话里，能同时摊在桌上的 token 总量，叫 <b>上下文窗口</b>。<br><span style="color:var(--ink-soft);font-size:16px">桌子摊满了，早先的内容就得先收起来——它就"忘"了。</span></div>
+          </div>
+          <div class="stack" style="gap:14px;justify-content:center">
+            <div class="card frag right" style="display:flex;gap:14px;align-items:flex-start"><span style="font-size:28px">📄</span><div><b>放什么上桌，是你的活</b><p style="margin-top:3px">同样一个问题，把报错原文、文件内容一起给它，和只说"报错了"，结果天差地别。</p></div></div>
+            <div class="card frag right" style="display:flex;gap:14px;align-items:flex-start"><span style="font-size:28px">🧹</span><div><b>任务太长要学会收桌子</b><p style="margin-top:3px">阶段性让它总结一下"我们做到哪了"，比让它硬扛一大堆旧内容有用。</p></div></div>
+            <div class="card frag right" style="display:flex;gap:14px;align-items:flex-start;border-color:var(--crimson)"><span style="font-size:28px">🎯</span><div><b style="color:var(--crimson-deep)">这是第 3、4 讲的重点</b><p style="margin-top:3px">"怎么把话说清楚"，比"知道它是怎么造的"实用得多。</p></div></div>
+          </div>
+        </div>
+      </section>
+
       <!-- ============ 11 大模型的天花板 ============ -->
       <section class="slide" data-sec="大模型与智能体">
         <div class="stack" style="margin-bottom:22px">
-          <span class="eyebrow"><span class="n">09</span>&nbsp;第四站 · 智能层</span>
+          <span class="eyebrow"><span class="n">29</span>&nbsp;第四站 · 智能层</span>
           <h2 class="title">但大模型有个<span class="hl">"天花板"</span></h2>
           <p class="lead" style="max-width:68ch">它很会"说"，可它只是<b>输出文字</b>——不知道现在几点、算不准复杂的账、连不上网，也没法真正动你的电脑。</p>
         </div>
@@ -504,7 +960,7 @@ svg{overflow:visible}
       <!-- ============ 12 智能体是什么 ============ -->
       <section class="slide" data-sec="大模型与智能体">
         <div class="stack" style="margin-bottom:22px">
-          <span class="eyebrow"><span class="n">10</span>&nbsp;第四站 · 智能层</span>
+          <span class="eyebrow"><span class="n">30</span>&nbsp;第四站 · 智能层</span>
           <h2 class="title">智能体 = 大模型 + <span class="hl-bg">手脚和工具</span></h2>
         </div>
         <div class="two" style="gap:36px;align-items:stretch">
@@ -525,7 +981,7 @@ svg{overflow:visible}
       <!-- ============ 13 智能体怎么运转 ============ -->
       <section class="slide" data-sec="大模型与智能体">
         <div class="stack" style="margin-bottom:22px">
-          <span class="eyebrow"><span class="n">11</span>&nbsp;第四站 · 智能层</span>
+          <span class="eyebrow"><span class="n">31</span>&nbsp;第四站 · 智能层</span>
           <h2 class="title">智能体怎么<span class="hl">自己干活</span>？</h2>
           <p class="lead" style="max-width:66ch">它把一个大目标，拆成"想一步、做一步、看一步"的小循环，转着转着就把事办成了。</p>
         </div>
@@ -542,25 +998,109 @@ svg{overflow:visible}
         </div>
       </section>
 
+      <!-- ============ 一个真实的智能体回合 ============ -->
+      <section class="slide" data-sec="大模型与智能体">
+        <div class="two v">
+          <div class="stack">
+            <span class="eyebrow"><span class="n">32</span>&nbsp;第四站 · 智能层</span>
+            <h2 class="title">一个回合，<br><span class="hl-bg">长这样</span></h2>
+            <p class="lead">右边是一次真实的派活。你只说了第一句，剩下的都是它自己转圈转出来的。</p>
+            <div class="okbox frag" style="margin-top:20px">注意中间那一步：它<b>犯了错</b>，然后<b>自己看见、自己改掉</b>。<br><span style="color:var(--ink-soft);font-size:16px">这正是"智能体"和"聊天机器人"的分界线。</span></div>
+          </div>
+          <div class="term rise-2"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">agent @ titan</span></div>
+            <div class="term-body sm">
+<span class="ln"><span class="em">你：</span><span class="cmd">帮我写个程序，读 CPU 温度存进文件</span></span>
+<span class="ln"><span class="cm">🤖 思考：温度一般在 /sys 里，先找找</span></span>
+<span class="ln"><span class="u">agent@titan</span>:<span class="p">~</span>$ <span class="cmd">ls /sys/class/thermal/</span></span>
+<span class="ln"><span class="out">thermal_zone0  thermal_zone1</span></span>
+<span class="ln"><span class="cm">🤖 行动：写好 temp.py，跑一下</span></span>
+<span class="ln"><span class="u">agent@titan</span>:<span class="p">~</span>$ <span class="cmd">python3 temp.py</span></span>
+<span class="ln"><span class="em">FileNotFoundError: thermal_zone9/temp</span></span>
+<span class="ln"><span class="cm">🤖 观察：路径写错了，这块板子是 zone0，改掉</span></span>
+<span class="ln"><span class="u">agent@titan</span>:<span class="p">~</span>$ <span class="cmd">python3 temp.py</span></span>
+<span class="ln"><span class="ok">✅ 已写入 temp.log：52.3 °C</span><span class="cursor"></span></span>
+            </div></div>
+        </div>
+      </section>
+
+      <!-- ============ 今天代码是怎么写出来的（vibe coding）============ -->
+      <section class="slide" data-sec="大模型与智能体">
+        <div class="stack" style="margin-bottom:18px">
+          <span class="eyebrow"><span class="n">33</span>&nbsp;第四站 · 智能层</span>
+          <h2 class="title">今天的代码，<span class="hl">是这样写出来的</span></h2>
+        </div>
+        <div class="stack" style="gap:12px">
+          <div class="news frag right"><span class="dt">2025.02</span><div class="nb">AI 科学家 Andrej Karpathy 随手造了个词：<b>vibe coding</b>。
+            <span class="s">意思是：不再一行行敲代码，而是用大白话告诉 AI 你想要什么，让它去写。</span></div></div>
+          <div class="news frag right"><span class="dt">2025.11</span><div class="nb">柯林斯词典把它选为<b>年度词汇</b>。
+            <span class="s">一个程序员圈子里的玩笑话，九个月就进了词典——因为真的太多人在这么干了。</span></div></div>
+          <div class="news frag right"><span class="dt">2026.04</span><div class="nb">谷歌 CEO：公司 <b>75% 的新代码由 AI 生成</b>，工程师审核后合入。
+            <span class="s">2024 年秋这个数字是 25%，2025 年秋约一半。微软 2025 年也公布过约 30%。</span></div></div>
+        </div>
+        <div class="warn frag" style="margin-top:20px"><span class="ic">🔍</span><div>回头看这三条，都跟着同一个小尾巴：<b>"由工程师审核"</b>。<br>
+          <span style="color:var(--ink-soft);font-size:16px">AI 负责敲，人负责<b>看懂、判断、拍板</b>。这四天真正要练的，是后面那半句。</span></div></div>
+      </section>
+
       <!-- ============ 14 为什么用 AI 智能体来做开发 ============ -->
       <section class="slide" data-sec="大模型与智能体">
         <div class="stack" style="margin-bottom:22px">
-          <span class="eyebrow"><span class="n">12</span>&nbsp;第四站 · 智能层</span>
+          <span class="eyebrow"><span class="n">34</span>&nbsp;第四站 · 智能层</span>
           <h2 class="title">为什么用 <span class="hl">AI 智能体</span> 来做开发？</h2>
         </div>
         <div class="grid2" style="gap:16px">
           <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🚀</span><div><h3>零基础也能上手</h3><p style="margin-top:4px">不会写的地方，让 AI 帮你写、帮你解释，边做边学。</p></div></div>
           <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🐞</span><div><h3>报错不再卡住</h3><p style="margin-top:4px">把报错丢给它，它帮你找原因、给出修好的代码。</p></div></div>
           <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🎯</span><div><h3>你出想法，AI 敲代码</h3><p style="margin-top:4px">繁琐的编码交给它，你专注在"想做什么"上。</p></div></div>
-          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start;border-color:var(--crimson)"><span style="font-size:32px">📈</span><div><h3>最高效的开发方式</h3><p style="margin-top:4px">用 AI 智能体做开发，正是这几天的主线，也是当下的趋势。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start;border-color:var(--crimson)"><span style="font-size:32px">📈</span><div><h3>整个行业都在转向它</h3><p style="margin-top:4px">2026 年，大家比的已经不是"谁模型分数高"，而是<b>智能体能不能真把一件事做完</b>。</p></div></div>
         </div>
         <div class="okbox frag" style="margin-top:22px;text-align:center">划重点：我们不是<b>从零造一个智能体</b>，而是<b>学会用 AI 智能体，在 RISC-V 板子上做开发</b>。</div>
+      </section>
+
+      <!-- ============ 先泼一盆冷水：三个坑 ============ -->
+      <section class="slide" data-sec="大模型与智能体">
+        <div class="stack" style="margin-bottom:22px">
+          <span class="eyebrow"><span class="n">35</span>&nbsp;第四站 · 智能层</span>
+          <h2 class="title">但它<span class="hl">不是魔法</span>——先泼一盆冷水</h2>
+        </div>
+        <div class="grid3" style="gap:16px">
+          <div class="card frag pop"><span class="ic">🌀</span><h3>会一本正经地胡说</h3><p>它可能编出根本不存在的命令、文件名、网址，语气还特别肯定。</p></div>
+          <div class="card frag pop"><span class="ic">🕳️</span><h3>会越改越乱</h3><p>一个错误卡住时，它可能一路绕圈，把本来好的地方也改坏。</p></div>
+          <div class="card frag pop"><span class="ic">🩼</span><h3>别把它当拐杖</h3><p>全丢给它，代码是有了，你什么也没学到——面试和考试可不让带它。</p></div>
+        </div>
+        <div class="okbox frag" style="margin-top:24px;text-align:center;font-size:20px">
+          所以你的角色是<b>队长</b>，不是观众：<span class="hl">派活、盯着、验收</span>。<br>
+          <span style="color:var(--ink-soft);font-size:16.5px">第 3 讲和第 4 讲，会专门教你怎么给它写任务书、怎么检查它交的活。</span>
+        </div>
+      </section>
+
+      <!-- ============ 收束：两条线正在交汇 ============ -->
+      <section class="slide" data-sec="大模型与智能体">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">36</span>&nbsp;第四站 · 收束</span>
+          <h2 class="title">为什么是<span class="hl-bg">现在</span>，为什么是<span class="hl-bg">你们</span></h2>
+        </div>
+        <div class="two" style="gap:24px;align-items:stretch">
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:8px">
+            <div class="chip" style="align-self:flex-start"><span class="d"></span>线索一 · 芯片在变开放</div>
+            <p style="margin:0;font-size:18px;line-height:1.5">RISC-V 十几年前还只是伯克利的暑期项目，今年已经在谈数据中心、卫星和 AI 盒子。<br>
+              <span style="color:var(--ink-soft);font-size:16px">开放意味着：小团队、学校、甚至高中生，也能碰到最底层的东西。</span></p>
+          </div>
+          <div class="card frag right" style="display:flex;flex-direction:column;gap:8px">
+            <div class="chip" style="align-self:flex-start"><span class="d"></span>线索二 · AI 从会聊天到会干活</div>
+            <p style="margin:0;font-size:18px;line-height:1.5">2026 年，整个行业比的已经不是"谁模型分数高"，而是<b>智能体能不能把一件事真做完</b>。<br>
+              <span style="color:var(--ink-soft);font-size:16px">而且它正在从屏幕里走出来，进到机器人、汽车和各种设备里。</span></p>
+          </div>
+        </div>
+        <div class="okbox frag" style="margin-top:22px;text-align:center;font-size:19px">
+          交汇点在这里：<b>那些新设备里的芯片，很多正是 RISC-V；而给它们写程序的，越来越是智能体。</b><br>
+          <span class="hl" style="font-size:20px">你这四天做的事——用智能体在 RISC-V 上开发——刚好就站在这个路口上。</span>
+        </div>
       </section>
 
       <!-- ============ 15 全景回顾 ============ -->
       <section class="slide" data-sec="收尾">
         <div class="stack" style="margin-bottom:20px">
-          <span class="eyebrow"><span class="n">13</span>&nbsp;全景回顾</span>
+          <span class="eyebrow"><span class="n">37</span>&nbsp;全景回顾</span>
           <h2 class="title">回到全景：<span class="hl-bg">一台机器 + 一个 AI 助手</span></h2>
         </div>
         <div class="tower">
@@ -569,6 +1109,40 @@ svg{overflow:visible}
           <div class="band top rise-3"><div class="bic">🤖</div><div class="btxt"><b>顶层 · AI 开发助手</b><div class="bd">大模型 + 智能体：帮你在这台机器上做开发</div></div><div class="btag">工具</div></div>
         </div>
         <div class="big-note hl frag" style="margin-top:22px;text-align:center;max-width:none;font-size:24px">认识这台 <span class="hl-bg">RISC-V 电脑</span>，再用 <span class="hl-bg">AI 智能体</span>在它上面做开发——这就是接下来几天要走的路。</div>
+      </section>
+
+      <!-- ============ 下午要搭的环境 ============ -->
+      <section class="slide" data-sec="收尾">
+        <div class="stack" style="margin-bottom:20px">
+          <span class="eyebrow"><span class="n">38</span>&nbsp;下午实践</span>
+          <h2 class="title">接下来：把<span class="hl">环境搭起来</span></h2>
+          <p class="lead tight" style="max-width:78ch">今天下午和之后的实验课，我们要一步步做完这五件事：</p>
+        </div>
+        <ul class="clean" style="gap:9px">
+          <li class="frag right"><span class="mk">1</span><div><b>认板子、接线</b><span class="sub">电源、网线，必要时再接上 Type-C 调试串口——就是刚才那张接口图</span></div></li>
+          <li class="frag right"><span class="mk">2</span><div><b>开机，确认能进 Linux</b><span class="sub">看到那个等你敲字的光标，就算成功了一半</span></div></li>
+          <li class="frag right"><span class="mk">3</span><div><b>拿到板子的 IP 地址</b><span class="sub">IP 就是这台机器在网络里的门牌号，没有它你找不到它</span></div></li>
+          <li class="frag right"><span class="mk">4</span><div><b>从自己的电脑 SSH 连上去</b><span class="sub">SSH＝一条加密的隧道，从你的键盘直通板子</span></div></li>
+          <li class="frag right"><span class="mk">5</span><div><b>装好后面几天要用的工具</b><span class="sub">包括第 3 天要请进板子的那位 AI 智能体</span></div></li>
+        </ul>
+        <div class="warn frag" style="margin-top:14px"><span class="ic">🧰</span><div><b>提前打个预防针：搭环境一定会卡住。</b>这不是你笨，是这件事本来就琐碎。<br>
+          <span style="color:var(--ink-soft);font-size:16px">下午有一半时间，就是专门用来解决"卡住"的——卡住了请举手，别自己憋着。</span></div></div>
+      </section>
+
+      <!-- ============ 给你的三条建议 ============ -->
+      <section class="slide" data-sec="收尾">
+        <div class="stack" style="margin-bottom:24px">
+          <span class="eyebrow"><span class="n">39</span>&nbsp;带走</span>
+          <h2 class="title">最后，给你三条建议</h2>
+        </div>
+        <div class="grid3" style="gap:16px">
+          <div class="card frag pop"><span class="ic">🙋</span><h3>多问，别憋着</h3><p>你现在是"零基础"，这是你这辈子问"这是什么"最不吃亏的时候。</p></div>
+          <div class="card frag pop"><span class="ic">⌨️</span><h3>一定亲手敲一遍</h3><p>看懂 ≠ 会。同一条命令，看老师敲和自己敲，是两回事。</p></div>
+          <div class="card frag pop" style="border-color:var(--crimson)"><span class="ic">🐞</span><h3>别怕报错</h3><p>报错是电脑在跟你说话，它已经告诉你哪儿错了——而且现在你还有 AI 帮你读。</p></div>
+        </div>
+        <div class="big-note hl frag" style="margin-top:26px;text-align:center;max-width:none;font-size:23px">
+          四天以后，你带走的不该是几条背下来的命令，<br>而是<span class="hl-bg">"碰到不会的东西，我知道该怎么开始"</span>。
+        </div>
       </section>
 
       <!-- ============ 16 谢谢 + 速览 ============ -->
@@ -599,7 +1173,7 @@ svg{overflow:visible}
 
     <!-- 底栏 -->
     <div class="chrome chrome-bot">
-      <div class="counter">第 <b id="cur">01</b> / <span id="total">15</span> 页</div>
+      <div class="counter">第 <b id="cur">01</b> / <span id="total">41</span> 页</div>
       <div class="hint"><span class="kbd">→</span><span class="kbd">空格</span> 下一步 · <span class="kbd">←</span> 返回 · <span class="kbd">F</span> 全屏</div>
     </div>
     <div id="progress"></div>
