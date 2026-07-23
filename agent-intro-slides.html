@@ -268,7 +268,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
               <li class="frag"><span class="mk">⌨️</span><div><b>你已经会用：</b>pwd / ls / cd / cat / mkdir …<span class="sub">在命令行里增删改查</span></div></li>
               <li class="frag"><span class="mk">🧩</span><div><b>还差一块拼图：</b>AI 怎么帮你干活？<span class="sub">大模型、智能体——今天从零讲起</span></div></li>
             </ul>
-            <div class="okbox frag" style="margin-top:20px">今天：把"想命令、敲命令"交给 AI——<b>你只负责说清楚要什么。</b></div>
+            <div class="okbox frag" style="margin-top:20px">今天：把"想命令、敲命令"交给 AI——<b>你说目标 → 它先试 → 你看计划、批命令、验结果。</b></div>
           </div>
           <div class="term rise-2">
             <div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t-title">昨天的你</span></div>
@@ -314,10 +314,10 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
           <div class="stack">
             <span class="eyebrow"><span class="n">03</span>&nbsp;先认识"大脑"</span>
             <h2 class="title">大模型（<span class="mono-accent">LLM</span>）<br>是什么？</h2>
-            <p class="lead">用海量文本（几乎整个互联网）训练出来的"语言大脑"。核心本领简单得惊人：<span class="hl">看着前文，猜下一个字。</span></p>
+            <p class="lead">它像一个"文字接龙"高手：读过很多很多例子，你起个头，它就<span class="hl">照着前文，猜最合适的下一个字。</span></p>
             <ul class="clean" style="margin-top:16px">
               <li class="frag"><span class="mk">📚</span><div><b>读得多</b><span class="sub">像读遍了图书馆——你起个头，它能自然接下去</span></div></li>
-              <li class="frag"><span class="mk">✨</span><div><b>练大了会"涌现"</b><span class="sub">大到一定程度，竟然会翻译、推理、写代码</span></div></li>
+              <li class="frag"><span class="mk">✨</span><div><b>见得多，会举一反三</b><span class="sub">例子读得够多，竟然能翻译、答题、写代码</span></div></li>
               <li class="frag"><span class="mk">⌨️</span><div><b>对今天最重要的一点</b><span class="sub">它读过全世界的代码和命令行——是个"老程序员"</span></div></li>
             </ul>
           </div>
@@ -329,7 +329,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
               <div class="pbar frag"><span class="pw">热</span><span class="ptrack"><span class="pfill" style="width:20%"></span></span><span class="pct">20%</span></div>
               <div class="pbar frag"><span class="pw">不</span><span class="ptrack"><span class="pfill" style="width:8%"></span></span><span class="pct">8%</span></div>
             </div>
-            <p style="color:var(--ink-faint);font-size:14px;margin:14px 0 0">一个字一个字接下去，就能写出整段话、整个程序。你听说过的 ChatGPT、DeepSeek，底层都是它。</p>
+            <p style="color:var(--ink-faint);font-size:14px;margin:14px 0 0">一个字一个字接下去，就能写出整段话、整个程序。它会写出代码的样子——<b>但不保证对</b>。你听说过的 ChatGPT、DeepSeek，底层都是它。</p>
           </div>
         </div>
       </section>
@@ -374,7 +374,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
           <div class="card frag pop" style="border-color:var(--crimson)"><span class="ic">⌨️</span><h3>跑命令</h3><p>打开一个真终端执行命令，再读回结果</p></div>
           <div class="card frag pop"><span class="ic">🌐</span><h3>上网查</h3><p>搜文档、查资料，补上训练之后的新知识</p></div>
         </div>
-        <div class="okbox frag" style="margin-top:24px;text-align:center">最厉害的是<b>"跑命令"</b>：你昨天会的它全会——<code class="inline">ls</code>、<code class="inline">ping</code>、<code class="inline">ssh</code> 样样在行。<br>⚠️ 危险动作它会先<b>请示你</b>（一会儿讲）。</div>
+        <div class="okbox frag" style="margin-top:24px;text-align:center">最厉害的是<b>"跑命令"</b>：你昨天会的，它也会——<code class="inline">ls</code>、<code class="inline">ping</code>、<code class="inline">ssh</code> 样样在行。<br>⚠️ 危险动作它会先<b>请示你</b>（一会儿讲）。</div>
       </section>
 
       <!-- ============ 07 想→做→看 循环 ============ -->
@@ -394,7 +394,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
         <div class="card frag" style="max-width:980px;margin:0 auto">
           <p style="font-size:17.5px;line-height:1.7"><b>走一圈：</b>"帮我看看这块板子装没装 Python" → <span class="hl">想</span>：查版本该跑哪条命令？ → <span class="hl">做</span>：<span class="cmd-pill">python3 --version</span> → <span class="hl">看</span>：输出 <code class="inline">Python 3.11.2</code> ✅ → 回来汇报。没办成？再转一圈，直到搞定或来问你。</p>
         </div>
-        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:17px;margin-top:16px">这个"外壳"并不神秘——核心循环用 <b>200 行代码</b>就能写出来。</p>
+        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:17px;margin-top:16px">今天<b>不用造这个循环</b>——只要看懂它每一步在干什么。</p>
       </section>
 
       <!-- ============ 08 书桌：上下文 ============ -->
@@ -480,7 +480,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             <h2 class="title">三步，把它<span class="hl-bg">请进板子</span></h2>
             <ul class="clean" style="margin-top:14px;gap:20px">
               <li><span class="step-n">1</span><div><b>SSH 进板子，装好它</b><span class="sub">昨天的本事！Node 24 + 一条 npm 命令（RISC-V 上实测能跑）</span></div></li>
-              <li><span class="step-n">2</span><div><b>向导里填你的钥匙</b><span class="sub">选 DeepSeek，粘贴你自己的 API key——怎么买？下一页</span></div></li>
+              <li><span class="step-n">2</span><div><b>向导里填你的钥匙</b><span class="sub">选 DeepSeek，把 API key 填进向导框（别发聊天框）——怎么买？下一页</span></div></li>
               <li><span class="step-n">3</span><div><b>你的电脑开浏览器</b><span class="sub">打开板子的聊天页就能用；Win / Mac 都一样，什么都不用装</span></div></li>
             </ul>
             <div class="okbox frag" style="margin-top:22px">今天先看懂流程，<b>下午实验课发一键脚本，手把手带你装</b>。</div>
@@ -496,13 +496,14 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
 </div>
 <div class="frag">
 <span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">openclaw onboard --install-daemon</span></span>
-<span class="ln out">? 选择模型服务商 › DeepSeek（粘贴你自己的 API key）</span>
+<span class="ln out">? 选择模型服务商 › DeepSeek（把 key 填进向导框，别发聊天框）</span>
 <span class="ln ok">✔ Gateway 已在板子上运行（端口 18789）</span>
 </div>
 <div class="frag">
-<span class="ln cm"># 回到你的电脑，浏览器打开——</span>
-<span class="ln ok">➜ http://192.168.1.50:18789  开始聊天！</span>
-<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cursor"></span></span>
+<span class="ln cm"># 回到你的电脑：下午的脚本会配好课堂局域网访问</span>
+<span class="ln cm"># 若没配，先开 SSH 隧道，再访问本机地址：</span>
+<span class="ln ok">➜ http://127.0.0.1:18789  开始聊天！</span>
+<span class="ln cm"># 控制台是管理入口，别对公网暴露</span>
 </div>
             </div>
           </div>
@@ -520,7 +521,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
               <li class="frag"><span class="mk">🎫</span><div><b>API key 就是你的门卡</b><span class="sub">出示门卡才给服务；按用量（token ≈ 字数）计费</span></div></li>
               <li class="frag"><span class="mk">💰</span><div><b>不贵</b><span class="sub">DeepSeek 按量计费很便宜——先充 10~20 元，够这几天放开用</span></div></li>
             </ul>
-            <div class="warn frag" style="margin-top:16px"><span class="ic">🔒</span><div><b>key = 钱包：</b>创建时只完整显示一次，复制保存好；<b>别发群里、别写进代码</b>。</div></div>
+            <div class="warn frag" style="margin-top:16px"><span class="ic">🔒</span><div><b>key = 钱包：</b>创建时只完整显示一次，复制保存好。API key 只填进 OpenClaw 的设置 / 向导框，<b>别发到聊天框、别发群里、别写进代码</b>。</div></div>
           </div>
           <div class="card rise-2" style="padding:22px 26px">
             <div class="eyebrow" style="margin-bottom:12px">以 DeepSeek 为例 · 4 步办卡</div>
@@ -546,6 +547,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
               <li class="frag"><span class="mk">🔘</span><div><b>三个按钮</b><span class="sub">允许一次 / 总是允许 / 拒绝——"总是允许"只给你看得懂、信得过的命令</span></div></li>
               <li class="frag"><span class="mk">⭐</span><div><b>这道关卡就是本质区别</b><span class="sub">聊天机器人只"说"；智能体会"做"，所以要有闸门</span></div></li>
             </ul>
+            <div class="okbox frag" style="margin-top:18px"><b>审批三原则：</b>① 看不懂不点 ② 默认只允许这一次 ③ 删除 / 覆盖 / 安装，先问老师。</div>
           </div>
           <div class="chat rise-2">
             <div class="chat-bar"><span class="cic">🦞</span>OpenClaw @ titan<span class="st">你的第一句话</span></div>
@@ -603,12 +605,12 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
           <div class="card frag pop" style="padding:18px 18px;border-color:var(--crimson)"><span class="ic">🐞</span><h3 style="font-size:18px">修报错</h3><p style="font-size:14.5px">最高频！报错丢给它就行</p></div>
           <div class="card frag pop" style="padding:18px 18px"><span class="ic">🔧</span><h3 style="font-size:18px">重构整理</h3><p style="font-size:14.5px">改名字、拆文件、理结构</p></div>
           <div class="card frag pop" style="padding:18px 18px"><span class="ic">🔍</span><h3 style="font-size:18px">审查挑毛病</h3><p style="font-size:14.5px">让它检查 bug 和安全问题</p></div>
-          <div class="card frag pop" style="padding:18px 18px"><span class="ic">📖</span><h3 style="font-size:18px">读懂陌生代码</h3><p style="font-size:14.5px">拿到新项目先让它讲一遍</p></div>
+          <div class="card frag pop" style="padding:18px 18px;border-color:var(--crimson)"><span class="ic">📖</span><h3 style="font-size:18px">读懂陌生代码</h3><p style="font-size:14.5px">拿到新项目先让它讲一遍</p></div>
           <div class="card frag pop" style="padding:18px 18px;border-color:var(--crimson)"><span class="ic">⌨️</span><h3 style="font-size:18px">当万能终端</h3><p style="font-size:14.5px">说人话，它来选命令</p></div>
-          <div class="card frag pop" style="padding:18px 18px;border-color:var(--crimson)"><span class="ic">🗣️</span><h3 style="font-size:18px">纯嘴编程</h3><p style="font-size:14.5px">vibe coding：一行不写做出应用</p></div>
+          <div class="card frag pop" style="padding:18px 18px"><span class="ic">🗣️</span><h3 style="font-size:18px">纯嘴编程</h3><p style="font-size:14.5px">vibe coding：说出一个应用，但成品要让它讲懂</p></div>
           <div class="card frag pop" style="padding:18px 18px;background:var(--paper-2);border-style:dashed"><span class="ic">➕</span><h3 style="font-size:18px">更多…</h3><p style="font-size:14.5px">查资料、写文档、做实验记录</p></div>
         </div>
-        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:17px;margin-top:18px">标红的三个最适合今天的你——接下来逐个细讲。</p>
+        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:17px;margin-top:18px">今天最常用的三个（标红）：<b>修报错 · 说人话跑命令 · 让它讲代码</b>——接下来细讲。</p>
       </section>
 
       <!-- ============ 16 修报错 ============ -->
@@ -643,7 +645,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             <span class="eyebrow"><span class="n">15</span>&nbsp;武艺二</span>
             <h2 class="title">忘了命令？<br><span class="hl-bg">说人话</span>就行</h2>
             <p class="lead" style="margin-top:4px">昨天教的"求助三法"，今天补上终极版：描述目的，它来选命令、拼参数。</p>
-            <div class="warn frag" style="margin-top:20px"><span class="ic">⚠️</span><div>命令可以不背，但要<b>看得懂</b>——请示框里出现 <code class="inline">rm</code>，你得认得那是"删除"。看不懂的命令，别点"允许"。</div></div>
+            <div class="warn frag" style="margin-top:20px"><span class="ic">🛡️</span><div>命令可以不背，但要<b>看得懂</b>：请示框里 <code class="inline">rm</code> 就是"删除"。<br><b>审批三原则：① 看不懂不点 ② 默认只允许这一次 ③ 删除 / 覆盖 / 安装，先问老师。</b></div></div>
           </div>
           <div class="chat rise-2">
             <div class="chat-bar"><span class="cic">🦞</span>OpenClaw<span class="st">natural language shell</span></div>
@@ -652,7 +654,8 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
               <div class="tooluse frag"><span class="tl hd">⌨️ 跑命令（已请示）</span><span class="tl">$ find /var/log -name "*.log" -mtime +7</span><span class="tl dim">/var/log/alternatives.log</span><span class="tl dim">/var/log/bootstrap.log</span></div>
               <div class="bub ai frag">两个：alternatives.log 和 bootstrap.log，都是系统装机日志，不动它们也没关系。</div>
               <div class="bub me frag">把我 photos 文件夹里的图全部缩小一半</div>
-              <div class="tooluse frag"><span class="tl hd">⌨️ 跑命令（已请示）</span><span class="tl">$ mogrify -resize 50% photos/*.jpg</span><span class="tl okk">✓ 28 张图片已处理</span></div>
+              <div class="tooluse frag"><span class="tl hd">⌨️ 跑命令（已请示）</span><span class="tl">$ mkdir photos_small &amp;&amp; mogrify -resize 50% -path photos_small photos/*.jpg</span><span class="tl okk">✓ 28 张已缩小，存到 photos_small/（原图没动）</span></div>
+              <div class="bub ai frag">我存到<b>新文件夹</b>了，没覆盖原图——<b>覆盖 / 删除类，我都会先问你</b>。</div>
             </div>
           </div>
         </div>
@@ -714,16 +717,16 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
       <section class="slide" data-sec="用得好">
         <div class="stack" style="margin-bottom:22px">
           <span class="eyebrow"><span class="n">17</span>&nbsp;方法论</span>
-          <h2 class="title">用得好的功夫：<span class="hl-bg">四门功课</span></h2>
-          <p class="lead" style="max-width:74ch">工具人人会装，用得好不好差别巨大。这套框架来自 Anthropic 的《AI Fluency》公开课。</p>
+          <h2 class="title">用得好，靠这<span class="hl-bg">四招</span></h2>
+          <p class="lead" style="max-width:74ch">工具人人会装，用得好不好差别巨大。记牢四个字——<b>派活、说清、验货、负责</b>。</p>
         </div>
         <div class="grid4">
-          <div class="card frag pop"><span class="ic">🎯</span><h3>委派 <span style="font:700 13px var(--mono);color:var(--ink-faint)">Delegation</span></h3><p>决定哪些事交给它、哪些事你自己来</p></div>
-          <div class="card frag pop"><span class="ic">🗣️</span><h3>描述 <span style="font:700 13px var(--mono);color:var(--ink-faint)">Description</span></h3><p>把任务讲清楚，让它一次听懂</p></div>
-          <div class="card frag pop"><span class="ic">🔍</span><h3>辨别 <span style="font:700 13px var(--mono);color:var(--ink-faint)">Discernment</span></h3><p>判断它交的活到底行不行</p></div>
-          <div class="card frag pop"><span class="ic">🛡️</span><h3>尽责 <span style="font:700 13px var(--mono);color:var(--ink-faint)">Diligence</span></h3><p>活是它干的，责任是你的</p></div>
+          <div class="card frag pop"><span class="ic">🎯</span><h3>派活 <span style="font:600 14px var(--mono);color:var(--ink-faint)">委派</span></h3><p>决定哪些事交给它、哪些事你自己来</p></div>
+          <div class="card frag pop"><span class="ic">🗣️</span><h3>说清 <span style="font:600 14px var(--mono);color:var(--ink-faint)">描述</span></h3><p>把任务讲清楚，让它一次听懂</p></div>
+          <div class="card frag pop"><span class="ic">🔍</span><h3>验货 <span style="font:600 14px var(--mono);color:var(--ink-faint)">辨别</span></h3><p>判断它交的活到底行不行</p></div>
+          <div class="card frag pop"><span class="ic">🛡️</span><h3>负责 <span style="font:600 14px var(--mono);color:var(--ink-faint)">尽责</span></h3><p>活是它干的，责任是你的</p></div>
         </div>
-        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:17px;margin-top:22px">接下来几页，每门功课给你一套<b>能直接上手的招式</b>。</p>
+        <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:17px;margin-top:22px">接下来每招给你一套<b>能上手的做法</b>。<br><span style="font:400 13px var(--mono);color:var(--ink-faint)">框架源自 Anthropic《AI Fluency》4D · Delegation / Description / Discernment / Diligence</span></p>
       </section>
 
       <!-- ============ 21 描述 ============ -->
@@ -764,7 +767,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
           </div>
           <div class="card rise-2" style="padding:24px 26px">
             <h3 style="font-size:21px">🔁 派活的最高技巧：给它"反馈闭环"</h3>
-            <p style="font-size:16px;margin-top:8px;line-height:1.6">好任务自带<b>它能自己跑的检查</b>——它错了能自己发现、自己改，不用你盯。</p>
+            <p style="font-size:16px;margin-top:8px;line-height:1.6">好任务自带<b>它能自己跑的检查</b>——它错了能自己发现、自己改；你把力气省在<b>验收结果</b>上。</p>
             <div class="term" style="margin-top:14px;box-shadow:none">
               <div class="term-body" style="padding:14px 18px;font-size:14.5px;line-height:1.7">
 <span class="ln cm"># 验收命令在手，它就能自己转圈：</span>
@@ -791,7 +794,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
         </div>
         <div class="grid3">
           <div class="card frag pop" style="padding:24px 24px"><span class="ic">🏃</span><h3>1. 跑一遍</h3><p style="margin-top:6px;line-height:1.55">最硬的道理：能不能跑？结果对不对？<b>换个输入</b>还对吗？</p></div>
-          <div class="card frag pop" style="padding:24px 24px"><span class="ic">🗣️</span><h3>2. 让它讲给你听</h3><p style="margin-top:6px;line-height:1.55">"逐行解释一下。"讲不圆 = 有鬼；讲圆了，你也学会了。</p></div>
+          <div class="card frag pop" style="padding:24px 24px"><span class="ic">🗣️</span><h3>2. 让它讲给你听</h3><p style="margin-top:6px;line-height:1.55">"逐行解释一下。"讲不圆 = 多半有问题；讲圆了，你也学会了。</p></div>
           <div class="card frag pop" style="padding:24px 24px"><span class="ic">👀</span><h3>3. 换双眼睛</h3><p style="margin-top:6px;line-height:1.55">开个<b>新会话</b>（甚至换个模型）冷眼复审："这段代码有什么问题？"</p></div>
         </div>
         <div class="warn frag" style="margin-top:24px"><span class="ic">⚠️</span><div>它说"我已经修好了" <b>≠</b> 真的修好了。以<b>运行结果</b>为准，不以它的汇报为准。</div></div>
@@ -801,29 +804,29 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
       <section class="slide" data-sec="用得好">
         <div class="stack" style="margin-bottom:20px">
           <span class="eyebrow"><span class="n">21</span>&nbsp;收拾书桌</span>
-          <h2 class="title">给它配上<span class="hl-bg">备忘录</span>和<span class="hl-bg">秘籍</span></h2>
+          <h2 class="title">两招，帮它<span class="hl-bg">收拾书桌</span></h2>
         </div>
-        <div class="grid3">
-          <div class="card frag pop" style="padding:22px 22px">
+        <div class="grid2">
+          <div class="card frag pop" style="padding:22px 24px">
             <span class="ic">🧹</span><h3>一事一会话</h3>
             <p style="margin-top:6px;line-height:1.55">新任务开新会话，别一锅粥。聊太长它会自动<b>压缩</b>前文（细节会丢）。</p>
           </div>
-          <div class="card frag pop" style="padding:22px 22px;border-color:var(--crimson)">
-            <span class="ic">📌</span><h3>AGENTS.md 备忘录</h3>
-            <p style="margin-top:6px;line-height:1.55">写进去的规矩<b>每次开工自动带上</b>："回答用中文 / 代码都放 ~/projects / 改完自己跑一遍验证"。</p>
-          </div>
-          <div class="card frag pop" style="padding:22px 22px">
-            <span class="ic">🧰</span><h3>技能包 skills</h3>
-            <p style="margin-top:6px;line-height:1.55">打包好的"武功秘籍"，用时才翻开。<code class="inline">openclaw skills install …</code> 一键装别人写好的。</p>
+          <div class="card frag pop" style="padding:22px 24px;border-color:var(--crimson)">
+            <span class="ic">📌</span><h3>班规本 AGENTS.md</h3>
+            <p style="margin-top:6px;line-height:1.55">把常用规矩写进这本"班规"，<b>每次开工自动带上</b>："回答用中文 / 代码都放 ~/projects / 改完自己跑一遍验证"。</p>
           </div>
         </div>
-        <div class="okbox frag" style="margin-top:22px;text-align:center">还记得"书桌"吗？这三招就是：<b>桌面常清空、规矩贴墙上、秘籍放抽屉。</b></div>
+        <div class="frag" style="margin-top:16px;display:flex;gap:12px;align-items:flex-start;background:var(--paper-2);border:1px dashed var(--line);border-radius:12px;padding:12px 16px">
+          <span style="flex:none;font:700 12px var(--mono);letter-spacing:.05em;color:var(--crimson);background:var(--crimson-soft);border-radius:6px;padding:3px 9px">选学 · 彩蛋</span>
+          <p style="margin:0;font-size:15.5px;line-height:1.5;color:var(--ink-soft)"><b>技能包 skills</b>：打包好的"武功秘籍"，用时才翻开；<code class="inline">openclaw skills install …</code> 一键装别人写好的。今天先不碰。</p>
+        </div>
+        <div class="okbox frag" style="margin-top:16px;text-align:center">还记得"书桌"吗？主线两招：<b>桌面常清空、班规贴墙上</b>；余力再翻"秘籍"。</div>
       </section>
 
       <!-- ============ 25 进阶一瞥 ============ -->
       <section class="slide" data-sec="用得好">
         <div class="stack" style="margin-bottom:20px">
-          <span class="eyebrow"><span class="n">22</span>&nbsp;学有余力</span>
+          <span class="eyebrow"><span class="n">22</span>&nbsp;学有余力 · 选学彩蛋</span>
           <h2 class="title">三扇<span class="hl-bg">进阶的门</span>，先认个脸</h2>
         </div>
         <div class="grid3">
@@ -834,13 +837,13 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
         <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:17px;margin-top:22px">今天不展开——知道有这几扇门，以后自己推开。</p>
       </section>
 
-      <!-- ============ 26 坑一：一本正经地胡说 ============ -->
+      <!-- ============ 26 坑一：一本正经地说错（自信但不一定对） ============ -->
       <section class="slide" data-sec="避坑">
         <div class="two" style="grid-template-columns:1fr 1.02fr">
           <div class="stack">
             <span class="eyebrow"><span class="n">23</span>&nbsp;坑一</span>
-            <h2 class="title">它会<span class="hl">一本正经</span><br>地胡说</h2>
-            <p class="lead" style="margin-top:4px">它本质是"猜下一个字"——猜得<b>像</b>，不等于<b>对</b>。这叫"幻觉"。</p>
+            <h2 class="title">它会<span class="hl">一本正经</span><br>地说错</h2>
+            <p class="lead" style="margin-top:4px">它本质是"猜下一个字"——语气很<b>自信</b>，但<b>不一定对</b>。猜得像 ≠ 猜得对，这叫"幻觉"。</p>
             <ul class="clean" style="margin-top:16px">
               <li class="frag"><span class="mk">👻</span><div><b>编造不存在的东西</b><span class="sub">没有的库、没有的命令、没有的参数</span></div></li>
               <li class="frag"><span class="mk">🔀</span><div><b>张冠李戴</b><span class="sub">把你电脑的路径当成板子的路径</span></div></li>
@@ -871,7 +874,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px">
               <span class="chip frag" style="background:#FBF1F1;border-color:#D8B9B9">🌀 绕圈子</span>
               <span class="chip frag" style="background:#FBF1F1;border-color:#D8B9B9">🩹 补丁摞补丁</span>
-              <span class="chip frag" style="background:#FBF1F1;border-color:#D8B9B9">🗣️ 开始嘴硬</span>
+              <span class="chip frag" style="background:#FBF1F1;border-color:#D8B9B9">🔁 一条错路反复试</span>
             </div>
           </div>
           <div class="stack" style="gap:0">
@@ -896,7 +899,8 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
           <div class="card frag pop" style="padding:24px"><span class="ic">📢</span><h3>它是放大器</h3><p style="margin-top:6px;line-height:1.55">你越懂，它越强；你全不懂，它带你跑偏你都发现不了。</p></div>
           <div class="card frag pop" style="padding:24px"><span class="ic">🧠</span><h3>计算思维仍是你的</h3><p style="margin-top:6px;line-height:1.55">拆问题、想边界、设计验收——这是指挥官的本事，AI 替代不了。</p></div>
         </div>
-        <div class="warn frag" style="margin-top:22px"><span class="ic">🔒</span><div><b>安全底线：</b>API key、密码，永远别贴进对话里；只让它碰<b>你自己的</b>电脑和板子。</div></div>
+        <div class="warn frag" style="margin-top:22px"><span class="ic">🔒</span><div><b>安全底线：</b>API key、密码只填进设置 / 向导框，<b>别发到聊天框、别发群里、别写进代码</b>；只让它碰<b>你自己的</b>电脑和板子。</div></div>
+        <p class="frag" style="text-align:center;font-size:20px;font-weight:700;color:var(--crimson-deep);margin-top:16px">AI 可以帮你试，但最后签字的是你。</p>
       </section>
 
       <!-- ============ 29 回顾 + 下午预告 ============ -->
@@ -909,8 +913,8 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
               <li class="frag right" style="font-size:19px"><span class="mk">🤖</span><div><b>智能体 = 大模型 + 工具 + 想做看循环</b><span class="sub" style="font-size:15px">书桌（上下文）有限，要帮它收拾</span></div></li>
               <li class="frag right" style="font-size:19px"><span class="mk">🦞</span><div><b>上手 OpenClaw</b><span class="sub" style="font-size:15px">装进板子 · 自己的钥匙 · 请示审批</span></div></li>
               <li class="frag right" style="font-size:19px"><span class="mk">🛠️</span><div><b>七般武艺</b><span class="sub" style="font-size:15px">修报错 · 万能终端 · 讲代码 · 纯嘴编程…</span></div></li>
-              <li class="frag right" style="font-size:19px"><span class="mk">🎓</span><div><b>四门功课</b><span class="sub" style="font-size:15px">委派 · 描述 · 辨别 · 尽责</span></div></li>
-              <li class="frag right" style="font-size:19px"><span class="mk">⚠️</span><div><b>三个坑</b><span class="sub" style="font-size:15px">胡说 · 兔子洞 · 拐杖</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="mk">🎓</span><div><b>四招</b><span class="sub" style="font-size:15px">派活 · 说清 · 验货 · 负责</span></div></li>
+              <li class="frag right" style="font-size:19px"><span class="mk">⚠️</span><div><b>三个坑</b><span class="sub" style="font-size:15px">自信说错 · 兔子洞 · 拐杖</span></div></li>
             </ul>
           </div>
           <div class="card frag right" style="background:var(--crimson);border-color:var(--crimson-deep);color:#fff;padding:26px 28px">
@@ -950,7 +954,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
               <div class="row" style="padding:5px 0"><code>规矩</code><span>常用要求写进 AGENTS.md</span></div>
               <div class="row" style="padding:5px 0"><code>验收</code><span>跑一遍 · 让它讲 · 换眼睛</span></div>
               <div class="row" style="padding:5px 0"><code>刹车</code><span>绕圈就喊停，回退重来</span></div>
-              <div class="row" style="background:var(--crimson-soft);border-radius:8px;padding:9px 12px;border:none;margin-top:4px"><code style="color:var(--crimson-deep)">心法</code><span style="color:var(--crimson-deep);font-weight:700">你说目标，它来动手 ★</span></div>
+              <div class="row" style="background:var(--crimson-soft);border-radius:8px;padding:9px 12px;border:none;margin-top:4px"><code style="color:var(--crimson-deep)">心法</code><span style="color:var(--crimson-deep);font-weight:700">你说目标 · 它先试 · 你签字 ★</span></div>
             </div>
           </div>
         </div>

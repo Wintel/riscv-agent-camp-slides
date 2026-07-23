@@ -434,6 +434,7 @@ svg{overflow:visible}
           <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🗄️</span><div><h3>硬盘 M.2 SSD —— 书柜</h3><p style="margin-top:4px">关机也留着。系统、你写的代码，都住在这儿。</p></div></div>
           <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🌐</span><div><h3>网口 —— 门</h3><p style="margin-top:4px">和外面世界说话的唯一通道。第 2 天你就是从这道门进去的。</p></div></div>
         </div>
+        <div class="okbox frag" style="margin-top:16px;font-size:17px;padding:11px 18px">🤔 <b>20 秒抢答</b>：CPU、内存、硬盘，谁负责"临时记事"、<b>一断电就忘光</b>？<span style="color:var(--ink-soft)">　答案：内存——那张"书桌"；CPU 只管算，硬盘关机也记得。</span></div>
         <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:18px;margin-top:20px">这四样谁都有。Titan 特别的地方只有一个：它的<b>大脑</b>，用的是 RISC-V。</p>
       </section>
 
@@ -520,6 +521,7 @@ svg{overflow:visible}
             <span class="eyebrow"><span class="n">09</span>&nbsp;第一站 · 系统层</span>
             <h2 class="title">为什么还要<span class="hl">敲命令</span>？<br>鼠标不香吗</h2>
             <p class="lead">因为这四天你要打交道的机器，大多数时候<b>连屏幕都没有</b>。</p>
+            <div class="okbox frag" style="margin-top:22px;font-size:17px;padding:12px 18px">🤔 <b>判断</b>：板子<b>连显示器都没有</b>，你还能指挥它干活吗？<br><span style="color:var(--ink-soft)">能——从自己的电脑远程敲命令，这正是下一课要练的 SSH。</span></div>
           </div>
           <div class="stack" style="gap:14px">
             <div class="card frag right" style="display:flex;gap:14px;align-items:flex-start"><span style="font-size:28px">🖥️</span><div><b>板子和服务器没有显示器</b><p style="margin-top:3px">你只能从自己的电脑远程连过去，用文字指挥它。</p></div></div>
@@ -661,9 +663,10 @@ svg{overflow:visible}
           <span class="chip mono">V 向量 · 跑 AI 常用</span>
         </div>
         <div class="okbox frag" style="margin-top:22px;font-size:19px">
-          把最常用的几块打包，就简称 <b>G</b>。所以你在规格表里看到的那串天书——<br>
+          把最常用的几块打包，就简称 <b>G</b>。所以规格表里那串"天书"，其实就一句话——<br>
           <span class="cmd-pill red" style="font-size:20px;margin-top:8px;display:inline-block">RV64GCBHX</span>
-          <span style="margin-left:10px">＝ 64 位 + 常用包 G + 压缩 C + 位操作 B + 虚拟化 H + 厂商自定义 X。</span>
+          <span style="margin-left:10px">＝ <b>64 位 + 常用功能包 + 可自由扩展</b>。</span>
+          <div style="color:var(--ink-soft);font-size:15px;margin-top:9px">想拆开看：G 常用包 · C 压缩 · B 位操作 · H 虚拟化（把一台机器当好几台用）· X 厂商自定义——记不住没关系。</div>
         </div>
         <p class="frag" style="text-align:center;color:var(--ink-soft);font-size:18px;margin-top:14px">这正是我们板子上 <b>UR-DP1000</b> 的规格——现在你已经能读懂它了。<br>
           不过自由也有代价：<b>拼法太多，软件就不知道该按哪套写</b>。这个麻烦怎么解决，两页之后见分晓。</p>
@@ -709,7 +712,7 @@ svg{overflow:visible}
         <div class="grid2" style="gap:14px">
           <div class="news frag right"><span class="dt">2024.10</span><div class="nb"><b>RVA23 规范批准</b>：给 RISC-V 定了一份"统一考纲"。
             <span class="s">乐高拼法太自由也有麻烦——软件不知道该按哪套写。有了考纲，写一次就都能跑。</span></div></div>
-          <div class="news frag right"><span class="dt">2026</span><div class="nb"><b>服务器平台规范 1.0</b> 通过，UEFI、ACPI 都齐了。
+          <div class="news frag right"><span class="dt">2026</span><div class="nb"><b>服务器平台规范 1.0</b> 通过，UEFI、ACPI（＝各种电脑开机、装系统都遵守的通用规矩）都齐了。
             <span class="s">说人话：RISC-V 机器现在能像普通电脑一样正常开机、装系统。</span></div></div>
           <div class="news frag right"><span class="dt">2026</span><div class="nb"><b>Ubuntu 26.04 LTS</b> 完整支持 RVA23。
             <span class="s">就是你们下午要往板子里装的那个系统。</span></div></div>
@@ -862,7 +865,7 @@ svg{overflow:visible}
           <tbody>
             <tr><td><b>架构</b></td><td>ARM（要授权费）</td><td>x86（不对外授权）</td><td class="hl">RISC-V（开放免费）</td></tr>
             <tr><td><b>处理器</b></td><td>4 核</td><td>常见 8～16 核</td><td>8 核 @ 最高 2.0GHz</td></tr>
-            <tr><td><b>内存上限</b></td><td>16GB</td><td>16～64GB</td><td>64GB DDR4（支持 ECC）</td></tr>
+            <tr><td><b>内存上限</b></td><td>16GB</td><td>16～64GB</td><td>64GB DDR4（支持 ECC，自动纠错）</td></tr>
             <tr><td><b>能插显卡吗</b></td><td>不能</td><td>一般不能</td><td>能，PCIe 4.0 ×16</td></tr>
             <tr class="me"><td>价格</td><td>约 ¥600 起</td><td>￥4000 起</td><td>$329（约 ¥2400）</td></tr>
           </tbody>
@@ -972,10 +975,10 @@ svg{overflow:visible}
           <div class="card frag right" style="display:flex;flex-direction:column;gap:12px;border-color:var(--crimson)">
             <div class="chip" style="align-self:flex-start;background:var(--crimson-soft);border-color:var(--crimson)"><span class="d"></span>智能体 Agent</div>
             <div style="font-size:46px;text-align:center;line-height:1.1">🧠 ＋ 🛠️ ＋ 📝</div>
-            <p style="margin:0;font-size:19px;text-align:center">大脑 + 会用工具的手 + 记得住事的笔记本<br><span style="color:var(--ink-soft);font-size:16px">给它一个目标，它自己拆解、动手、反复尝试，直到办成</span></p>
+            <p style="margin:0;font-size:19px;text-align:center">大脑 + 会用工具的手 + 记得住事的笔记本<br><span style="color:var(--ink-soft);font-size:16px">给它一个目标，它自己拆解、动手、一步步尝试（也会出错，要你把关）</span></p>
           </div>
         </div>
-        <div class="okbox frag" style="margin-top:22px;text-align:center">打个比方：大模型是"聪明的脑子"，<b>智能体</b>是"聪明的脑子 + 会用工具的双手 + 记事的笔记本"。</div>
+        <div class="okbox frag" style="margin-top:22px;text-align:center">打个比方：大模型是"聪明的脑子"，<b>智能体</b>是"聪明的脑子 + 会用工具的双手 + 记事的笔记本"。<br><span style="color:var(--ink-soft);font-size:16px">在我们的课里，这双"手"在 Titan 板子上敲命令，那颗"大脑"（大模型）常常在<b>云端</b>——并不是塞在板子里跑的。</span></div>
       </section>
 
       <!-- ============ 13 智能体怎么运转 ============ -->
@@ -1006,6 +1009,7 @@ svg{overflow:visible}
             <h2 class="title">一个回合，<br><span class="hl-bg">长这样</span></h2>
             <p class="lead">右边是一次真实的派活。你只说了第一句，剩下的都是它自己转圈转出来的。</p>
             <div class="okbox frag" style="margin-top:20px">注意中间那一步：它<b>犯了错</b>，然后<b>自己看见、自己改掉</b>。<br><span style="color:var(--ink-soft);font-size:16px">这正是"智能体"和"聊天机器人"的分界线。</span></div>
+            <div class="okbox frag" style="margin-top:14px;font-size:17px;padding:12px 18px">🤔 <b>判断</b>：它报告 <b>✅ 已写入 52.3°C</b>，你敢直接信、直接交作业吗？<br><span style="color:var(--ink-soft)">先别急着交——AI 报"成功"不等于真的对，得你自己核一眼。</span></div>
           </div>
           <div class="term rise-2"><div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">agent @ titan</span></div>
             <div class="term-body sm">
@@ -1049,8 +1053,8 @@ svg{overflow:visible}
         </div>
         <div class="grid2" style="gap:16px">
           <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🚀</span><div><h3>零基础也能上手</h3><p style="margin-top:4px">不会写的地方，让 AI 帮你写、帮你解释，边做边学。</p></div></div>
-          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🐞</span><div><h3>报错不再卡住</h3><p style="margin-top:4px">把报错丢给它，它帮你找原因、给出修好的代码。</p></div></div>
-          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🎯</span><div><h3>你出想法，AI 敲代码</h3><p style="margin-top:4px">繁琐的编码交给它，你专注在"想做什么"上。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🐞</span><div><h3>报错时有它陪你查</h3><p style="margin-top:4px">把报错丢给它，它帮你找可能的原因、给出改法——但改对没有，得你跑一遍才算数。</p></div></div>
+          <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start"><span style="font-size:32px">🎯</span><div><h3>你出想法，它写草稿</h3><p style="margin-top:4px">繁琐的编码先交给它打草稿，你专注在"想做什么"，再把关它写得对不对。</p></div></div>
           <div class="card frag right" style="display:flex;gap:16px;align-items:flex-start;border-color:var(--crimson)"><span style="font-size:32px">📈</span><div><h3>整个行业都在转向它</h3><p style="margin-top:4px">2026 年，大家比的已经不是"谁模型分数高"，而是<b>智能体能不能真把一件事做完</b>。</p></div></div>
         </div>
         <div class="okbox frag" style="margin-top:22px;text-align:center">划重点：我们不是<b>从零造一个智能体</b>，而是<b>学会用 AI 智能体，在 RISC-V 板子上做开发</b>。</div>
@@ -1068,6 +1072,7 @@ svg{overflow:visible}
           <div class="card frag pop"><span class="ic">🩼</span><h3>别把它当拐杖</h3><p>全丢给它，代码是有了，你什么也没学到——面试和考试可不让带它。</p></div>
         </div>
         <div class="okbox frag" style="margin-top:24px;text-align:center;font-size:20px">
+          <span class="hl" style="font-size:23px;font-weight:800">AI 可以帮你试，但最后签字的是你。</span><br>
           所以你的角色是<b>队长</b>，不是观众：<span class="hl">派活、盯着、验收</span>。<br>
           <span style="color:var(--ink-soft);font-size:16.5px">第 3 讲和第 4 讲，会专门教你怎么给它写任务书、怎么检查它交的活。</span>
         </div>

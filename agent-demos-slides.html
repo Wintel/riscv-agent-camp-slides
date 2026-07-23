@@ -259,7 +259,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             <h2 class="title">昨天，我们已经把<br><span class="hl-bg">工具箱打开</span>了</h2>
             <ul class="clean" style="margin-top:14px">
               <li class="frag right"><span class="mk">1</span><div><b>智能体不是聊天框升级版</b><span class="sub">它会读文件、改代码、跑命令、看结果，再继续往前推任务。</span></div></li>
-              <li class="frag right"><span class="mk">2</span><div><b>OpenClaw 是你的指挥台</b><span class="sub">你在自己的电脑里说目标，智能体通过 SSH 去操控 Titan。</span></div></li>
+              <li class="frag right"><span class="mk">2</span><div><b>OpenClaw 是你的指挥台</b><span class="sub">你在自己的电脑里说目标，智能体在你允许的范围内，通过 SSH 连接 Titan、执行命令并把结果带回来。</span></div></li>
               <li class="frag right"><span class="mk">3</span><div><b>关键不是“神不神”</b><span class="sub">关键是：你能不能把任务说清楚，能不能自己验收结果。</span></div></li>
             </ul>
           </div>
@@ -297,7 +297,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
           <div class="card frag pop"><span class="ic">🧪</span><h3>跑验证</h3><p>运行脚本、测试或预览命令验证结果。</p></div>
           <div class="card frag pop"><span class="ic">🩺</span><h3>修报错</h3><p>从报错出发，定位、修改、复测。</p></div>
           <div class="card frag pop"><span class="ic">🗣️</span><h3>讲代码</h3><p>把陌生文件翻译成你能听懂的话。</p></div>
-          <div class="card frag pop" style="background:var(--crimson-soft);border-color:var(--crimson)"><span class="ic">🧩</span><h3>拼任务</h3><p>把“读、改、跑、验”串成一个完整闭环。</p></div>
+          <div class="card frag pop" style="background:var(--crimson-soft);border-color:var(--crimson)"><span class="ic">🧩</span><h3>拼任务</h3><p>把“读、改、跑、验”串成一个完整闭环（自己从头到尾走通一圈）。</p></div>
         </div>
       </section>
 
@@ -319,7 +319,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             <div class="eyebrow" style="margin-bottom:10px">三个坑</div>
             <ul class="clean" style="gap:12px">
               <li class="frag right" style="font-size:18px"><span class="mk">⚠</span><div><b>一本正经地胡说</b><span class="sub" style="font-size:15px">它可能说得很像真的，所以必须验。</span></div></li>
-              <li class="frag right" style="font-size:18px"><span class="mk">↺</span><div><b>兔子洞</b><span class="sub" style="font-size:15px">它可能越修越远，忘了原始目标。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">↺</span><div><b>越修越跑偏</b><span class="sub" style="font-size:15px">像做题算着算着偏离了题目，它可能走岔路，忘了原始目标。</span></div></li>
               <li class="frag right" style="font-size:18px"><span class="mk">🩼</span><div><b>拐杖</b><span class="sub" style="font-size:15px">如果你从不检查，就会慢慢失去判断力。</span></div></li>
             </ul>
           </div>
@@ -334,14 +334,14 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             <h2 class="title">三件事：<br>选任务，写任务书，做验收</h2>
             <ul class="clean" style="margin-top:12px">
               <li class="frag right"><span class="mk">A</span><div><b>会判断</b><span class="sub">知道什么活适合交给智能体，什么活暂时别交。</span></div></li>
-              <li class="frag right"><span class="mk">B</span><div><b>会设计</b><span class="sub">把目标、上下文、限制、输出物说清楚。</span></div></li>
+              <li class="frag right"><span class="mk">B</span><div><b>会设计</b><span class="sub">把目标、上下文（背景材料和现场）、限制、输出物（最后交上来的东西）说清楚。</span></div></li>
               <li class="frag right"><span class="mk">C</span><div><b>会闭环</b><span class="sub">不是“它说完成了”，而是“你真的检查过了”。</span></div></li>
             </ul>
           </div>
           <div class="card frag right" style="background:var(--crimson);border-color:var(--crimson-deep);color:#fff;padding:28px 30px">
             <span class="ic" style="font-size:34px">🎯</span>
             <h3 style="color:#fff;font-size:24px;margin-bottom:10px">本讲终点</h3>
-            <p style="color:#ffd7dd;font-size:18px;line-height:1.6">课讲完时，你应该已经能把一句模糊想法，变成一个<span style="color:#fff;font-weight:800">可执行、可检查、可迭代</span>的 Agent 任务。</p>
+            <p style="color:#ffd7dd;font-size:18px;line-height:1.6">课讲完时，你应该已经能把一句模糊想法，变成一个<span style="color:#fff;font-weight:800">可执行、可检查、可迭代</span>的 Agent 任务（迭代＝做一版、看问题、再改一版）。</p>
           </div>
         </div>
       </section>
@@ -406,11 +406,12 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
 <span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">uname -a</span></span>
 <span class="ln out">Linux titan 6.6.0 riscv64 GNU/Linux</span>
 <span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">free -h</span></span>
-<span class="ln out">Mem: 15Gi   used 3.1Gi   free 10Gi</span>
+<span class="ln out">Mem: 15Gi   used 3.1Gi   free 10Gi   <span class="cm"># 示意，以你板子实际输出为准</span></span>
 <span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">df -h /</span></span>
-<span class="ln out">/dev/nvme0n1p2   120G   28G   87G   25%</span>
-<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">ip -4 addr show eth0</span></span>
-<span class="ln out">inet 192.168.1.50/24 brd 192.168.1.255</span>
+<span class="ln out">/dev/nvme0n1p2   120G   28G   87G   25%   <span class="cm"># 示意</span></span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cmd">ip -br -4 addr</span></span>
+<span class="ln out">lo       UNKNOWN   127.0.0.1/8</span>
+<span class="ln out">eth0     UP        192.168.1.50/24   <span class="cm"># 网卡名不一定叫 eth0</span></span>
 <span class="ln"><span class="u">student</span><span class="p">@titan:~$</span> <span class="cursor"></span></span>
             </div>
           </div>
@@ -436,6 +437,11 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
           <div class="card frag pop"><span class="ic">快</span><h3>省去手抄命令</h3><p>尤其是刚入门时，不必一条条查手册再照打。</p></div>
           <div class="card frag pop"><span class="ic">稳</span><h3>结果更整洁</h3><p>它能把散乱输出整理成“板子状态报告”。</p></div>
           <div class="card frag pop"><span class="ic">准</span><h3>但仍要复核</h3><p>事实来自命令输出，不来自它的嘴。</p></div>
+        </div>
+        <div class="frag" style="margin-top:22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--crimson-soft);border:1px solid var(--crimson);border-radius:12px;padding:11px 18px;font-size:16px">
+          <span style="font-weight:800;color:var(--crimson-deep);white-space:nowrap">⏱️ 30 秒判断</span>
+          <span>让 Agent 跑 <code class="inline">df -h /</code> 看一眼磁盘余量 —— 要不要审批？</span>
+          <span class="frag" style="margin-left:auto;color:var(--ok);font-weight:700;white-space:nowrap">只读命令→放行；但若接着要“删文件腾空间”，先问老师。</span>
         </div>
       </section>
 
@@ -481,6 +487,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
 <span class="ln out"><span class="em">ValueError:</span> invalid literal for int() with base 10: ''</span>
 <span class="ln"><span class="u">student</span><span class="p">@titan:~/demo$</span> <span class="cmd">python3 app.py --self-check</span></span>
 <span class="ln out"><span class="ok">OK</span> fallback value used when sensor is empty</span>
+<span class="ln cm"># --self-check 是这个示例脚本自带的检查命令，不是所有 Python 脚本都有</span>
             </div>
           </div>
           <div class="stack">
@@ -493,6 +500,11 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             </ul>
             <div class="okbox frag" style="margin-top:18px">好 Agent 不是“一把梭哈全重构”，而是先用<span class="hl">最小修复</span>把你带回可运行状态。</div>
           </div>
+        </div>
+        <div class="frag" style="margin-top:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--crimson-soft);border:1px solid var(--crimson);border-radius:12px;padding:11px 18px;font-size:16px">
+          <span style="font-weight:800;color:var(--crimson-deep);white-space:nowrap">⏱️ 30 秒判断</span>
+          <span>Agent 说“旧文件我直接删了重写” —— 要不要审批？</span>
+          <span class="frag" style="margin-left:auto;color:var(--crimson-deep);font-weight:700;white-space:nowrap">要！删除 / 覆盖，先问老师。</span>
         </div>
       </section>
 
@@ -510,7 +522,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             </ul>
           </div>
           <div class="phone rise-2">
-            <div class="purl">http://titan.local:8000</div>
+            <div class="purl">http://192.168.1.50:8000</div>
             <div class="ptitle">Titan 状态看板</div>
             <div class="ptemp">OK</div>
             <div class="plab">Board Ready</div>
@@ -518,7 +530,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             <div class="prow"><b>架构</b><span>riscv64</span></div>
             <div class="prow"><b>内存</b><span>3.1 / 15 GiB</span></div>
             <div class="prow"><b>磁盘</b><span>25% used</span></div>
-            <div class="pbtn">刷新状态</div>
+            <div class="pbtn">刷新页面</div>
           </div>
         </div>
       </section>
@@ -541,6 +553,11 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
         <div class="grid2" style="margin-top:26px">
           <div class="card frag pop"><span class="ic">🌱</span><h3>这就是小产品雏形</h3><p>哪怕只是一个单页网页，也已经从“命令行输出”升级成了“可展示成品”。</p></div>
           <div class="card frag pop"><span class="ic">🔁</span><h3>下一轮迭代很自然</h3><p>你可以继续加刷新、警示色、手机适配、说明文字，而不是重新从零开始。</p></div>
+        </div>
+        <div class="frag" style="margin-top:22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--crimson-soft);border:1px solid var(--crimson);border-radius:12px;padding:11px 18px;font-size:16px">
+          <span style="font-weight:800;color:var(--crimson-deep);white-space:nowrap">⏱️ 30 秒判断</span>
+          <span>Agent 要 <code class="inline">sudo apt install</code> 装个库来美化页面 —— 要不要审批？</span>
+          <span class="frag" style="margin-left:auto;color:var(--crimson-deep);font-weight:700;white-space:nowrap">要，安装先请示；能用标准库就先别装。</span>
         </div>
       </section>
 
@@ -631,6 +648,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
               <li class="frag right"><span class="mk">写</span><div><b>写文件前说清会改哪里</b><span class="sub">尤其在陌生项目里，先计划再动手。</span></div></li>
               <li class="frag right"><span class="mk">装</span><div><b>装依赖、联网、删除前先请示</b><span class="sub">这些动作风险更高，也更容易把环境弄乱。</span></div></li>
             </ul>
+            <div class="okbox frag" style="margin-top:16px;font-size:15px;background:var(--crimson-soft);border-color:var(--crimson);color:var(--crimson-deep)"><b>审批三原则：</b>① 看不懂不点 ② 默认只允许这一次 ③ 删除 / 覆盖 / 安装，先问老师。</div>
           </div>
           <div class="chat rise-2">
             <div class="chat-bar"><span class="cic">🤖</span>OpenClaw<span class="st">permission check</span></div>
@@ -658,11 +676,13 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             <div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t-title">verify-first</span></div>
             <div class="term-body">
 <span class="ln"><span class="u">student</span><span class="p">@titan:~/status-board$</span> <span class="cmd">ls</span></span>
-<span class="ln out">index.html  server.py  README.md</span>
-<span class="ln"><span class="u">student</span><span class="p">@titan:~/status-board$</span> <span class="cmd">python3 server.py</span></span>
-<span class="ln out"><span class="ok">Serving</span> at http://127.0.0.1:8000</span>
-<span class="ln"><span class="u">student</span><span class="p">@titan:~/status-board$</span> <span class="cmd">git diff -- index.html</span></span>
-<span class="ln out">+ added status cards and refresh button</span>
+<span class="ln out">index.html  README.md</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~/status-board$</span> <span class="cmd">python3 -m http.server 8000</span></span>
+<span class="ln out"><span class="ok">Serving</span> HTTP on 0.0.0.0 port 8000 ...</span>
+<span class="ln cm"># 想在自己电脑看：用 http://&lt;Titan的IP&gt;:8000（127.0.0.1 只指本机）</span>
+<span class="ln"><span class="u">student</span><span class="p">@titan:~/status-board$</span> <span class="cmd">git diff --stat</span></span>
+<span class="ln out"> index.html | 12 ++++++++++++</span>
+<span class="ln out"> 1 file changed, 12 insertions(+)</span>
             </div>
           </div>
           <div class="stack">
@@ -672,7 +692,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
               <li class="frag right"><span class="mk">看</span><div><b>看成品</b><span class="sub">网页能不能打开，布局是不是合理。</span></div></li>
               <li class="frag right"><span class="mk">跑</span><div><b>跑命令</b><span class="sub">原始命令、验证命令、预览命令都要能复现。</span></div></li>
               <li class="frag right"><span class="mk">查</span><div><b>查改动</b><span class="sub">文件改了哪些地方，有没有误伤别的内容。</span></div></li>
-              <li class="frag right"><span class="mk">留</span><div><b>留回退点</b><span class="sub">每次只做一小步，出问题才知道退到哪里。</span></div></li>
+              <li class="frag right"><span class="mk">留</span><div><b>留回滚点</b><span class="sub">像游戏存档，改坏了能退回；每次只做一小步，出问题才知道退到哪里。</span></div></li>
             </ul>
           </div>
         </div>
@@ -702,6 +722,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             </ul>
           </div>
         </div>
+        <div class="frag" style="margin-top:22px;text-align:center;background:var(--crimson);color:#fff;border-radius:12px;padding:13px 20px;font-size:20px;font-weight:800">AI 可以帮你试，但最后签字的是你。</div>
       </section>
 
       <!-- ============ 21 Prompt 模板 ============ -->
@@ -779,7 +800,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
                 <span class="tl">free -h</span>
                 <span class="tl">df -h /</span>
               </div>
-              <div class="bub ai">系统信息已经拿到，下一步我会生成 <code class="inline">index.html</code> 和一个简易服务脚本。</div>
+              <div class="bub ai">系统信息已经拿到，下一步我会生成 <code class="inline">index.html</code>，再用 Python 内置服务预览。</div>
             </div>
           </div>
           <div class="term rise-2">
@@ -801,7 +822,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
       <section class="slide" data-sec="动手体验">
         <div class="two">
           <div class="phone rise">
-            <div class="purl">http://127.0.0.1:8000</div>
+            <div class="purl">http://192.168.1.50:8000</div>
             <div class="ptitle">Titan 状态看板</div>
             <div class="ptemp">15G</div>
             <div class="plab">Memory Total</div>
@@ -809,7 +830,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             <div class="prow"><b>时间</b><span>10:32</span></div>
             <div class="prow"><b>架构</b><span>riscv64</span></div>
             <div class="prow"><b>磁盘</b><span>25% used</span></div>
-            <div class="pbtn">刷新状态</div>
+            <div class="pbtn">刷新页面</div>
           </div>
           <div class="stack">
             <span class="eyebrow"><span class="n">23</span>&nbsp;step 3</span>
@@ -820,6 +841,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
               <li class="frag right"><span class="mk">查</span><div><b>目录是不是干净</b><span class="sub">它有没有偷偷写出一堆不需要的文件。</span></div></li>
               <li class="frag right"><span class="mk">问</span><div><b>让它解释设计</b><span class="sub">它为什么这样布局，下一轮准备怎么改。</span></div></li>
             </ul>
+            <div class="okbox frag" style="margin-top:16px;font-size:14.5px">打开预览：与 Titan 同一局域网，用 <b>http://&lt;Titan的IP&gt;:8000</b>；或先 <code class="inline">ssh -L 8000:127.0.0.1:8000</code> 转发，再开 <code class="inline">http://127.0.0.1:8000</code>。<b>127.0.0.1 只指“当前这台机器”</b>，在自己电脑直接打开连不到 Titan。</div>
           </div>
         </div>
       </section>
@@ -842,7 +864,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
           <div class="card rise-2" style="background:var(--crimson-soft);border-color:var(--crimson)">
             <h3 style="font-size:24px;margin-bottom:12px">第二轮可以补充</h3>
             <ul class="clean" style="gap:11px">
-              <li class="frag right" style="font-size:18px"><span class="mk">刷</span><div><b>加刷新按钮</b><span class="sub" style="font-size:15px">点击即可重新读取状态。</span></div></li>
+              <li class="frag right" style="font-size:18px"><span class="mk">刷</span><div><b>升级成会刷新的后端</b><span class="sub" style="font-size:15px">静态页只能“刷新页面”看旧数据；换成 <code class="inline">server.py</code> 后端，按钮才能真的重新读取 Titan 状态。</span></div></li>
               <li class="frag right" style="font-size:18px"><span class="mk">警</span><div><b>加颜色警示</b><span class="sub" style="font-size:15px">磁盘或内存占用高时变成红色。</span></div></li>
               <li class="frag right" style="font-size:18px"><span class="mk">适</span><div><b>做手机适配</b><span class="sub" style="font-size:15px">窄屏下仍能清楚显示。</span></div></li>
             </ul>

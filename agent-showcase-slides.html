@@ -251,10 +251,10 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
           <h2 class="title">今天这 4 个案例<br>各酷在不同地方</h2>
         </div>
         <div class="grid4">
-          <div class="card frag pop"><span class="ic">🖥️</span><h3>GUI Agent Studio</h3><p>聊天、文件树、终端、预览同屏出现，像真正的开发环境。</p></div>
-          <div class="card frag pop"><span class="ic">🌐</span><h3>Agent 做网页系统</h3><p>从需求到页面到接口到上线预览，直接走完整 Web 流程。</p></div>
-          <div class="card frag pop"><span class="ic">🧠</span><h3>多 Agent 流水线</h3><p>一个人做调度，多个 Agent 分工合作：策划、设计、编码、审查。</p></div>
-          <div class="card frag pop"><span class="ic">🛰️</span><h3>Titan 控制中心</h3><p>把多块板子的状态、日志和远程动作收进一个仪表盘。</p></div>
+          <div class="card frag pop"><span class="ic">🖥️</span><h3>GUI Agent Studio</h3><p>聊天、文件树、终端、预览同屏出现，像真正的开发环境。</p><p style="margin-top:9px;font-weight:700;color:var(--crimson)">就像：带屏幕的万能工具箱</p></div>
+          <div class="card frag pop"><span class="ic">🌐</span><h3>Agent 做网页系统</h3><p>从需求到页面到预览，体验一个缩小版 Web 流程。</p><p style="margin-top:9px;font-weight:700;color:var(--crimson)">就像：班级任务看板</p></div>
+          <div class="card frag pop"><span class="ic">🧠</span><h3>多 Agent 流水线</h3><p>一个人做调度，多个 Agent 分工合作：策划、画图、写代码、检查。</p><p style="margin-top:9px;font-weight:700;color:var(--crimson)">就像：小组分工做海报</p></div>
+          <div class="card frag pop"><span class="ic">🛰️</span><h3>Titan 控制中心</h3><p>把多块板子的状态、日志和远程动作收进一个仪表盘。</p><p style="margin-top:9px;font-weight:700;color:var(--crimson)">就像：机房值班大屏</p></div>
         </div>
         <div class="okbox frag" style="margin-top:24px;text-align:center">看完你会发现：酷项目并不一定更难，关键在于<span class="hl">任务拆得好、边界画得清、结果验得住</span>。</div>
       </section>
@@ -329,21 +329,37 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
           <div class="carrow"><div class="aa">→</div><div class="al">结果</div></div>
           <div class="cnode"><div class="ci">👀</div><b>预览验收</b><span>马上看到成品</span></div>
         </div>
+        <div class="frag" style="margin-top:26px;display:flex;align-items:center;gap:14px;font-size:17px;background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:10px 20px">
+          <span style="font-weight:700;color:var(--crimson);white-space:nowrap">🙋 举手判断</span>
+          <span>Agent 说“我要安装一个新软件包”，这个动作要不要先问老师？</span>
+          <span style="margin-left:auto;color:var(--ink-soft);font-size:15px;white-space:nowrap">要（安装 = 先问老师）</span>
+        </div>
       </section>
 
       <!-- 06 -->
       <section class="slide" data-sec="案例一">
         <div class="two">
-          <div class="term rise">
-            <div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t-title">gui-agent-stack</span></div>
-            <div class="term-body">
-<span class="ln"><span class="u">idea</span><span class="p">@whiteboard:~$</span> <span class="cmd">stack</span></span>
-<span class="ln out">frontend: HTML / CSS / JS or React</span>
-<span class="ln out">shell: local terminal runner</span>
-<span class="ln out">agent: model + tools + approval layer</span>
-<span class="ln out">preview: browser / logs / charts</span>
-<span class="ln out"><span class="ok">goal</span>: see plan, execution, and result on one screen</span>
+          <div class="rise">
+            <div style="font-weight:800;font-size:18px;margin-bottom:12px">把一个 Agent 工具拆开看，其实就四层：</div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <div class="card" style="padding:14px 18px;display:flex;gap:14px;align-items:center">
+                <span style="font-size:30px;flex:none">🖼️</span>
+                <div><b style="font-size:19px">外壳</b><span style="display:block;color:var(--ink-soft);font-size:15px;line-height:1.4;margin-top:2px">你看到的界面：聊天框、文件列表、预览窗。</span></div>
+              </div>
+              <div class="card" style="padding:14px 18px;display:flex;gap:14px;align-items:center">
+                <span style="font-size:30px;flex:none">🖐️</span>
+                <div><b style="font-size:19px">手脚</b><span style="display:block;color:var(--ink-soft);font-size:15px;line-height:1.4;margin-top:2px">帮你点按钮、跑命令，真正去动手做事。</span></div>
+              </div>
+              <div class="card" style="padding:14px 18px;display:flex;gap:14px;align-items:center;border-color:var(--crimson);background:var(--crimson-soft)">
+                <span style="font-size:30px;flex:none">🧠</span>
+                <div><b style="font-size:19px">大脑</b><span style="display:block;color:var(--ink-soft);font-size:15px;line-height:1.4;margin-top:2px">理解你的任务，想清楚先做什么、再做什么。</span></div>
+              </div>
+              <div class="card" style="padding:14px 18px;display:flex;gap:14px;align-items:center">
+                <span style="font-size:30px;flex:none">✅</span>
+                <div><b style="font-size:19px">验收台</b><span style="display:block;color:var(--ink-soft);font-size:15px;line-height:1.4;margin-top:2px">看结果有没有真的出来，而不是嘴上说完成。</span></div>
+              </div>
             </div>
+            <div class="side-note" style="margin-top:11px">这是示意，不是真命令。像 React、diff 这些技术名词今天不用记，知道有这四层就够了。</div>
           </div>
           <div class="stack">
             <span class="eyebrow"><span class="n">05</span>&nbsp;为什么这个例子酷</span>
@@ -351,7 +367,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
             <ul class="clean" style="margin-top:12px">
               <li class="frag right"><span class="mk">软</span><div><b>像产品，不像脚本</b><span class="sub">用户感受到的是完整交互，而不是散落的命令。</span></div></li>
               <li class="frag right"><span class="mk">透</span><div><b>更透明</b><span class="sub">它在做什么、下一步是什么、哪里需要你批准，都看得见。</span></div></li>
-              <li class="frag right"><span class="mk">扩</span><div><b>很容易长新功能</b><span class="sub">后续能加文件 diff、语音输入、视觉预览、远程设备连接。</span></div></li>
+              <li class="frag right"><span class="mk">扩</span><div><b>很容易长新功能</b><span class="sub">后续能加文件改动前后对比、语音输入、视觉预览、远程连板子。</span></div></li>
             </ul>
           </div>
         </div>
@@ -363,15 +379,15 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
           <div class="stack">
             <span class="eyebrow"><span class="n">06</span>&nbsp;案例二</span>
             <h2 class="title">让 Agent 直接开发<br>一个网页系统</h2>
-            <p class="lead">不是做一个静态小页，而是完整走一遍：需求梳理、页面布局、数据接口、预览验收、继续迭代。</p>
+            <p class="lead">先别急着接真数据。<span class="hl">第一步只做假数据网页</span>，像画一个能点的模型；<span class="hl">第二步再接真实数据</span>。</p>
             <ul class="clean" style="margin-top:16px">
-              <li class="frag right"><span class="mk">需</span><div><b>先把需求写成产品说明</b><span class="sub">比如“做一个夏令营报名与看板系统”。</span></div></li>
-              <li class="frag right"><span class="mk">拆</span><div><b>再拆前端、后端、数据</b><span class="sub">页面长什么样，数据怎么存，哪些动作要支持。</span></div></li>
-              <li class="frag right"><span class="mk">迭</span><div><b>最后像产品经理一样迭代</b><span class="sub">再补搜索、筛选、移动端适配、状态标签。</span></div></li>
+              <li class="frag right"><span class="mk">需</span><div><b>先把想做的东西写清楚</b><span class="sub">比如“做一个夏令营报名与看板系统”。</span></div></li>
+              <li class="frag right"><span class="mk">页</span><div><b>先只做能点的页面</b><span class="sub">先想每一页长什么样、点了会怎样；真实数据放到第二步。</span></div></li>
+              <li class="frag right"><span class="mk">迭</span><div><b>最后像产品经理一样一轮轮改</b><span class="sub">再补搜索、筛选、手机上也能看、状态标签。</span></div></li>
             </ul>
           </div>
           <div class="browser rise-2">
-            <div class="browser-top"><span class="dot" style="background:#e0506a;width:11px;height:11px;border-radius:50%"></span><span class="dot" style="background:#f5b940;width:11px;height:11px;border-radius:50%"></span><span class="dot" style="background:#3fbb6d;width:11px;height:11px;border-radius:50%"></span><div class="addr">https://camp-board.local</div></div>
+            <div class="browser-top"><span class="dot" style="background:#e0506a;width:11px;height:11px;border-radius:50%"></span><span class="dot" style="background:#f5b940;width:11px;height:11px;border-radius:50%"></span><span class="dot" style="background:#3fbb6d;width:11px;height:11px;border-radius:50%"></span><div class="addr">http://localhost:8000</div></div>
             <div class="browser-body">
               <div class="hero-card">
                 <h3>Camp Mission Board</h3>
@@ -437,6 +453,11 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
             </ul>
           </div>
         </div>
+        <div class="frag" style="margin-top:22px;display:flex;align-items:center;gap:14px;font-size:17px;background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:10px 20px">
+          <span style="font-weight:700;color:var(--crimson);white-space:nowrap">🙋 二选一</span>
+          <span>做网页系统，先做“能点的页面”还是先做数据库？</span>
+          <span style="margin-left:auto;color:var(--ink-soft);font-size:15px;white-space:nowrap">先做页面（假数据模型）</span>
+        </div>
       </section>
 
       <!-- 10 -->
@@ -445,7 +466,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
           <div class="stack">
             <span class="eyebrow"><span class="n">09</span>&nbsp;案例三</span>
             <h2 class="title">多 Agent 流水线：<br>一个人调度，一群 Agent 分工</h2>
-            <p class="lead">单个 Agent 已经能做很多事，但复杂项目里，你可以让不同 Agent 扮演不同角色：产品、设计、编码、审查。</p>
+            <p class="lead">单个 Agent 已经能做很多事，但复杂项目里，你可以让不同 Agent 扮演不同角色：策划、画图、写代码、检查。</p>
             <ul class="clean" style="margin-top:16px">
               <li class="frag right"><span class="mk">分</span><div><b>把职责拆开</b><span class="sub">谁写方案，谁做界面，谁写代码，谁做复查。</span></div></li>
               <li class="frag right"><span class="mk">接</span><div><b>让输出接得上</b><span class="sub">前一个 Agent 的产物，要变成下一个 Agent 的输入。</span></div></li>
@@ -453,13 +474,13 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
             </ul>
           </div>
           <div class="chainrow rise-2" style="flex-wrap:wrap;gap:10px">
-            <div class="cnode"><div class="ci">📋</div><b>Planner</b><span>拆任务</span></div>
-            <div class="carrow"><div class="aa">→</div><div class="al">spec</div></div>
-            <div class="cnode"><div class="ci">🎨</div><b>Designer</b><span>做界面</span></div>
-            <div class="carrow"><div class="aa">→</div><div class="al">ui</div></div>
-            <div class="cnode hot"><div class="ci">⌨️</div><b>Coder</b><span>实现功能</span></div>
-            <div class="carrow"><div class="aa">→</div><div class="al">review</div></div>
-            <div class="cnode"><div class="ci">🧪</div><b>Reviewer</b><span>复核与测试</span></div>
+            <div class="cnode"><div class="ci">📋</div><b>策划同学</b><span>拆任务</span></div>
+            <div class="carrow"><div class="aa">→</div><div class="al">任务说明书</div></div>
+            <div class="cnode"><div class="ci">🎨</div><b>画图同学</b><span>做界面</span></div>
+            <div class="carrow"><div class="aa">→</div><div class="al">界面稿</div></div>
+            <div class="cnode hot"><div class="ci">⌨️</div><b>写代码同学</b><span>实现功能</span></div>
+            <div class="carrow"><div class="aa">→</div><div class="al">代码</div></div>
+            <div class="cnode"><div class="ci">🧪</div><b>检查同学</b><span>复核与测试</span></div>
           </div>
         </div>
       </section>
@@ -473,8 +494,8 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
         <div class="grid2">
           <div class="card frag pop">
             <span class="ic">📦</span>
-            <h3>每个角色都要有标准输出</h3>
-            <p>比如 Planner 交 PRD，Designer 交页面清单与风格稿，Coder 交代码与运行命令，Reviewer 交发现清单。</p>
+            <h3>每个角色都要有“交作业格式”</h3>
+            <p>比如策划同学交任务说明书，画图同学交页面清单与风格稿，写代码同学交代码与运行命令，检查同学交问题清单。</p>
           </div>
           <div class="card frag pop">
             <span class="ic">🔗</span>
@@ -501,7 +522,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
             <span class="eyebrow"><span class="n">11</span>&nbsp;风险控制</span>
             <h2 class="title">多 Agent 很酷<br>但更容易失控</h2>
             <ul class="clean" style="margin-top:12px">
-              <li class="frag right"><span class="mk">绕</span><div><b>链条越长，越容易绕圈</b><span class="sub">Planner 重新改需求，Coder 又重做，Reviewer 再打回，循环反复。</span></div></li>
+              <li class="frag right"><span class="mk">绕</span><div><b>链条越长，越容易绕圈</b><span class="sub">策划同学重新改需求，写代码同学又重做，检查同学再打回，循环反复。</span></div></li>
               <li class="frag right"><span class="mk">糊</span><div><b>责任边界容易变糊</b><span class="sub">谁该看风险，谁该验收，谁该停手，不写清就会乱。</span></div></li>
               <li class="frag right"><span class="mk">贵</span><div><b>成本更高</b><span class="sub">更多会话、更多上下文、更多协调，也意味着更高的模型调用成本。</span></div></li>
             </ul>
@@ -510,6 +531,11 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
             <b style="display:block;font-size:22px;color:#935000;margin-bottom:10px">适合什么时候用</b>
             <p style="margin:0;font-size:17px;line-height:1.6;color:#7A5D33">当项目里真的有几种明显不同的工作类型，而且单个 Agent 容易“顾此失彼”时，多 Agent 才值得上。否则，先把单 Agent 用明白，往往更划算。</p>
           </div>
+        </div>
+        <div class="frag" style="margin-top:24px;display:flex;align-items:center;gap:14px;font-size:17px;background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:10px 20px">
+          <span style="font-weight:700;color:var(--crimson);white-space:nowrap">🙋 二选一</span>
+          <span>一个作业，先用 1 个 Agent，还是一上来就用 4 个？</span>
+          <span style="margin-left:auto;color:var(--ink-soft);font-size:15px;white-space:nowrap">先用 1 个（够用就别折腾）</span>
         </div>
       </section>
 
@@ -527,7 +553,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
             </ul>
           </div>
           <div class="browser rise-2">
-            <div class="browser-top"><span class="dot" style="background:#e0506a;width:11px;height:11px;border-radius:50%"></span><span class="dot" style="background:#f5b940;width:11px;height:11px;border-radius:50%"></span><span class="dot" style="background:#3fbb6d;width:11px;height:11px;border-radius:50%"></span><div class="addr">https://lab-ops.local</div></div>
+            <div class="browser-top"><span class="dot" style="background:#e0506a;width:11px;height:11px;border-radius:50%"></span><span class="dot" style="background:#f5b940;width:11px;height:11px;border-radius:50%"></span><span class="dot" style="background:#3fbb6d;width:11px;height:11px;border-radius:50%"></span><div class="addr">http://localhost:8000</div></div>
             <div class="browser-body">
               <div class="module-grid" style="margin-top:0">
                 <div class="module"><b>Titan-A</b><span>online · riscv64 · mem 22% · disk 31%</span></div>
@@ -536,11 +562,15 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
                 <div class="module"><b>Titan-D</b><span>offline · waiting for reconnect</span></div>
               </div>
               <div class="hero-card" style="margin-top:14px">
-                <h3>Actions</h3>
-                <p>pull logs · run health-check · restart service · sync demo files</p>
+                <h3>可执行的动作</h3>
+                <p>拉日志 · 跑体检脚本 · 重启服务 · 分发样例文件</p>
               </div>
             </div>
           </div>
+        </div>
+        <div class="warnbox frag" style="margin-top:20px">
+          <b style="color:#935000">🙋 举手判断：</b>Agent 说“我去把 Titan-D <b>重启</b>、把旧文件<b>删掉</b>”，要不要先问老师？
+          <span style="display:block;margin-top:8px;color:#7A5D33;font-size:16px">要！课堂先用<b>样例数据</b>演示；真正<b>重启 / 删文件 / 分发</b>，必须<b>老师批准</b>。</span>
         </div>
       </section>
 
@@ -552,14 +582,18 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
         </div>
         <div class="chainrow rise">
           <div class="cnode"><div class="ci">📡</div><b>采集</b><span>各板子定时上报状态</span></div>
-          <div class="carrow"><div class="aa">→</div><div class="al">store</div></div>
-          <div class="cnode hot"><div class="ci">🗃️</div><b>汇总</b><span>后端存成统一结构</span></div>
-          <div class="carrow"><div class="aa">→</div><div class="al">view</div></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">记到表里</div></div>
+          <div class="cnode hot"><div class="ci">🗃️</div><b>汇总</b><span>统一整理成一张表</span></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">页面展示</div></div>
           <div class="cnode"><div class="ci">📊</div><b>可视化</b><span>浏览器里看状态卡</span></div>
-          <div class="carrow"><div class="aa">→</div><div class="al">act</div></div>
+          <div class="carrow"><div class="aa">→</div><div class="al">执行动作</div></div>
           <div class="cnode"><div class="ci">🤖</div><b>Agent 操作</b><span>根据你的命令触发动作</span></div>
         </div>
-        <div class="okbox frag" style="margin-top:26px">“酷”的秘密往往不是单一黑科技，而是把很多普通能力：<b>SSH</b>、<b>网页</b>、<b>日志</b>、<b>审批</b>、<b>可视化</b>，拼成一整套体验。</div>
+        <div class="okbox frag" style="margin-top:22px">“酷”的秘密往往不是单一黑科技，而是把很多普通能力：<b>连接板子（SSH）</b>、<b>网页</b>、<b>日志</b>、<b>审批</b>、<b>可视化</b>，拼成一整套体验。</div>
+        <div class="warnbox frag" style="margin-top:14px">
+          <b style="display:block;font-size:18px;color:#935000;margin-bottom:6px">审批三原则：① 看不懂不点 ② 默认只允许这一次 ③ 删除 / 覆盖 / 安装，先问老师。</b>
+          <span style="font-size:17px;font-weight:800;color:var(--crimson)">AI 可以帮你试，但最后签字的是你。</span>
+        </div>
       </section>
 
       <!-- 15 -->
@@ -584,24 +618,24 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
             <h2 class="title">如果你也想做一个<br>“酷 Agent 项目”</h2>
             <p class="lead">最稳妥的方式不是一口气写满，而是先搭出一个很小但完整的骨架。</p>
             <ul class="clean" style="margin-top:16px">
-              <li class="frag right"><span class="mk">骨</span><div><b>先定目录结构</b><span class="sub">前端、后端、文档、数据、脚本各自分开放。</span></div></li>
+              <li class="frag right"><span class="mk">骨</span><div><b>先定目录结构</b><span class="sub">入门先放三个文件就够；做顺了再分前端 / 后端 / 脚本。</span></div></li>
               <li class="frag right"><span class="mk">规</span><div><b>再写项目规矩</b><span class="sub">告诉 Agent 该怎么命名、怎么汇报、怎么验证。</span></div></li>
               <li class="frag right"><span class="mk">小</span><div><b>先做最小可演示版本</b><span class="sub">哪怕只有一个页面和一个按钮，也比空喊“大系统”强。</span></div></li>
             </ul>
           </div>
-          <div class="tree rise-2"><span class="d">project/</span>
-├─ <span class="f">README.md</span>
-├─ <span class="f">AGENTS.md</span>
-├─ <span class="d">frontend/</span>
-│  ├─ <span class="f">index.html</span>
-│  └─ <span class="f">styles.css</span>
-├─ <span class="d">backend/</span>
-│  ├─ <span class="f">server.py</span>
-│  └─ <span class="f">collect.py</span>
-├─ <span class="d">data/</span>
-│  └─ <span class="f">sample.json</span>
-└─ <span class="d">scripts/</span>
-   └─ <span class="f">health_check.sh</span></div>
+          <div class="rise-2">
+            <div style="font-weight:800;font-size:16px;margin-bottom:7px;color:var(--crimson)">入门版（先做这个就够）</div>
+            <div class="tree" style="padding:13px 16px;font-size:15px"><span class="d">project/</span>
+├─ <span class="f">index.html</span>   <span class="d"># 页面：打得开、能点</span>
+├─ <span class="f">data.json</span>    <span class="d"># 假数据：先用它撑起页面</span>
+└─ <span class="f">README.md</span>    <span class="d"># 说明：这是什么、怎么跑</span></div>
+            <div style="font-weight:800;font-size:16px;margin:13px 0 7px;color:var(--ink-soft)">进阶版（做顺了再加）</div>
+            <div class="tree" style="padding:13px 16px;font-size:15px"><span class="d">project/</span>
+├─ <span class="d">（入门版那三个文件）</span>
+├─ <span class="f">AGENTS.md</span>   <span class="d"># 给某些 Agent 工具看的项目说明文件</span>
+├─ <span class="d">backend/</span>   <span class="d"># 真实数据接口（第二步再碰）</span>
+└─ <span class="d">scripts/</span>   <span class="d"># 体检 / 维护脚本</span></div>
+          </div>
         </div>
       </section>
 
@@ -615,21 +649,21 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
 请做一个【GUI Agent 工具 / Web 系统 / 控制中心】。
 
 第一阶段：
-先交一个最小可演示版本，只包含【列 3 个最重要功能】。
+先交一个最小可演示版本（打得开、看得懂、能点一两个按钮），只包含【列 3 个最重要功能】。
 
 限制：
-- 先不要做复杂后端
-- 不要安装额外依赖，除非先说明原因
+- 先不要做复杂后端（先不碰数据库那些）
+- 不要安装额外依赖（要额外装的软件包），除非先说明原因
 - 每次改动后告诉我改了哪些文件
 
 验收：
-- 能本地预览
-- 我可以点 1 到 2 个关键交互
+- 能本地预览（在自己电脑上打开就能看）
+- 我可以点 1 到 2 个关键交互（点了会有反应的按钮）
 - 结构清楚，下一轮容易继续加功能
 
 汇报：
 最后告诉我：已完成 / 未完成 / 下一轮建议</div>
-        <div class="warnbox frag" style="margin-top:18px">越是“酷项目”，越不能只说“你自由发挥”。自由发挥很容易直接把项目带进兔子洞。</div>
+        <div class="warnbox frag" style="margin-top:18px">越是“酷项目”，越不能只说“你自由发挥”。自由发挥很容易直接把项目带进兔子洞（越钻越深、绕不出来）。</div>
       </section>
 
       <!-- 18 -->
@@ -677,6 +711,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16px;line-height:
             <span class="ic" style="font-size:34px">🧠</span>
             <h3 style="color:#fff;font-size:24px;margin-bottom:12px">一句总结</h3>
             <p style="color:#ffd7dd;font-size:19px;line-height:1.65">Agent 的上限，不在“它能说多少”，而在<br><span style="color:#fff;font-weight:800">你能不能把它组织成一个真正的系统</span>。</p>
+            <p style="color:#fff;font-weight:800;font-size:18px;margin:14px 0 0;padding-top:12px;border-top:1px solid rgba(255,255,255,.28)">AI 可以帮你试，但最后签字的是你。</p>
           </div>
         </div>
       </section>
