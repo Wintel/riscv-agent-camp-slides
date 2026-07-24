@@ -124,8 +124,6 @@ h2.sec{font-size:clamp(28px,4vw,40px);line-height:1.15;font-weight:800;margin:0 
   font-variant-numeric:tabular-nums}
 .timecard .when{margin-top:10px;font-size:15px;color:var(--ink-soft)}
 .timecard .sty{position:absolute;right:22px;top:22px;font-size:26px;opacity:.9}
-.time-note{margin-top:18px;font-size:14.5px;color:var(--ink-soft);display:flex;gap:9px;align-items:flex-start}
-.time-note b{color:var(--crimson)}
 
 /* ---------- 日程时间线 ---------- */
 .timeline{display:flex;flex-direction:column;gap:20px;margin-top:8px}
@@ -204,7 +202,6 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
     </a>
     <div class="links">
       <a href="#about">概览</a>
-      <a href="#time">每日时间</a>
       <a href="#schedule">日程</a>
       <a href="#tutors">讲师</a>
       <a href="#resources">资源</a>
@@ -251,12 +248,13 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
     </div>
   </section>
 
-  <!-- ===== 每日时间 ===== -->
-  <section id="time" style="background:var(--panel-2)">
+  <!-- ===== 日程（含每日常规作息速览） ===== -->
+  <section id="schedule">
     <div class="wrap">
       <div class="reveal">
-        <span class="eyebrow">时间安排</span>
-        <h2 class="sec">上课与实践时间</h2>
+        <span class="eyebrow">具体方案</span>
+        <h2 class="sec">四天日程</h2>
+        <p class="sec-lead">上课地点：上院302，授课团队负责人：戚正伟。常规作息如下，具体以每日明细为准。</p>
       </div>
       <div class="times reveal" style="margin-top:28px">
         <div class="timecard">
@@ -272,19 +270,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
           <div class="when">上机实验：连板子、跑代码、搭建并调试你的智能体。</div>
         </div>
       </div>
-      <div class="time-note reveal"><span>ℹ️</span><span><b>注意：</b>第一天（7/27）上午 <b>10:00</b> 起为实验室参观；7/28 上午 <b>10:00</b> 另有参观安排；最后一天（7/30）下午 <b>16:00</b> 起为结营成果展示（约至 <b>17:30</b>，见下方日程）。</span></div>
-    </div>
-  </section>
-
-  <!-- ===== 日程 ===== -->
-  <section id="schedule">
-    <div class="wrap">
-      <div class="reveal">
-        <span class="eyebrow">具体方案</span>
-        <h2 class="sec">四天日程</h2>
-        <p class="sec-lead">上课地点：上院302，授课团队负责人：戚正伟。</p>
-      </div>
-      <div class="timeline">
+      <div class="timeline" style="margin-top:24px">
 
         <!-- 7/27 -->
         <div class="day reveal">
