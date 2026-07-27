@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分组名单与机器 IP · 零基础 RISC-V 芯片智能体开发</title>
+<meta name="description" content="学森暑期营「零基础 RISC-V 芯片智能体开发」上机分组：12 组、31 位同学，以及每组对应的开发板 IP。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%23AD1730'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='6'%20fill='white'/%3E%3C/svg%3E">
+<style>
+/* =========================================================================
+   分组名单与机器 IP · 与课程主页 / 幻灯片同一套设计语言（交大红）
+   ========================================================================= */
+:root{
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2;
+  --paper:#F4F2EE; --panel:#FFFFFF; --panel-2:#ECE8E1;
+  --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88; --line:#DCD4C8;
+  --ok:#1E8A6E;
+  --shadow:0 18px 44px -26px rgba(60,30,20,.5);
+  --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Cascadia Code","JetBrains Mono","SF Mono","Consolas","Menlo",monospace;
+  --maxw:1080px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --crimson:#E4586C; --crimson-deep:#F08292; --crimson-soft:#3A1E24;
+    --paper:#17140F; --panel:#211C17; --panel-2:#2A241E;
+    --ink:#EDE7DF; --ink-soft:#B3A99F; --ink-faint:#8A8078; --line:#3A332B;
+    --ok:#4FBFA0; --shadow:0 20px 50px -28px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="light"]{
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2;
+  --paper:#F4F2EE; --panel:#FFFFFF; --panel-2:#ECE8E1;
+  --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88; --line:#DCD4C8;
+  --ok:#1E8A6E; --shadow:0 18px 44px -26px rgba(60,30,20,.5);
+}
+:root[data-theme="dark"]{
+  --crimson:#E4586C; --crimson-deep:#F08292; --crimson-soft:#3A1E24;
+  --paper:#17140F; --panel:#211C17; --panel-2:#2A241E;
+  --ink:#EDE7DF; --ink-soft:#B3A99F; --ink-faint:#8A8078; --line:#3A332B;
+  --ok:#4FBFA0; --shadow:0 20px 50px -28px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:inherit}
+img{max-width:100%;display:block}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono)}
+.hl{color:var(--crimson);font-weight:700}
+
+/* ---------- 顶部导航 ---------- */
+header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);
+  backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:16px;height:64px;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.nav .brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:15px}
+.nav .brand img{width:34px;height:34px}
+.nav .brand .b2{font:600 10px var(--mono);letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase}
+.nav .links{margin-left:auto;display:flex;gap:6px}
+.nav .links a{font-size:14px;color:var(--ink-soft);text-decoration:none;padding:8px 12px;border-radius:8px;transition:.15s}
+.nav .links a:hover{color:var(--crimson);background:var(--crimson-soft)}
+.tbtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+  cursor:pointer;font-size:16px;display:grid;place-items:center;color:var(--ink-soft);transition:.15s}
+.tbtn:hover{border-color:var(--crimson);color:var(--crimson)}
+@media (max-width:760px){.nav .brand span:not(.b2){font-size:13px}}
+
+/* ---------- 通用区块 ---------- */
+section{padding:56px 0}
+.eyebrow{font:600 13px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);
+  display:inline-flex;align-items:center;gap:10px;margin-bottom:14px}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--crimson)}
+h2.sec{font-size:clamp(24px,3.4vw,32px);line-height:1.15;font-weight:800;margin:0 0 12px;text-wrap:balance}
+.sec-lead{font-size:17px;color:var(--ink-soft);max-width:62ch;margin:0}
+
+/* ---------- 英雄区 ---------- */
+.hero{position:relative;overflow:hidden;padding:62px 0 52px;border-bottom:1px solid var(--line)}
+.hero::before{content:"";position:absolute;inset:0;z-index:0;opacity:.6;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:radial-gradient(120% 80% at 80% 0%,#000,transparent 70%);
+  mask-image:radial-gradient(120% 80% at 80% 0%,#000,transparent 70%)}
+.hero::after{content:"";position:absolute;right:-160px;top:-190px;width:520px;height:520px;border-radius:50%;z-index:0;
+  background:radial-gradient(circle,color-mix(in srgb,var(--crimson) 20%,transparent),transparent 62%)}
+.hero .wrap{position:relative;z-index:1}
+.hero .badge{display:inline-flex;align-items:center;gap:9px;font:600 13px var(--mono);letter-spacing:.06em;
+  color:var(--crimson);background:var(--crimson-soft);border:1px solid color-mix(in srgb,var(--crimson) 30%,transparent);
+  padding:7px 14px;border-radius:999px;margin-bottom:20px}
+.hero h1{font-size:clamp(30px,5.2vw,50px);line-height:1.06;font-weight:800;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.hero h1 .m{font-family:var(--mono);color:var(--crimson)}
+.hero p.sub{font-size:clamp(16px,2.1vw,19px);color:var(--ink-soft);max-width:50ch;margin:20px 0 0}
+.facts{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.fact{display:inline-flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:11px 16px;font-size:15px;font-weight:600;box-shadow:var(--shadow)}
+.fact .i{font-size:18px}
+
+/* ---------- 「怎么连」说明卡 ---------- */
+.how{margin-top:30px;background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:22px 24px;box-shadow:var(--shadow)}
+.how .ht{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.how .hc{display:block;margin:14px 0 0;background:#12100E;color:#E8E3DC;border-radius:11px;padding:14px 16px;
+  font:600 15px/1.5 var(--mono);overflow-x:auto;white-space:nowrap}
+.how .hc .hv{color:#F1889A}
+.how .hc .hp{color:#7FB3E8}
+.how .hn{margin:13px 0 0;font-size:14.5px;color:var(--ink-soft)}
+.how .hn b{font-family:var(--mono);color:var(--crimson)}
+
+/* ---------- 搜索 ---------- */
+.tools{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:26px 0 20px}
+.sbox{position:relative;flex:1;min-width:240px}
+.sbox .si{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--ink-faint);font-size:15px;pointer-events:none}
+#q{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--ink);
+  font:500 15px var(--sans);padding:12px 40px 12px 40px;outline:none;transition:.15s}
+#q::placeholder{color:var(--ink-faint)}
+#q:focus{border-color:var(--crimson);box-shadow:0 0 0 3px var(--crimson-soft)}
+.clr{position:absolute;right:9px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:8px;
+  border:none;background:transparent;color:var(--ink-faint);cursor:pointer;font-size:15px;display:none;place-items:center}
+.clr:hover{background:var(--panel-2);color:var(--crimson)}
+.clr.on{display:grid}
+.count{font:600 13px var(--mono);color:var(--ink-faint);white-space:nowrap}
+
+/* ---------- 分组卡片 ---------- */
+.groups{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.gcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+  box-shadow:var(--shadow);transition:.18s}
+.gcard:hover{border-color:color-mix(in srgb,var(--crimson) 45%,transparent);transform:translateY(-2px)}
+.ghead{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--panel-2);border-bottom:1px solid var(--line)}
+.gno{flex:none;width:38px;height:38px;border-radius:11px;background:var(--crimson);color:#fff;
+  display:grid;place-items:center;font:800 16px var(--mono)}
+.gtt{font-size:15.5px;font-weight:700;line-height:1.2}
+.gct{font:600 11.5px var(--mono);color:var(--ink-faint);margin-top:2px}
+.ip{margin-left:auto;flex:none;font:700 13.5px var(--mono);color:var(--crimson);background:var(--crimson-soft);
+  border:1px solid color-mix(in srgb,var(--crimson) 28%,transparent);border-radius:9px;padding:7px 11px;
+  cursor:pointer;transition:.15s;white-space:nowrap}
+.ip:hover{background:var(--crimson);border-color:var(--crimson);color:#fff}
+.ip.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.mems{padding:2px 16px 12px}
+.mem{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)}
+.mem:first-child{border-top:none}
+.mem[hidden]{display:none}
+.av{flex:none;width:32px;height:32px;border-radius:9px;background:var(--crimson-soft);color:var(--crimson);
+  display:grid;place-items:center;font:700 15px var(--sans)}
+.mi{min-width:0}
+.mn{font-size:15px;font-weight:600}
+.py{font-family:var(--mono);font-weight:700;font-size:14px;padding:0 .5px}
+.ms{font-size:12.5px;color:var(--ink-soft);line-height:1.35;margin-top:1px}
+.pv{margin-left:auto;flex:none;font:600 11.5px var(--sans);color:var(--ink-faint);border:1px solid var(--line);
+  border-radius:999px;padding:3px 9px;background:var(--paper)}
+.empty{display:none;text-align:center;color:var(--ink-faint);padding:40px 0;font-size:15px}
+.empty.on{display:block}
+
+/* ---------- 提示条 ---------- */
+.pin{margin:22px 0 0;display:flex;gap:10px;align-items:flex-start;background:var(--crimson-soft);
+  border:1px solid color-mix(in srgb,var(--crimson) 30%,transparent);border-radius:12px;padding:12px 16px;
+  font-size:14px;font-weight:600;color:var(--crimson-deep)}
+.pin .i{font-size:17px;line-height:1.4}
+
+/* ---------- 页脚 ---------- */
+footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)}
+.foot{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.foot img{width:40px;height:40px}
+.foot .ft{font-weight:700}
+.foot .fs{font-size:13px;color:var(--ink-faint)}
+.foot .fr{margin-left:auto;font:600 12px var(--mono);color:var(--ink-faint);letter-spacing:.08em}
+
+/* ---------- 滚动进入动画 ---------- */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s cubic-bezier(.3,1,.5,1)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .reveal{opacity:1;transform:none;transition:none}
+  *{transition-duration:.01ms!important}
+}
+
+/* ---------- 打印（贴墙 / 发纸质名单） ---------- */
+@media print{
+  header,.tools,.hero::before,.hero::after,footer{display:none!important}
+  body{background:#fff}
+  section{padding:10px 0}
+  .hero{padding:0 0 12px}
+  .gcard{break-inside:avoid;box-shadow:none}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <a class="brand" href="index.html" style="text-decoration:none">
+      <img src="sjtu.png" alt="上海交通大学">
+      <span>零基础 RISC-V 芯片智能体开发<br><span class="b2">SJTU · Xuesen Camp</span></span>
+    </a>
+    <div class="links">
+      <a href="index.html">← 返回主页</a>
+      <a href="index.html#schedule">日程</a>
+      <a href="index.html#resources">资源</a>
+    </div>
+    <button class="tbtn" id="themeBtn" title="切换深浅色" aria-label="切换深浅色">◐</button>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ===== 英雄区 ===== -->
+  <section class="hero">
+    <div class="wrap">
+      <span class="badge">👥 上机分组 · 上院302</span>
+      <h1>分组名单 &amp; <span class="m">机器 IP</span></h1>
+      <p class="sub">每组一块 <span class="hl">Milk-V Titan</span> 开发板。找到自己的组号，就知道该连哪一台机器。</p>
+      <div class="facts">
+        <span class="fact"><span class="i">🧩</span>12 个小组</span>
+        <span class="fact"><span class="i">🙋</span>31 位同学</span>
+        <span class="fact"><span class="i">🗺️</span>来自 12 个省市</span>
+        <span class="fact"><span class="i">🌐</span>192.168.31.100–111</span>
+      </div>
+
+      <div class="how">
+        <div class="ht"><span>🔌</span>怎么连上自己那块板子？</div>
+        <code class="hc">ssh <span class="hv">ubuntu</span>@<span class="hp">192.168.31.1</span><span class="hv">xx</span>&nbsp;&nbsp;<span style="color:#8C857C"># 比如第 3 组：ssh ubuntu@192.168.31.102</span></code>
+        <p class="hn">用户名<strong>统一是 <b>ubuntu</b></strong>，密码由助教现场发给大家。IP 的规则很简单：<b>IP = 192.168.31.(99 + 组号)</b> —— 第 1 组是 <b>192.168.31.100</b>，第 2 组是 <b>192.168.31.101</b>，依次往后，第 12 组是 <b>192.168.31.111</b>。</p>
+        <p class="hn">连之前先确认自己的电脑和板子在<strong>同一个局域网（同一个 Wi-Fi / 同一台交换机）</strong>；连不上就先 <span class="mono" style="color:var(--crimson)">ping</span> 一下 IP，看看板子在不在线。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 分组名单 ===== -->
+  <section id="list">
+    <div class="wrap">
+      <div class="reveal">
+        <span class="eyebrow">分组名单</span>
+        <h2 class="sec">12 组，31 位同学</h2>
+        <p class="sec-lead">按组号排列，点一下右上角的 IP 就能复制。也可以直接搜索姓名、学校、省份或组号。</p>
+        <p class="sec-lead" style="margin-top:10px;font-size:15px">🔒 为保护同学隐私，名字第二个字用<strong>拼音首字母</strong>代替，例：王小明 → 王<span class="py">X</span>明。搜索时输入姓氏或学校即可找到自己。</p>
+      </div>
+
+      <div class="tools reveal">
+        <div class="sbox">
+          <span class="si">🔍</span>
+          <input id="q" type="search" placeholder="搜索姓名 / 学校 / 省份 / 组号 / IP…" autocomplete="off" spellcheck="false">
+          <button class="clr" id="clr" title="清空" aria-label="清空">✕</button>
+        </div>
+        <span class="count" id="count">12 组 · 31 人</span>
+      </div>
+
+      <div class="groups" id="groups">
+
+        <!-- 第 1 组 -->
+        <div class="gcard reveal" data-gk="1 01 第1组 192.168.31.100">
+          <div class="ghead">
+            <div class="gno">01</div>
+            <div><div class="gtt">第 1 组</div><div class="gct">3 人</div></div>
+            <button class="ip" data-ip="192.168.31.100" title="点击复制 IP">192.168.31.100</button>
+          </div>
+          <div class="mems">
+            <div class="mem" data-k="罗J骏 长沙市雅礼中学 湖南"><span class="av">罗</span><span class="mi"><div class="mn">罗<span class="py">J</span>骏</div><div class="ms">长沙市雅礼中学</div></span><span class="pv">湖南</span></div>
+            <div class="mem" data-k="张X灿 东北师范大学附属中学 吉林"><span class="av">张</span><span class="mi"><div class="mn">张<span class="py">X</span>灿</div><div class="ms">东北师范大学附属中学</div></span><span class="pv">吉林</span></div>
+            <div class="mem" data-k="刘X岳 东北师范大学附属中学 吉林"><span class="av">刘</span><span class="mi"><div class="mn">刘<span class="py">X</span>岳</div><div class="ms">东北师范大学附属中学</div></span><span class="pv">吉林</span></div>
+          </div>
+        </div>
+
+        <!-- 第 2 组 -->
+        <div class="gcard reveal" data-gk="2 02 第2组 192.168.31.101">
+          <div class="ghead">
+            <div class="gno">02</div>
+            <div><div class="gtt">第 2 组</div><div class="gct">3 人</div></div>
+            <button class="ip" data-ip="192.168.31.101" title="点击复制 IP">192.168.31.101</button>
+          </div>
+          <div class="mems">
+            <div class="mem" data-k="杜T玮 西安高新第一中学 陕西"><span class="av">杜</span><span class="mi"><div class="mn">杜<span class="py">T</span>玮</div><div class="ms">西安高新第一中学</div></span><span class="pv">陕西</span></div>
+            <div class="mem" data-k="袁J彦 宁波市镇海中学 浙江"><span class="av">袁</span><span class="mi"><div class="mn">袁<span class="py">J</span>彦</div><div class="ms">宁波市镇海中学</div></span><span class="pv">浙江</span></div>
+            <div class="mem" data-k="周S煜 上海交通大学附属中学（本部） 上海"><span class="av">周</span><span class="mi"><div class="mn">周<span class="py">S</span>煜</div><div class="ms">上海交通大学附属中学（本部）</div></span><span class="pv">上海</span></div>
+          </div>
+        </div>
+
+        <!-- 第 3 组 -->
+        <div class="gcard reveal" data-gk="3 03 第3组 192.168.31.102">
+          <div class="ghead">
+            <div class="gno">03</div>
+            <div><div class="gtt">第 3 组</div><div class="gct">3 人</div></div>
+            <button class="ip" data-ip="192.168.31.102" title="点击复制 IP">192.168.31.102</button>
+          </div>
+          <div class="mems">
+            <div class="mem" data-k="王S媛 北京师范大学附属实验中学 北京"><span class="av">王</span><span class="mi"><div class="mn">王<span class="py">S</span>媛</div><div class="ms">北京师范大学附属实验中学</div></span><span class="pv">北京</span></div>
+            <div class="mem" data-k="王Q浔 北京市第四中学 北京"><span class="av">王</span><span class="mi"><div class="mn">王<span class="py">Q</span>浔</div><div class="ms">北京市第四中学</div></span><span class="pv">北京</span></div>
+            <div class="mem" data-k="马Y飞 哈尔滨市第三中学校 黑龙江"><span class="av">马</span><span class="mi"><div class="mn">马<span class="py">Y</span>飞</div><div class="ms">哈尔滨市第三中学校</div></span><span class="pv">黑龙江</span></div>
+          </div>
+        </div>
+
+        <!-- 第 4 组 -->
+        <div class="gcard reveal" data-gk="4 04 第4组 192.168.31.103">
+          <div class="ghead">
+            <div class="gno">04</div>
+            <div><div class="gtt">第 4 组</div><div class="gct">3 人</div></div>
+            <button class="ip" data-ip="192.168.31.103" title="点击复制 IP">192.168.31.103</button>
+          </div>
+          <div class="mems">
+            <div class="mem" data-k="董Y玮 大连育明高级中学 辽宁"><span class="av">董</span><span class="mi"><div class="mn">董<span class="py">Y</span>玮</div><div class="ms">大连育明高级中学</div></span><span class="pv">辽宁</span></div>
+            <div class="mem" data-k="吴Y涵 山东省实验中学 山东"><span class="av">吴</span><span class="mi"><div class="mn">吴<span class="py">Y</span>涵</div><div class="ms">山东省实验中学</div></span><span class="pv">山东</span></div>
+            <div class="mem" data-k="夏W博 江苏省启东中学 江苏"><span class="av">夏</span><span class="mi"><div class="mn">夏<span class="py">W</span>博</div><div class="ms">江苏省启东中学</div></span><span class="pv">江苏</span></div>
+          </div>
+        </div>
+
+        <!-- 第 5 组 -->
+        <div class="gcard reveal" data-gk="5 05 第5组 192.168.31.104">
+          <div class="ghead">
+            <div class="gno">05</div>
+            <div><div class="gtt">第 5 组</div><div class="gct">3 人</div></div>
+            <button class="ip" data-ip="192.168.31.104" title="点击复制 IP">192.168.31.104</button>
+          </div>
+          <div class="mems">
+            <div class="mem" data-k="姚R 华东师范大学第二附属中学（松江） 上海"><span class="av">姚</span><span class="mi"><div class="mn">姚<span class="py">R</span></div><div class="ms">华东师范大学第二附属中学（松江）</div></span><span class="pv">上海</span></div>
+            <div class="mem" data-k="李Y霖 杭州第二中学 浙江"><span class="av">李</span><span class="mi"><div class="mn">李<span class="py">Y</span>霖</div><div class="ms">杭州第二中学</div></span><span class="pv">浙江</span></div>
+            <div class="mem" data-k="曹Y馨 宁夏银川一中 宁夏"><span class="av">曹</span><span class="mi"><div class="mn">曹<span class="py">Y</span>馨</div><div class="ms">宁夏银川一中</div></span><span class="pv">宁夏</span></div>
+          </div>
+        </div>
+
+        <!-- 第 6 组 -->
+        <div class="gcard reveal" data-gk="6 06 第6组 192.168.31.105">
+          <div class="ghead">
+            <div class="gno">06</div>
+            <div><div class="gtt">第 6 组</div><div class="gct">2 人</div></div>
+            <button class="ip" data-ip="192.168.31.105" title="点击复制 IP">192.168.31.105</button>
+          </div>
+          <div class="mems">
+            <div class="mem" data-k="龚R垚 上海交通大学附属中学闵行分校 上海"><span class="av">龚</span><span class="mi"><div class="mn">龚<span class="py">R</span>垚</div><div class="ms">上海交通大学附属中学闵行分校</div></span><span class="pv">上海</span></div>
+            <div class="mem" data-k="乐J纬 上海交通大学附属中学闵行分校 上海"><span class="av">乐</span><span class="mi"><div class="mn">乐<span class="py">J</span>纬</div><div class="ms">上海交通大学附属中学闵行分校</div></span><span class="pv">上海</span></div>
+          </div>
+        </div>
+
+        <!-- 第 7 组 -->
+        <div class="gcard reveal" data-gk="7 07 第7组 192.168.31.106">
+          <div class="ghead">
+            <div class="gno">07</div>
+            <div><div class="gtt">第 7 组</div><div class="gct">2 人</div></div>
+            <button class="ip" data-ip="192.168.31.106" title="点击复制 IP">192.168.31.106</button>
+          </div>
+          <div class="mems">
+            <div class="mem" data-k="何Z川 华东师范大学第二附属中学（紫竹校区）华师大二附中 上海"><span class="av">何</span><span class="mi"><div class="mn">何<span class="py">Z</span>川</div><div class="ms">华东师范大学第二附属中学（紫竹校区）</div></span><span class="pv">上海</span></div>
+            <div class="mem" data-k="张Y铭 华东师范大学第二附属中学（紫竹校区）华师大二附中 上海"><span class="av">张</span><span class="mi"><div class="mn">张<span class="py">Y</span>铭</div><div class="ms">华东师范大学第二附属中学（紫竹校区）</div></span><span class="pv">上海</span></div>
+          </div>
+        </div>
+
+        <!-- 第 8 组 -->
+        <div class="gcard reveal" data-gk="8 08 第8组 192.168.31.107">
+          <div class="ghead">
+            <div class="gno">08</div>
+            <div><div class="gtt">第 8 组</div><div class="gct">2 人</div></div>
+            <button class="ip" data-ip="192.168.31.107" title="点击复制 IP">192.168.31.107</button>
+          </div>
+          <div class="mems">
+            <div class="mem" data-k="黄M 上海交通大学附属中学（本部） 上海"><span class="av">黄</span><span class="mi"><div class="mn">黄<span class="py">M</span></div><div class="ms">上海交通大学附属中学（本部）</div></span><span class="pv">上海</span></div>
+            <div class="mem" data-k="王Z萌 上海交通大学附属中学（本部） 上海"><span class="av">王</span><span class="mi"><div class="mn">王<span class="py">Z</span>萌</div><div class="ms">上海交通大学附属中学（本部）</div></span><span class="pv">上海</span></div>
+          </div>
+        </div>
+
+        <!-- 第 9 组 -->
+        <div class="gcard reveal" data-gk="9 09 第9组 192.168.31.108">
+          <div class="ghead">
+            <div class="gno">09</div>
+            <div><div class="gtt">第 9 组</div><div class="gct">2 人</div></div>
+            <button class="ip" data-ip="192.168.31.108" title="点击复制 IP">192.168.31.108</button>
+          </div>
+          <div class="mems">
+            <div class="mem" data-k="高Y欣 上海交通大学附属中学（本部） 上海"><span class="av">高</span><span class="mi"><div class="mn">高<span class="py">Y</span>欣</div><div class="ms">上海交通大学附属中学（本部）</div></span><span class="pv">上海</span></div>
+            <div class="mem" data-k="侯Y轩 上海交通大学附属中学（本部） 上海"><span class="av">侯</span><span class="mi"><div class="mn">侯<span class="py">Y</span>轩</div><div class="ms">上海交通大学附属中学（本部）</div></span><span class="pv">上海</span></div>
+          </div>
+        </div>
+
+        <!-- 第 10 组 -->
+        <div class="gcard reveal" data-gk="10 第10组 192.168.31.109">
+          <div class="ghead">
+            <div class="gno">10</div>
+            <div><div class="gtt">第 10 组</div><div class="gct">2 人</div></div>
+            <button class="ip" data-ip="192.168.31.109" title="点击复制 IP">192.168.31.109</button>
+          </div>
+          <div class="mems">
+            <div class="mem" data-k="黄C恒 复旦大学附属中学 上海"><span class="av">黄</span><span class="mi"><div class="mn">黄<span class="py">C</span>恒</div><div class="ms">复旦大学附属中学</div></span><span class="pv">上海</span></div>
+            <div class="mem" data-k="张Y同 上海市市西中学 上海"><span class="av">张</span><span class="mi"><div class="mn">张<span class="py">Y</span>同</div><div class="ms">上海市市西中学</div></span><span class="pv">上海</span></div>
+          </div>
+        </div>
+
+        <!-- 第 11 组 -->
+        <div class="gcard reveal" data-gk="11 第11组 192.168.31.110">
+          <div class="ghead">
+            <div class="gno">11</div>
+            <div><div class="gtt">第 11 组</div><div class="gct">3 人</div></div>
+            <button class="ip" data-ip="192.168.31.110" title="点击复制 IP">192.168.31.110</button>
+          </div>
+          <div class="mems">
+            <div class="mem" data-k="丘Z珉 上海市闵行中学 上海"><span class="av">丘</span><span class="mi"><div class="mn">丘<span class="py">Z</span>珉</div><div class="ms">上海市闵行中学</div></span><span class="pv">上海</span></div>
+            <div class="mem" data-k="周T佑 上海市奉贤中学 上海"><span class="av">周</span><span class="mi"><div class="mn">周<span class="py">T</span>佑</div><div class="ms">上海市奉贤中学</div></span><span class="pv">上海</span></div>
+            <div class="mem" data-k="周Y尧 复旦大学附属复兴中学 上海"><span class="av">周</span><span class="mi"><div class="mn">周<span class="py">Y</span>尧</div><div class="ms">复旦大学附属复兴中学</div></span><span class="pv">上海</span></div>
+          </div>
+        </div>
+
+        <!-- 第 12 组 -->
+        <div class="gcard reveal" data-gk="12 第12组 192.168.31.111">
+          <div class="ghead">
+            <div class="gno">12</div>
+            <div><div class="gtt">第 12 组</div><div class="gct">3 人</div></div>
+            <button class="ip" data-ip="192.168.31.111" title="点击复制 IP">192.168.31.111</button>
+          </div>
+          <div class="mems">
+            <div class="mem" data-k="游G翔 佛山市南海区石门中学 广东"><span class="av">游</span><span class="mi"><div class="mn">游<span class="py">G</span>翔</div><div class="ms">佛山市南海区石门中学</div></span><span class="pv">广东</span></div>
+            <div class="mem" data-k="陈G烽 佛山市南海区石门中学 广东"><span class="av">陈</span><span class="mi"><div class="mn">陈<span class="py">G</span>烽</div><div class="ms">佛山市南海区石门中学</div></span><span class="pv">广东</span></div>
+            <div class="mem" data-k="冷Z昊 佛山市南海区石门中学 广东"><span class="av">冷</span><span class="mi"><div class="mn">冷<span class="py">Z</span>昊</div><div class="ms">佛山市南海区石门中学</div></span><span class="pv">广东</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="empty" id="empty">没有找到匹配的同学或小组，换个关键词试试～</div>
+
+      <div class="pin reveal"><span class="i">💡</span><span>名单或 IP 有出入？课上直接告诉助教，我们当场改。上机时请只登录自己组的那台机器。</span></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <img src="sjtu.png" alt="上海交通大学">
+    <div>
+      <div class="ft">零基础 RISC-V 芯片智能体开发</div>
+      <div class="fs">上海交通大学学森暑期营 · 2026 暑期</div>
+    </div>
+    <div class="fr">SJTU · RISC-V · AI AGENT</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  // —— 主题切换（浅/深）——
+  var root=document.documentElement, btn=document.getElementById('themeBtn');
+  function cur(){
+    var t=root.getAttribute('data-theme');
+    if(t) return t;
+    return window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  }
+  function apply(t){ if(t){root.setAttribute('data-theme',t);} btn.textContent = cur()==='dark'?'☀':'◐'; }
+  try{ var saved=localStorage.getItem('camp-theme'); if(saved) apply(saved); else apply(); }catch(e){ apply(); }
+  btn.addEventListener('click',function(){
+    var next=cur()==='dark'?'light':'dark';
+    apply(next);
+    try{ localStorage.setItem('camp-theme',next); }catch(e){}
+  });
+
+  // —— 搜索过滤（姓名 / 学校 / 省份 / 组号 / IP）——
+  var q=document.getElementById('q'), clr=document.getElementById('clr'),
+      countEl=document.getElementById('count'), emptyEl=document.getElementById('empty'),
+      cards=[].slice.call(document.querySelectorAll('.gcard'));
+
+  function filter(){
+    var k=q.value.trim().toLowerCase(), groups=0, people=0;
+    cards.forEach(function(card){
+      var gHit = !!k && card.getAttribute('data-gk').toLowerCase().indexOf(k)>=0;
+      var vis=0;
+      [].slice.call(card.querySelectorAll('.mem')).forEach(function(m){
+        var ok = !k || gHit || m.getAttribute('data-k').toLowerCase().indexOf(k)>=0;
+        m.hidden=!ok;
+        if(ok) vis++;
+      });
+      card.hidden = vis===0;
+      if(vis){ groups++; people+=vis; }
+    });
+    countEl.textContent = groups+' 组 · '+people+' 人';
+    emptyEl.classList.toggle('on', groups===0);
+    clr.classList.toggle('on', q.value.length>0);
+  }
+  q.addEventListener('input',filter);
+  clr.addEventListener('click',function(){ q.value=''; filter(); q.focus(); });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='/' && document.activeElement!==q){ e.preventDefault(); q.focus(); }
+    if(e.key==='Escape' && document.activeElement===q){ q.value=''; filter(); q.blur(); }
+  });
+
+  // —— 点击 IP 复制 ——
+  [].slice.call(document.querySelectorAll('.ip')).forEach(function(b){
+    b.addEventListener('click',function(){
+      var ip=b.getAttribute('data-ip'), old=b.textContent;
+      function done(){
+        b.textContent='已复制 ✓'; b.classList.add('done');
+        setTimeout(function(){ b.textContent=old; b.classList.remove('done'); },1200);
+      }
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(ip).then(done,fallback);
+      }else{ fallback(); }
+      function fallback(){
+        try{
+          var ta=document.createElement('textarea');
+          ta.value=ip; ta.style.position='fixed'; ta.style.opacity='0';
+          document.body.appendChild(ta); ta.select();
+          document.execCommand('copy'); document.body.removeChild(ta); done();
+        }catch(e){}
+      }
+    });
+  });
+
+  // —— 滚动进入动画 ——
+  var items=[].slice.call(document.querySelectorAll('.reveal'));
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+    },{threshold:.12});
+    items.forEach(function(el){ io.observe(el); });
+  }else{ items.forEach(function(el){ el.classList.add('in'); }); }
+})();
+</script>
+</body>
+</html>
