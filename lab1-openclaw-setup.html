@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>实验一 · 把 AI 智能体装进你的板子 | 学森暑期营</title>
+<meta name="description" content="学森暑期营实验一：从零在 RISC-V 板子上配置 OpenClaw + DeepSeek，零基础可跟做。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%23AD1730'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='6'%20fill='white'/%3E%3C/svg%3E">
+<style>
+/* =========================================================================
+   实验一 · OpenClaw 配置手册
+   与课程主页 / 幻灯片同一套设计语言（交大红）。支持浅/深色主题。
+   面向零基础高中生：大字号、命令可一键复制、左侧步骤导航。
+   ========================================================================= */
+:root{
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2;
+  --paper:#F4F2EE; --panel:#FFFFFF; --panel-2:#ECE8E1;
+  --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88; --line:#DCD4C8;
+  --ok:#1E8A6E; --ok-soft:#DCEFE8; --warn:#B4690E; --warn-soft:#FBEEDC;
+  --term-bg:#14171E; --term-fg:#E7EAF0; --term-green:#57D07E; --term-cyan:#54C4D4; --term-dim:#8891A0;
+  --shadow:0 18px 44px -26px rgba(60,30,20,.5);
+  --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Cascadia Code","JetBrains Mono","SF Mono","Consolas","Menlo",monospace;
+  --maxw:820px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --crimson:#E4586C; --crimson-deep:#F08292; --crimson-soft:#3A1E24;
+    --paper:#17140F; --panel:#211C17; --panel-2:#2A241E;
+    --ink:#EDE7DF; --ink-soft:#B3A99F; --ink-faint:#8A8078; --line:#3A332B;
+    --ok:#4FBFA0; --ok-soft:#1B2E28; --warn:#E0A047; --warn-soft:#332818;
+    --shadow:0 20px 50px -28px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="light"]{
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2;
+  --paper:#F4F2EE; --panel:#FFFFFF; --panel-2:#ECE8E1;
+  --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88; --line:#DCD4C8;
+  --ok:#1E8A6E; --ok-soft:#DCEFE8; --warn:#B4690E; --warn-soft:#FBEEDC;
+  --shadow:0 18px 44px -26px rgba(60,30,20,.5);
+}
+:root[data-theme="dark"]{
+  --crimson:#E4586C; --crimson-deep:#F08292; --crimson-soft:#3A1E24;
+  --paper:#17140F; --panel:#211C17; --panel-2:#2A241E;
+  --ink:#EDE7DF; --ink-soft:#B3A99F; --ink-faint:#8A8078; --line:#3A332B;
+  --ok:#4FBFA0; --ok-soft:#1B2E28; --warn:#E0A047; --warn-soft:#332818;
+  --shadow:0 20px 50px -28px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:86px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  line-height:1.75;font-size:17px;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:var(--crimson)}
+
+/* ---------- 顶栏 ---------- */
+header{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--paper) 90%,transparent);
+  backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:14px;height:64px;max-width:1180px;margin:0 auto;padding:0 22px}
+.nav .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14.5px;text-decoration:none;color:inherit}
+.nav .brand img{width:32px;height:32px}
+.nav .brand .b2{font:600 10px var(--mono);letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase}
+.nav .sp{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tbtn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+  cursor:pointer;font-size:15px;display:grid;place-items:center;color:var(--ink-soft);transition:.15s}
+.tbtn:hover{border-color:var(--crimson);color:var(--crimson)}
+.backlink{font-size:13.5px;color:var(--ink-soft);text-decoration:none;padding:7px 12px;border-radius:8px}
+.backlink:hover{color:var(--crimson);background:var(--crimson-soft)}
+#bar{position:fixed;left:0;top:0;height:3px;width:0;background:var(--crimson);z-index:70;transition:width .1s linear}
+
+/* ---------- 整体布局：左目录 + 正文 ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 22px;display:grid;grid-template-columns:214px 1fr;gap:44px;align-items:start}
+#toc{position:sticky;top:88px;padding:22px 0 40px;font-size:14px}
+#toc .t{font:600 11px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:12px}
+#toc a{display:block;padding:6px 11px;border-left:2px solid var(--line);color:var(--ink-soft);
+  text-decoration:none;transition:.15s;line-height:1.4}
+#toc a:hover{color:var(--crimson);border-left-color:var(--crimson)}
+#toc a.on{color:var(--crimson);border-left-color:var(--crimson);font-weight:700;background:var(--crimson-soft)}
+main{max-width:var(--maxw);padding:8px 0 90px;min-width:0}
+@media (max-width:940px){
+  .shell{grid-template-columns:1fr;gap:0}
+  #toc{display:none}
+}
+
+/* ---------- 首屏 ---------- */
+.hero{padding:44px 0 30px;border-bottom:1px solid var(--line);margin-bottom:34px}
+.eyebrow{font:600 12.5px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);
+  display:inline-flex;align-items:center;gap:10px;margin-bottom:14px}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--crimson)}
+h1{font-size:clamp(30px,5.2vw,44px);line-height:1.12;font-weight:800;margin:0 0 16px;letter-spacing:-.01em;text-wrap:balance}
+.sub{font-size:19px;color:var(--ink-soft);margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.fact{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);
+  border-radius:11px;padding:9px 14px;font-size:14.5px;font-weight:600}
+
+/* ---------- 标题层级 ---------- */
+h2{font-size:27px;line-height:1.25;font-weight:800;margin:52px 0 14px;padding-top:10px;scroll-margin-top:86px;text-wrap:balance}
+h2 .num{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:11px;
+  background:var(--crimson);color:#fff;font:800 19px/1 var(--mono);margin-right:12px;vertical-align:-7px}
+h3{font-size:19.5px;font-weight:700;margin:30px 0 10px;scroll-margin-top:86px}
+p{margin:14px 0}
+ul,ol{padding-left:24px;margin:14px 0}
+li{margin:7px 0}
+b,strong{font-weight:700}
+.hl{color:var(--crimson);font-weight:700}
+hr{border:0;border-top:1px solid var(--line);margin:44px 0}
+
+/* ---------- 行内代码 ---------- */
+code{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--line);border-radius:6px;
+  padding:1.5px 6px;font-size:.88em;color:var(--crimson-deep);font-weight:600;word-break:break-word}
+
+/* ---------- 命令块（可一键复制）---------- */
+.cmd{position:relative;background:var(--term-bg);border-radius:12px;margin:18px 0;
+  border:1px solid #2A2F3A;box-shadow:0 18px 40px -26px rgba(0,0,0,.6)}
+.cmd .cmd-h{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid #2A2F3A}
+.cmd .cmd-h .w{font:600 11.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--term-dim)}
+.cmd .cmd-h .w b{color:var(--term-cyan);font-weight:700}
+/* 超长命令（如 curl 那条）自动折行，让学生一眼看全；反正是点「复制」而不是手抄 */
+.cmd pre{margin:0;padding:15px 17px;font-family:var(--mono);font-size:14.5px;line-height:1.7;
+  color:var(--term-fg);white-space:pre-wrap;overflow-wrap:anywhere}
+.cmd pre .p{color:var(--term-green)}
+.cmd pre .c{color:var(--term-dim)}
+.copy{position:absolute;right:9px;top:6px;border:1px solid #39404E;background:#232833;color:#C9D1DE;
+  font:600 12px var(--sans);padding:5px 11px;border-radius:8px;cursor:pointer;transition:.15s}
+.copy:hover{border-color:var(--term-cyan);color:#fff}
+.copy.done{background:var(--ok);border-color:var(--ok);color:#fff}
+
+/* ---------- 提示框 ---------- */
+.box{border-radius:12px;padding:15px 18px;margin:20px 0;border:1px solid var(--line);background:var(--panel);font-size:16px}
+.box .bt{font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:8px}
+.box p{margin:7px 0}
+.box.tip{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.box.tip .bt{color:var(--ok)}
+.box.warn{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 42%,transparent)}
+.box.warn .bt{color:var(--warn)}
+.box.danger{background:var(--crimson-soft);border-color:color-mix(in srgb,var(--crimson) 42%,transparent)}
+.box.danger .bt{color:var(--crimson)}
+
+/* ---------- 角色表 / 通用表格 ---------- */
+.tw{overflow-x:auto;margin:20px 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:460px}
+th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;
+  border-bottom:2px solid var(--line);white-space:nowrap}
+tbody tr:hover{background:var(--panel-2)}
+td code{font-size:.9em}
+
+/* ---------- 结果预览（终端输出）---------- */
+.out{background:var(--term-bg);color:var(--term-dim);border-radius:12px;padding:15px 17px;margin:18px 0;
+  font-family:var(--mono);font-size:14px;line-height:1.7;overflow-x:auto;white-space:pre;border:1px solid #2A2F3A}
+.out .ok{color:var(--term-green)}
+.out .hd{color:#fff;font-weight:700}
+
+/* ---------- 检查点 ---------- */
+.check{display:flex;gap:12px;align-items:flex-start;background:var(--ok-soft);
+  border:1px solid color-mix(in srgb,var(--ok) 40%,transparent);border-radius:12px;padding:14px 17px;margin:20px 0}
+.check .ci{font-size:20px;line-height:1.3}
+.check b{color:var(--ok)}
+
+/* ---------- 页脚 ---------- */
+footer{border-top:1px solid var(--line);background:var(--panel-2);padding:30px 0;margin-top:20px}
+.foot{max-width:1180px;margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:14px;font-size:14px;color:var(--ink-soft)}
+.foot img{width:34px;height:34px}
+.foot .fr{margin-left:auto;font:600 11px var(--mono);letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase}
+@media (max-width:560px){ .foot .fr{display:none} body{font-size:16.5px} }
+
+@media print{
+  header,#toc,#bar,.copy,footer{display:none!important}
+  .shell{display:block;padding:0} main{max-width:none}
+  .cmd{break-inside:avoid} .cmd pre{white-space:pre-wrap}
+  body{background:#fff;font-size:11pt}
+}
+</style>
+</head>
+<body>
+
+<div id="bar"></div>
+
+<header>
+  <nav class="nav">
+    <a class="brand" href="index.html">
+      <img src="sjtu.png" alt="上海交通大学">
+      <span>零基础 RISC-V 芯片智能体开发<br><span class="b2">SJTU · Xuesen Camp</span></span>
+    </a>
+    <div class="sp">
+      <a class="backlink" href="index.html">← 课程主页</a>
+      <button class="tbtn" id="themeBtn" title="切换深浅色" aria-label="切换深浅色">◐</button>
+    </div>
+  </nav>
+</header>
+
+<div class="shell">
+
+  <!-- ===== 左侧目录 ===== -->
+  <nav id="toc">
+    <div class="t">实验步骤</div>
+    <a href="#intro">这个实验在干什么</a>
+    <a href="#prep">动手前的准备</a>
+    <a href="#s1">1 · 办一把钥匙</a>
+    <a href="#s2">2 · 连上板子</a>
+    <a href="#s3">3 · 一键安装</a>
+    <a href="#s4">4 · 开一条隧道</a>
+    <a href="#s5">5 · 说第一句话</a>
+    <a href="#trouble">🔧 卡住了怎么办</a>
+    <a href="#cheat">附录 A · 命令小抄</a>
+    <a href="#inside">附录 B · 脚本做了什么</a>
+    <a href="#models">附录 C · 关于模型</a>
+  </nav>
+
+  <main>
+
+    <!-- ===== 首屏 ===== -->
+    <div class="hero">
+      <span class="eyebrow">实验一 · 配套第 2 讲</span>
+      <h1>从零把 AI 智能体<br>装进你的板子</h1>
+      <p class="sub">跟着做完，你会拥有一个住在自己板子里、听得懂人话、会自己动手干活的 AI 助手。</p>
+      <div class="facts">
+        <span class="fact">⏱️ 约 30 分钟</span>
+        <span class="fact">🧑‍💻 零基础可跟做</span>
+        <span class="fact">💰 花费约 10 元</span>
+        <span class="fact">🖥️ Windows / Mac 都行</span>
+      </div>
+    </div>
+
+    <!-- ===== 导入 ===== -->
+    <h2 id="intro">这个实验在干什么？</h2>
+    <p>一句话：<b>把 OpenClaw 装进板子，让它借 DeepSeek 的"大脑"，替你操作这台 RISC-V 电脑。</b></p>
+    <p>三个角色，先认清楚，后面就不会晕：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>角色</th><th>是谁</th><th>在哪</th></tr></thead>
+        <tbody>
+          <tr><td>🧑‍🎓 <b>你</b></td><td>发号施令、验收结果</td><td>你自己的电脑</td></tr>
+          <tr><td>🦞 <b>OpenClaw</b></td><td>智能体本体，会跑命令、写文件</td><td><b>住在板子里</b></td></tr>
+          <tr><td>🧠 <b>DeepSeek</b></td><td>大模型，负责"思考"</td><td>云端机房，靠你的 key 进门</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box tip">
+      <div class="bt">💡 好消息</div>
+      <p>你自己的电脑上<b>什么都不用装</b>——有个 SSH、有个浏览器就够了，它俩 Windows 和 Mac 都自带。</p>
+    </div>
+
+    <h2 id="prep">动手前的准备</h2>
+    <ul>
+      <li>✅ 一台能上网的电脑（Windows 10 以上 / Mac 都行）</li>
+      <li>✅ 板子的 <b>IP 地址</b>、<b>用户名</b>、<b>密码</b>（老师会写在黑板上）</li>
+      <li>✅ 微信或支付宝（第 1 步充值用，<b>10 块钱就够这几天了</b>）</li>
+      <li>✅ 第 1 课学的 <code>ssh</code> 命令 —— 今天就要用上了</li>
+    </ul>
+
+    <hr>
+
+    <!-- ===== 第 1 步 ===== -->
+    <h2 id="s1"><span class="num">1</span>给自己办一把钥匙 🔑</h2>
+    <p>大模型住在云端的机房里。板子上的 OpenClaw 每"想一步"，都要远程去请它帮忙。而机房不是随便谁都能进的——<b>你得有一张门卡，这就是 API key。</b></p>
+    <p>我们用 <b>DeepSeek</b>（国内的大模型，直连很快，还便宜）。</p>
+
+    <h3>1.1 注册</h3>
+    <p>打开 👉 <a href="https://platform.deepseek.com" target="_blank" rel="noopener">platform.deepseek.com</a>，用手机号注册、登录。</p>
+
+    <h3>1.2 充值</h3>
+    <p>进入左边的「<b>充值</b>」页面，充 <b>10 元</b>（支付宝、微信都行）。</p>
+    <div class="box tip">
+      <div class="bt">💰 会花很多钱吗？</div>
+      <p>不会。DeepSeek 按用量收费，便宜到什么程度呢——你这几天来回问上千句，也就几块钱。充 10 块完全够用，用不完还在你账号里。</p>
+    </div>
+
+    <h3>1.3 创建 API key</h3>
+    <p>进入左边的「<b>API keys</b>」页面 → 点「<b>创建 API key</b>」→ 随便起个名字（比如 <code>summer-camp</code>）→ 创建。</p>
+    <p>屏幕上会出现一长串以 <code>sk-</code> 开头的字符，这就是你的钥匙。</p>
+    <div class="box warn">
+      <div class="bt">⚠️ 这一步最容易翻车，看清楚</div>
+      <p><b>这串字符只会完整显示这一次！</b>关掉窗口就再也看不到了。</p>
+      <p>立刻点「复制」，粘贴到一个安全的地方（比如你电脑上新建一个记事本）。</p>
+      <p>万一没存住也别慌 —— 删掉重新创建一个就行，不花钱。</p>
+    </div>
+    <div class="box danger">
+      <div class="bt">🔒 关于这把钥匙的三条规矩</div>
+      <p><b>1. key 就是你的钱包。</b>别人拿到它，就能用你的余额。</p>
+      <p><b>2. 不要发到群里、不要发给同学、不要截图发朋友圈。</b></p>
+      <p><b>3. 一会儿粘贴 key 的时候</b>，要粘到脚本问你的那个位置，❌ 千万<b>不要</b>粘到跟 AI 的<b>聊天框</b>里 —— 那等于把钥匙念给全世界听。</p>
+    </div>
+
+    <hr>
+
+    <!-- ===== 第 2 步 ===== -->
+    <h2 id="s2"><span class="num">2</span>连上你的板子</h2>
+    <p>打开终端：</p>
+    <ul>
+      <li><b>Windows</b>：开始菜单搜索 <code>PowerShell</code>，打开它</li>
+      <li><b>Mac</b>：聚焦搜索（<code>⌘ + 空格</code>）输入 <code>终端</code>，打开它</li>
+    </ul>
+    <p>输入下面这行（把 <code>用户名</code> 和 <code>板子IP</code> 换成黑板上的真实信息）：</p>
+
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">在<b>你自己的电脑</b>上运行</span></div>
+      <button class="copy">复制</button>
+      <pre>ssh 用户名@板子IP</pre>
+    </div>
+
+    <p>比如：<code>ssh student@192.168.1.50</code></p>
+    <p>第一次连接会问你 <code>Are you sure you want to continue connecting?</code> —— 输入 <code>yes</code> 回车。然后输入密码。</p>
+    <div class="box warn">
+      <div class="bt">⌨️ 输密码时屏幕上没反应？</div>
+      <p><b>这是正常的。</b>Linux 输密码时不显示任何字符，光标也不动，这是为了防止旁人看到。盲打完直接回车就行，别以为卡住了反复输入。</p>
+    </div>
+    <div class="check">
+      <span class="ci">✅</span>
+      <div><b>检查点：</b>看到提示符从你自己电脑的名字变成了<b>板子的名字</b>，就说明你已经"人在板子里"了。🎉</div>
+    </div>
+
+    <hr>
+
+    <!-- ===== 第 3 步 ===== -->
+    <h2 id="s3"><span class="num">3</span>一键安装</h2>
+    <p>现在你在板子里。复制下面这<b>一整行</b>，粘贴进去回车：</p>
+
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">在<b>板子</b>上运行</span></div>
+      <button class="copy">复制</button>
+      <pre>curl -fsSL https://gh-proxy.com/https://raw.githubusercontent.com/Wintel/riscv-agent-camp-slides/main/setup-openclaw.sh -o setup-openclaw.sh && bash setup-openclaw.sh</pre>
+    </div>
+
+    <div class="box tip">
+      <div class="bt">📋 怎么粘贴？</div>
+      <p>Windows 的 PowerShell 里点<b>鼠标右键</b>就是粘贴；Mac 用 <code>⌘ + V</code>。</p>
+    </div>
+
+    <p>脚本会自己走完 8 个步骤，你只需要在 <b>第 5 步</b> 做一件事——把第 1 步存好的那串 <code>sk-...</code> 粘贴进去，回车：</p>
+
+    <div class="out">  请粘贴你在 platform.deepseek.com 创建的 API key，
+  它以 sk- 开头。粘贴时屏幕上不会显示任何字符，这是正常的。
+  API key: <span class="ok">▊</span></div>
+
+    <div class="box warn">
+      <div class="bt">😱 粘贴完屏幕上什么都没出现？</div>
+      <p>正常！这是故意的，防止旁边的同学看到你的钥匙。放心回车就行。</p>
+    </div>
+
+    <p>然后就是等。<b>最慢的是"安装 OpenClaw"那一步，大约 1 分钟</b>，别以为卡住了。全部顺利的话，最后你会看到：</p>
+
+    <div class="out"><span class="hd">▶ 第 8 步 / 共 8 步：自检（真的问它一句话，约 20 秒）</span>
+  <span class="ok">✔</span> 它回话了：……
+
+=====================================================
+  🎉 装好了！下面两步在「你自己的电脑」上做
+=====================================================</div>
+
+    <div class="box danger">
+      <div class="bt">🛑 先别关这个窗口！</div>
+      <p>最后那段话里有两条<b>属于你自己的</b>信息（隧道命令、网页地址），下一步就要用。</p>
+    </div>
+
+    <hr>
+
+    <!-- ===== 第 4 步 ===== -->
+    <h2 id="s4"><span class="num">4</span>开一条隧道，把聊天页"搬"到你电脑</h2>
+
+    <h3>为什么要多这一步？</h3>
+    <p>你可能会想：板子已经在跑了，我直接在浏览器里输 <code>板子IP:18789</code> 不就完了？</p>
+    <p><b>试了你会发现打不开</b>，浏览器会报一句 <code>control ui requires device identity</code>。</p>
+    <p>原因是浏览器有条安全规矩：<b>只有 <code>localhost</code>（也就是"本机"）和 HTTPS 网站，才被允许使用某些敏感功能。</b>而 OpenClaw 的控制台正好需要这些功能。直接用 IP 访问的明文网页，浏览器信不过，直接拒绝。</p>
+    <div class="box tip">
+      <div class="bt">🚇 解决办法很聪明，叫「SSH 端口转发」</div>
+      <p>打个比方：板子的 18789 号门在很远的地方，浏览器不肯走那么远。</p>
+      <p>那我们就用 SSH 挖一条隧道，把那扇门<b>"接"到你自己电脑的门口</b>。于是浏览器以为门就在本机（<code>localhost</code>），高高兴兴地开了。</p>
+      <p>而数据在隧道里是<b>加密</b>的，比直连还安全。</p>
+    </div>
+
+    <h3>动手</h3>
+    <p>在你自己的电脑上<b>新开一个终端窗口</b>（原来那个连着板子的别关），粘贴脚本最后打印给你的那行，长这样：</p>
+
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">在<b>你自己的电脑</b>上运行 · 新窗口</span></div>
+      <button class="copy">复制</button>
+      <pre>ssh -L 18789:127.0.0.1:18789 用户名@板子IP</pre>
+    </div>
+
+    <p>输入密码。看起来好像什么都没发生，就是一个普通的板子提示符——<b>这是对的</b>。</p>
+    <div class="box danger">
+      <div class="bt">🚨 这个窗口必须一直开着</div>
+      <p>关掉隧道就断了，网页立刻失联。你可以把它最小化，但别关掉。</p>
+    </div>
+
+    <h3>打开网页</h3>
+    <p>在你自己电脑的浏览器里，打开脚本最后给你的那个地址：</p>
+
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">在<b>你自己电脑</b>的浏览器里打开</span></div>
+      <button class="copy">复制</button>
+      <pre>http://localhost:18789/#token=<span class="c">你自己的那串口令</span></pre>
+    </div>
+
+    <div class="box warn">
+      <div class="bt">🔑 <code>#token=</code> 后面那串不能少！</div>
+      <p>那是开门的口令，第一次打开必须带着。打开后你会发现它自己从地址栏消失了——这是 OpenClaw 故意的，防止被别人看到。之后同一个标签页刷新不用再带。</p>
+    </div>
+
+    <div class="check">
+      <span class="ci">🎉</span>
+      <div><b>检查点：</b>看到聊天界面，而且<b>左下角是一个绿点</b>，就成功了！</div>
+    </div>
+
+    <hr>
+
+    <!-- ===== 第 5 步 ===== -->
+    <h2 id="s5"><span class="num">5</span>说第一句话</h2>
+
+    <h3>它可能先反问你</h3>
+    <p>第一次聊天，它八成会先问你「我该叫什么名字？你是谁？」——</p>
+    <div class="box tip">
+      <div class="bt">🤝 这不是出错了</div>
+      <p>它是在给自己和你建档（就像新同学互相认识）。随便回答就行，比如"你叫小爪，我叫小明"。之后它就记住了。</p>
+    </div>
+
+    <h3>试试这三句</h3>
+
+    <p><b>① 先来个简单的（看它会不会用工具）</b></p>
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">发给 <b>AI</b> 的话</span></div>
+      <button class="copy">复制</button>
+      <pre>这块板子的硬盘还剩多少空间？</pre>
+    </div>
+    <p>注意看：它不会凭空瞎猜，而是<b>真的跑了一条 <code>df</code> 命令</b>，把结果读给你听。这就是"智能体"和"聊天机器人"的根本区别。</p>
+
+    <p><b>② 让它动手写程序</b></p>
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">发给 <b>AI</b> 的话</span></div>
+      <button class="copy">复制</button>
+      <pre>写一个 cpu_temp.py：每 2 秒读一次这块板子的 CPU 温度，带时间戳记进 temp.log。
+写完实际跑 6 秒，把 temp.log 的内容给我看。</pre>
+    </div>
+    <div class="box tip">
+      <div class="bt">🔍 这里有个好玩的地方，你一定要盯着看</div>
+      <p>大多数电脑的温度是从 <code>/sys/class/thermal/thermal_zone0</code> 读的，但<b>我们这块 RISC-V 板子偏偏没有这个文件</b>。</p>
+      <p>你会看到它先试了一下、失败了，然后自己换个地方找，最后在 <code>hwmon</code> 里找到了板子真正的温度传感器（叫 <code>corepvt-ultrarisc</code>，是 SoC 内部的探针）。</p>
+      <p><b>这就是"想 → 做 → 看 → 再转一圈"的循环</b>，也是你请它干活、而不是自己查资料的意义。</p>
+    </div>
+
+    <p><b>③ 让它请示你（观察安全机制）</b></p>
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">发给 <b>AI</b> 的话</span></div>
+      <button class="copy">复制</button>
+      <pre>把 /tmp 下面所有 .log 文件删掉</pre>
+    </div>
+    <p>它在动手前会弹出一个<b>请示框</b>，列出准备执行的命令，让你选「允许一次 / 总是允许 / 拒绝」。</p>
+    <div class="box danger">
+      <div class="bt">🛡️ 认真看清楚再点</div>
+      <p>这道关卡就是你的安全带 —— 它可以很能干，但真正拍板的人始终是你。</p>
+      <p>拿不准的时候，选「拒绝」，然后问它"你为什么要跑这条命令？"</p>
+    </div>
+
+    <hr>
+
+    <!-- ===== 排查 ===== -->
+    <h2 id="trouble">🔧 卡住了怎么办</h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>你看到的</th><th>什么原因</th><th>怎么办</th></tr></thead>
+        <tbody>
+          <tr><td><code>Permission denied</code></td><td>密码错了</td><td>重新输。密码不显示是正常的，别重复输入</td></tr>
+          <tr><td>脚本说<code>架构不对</code></td><td>你在<b>自己电脑</b>上跑脚本了</td><td>先 <code>ssh</code> 连上板子，在板子里跑</td></tr>
+          <tr><td>卡在"安装 OpenClaw"</td><td>正常，板子性能有限</td><td>耐心等 1～2 分钟</td></tr>
+          <tr><td><code>这不像一把 DeepSeek 的 key</code></td><td>复制时少了字符</td><td>回官网重新复制，或重新创建一个</td></tr>
+          <tr><td>网页打不开 / 一直转圈</td><td>隧道窗口关了</td><td>重新开终端，再跑一次 <code>ssh -L ...</code></td></tr>
+          <tr><td><code>requires device identity</code></td><td>你直接用板子 IP 访问了</td><td>必须用 <code>localhost</code> 那个地址（见第 4 步）</td></tr>
+          <tr><td>说要认证 / 连不上 Gateway</td><td>地址里少了 <code>#token=...</code></td><td>用脚本最后给的完整地址重新打开</td></tr>
+          <tr><td>左下角是<b>红点</b></td><td>板子上的 Gateway 停了</td><td>回板子上再跑一次 <code>bash setup-openclaw.sh</code></td></tr>
+          <tr><td>它答非所问、瞎编</td><td>大模型的通病</td><td>把报错<b>原文</b>贴给它；或开个新会话重来</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box danger">
+      <div class="bt">⚠️ 三条保命提醒</div>
+      <p><b>1. 🚫 千万别运行 <code>pkill -f openclaw</code>。</b>你的 SSH 连接的命令行里也含 "openclaw" 这几个字，这条命令会把你自己一起踢下线。要重启就直接再跑一次安装脚本。</p>
+      <p><b>2. 🔑 换 key 怎么办？</b>删掉 <code>~/.openclaw</code> 文件夹，再跑一次脚本即可。</p>
+      <p><b>3. 🌐 别把控制台开放到公网。</b>它能操作你的板子，只在校园网里、只走隧道用。</p>
+    </div>
+
+    <hr>
+
+    <!-- ===== 附录 A ===== -->
+    <h2 id="cheat">📎 附录 A · 常用命令小抄</h2>
+    <p>在<b>板子上</b>（先 <code>ssh</code> 进去）：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>想干什么</th><th>敲什么</th></tr></thead>
+        <tbody>
+          <tr><td>直接问它一句话（不开网页）</td><td><code>openclaw agent --agent main -m "你的问题"</code></td></tr>
+          <tr><td>看装的是哪个版本</td><td><code>openclaw --version</code></td></tr>
+          <tr><td>看现在能用哪些模型</td><td><code>openclaw models list</code></td></tr>
+          <tr><td>看管家进程状态</td><td><code>openclaw gateway status</code></td></tr>
+          <tr><td>看运行日志</td><td><code>tail -f ~/openclaw-env/gateway.log</code></td></tr>
+          <tr><td>重启一切</td><td><code>bash setup-openclaw.sh</code></td></tr>
+          <tr><td>忘了自己的口令</td><td><code>cat ~/openclaw-env/gateway-token.txt</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>在<b>你自己电脑上</b>：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>想干什么</th><th>敲什么</th></tr></thead>
+        <tbody>
+          <tr><td>开隧道</td><td><code>ssh -L 18789:127.0.0.1:18789 用户名@板子IP</code></td></tr>
+          <tr><td>打开控制台</td><td>浏览器访问 <code>http://localhost:18789</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr>
+
+    <!-- ===== 附录 B ===== -->
+    <h2 id="inside">📎 附录 B · 脚本到底做了什么？</h2>
+    <p>一键脚本不是魔法，它只是替你敲了这些命令。<b>看懂它，你就能自己装了</b>：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>步骤</th><th>干了什么</th><th>为什么</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>检查是不是 riscv64、能不能连上 DeepSeek</td><td>早点发现问题，省得装到一半才报错</td></tr>
+          <tr><td>1</td><td>下载 Node 24 到 <code>~/openclaw-env</code></td><td>板子自带的 Node 是 18，版本太老跑不了</td></tr>
+          <tr><td>2</td><td><code>npm install -g openclaw@latest</code></td><td>装 OpenClaw 本体（走国内镜像，快很多）</td></tr>
+          <tr><td>3</td><td>往 <code>~/.bashrc</code> 加一行 PATH</td><td>让你下次登录直接敲 <code>openclaw</code> 就能用</td></tr>
+          <tr><td>4</td><td>装 <code>@openclaw/deepseek-provider</code> 插件</td><td>让 OpenClaw 学会跟 DeepSeek 说话</td></tr>
+          <tr><td>5</td><td><code>openclaw onboard</code> 填入你的 key</td><td>把你的钥匙交给它保管</td></tr>
+          <tr><td>6</td><td>配置只监听本机 + 随机口令</td><td>外人进不来，只能走你的 SSH 隧道</td></tr>
+          <tr><td>7</td><td>后台启动 Gateway</td><td>那个 7×24 待命的"管家"进程</td></tr>
+          <tr><td>8</td><td>真的问它一句话</td><td>确认整条链路是通的，而不是"看起来装好了"</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box tip">
+      <div class="bt">💡 想手动装一遍？</div>
+      <p>上面这 8 步就是完整的命令清单，照着敲一遍，你对整个系统的理解会深很多。脚本源码就在课程仓库里，欢迎打开看。</p>
+    </div>
+
+    <hr>
+
+    <!-- ===== 附录 C ===== -->
+    <h2 id="models">📎 附录 C · 关于模型</h2>
+    <p>装好后默认用的是 <code>deepseek-v4-flash</code>（快、便宜，够用）。在网页右下角能看到当前模型。</p>
+    <p>你可能会奇怪：<b>为什么只有 DeepSeek 一个选项？</b></p>
+    <p>因为 OpenClaw 内置支持 80 多个模型（Claude、GPT、Gemini 都在列），但<b>每一个都需要那一家的 API key 才能用</b>。我们只办了 DeepSeek 的门卡，所以只有这一扇门能进。这正好说明了 key 的作用。</p>
+    <div class="box warn">
+      <div class="bt">⚠️ 别选这两个</div>
+      <p>如果你自己去翻配置，会看到还有 <code>deepseek-chat</code>、<code>deepseek-reasoner</code> 两个名字 —— <b>它们已经在 2026 年 7 月下架了</b>，选了会报错。就用默认的 <code>v4-flash</code>。</p>
+    </div>
+
+    <p style="margin-top:44px;font-size:19px"><b>祝你玩得开心。有任何问题，举手叫老师或助教。</b> 🚀</p>
+
+  </main>
+</div>
+
+<footer>
+  <div class="foot">
+    <img src="sjtu.png" alt="上海交通大学">
+    <div>
+      <div><b>实验一 · OpenClaw 配置手册</b></div>
+      <div>上海交通大学学森暑期营 · 2026 暑期</div>
+    </div>
+    <div class="fr">SJTU · RISC-V · AI AGENT</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // —— 主题切换（浅/深），与课程主页共用同一个记忆键 ——
+  var root=document.documentElement, btn=document.getElementById('themeBtn');
+  function cur(){
+    var t=root.getAttribute('data-theme');
+    if(t) return t;
+    return window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  }
+  function apply(t){ if(t){root.setAttribute('data-theme',t);} btn.textContent = cur()==='dark'?'☀':'◐'; }
+  try{ var saved=localStorage.getItem('camp-theme'); if(saved) apply(saved); else apply(); }catch(e){ apply(); }
+  btn.addEventListener('click',function(){
+    var next=cur()==='dark'?'light':'dark';
+    apply(next);
+    try{ localStorage.setItem('camp-theme',next); }catch(e){}
+  });
+
+  // —— 命令一键复制 ——
+  [].slice.call(document.querySelectorAll('.cmd')).forEach(function(box){
+    var b=box.querySelector('.copy'), pre=box.querySelector('pre');
+    if(!b||!pre) return;
+    b.addEventListener('click',function(){
+      var text=pre.textContent;
+      function done(){
+        b.textContent='已复制 ✓'; b.classList.add('done');
+        setTimeout(function(){ b.textContent='复制'; b.classList.remove('done'); },1600);
+      }
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,fallback);
+      }else{ fallback(); }
+      function fallback(){
+        // http 页面下 clipboard API 可能不可用，退回选中文本让学生手动复制
+        var r=document.createRange(); r.selectNodeContents(pre);
+        var s=window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        try{ document.execCommand('copy'); done(); }
+        catch(e){ b.textContent='请按 Ctrl+C'; setTimeout(function(){ b.textContent='复制'; },2200); }
+      }
+    });
+  });
+
+  // —— 阅读进度条 + 目录高亮 ——
+  var links=[].slice.call(document.querySelectorAll('#toc a'));
+  var targets=links.map(function(a){ return document.getElementById(a.getAttribute('href').slice(1)); });
+  var bar=document.getElementById('bar');
+  function onScroll(){
+    var h=document.documentElement;
+    var max=h.scrollHeight-h.clientHeight;
+    bar.style.width = (max>0 ? (h.scrollTop/max*100) : 0) + '%';
+    var idx=0;
+    for(var i=0;i<targets.length;i++){
+      if(targets[i] && targets[i].getBoundingClientRect().top<=120) idx=i;
+    }
+    links.forEach(function(a,i){ a.classList.toggle('on', i===idx); });
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',onScroll);
+  onScroll();
+})();
+</script>
+</body>
+</html>
