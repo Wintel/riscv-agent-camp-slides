@@ -291,7 +291,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
         <div class="stack" style="margin-bottom:26px">
           <span class="eyebrow"><span class="n">02</span>&nbsp;今天的全景图</span>
           <h2 class="title">给你的板子，住进一个<span class="hl-bg">AI 实习生</span></h2>
-          <p class="lead" style="max-width:74ch">它听得懂人话，替你使用昨天学的全部本事。你的电脑只当"遥控器"——<b>有浏览器就行，Win / Mac 都一样</b>。</p>
+          <p class="lead" style="max-width:74ch">它听得懂人话，替你使用昨天学的全部本事。你的电脑只当"遥控器"——<b>一个 SSH 加一个浏览器，Win / Mac 都一样</b>。</p>
         </div>
         <div class="chainrow" style="margin:10px 0 26px">
           <div class="cnode frag pop"><div class="ci">🧑‍🎓</div><b>你</b><span>浏览器里：说目标 · 验收</span></div>
@@ -482,7 +482,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             <ul class="clean" style="margin-top:14px;gap:20px">
               <li><span class="step-n">1</span><div><b>SSH 进板子，装好它</b><span class="sub">昨天的本事！Node 24 + 一条 npm 命令（RISC-V 上实测能跑）</span></div></li>
               <li><span class="step-n">2</span><div><b>向导里填你的钥匙</b><span class="sub">选 DeepSeek，把 API key 填进向导框（别发聊天框）——怎么买？下一页</span></div></li>
-              <li><span class="step-n">3</span><div><b>你的电脑开浏览器</b><span class="sub">打开板子的聊天页就能用；Win / Mac 都一样，什么都不用装</span></div></li>
+              <li><span class="step-n">3</span><div><b>一条 ssh -L，把聊天页"搬"到你电脑</b><span class="sub">浏览器开 localhost:18789；Win / Mac 都一样，什么都不用装</span></div></li>
             </ul>
             <div class="okbox frag" style="margin-top:22px">今天先看懂流程，<b>下午实验课发一键脚本，手把手带你装</b>。</div>
           </div>
@@ -501,10 +501,10 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
 <span class="ln ok">✔ Gateway 已在板子上运行（端口 18789）</span>
 </div>
 <div class="frag">
-<span class="ln cm"># 回到你的电脑：下午的脚本会配好课堂局域网访问</span>
-<span class="ln cm"># 若没配，先开 SSH 隧道，再访问本机地址：</span>
-<span class="ln ok">➜ http://127.0.0.1:18789  开始聊天！</span>
-<span class="ln cm"># 控制台是管理入口，别对公网暴露</span>
+<span class="ln cm"># 回到你的电脑，开一条隧道：把板子的 18789 接到本机</span>
+<span class="ln"><span class="u">you</span><span class="p">@laptop:~$</span> <span class="cmd">ssh -L 18789:127.0.0.1:18789 student@192.168.1.50</span></span>
+<span class="ln ok">➜ 浏览器打开 http://localhost:18789  开始聊天！</span>
+<span class="ln cm"># 必须走 localhost：浏览器只信任本机，直连板子 IP 会被拒</span>
 </div>
             </div>
           </div>
@@ -574,7 +574,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
             <h2 class="title">它就住在板子里，<br><span class="hl-bg">直接动手</span></h2>
             <ul class="clean" style="margin-top:14px">
               <li class="frag"><span class="mk">⚡</span><div><b>命令直接在板子上执行</b><span class="sub">不用再绕 SSH——装它的时候，你已经把它"送进去"了</span></div></li>
-              <li class="frag"><span class="mk">🖥️</span><div><b>你的电脑只是遥控器</b><span class="sub">浏览器聊天页发号施令，Win / Mac / 平板都一样</span></div></li>
+              <li class="frag"><span class="mk">🖥️</span><div><b>你的电脑只是遥控器</b><span class="sub">浏览器聊天页发号施令，Win / Mac 都一样</span></div></li>
               <li class="frag"><span class="mk">🎯</span><div><b>从现在起分工明确</b><span class="sub">你说"要什么"，它管"怎么做"</span></div></li>
             </ul>
             <div class="okbox frag" style="margin-top:18px">今天最重要的一页：<b>你（浏览器）→ 板子里的智能体 → 板子上的一切</b>，这条链通了。</div>
@@ -926,7 +926,7 @@ ul.clean li .sub{display:block;color:var(--ink-soft);font-size:16.5px;line-heigh
               <li style="color:#fff;font-size:17px"><span style="color:#ffd7dd">▸</span> SSH 进<b>你的</b> Titan，一键脚本装好 OpenClaw</li>
               <li style="color:#fff;font-size:17px"><span style="color:#ffd7dd">▸</span> 浏览器连上板子，指挥它做出"温度仪表盘"</li>
             </ul>
-            <p style="color:#ffd7dd;margin-top:14px;font-size:15px">上午我演示的，下午你来当指挥官——你的电脑有浏览器就行。</p>
+            <p style="color:#ffd7dd;margin-top:14px;font-size:15px">上午我演示的，下午你来当指挥官——你的电脑有 SSH 和浏览器就行。</p>
           </div>
         </div>
       </section>
