@@ -1255,21 +1255,38 @@ svg{overflow:visible}
         <div class="okbox frag" style="margin-top:22px;text-align:center">📋 终极大招：把<b>完整的报错信息复制给大模型</b>，描述你做了什么，它几乎总能帮你定位问题。<b>AI 可以帮你试，但最后签字的是你。</b></div>
       </section>
 
-      <!-- ============ 闯关挑战 ============ -->
+      <!-- ============ 动手实验：在板子上留个名 ============ -->
       <section class="slide" data-sec="实战与收尾">
-        <div class="stack" style="margin-bottom:20px">
+        <div class="stack" style="margin-bottom:18px">
           <span class="eyebrow"><span class="n">40</span>&nbsp;现在轮到你了</span>
-          <h2 class="title">五个小关卡，闯闯看 🎮</h2>
-          <p class="lead" style="max-width:66ch">连上板子后挨个试。卡住了？先 <code class="inline">--help</code>，再把报错<b>丢给大模型</b>。</p>
+          <h2 class="title">今天的实验：在板子上留个名 ✍️</h2>
+          <p class="lead" style="max-width:68ch">连上板子后就做一件事：建一个<b>用你名字命名</b>的 txt 文件，里面写上<b>你的名字</b>和<b>今天的日期</b>。卡住了？先 <code class="inline">--help</code>，再把报错<b>丢给大模型</b>。</p>
         </div>
-        <div class="grid2" style="gap:14px">
-          <div class="card" style="display:flex;gap:14px;align-items:flex-start"><div class="step-n">1</div><div><b>安个家</b><p style="margin-top:2px">在家目录建 <code class="inline">camp</code> 文件夹，进去，用 <code class="inline">pwd</code> 确认位置</p></div></div>
-          <div class="card" style="display:flex;gap:14px;align-items:flex-start"><div class="step-n">2</div><div><b>留个名</b><p style="margin-top:2px">用 nano 写个 <code class="inline">me.txt</code>，写上名字和今天日期</p></div></div>
-          <div class="card" style="display:flex;gap:14px;align-items:flex-start"><div class="step-n">3</div><div><b>点名机器</b><p style="margin-top:2px">跑 <code class="inline">neofetch</code>，截图你的 RISC-V 配置</p></div></div>
-          <div class="card" style="display:flex;gap:14px;align-items:flex-start"><div class="step-n">4</div><div><b>数一数</b><p style="margin-top:2px">用一条管道，数出 <code class="inline">/etc</code> 里有多少个东西</p></div></div>
-          <div class="card" style="display:flex;gap:14px;align-items:flex-start;border-color:var(--crimson)"><div class="step-n">5</div><div><b>自动化</b><p style="margin-top:2px">写个 <code class="inline">hi.sh</code>，运行后打印三行问候</p></div></div>
-          <div class="card frag right" style="display:flex;gap:14px;align-items:flex-start;background:var(--crimson);border-color:var(--crimson-deep)"><div class="step-n" style="background:#fff;color:var(--crimson)">★</div><div><b style="color:#fff">通关</b><p style="margin-top:2px;color:#ffd7dd">全搞定？你已经能用命令行操作一台真芯片了</p></div></div>
+        <div class="grid2" style="gap:20px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card" style="display:flex;gap:14px;align-items:flex-start;padding:15px 18px"><div class="step-n">1</div><div><b>连上板子</b><p style="margin-top:2px"><code class="inline">ssh ubuntu@192.168.31.1xx</code><br>末两位看你的组号，第 1 组是 <code class="inline">100</code></p></div></div>
+            <div class="card" style="display:flex;gap:14px;align-items:flex-start;padding:15px 18px"><div class="step-n">2</div><div><b>建文件</b><p style="margin-top:2px"><code class="inline">nano zhangsan.txt</code><br>文件名用<b>自己名字的拼音</b></p></div></div>
+            <div class="card" style="display:flex;gap:14px;align-items:flex-start;padding:15px 18px"><div class="step-n">3</div><div><b>写两行，存盘</b><p style="margin-top:2px">第一行名字，第二行今天日期<br><code class="inline">Ctrl</code>+<code class="inline">O</code> 回车保存，<code class="inline">Ctrl</code>+<code class="inline">X</code> 退出</p></div></div>
+            <div class="card" style="display:flex;gap:14px;align-items:flex-start;padding:15px 18px;border-color:var(--crimson)"><div class="step-n">4</div><div><b>检查一下</b><p style="margin-top:2px"><code class="inline">cat zhangsan.txt</code><br>能把两行读出来，就算过关 ✅</p></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="term">
+              <div class="term-bar"><span class="dot" style="background:#e0506a"></span><span class="dot" style="background:#f5b940"></span><span class="dot" style="background:#3fbb6d"></span><span class="t">照着敲一遍</span></div>
+              <div class="term-body sm">
+<span class="ln"><span class="u">ubuntu</span><span class="p">@</span><span class="h">titan</span><span class="p">:~$</span> <span class="cmd">date</span>  <span class="cm"># 今天几号来着？</span></span>
+<span class="ln out">Tue Jul 28 14:35:02 CST 2026</span>
+<span class="ln"><span class="u">ubuntu</span><span class="p">@</span><span class="h">titan</span><span class="p">:~$</span> <span class="cmd">nano zhangsan.txt</span></span>
+<span class="ln cm"># 写两行 → Ctrl+O 回车 → Ctrl+X</span>
+<span class="ln"><span class="u">ubuntu</span><span class="p">@</span><span class="h">titan</span><span class="p">:~$</span> <span class="cmd">cat zhangsan.txt</span></span>
+<span class="ln out"><span class="em">张三</span></span>
+<span class="ln out"><span class="em">2026-07-28</span></span>
+<span class="ln"><span class="u">ubuntu</span><span class="p">@</span><span class="h">titan</span><span class="p">:~$</span> <span class="cursor"></span></span>
+              </div>
+            </div>
+            <div class="card frag right" style="padding:15px 18px;border-color:var(--crimson)"><b>💡 懒人一招</b><p style="margin-top:4px">用前面学过的<b>重定向</b>，不开编辑器也行：<br><code class="inline">echo 张三 &gt; zhangsan.txt</code><br><code class="inline">echo 2026-07-28 &gt;&gt; zhangsan.txt</code><br><code class="inline">&gt;</code> 是覆盖写，<code class="inline">&gt;&gt;</code> 是往后追加。</p></div>
+          </div>
         </div>
+        <div class="okbox frag right" style="margin-top:18px;text-align:center">这一步做完，你就是<b>真的在远程操作一台 RISC-V 芯片</b>了 —— 名字就存在那块板子的硬盘上。</div>
       </section>
 
       <!-- ============ 24 下一步 + 总结 ============ -->
