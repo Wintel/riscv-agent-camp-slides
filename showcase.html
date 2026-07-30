@@ -100,6 +100,9 @@ h2.sec{font-size:clamp(24px,3.4vw,32px);line-height:1.15;font-weight:800;margin:
 .work{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:16px;
   overflow:hidden;box-shadow:var(--shadow);transition:.18s}
 .work:hover{border-color:color-mix(in srgb,var(--crimson) 45%,transparent);transform:translateY(-3px)}
+/* 从分组名单点过来时，让目标卡片自己亮一下（sticky 头 64px，留点余量） */
+.work[id]{scroll-margin-top:84px}
+.work:target{border-color:var(--crimson);box-shadow:0 0 0 3px var(--crimson-soft),var(--shadow)}
 .whead{display:flex;align-items:center;gap:12px;padding:15px 17px;background:var(--panel-2);border-bottom:1px solid var(--line)}
 .wav{flex:none;width:40px;height:40px;border-radius:11px;background:var(--crimson);color:#fff;
   display:grid;place-items:center;font:800 17px var(--sans)}
@@ -376,7 +379,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
       <div class="works reveal">
 
         <!-- 王Q浔 · 文学人格测试 -->
-        <div class="work">
+        <div class="work" id="solo-litquiz">
           <div class="whead">
             <div class="wav">王</div>
             <div class="wwho">
@@ -400,7 +403,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
         </div>
 
         <!-- 王S媛 · 历史探索器 -->
-        <div class="work">
+        <div class="work" id="solo-history">
           <div class="whead">
             <div class="wav">王</div>
             <div class="wwho">
@@ -425,7 +428,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
         </div>
 
         <!-- 周Y尧 · 电子企鹅宠物 -->
-        <div class="work">
+        <div class="work" id="solo-penguin">
           <div class="whead">
             <div class="wav">周</div>
             <div class="wwho">
@@ -450,7 +453,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
         </div>
 
         <!-- 游G翔 · 丧尸捉人模拟器 -->
-        <div class="work">
+        <div class="work" id="solo-zombie">
           <div class="whead">
             <div class="wav">游</div>
             <div class="wwho">

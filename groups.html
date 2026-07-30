@@ -145,6 +145,11 @@ h2.sec{font-size:clamp(24px,3.4vw,32px);line-height:1.15;font-weight:800;margin:
 .mn{font-size:15px;font-weight:600}
 .py{font-family:var(--mono);font-weight:700;font-size:14px;padding:0 .5px}
 .ms{font-size:12.5px;color:var(--ink-soft);line-height:1.35;margin-top:1px}
+/* 交了个人作品的同学，名字下面挂一条链接到成果展示页 */
+.mwork{display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:2px 8px;border-radius:999px;
+  background:var(--crimson-soft);border:1px solid color-mix(in srgb,var(--crimson) 25%,transparent);
+  font-size:12px;font-weight:700;line-height:1.4;max-width:100%;color:var(--crimson);text-decoration:none;transition:.15s}
+.mwork:hover{background:var(--crimson);color:#fff;border-color:var(--crimson)}
 .pv{margin-left:auto;flex:none;font:600 11.5px var(--sans);color:var(--ink-faint);border:1px solid var(--line);
   border-radius:999px;padding:3px 9px;background:var(--paper)}
 .empty{display:none;text-align:center;color:var(--ink-faint);padding:40px 0;font-size:15px}
@@ -317,6 +322,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
         <span class="eyebrow">分组名单</span>
         <h2 class="sec">12 组，31 位同学</h2>
         <p class="sec-lead">按组号排列，点一下右上角的 IP 就能复制。也可以直接搜索姓名、学校、省份或组号。</p>
+        <p class="sec-lead" style="margin-top:10px;font-size:15px">🎨 名字底下挂着<strong>红色标签</strong>的同学交了个人作品 —— 点一下直接跳到成果展示页对应的那张卡片。在搜索框里输「个人作品」能把他们都筛出来。</p>
         <p class="sec-lead" style="margin-top:10px;font-size:15px">🔒 为保护同学隐私，名字第二个字用<strong>拼音首字母</strong>代替，例：王小明 → 王<span class="py">X</span>明。搜索时输入姓氏或学校即可找到自己。</p>
       </div>
 
@@ -367,8 +373,8 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
             <button class="ip" data-ip="192.168.31.102" title="点击复制 IP">192.168.31.102</button>
           </div>
           <div class="mems">
-            <div class="mem" data-k="王S媛 北京师范大学附属实验中学 北京"><span class="av">王</span><span class="mi"><div class="mn">王<span class="py">S</span>媛</div><div class="ms">北京师范大学附属实验中学</div></span><span class="pv">北京</span></div>
-            <div class="mem" data-k="王Q浔 北京市第四中学 北京"><span class="av">王</span><span class="mi"><div class="mn">王<span class="py">Q</span>浔</div><div class="ms">北京市第四中学</div></span><span class="pv">北京</span></div>
+            <div class="mem" data-k="王S媛 北京师范大学附属实验中学 北京 个人作品 历史探索器"><span class="av">王</span><span class="mi"><div class="mn">王<span class="py">S</span>媛</div><div class="ms">北京师范大学附属实验中学</div><a class="mwork" title="个人作品" href="showcase.html#solo-history">🎨 历史探索器&nbsp;↗</a></span><span class="pv">北京</span></div>
+            <div class="mem" data-k="王Q浔 北京市第四中学 北京 个人作品 找到你命运的互文 文学人格测试"><span class="av">王</span><span class="mi"><div class="mn">王<span class="py">Q</span>浔</div><div class="ms">北京市第四中学</div><a class="mwork" title="个人作品" href="showcase.html#solo-litquiz">🎨 找到你命运的互文&nbsp;↗</a></span><span class="pv">北京</span></div>
             <div class="mem" data-k="马Y飞 哈尔滨市第三中学校 黑龙江"><span class="av">马</span><span class="mi"><div class="mn">马<span class="py">Y</span>飞</div><div class="ms">哈尔滨市第三中学校</div></span><span class="pv">黑龙江</span></div>
           </div>
         </div>
@@ -476,7 +482,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
           <div class="mems">
             <div class="mem" data-k="丘Z珉 上海市闵行中学 上海"><span class="av">丘</span><span class="mi"><div class="mn">丘<span class="py">Z</span>珉</div><div class="ms">上海市闵行中学</div></span><span class="pv">上海</span></div>
             <div class="mem" data-k="周T佑 上海市奉贤中学 上海"><span class="av">周</span><span class="mi"><div class="mn">周<span class="py">T</span>佑</div><div class="ms">上海市奉贤中学</div></span><span class="pv">上海</span></div>
-            <div class="mem" data-k="周Y尧 复旦大学附属复兴中学 上海"><span class="av">周</span><span class="mi"><div class="mn">周<span class="py">Y</span>尧</div><div class="ms">复旦大学附属复兴中学</div></span><span class="pv">上海</span></div>
+            <div class="mem" data-k="周Y尧 复旦大学附属复兴中学 上海 个人作品 电子企鹅宠物"><span class="av">周</span><span class="mi"><div class="mn">周<span class="py">Y</span>尧</div><div class="ms">复旦大学附属复兴中学</div><a class="mwork" title="个人作品" href="showcase.html#solo-penguin">🎨 电子企鹅宠物&nbsp;↗</a></span><span class="pv">上海</span></div>
           </div>
         </div>
 
@@ -488,7 +494,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
             <button class="ip" data-ip="192.168.31.111" title="点击复制 IP">192.168.31.111</button>
           </div>
           <div class="mems">
-            <div class="mem" data-k="游G翔 佛山市南海区石门中学 广东"><span class="av">游</span><span class="mi"><div class="mn">游<span class="py">G</span>翔</div><div class="ms">佛山市南海区石门中学</div></span><span class="pv">广东</span></div>
+            <div class="mem" data-k="游G翔 佛山市南海区石门中学 广东 个人作品 丧尸捉人模拟器"><span class="av">游</span><span class="mi"><div class="mn">游<span class="py">G</span>翔</div><div class="ms">佛山市南海区石门中学</div><a class="mwork" title="个人作品" href="showcase.html#solo-zombie">🎨 丧尸捉人模拟器&nbsp;↗</a></span><span class="pv">广东</span></div>
             <div class="mem" data-k="陈G烽 佛山市南海区石门中学 广东"><span class="av">陈</span><span class="mi"><div class="mn">陈<span class="py">G</span>烽</div><div class="ms">佛山市南海区石门中学</div></span><span class="pv">广东</span></div>
             <div class="mem" data-k="冷Z昊 佛山市南海区石门中学 广东"><span class="av">冷</span><span class="mi"><div class="mn">冷<span class="py">Z</span>昊</div><div class="ms">佛山市南海区石门中学</div></span><span class="pv">广东</span></div>
           </div>
