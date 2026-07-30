@@ -173,6 +173,9 @@ h2.sec{font-size:clamp(28px,4vw,40px);line-height:1.15;font-weight:800;margin:0 
 .res .rt{font-size:16px;font-weight:700}
 .res .rl{font:600 13px var(--mono);color:var(--crimson);margin-top:2px;word-break:break-all}
 .res .arw{margin-left:auto;color:var(--ink-faint);font-size:20px;flex:none}
+.res .opt{display:inline-flex;align-items:center;gap:4px;font:700 11px var(--sans);color:var(--crimson);
+  background:var(--crimson-soft);border:1px solid color-mix(in srgb,var(--crimson) 34%,transparent);
+  border-radius:999px;padding:2px 9px;margin-left:8px;vertical-align:2px;white-space:nowrap}
 
 /* ---------- 页脚 ---------- */
 footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)}
@@ -361,13 +364,13 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
               <span class="tag lab">实验</span>
             </div>
             <div class="session">
-              <div class="slot"><div class="ap">下午</div><div class="tm">14:30–16:00</div></div>
+              <div class="slot"><div class="ap">下午</div><div class="tm">14:30–15:30</div></div>
               <div class="desc"><div class="t">实验</div><div class="who">上机实践</div></div>
               <span class="tag lab">实验</span>
             </div>
             <div class="session">
-              <div class="slot"><div class="ap">下午</div><div class="tm">16:00–17:30</div></div>
-              <div class="desc"><div class="t">分组成果展示</div><div class="who">每组 10 分钟 · 助教现场打分 + 点评</div></div>
+              <div class="slot"><div class="ap">下午</div><div class="tm">15:30–17:30</div></div>
+              <div class="desc"><div class="t">分组成果展示（答辩）</div><div class="who">12 组 · 每组 10 分钟 · 顺序随机抽签 · 助教现场打分 + 点评</div><a href="groups.html#defense" style="display:inline-flex;align-items:center;gap:5px;margin-top:7px;font:600 12.5px var(--mono);color:var(--crimson);text-decoration:none">🎤 答辩顺序与时间 →</a></div>
               <span class="tag show">展示</span>
             </div>
           </div>
@@ -400,7 +403,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
         <span class="eyebrow">学习资源</span>
         <h2 class="sec">课上课下都能用</h2>
       </div>
-      <div class="pin reveal" style="margin:24px 0 0"><span class="i">🔓</span>全部讲义（开营导论、第 1 课、智能体介绍 II / III、酷案例加餐）与实验一手册均已开放，随时可以回看。</div>
+      <div class="pin reveal" style="margin:24px 0 0"><span class="i">🔓</span>全部讲义（开营导论、第 1 课、智能体介绍 II / III、酷案例加餐）与实验一手册均已开放，随时可以回看。另有一份<b>选修</b>实验：注册 GitHub 并让智能体给你做个人主页，感兴趣的同学随时可以做。</div>
       <div class="reslist reveal" style="margin-top:18px">
         <a class="res" href="overview-slides.html">
           <span class="ic">🎬</span><div><div class="rt">开营导论 · 课程总览</div><div class="rl">芯片→系统→智能：Linux · RISC-V · DP1000 · 智能体（41 页）</div></div><span class="arw">↗</span>
@@ -419,6 +422,9 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
         </a>
         <a class="res" href="agent-showcase-slides.html">
           <span class="ic">✨</span><div><div class="rt">加餐 · AI 智能体酷案例</div><div class="rl">GUI · Web · Multi-Agent · Titan 控制中心（20 页）</div></div><span class="arw">↗</span>
+        </a>
+        <a class="res" href="lab-github-pages.html">
+          <span class="ic">🌍</span><div><div class="rt">选修实验 · 注册 GitHub，做个人主页<span class="opt">🌟 可选</span></div><div class="rl">你只管注册 → 建仓库·写网页·部署上线全交给智能体，得到 你的用户名.github.io</div></div><span class="arw">↗</span>
         </a>
         <a class="res" href="groups.html">
           <span class="ic">👥</span><div><div class="rt">分组名单与机器 IP</div><div class="rl">12 组 · 31 人 · 192.168.31.100–111</div></div><span class="arw">→</span>

@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>选修 · 注册 GitHub，让小龙虾给你做个人主页 | 学森暑期营</title>
+<meta name="description" content="学森暑期营选修实验：注册 GitHub 账号，然后让 OpenClaw（小龙虾）替你生成个人主页并部署上线，全世界都能访问。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%23AD1730'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='6'%20fill='white'/%3E%3C/svg%3E">
+<style>
+/* =========================================================================
+   选修实验 · GitHub + 个人主页
+   与课程主页 / 实验一手册同一套设计语言（交大红）。支持浅/深色主题。
+   面向零基础高中生：大字号、命令可一键复制、左侧步骤导航。
+   ========================================================================= */
+:root{
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2;
+  --paper:#F4F2EE; --panel:#FFFFFF; --panel-2:#ECE8E1;
+  --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88; --line:#DCD4C8;
+  --ok:#1E8A6E; --ok-soft:#DCEFE8; --warn:#B4690E; --warn-soft:#FBEEDC;
+  --term-bg:#14171E; --term-fg:#E7EAF0; --term-green:#57D07E; --term-cyan:#54C4D4; --term-dim:#8891A0;
+  --shadow:0 18px 44px -26px rgba(60,30,20,.5);
+  --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Cascadia Code","JetBrains Mono","SF Mono","Consolas","Menlo",monospace;
+  --maxw:820px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --crimson:#E4586C; --crimson-deep:#F08292; --crimson-soft:#3A1E24;
+    --paper:#17140F; --panel:#211C17; --panel-2:#2A241E;
+    --ink:#EDE7DF; --ink-soft:#B3A99F; --ink-faint:#8A8078; --line:#3A332B;
+    --ok:#4FBFA0; --ok-soft:#1B2E28; --warn:#E0A047; --warn-soft:#332818;
+    --shadow:0 20px 50px -28px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="light"]{
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2;
+  --paper:#F4F2EE; --panel:#FFFFFF; --panel-2:#ECE8E1;
+  --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88; --line:#DCD4C8;
+  --ok:#1E8A6E; --ok-soft:#DCEFE8; --warn:#B4690E; --warn-soft:#FBEEDC;
+  --shadow:0 18px 44px -26px rgba(60,30,20,.5);
+}
+:root[data-theme="dark"]{
+  --crimson:#E4586C; --crimson-deep:#F08292; --crimson-soft:#3A1E24;
+  --paper:#17140F; --panel:#211C17; --panel-2:#2A241E;
+  --ink:#EDE7DF; --ink-soft:#B3A99F; --ink-faint:#8A8078; --line:#3A332B;
+  --ok:#4FBFA0; --ok-soft:#1B2E28; --warn:#E0A047; --warn-soft:#332818;
+  --shadow:0 20px 50px -28px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:86px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  line-height:1.75;font-size:17px;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:var(--crimson)}
+
+/* ---------- 顶栏 ---------- */
+header{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--paper) 90%,transparent);
+  backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:14px;height:64px;max-width:1180px;margin:0 auto;padding:0 22px}
+.nav .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14.5px;text-decoration:none;color:inherit}
+.nav .brand img{width:32px;height:32px}
+.nav .brand .b2{font:600 10px var(--mono);letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase}
+.nav .sp{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tbtn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+  cursor:pointer;font-size:15px;display:grid;place-items:center;color:var(--ink-soft);transition:.15s}
+.tbtn:hover{border-color:var(--crimson);color:var(--crimson)}
+.backlink{font-size:13.5px;color:var(--ink-soft);text-decoration:none;padding:7px 12px;border-radius:8px}
+.backlink:hover{color:var(--crimson);background:var(--crimson-soft)}
+#bar{position:fixed;left:0;top:0;height:3px;width:0;background:var(--crimson);z-index:70;transition:width .1s linear}
+
+/* ---------- 整体布局：左目录 + 正文 ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 22px;display:grid;grid-template-columns:214px 1fr;gap:44px;align-items:start}
+#toc{position:sticky;top:88px;padding:22px 0 40px;font-size:14px}
+#toc .t{font:600 11px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:12px}
+#toc a{display:block;padding:6px 11px;border-left:2px solid var(--line);color:var(--ink-soft);
+  text-decoration:none;transition:.15s;line-height:1.4}
+#toc a:hover{color:var(--crimson);border-left-color:var(--crimson)}
+#toc a.on{color:var(--crimson);border-left-color:var(--crimson);font-weight:700;background:var(--crimson-soft)}
+main{max-width:var(--maxw);padding:8px 0 90px;min-width:0}
+@media (max-width:940px){
+  .shell{grid-template-columns:1fr;gap:0}
+  #toc{display:none}
+}
+
+/* ---------- 首屏 ---------- */
+.hero{padding:44px 0 30px;border-bottom:1px solid var(--line);margin-bottom:34px}
+.eyebrow{font:600 12.5px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);
+  display:inline-flex;align-items:center;gap:10px;margin-bottom:14px}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--crimson)}
+h1{font-size:clamp(30px,5.2vw,44px);line-height:1.12;font-weight:800;margin:0 0 16px;letter-spacing:-.01em;text-wrap:balance}
+.sub{font-size:19px;color:var(--ink-soft);margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.fact{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);
+  border-radius:11px;padding:9px 14px;font-size:14.5px;font-weight:600}
+.optional{display:inline-flex;align-items:center;gap:8px;font:700 13px var(--sans);color:var(--crimson);
+  background:var(--crimson-soft);border:1px solid color-mix(in srgb,var(--crimson) 38%,transparent);
+  border-radius:999px;padding:6px 14px;margin-bottom:16px}
+
+/* ---------- 标题层级 ---------- */
+h2{font-size:27px;line-height:1.25;font-weight:800;margin:52px 0 14px;padding-top:10px;scroll-margin-top:86px;text-wrap:balance}
+h2 .num{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:11px;
+  background:var(--crimson);color:#fff;font:800 19px/1 var(--mono);margin-right:12px;vertical-align:-7px}
+h3{font-size:19.5px;font-weight:700;margin:30px 0 10px;scroll-margin-top:86px}
+p{margin:14px 0}
+ul,ol{padding-left:24px;margin:14px 0}
+li{margin:7px 0}
+b,strong{font-weight:700}
+.hl{color:var(--crimson);font-weight:700}
+hr{border:0;border-top:1px solid var(--line);margin:44px 0}
+
+/* ---------- 行内代码 ---------- */
+code{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--line);border-radius:6px;
+  padding:1.5px 6px;font-size:.88em;color:var(--crimson-deep);font-weight:600;word-break:break-word}
+
+/* ---------- 命令块（可一键复制）---------- */
+.cmd{position:relative;background:var(--term-bg);border-radius:12px;margin:18px 0;
+  border:1px solid #2A2F3A;box-shadow:0 18px 40px -26px rgba(0,0,0,.6)}
+.cmd .cmd-h{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid #2A2F3A}
+.cmd .cmd-h .w{font:600 11.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--term-dim)}
+.cmd .cmd-h .w b{color:var(--term-cyan);font-weight:700}
+.cmd pre{margin:0;padding:15px 17px;font-family:var(--mono);font-size:14.5px;line-height:1.7;
+  color:var(--term-fg);white-space:pre-wrap;overflow-wrap:anywhere}
+.cmd pre .p{color:var(--term-green)}
+.cmd pre .c{color:var(--term-dim)}
+.copy{position:absolute;right:9px;top:6px;border:1px solid #39404E;background:#232833;color:#C9D1DE;
+  font:600 12px var(--sans);padding:5px 11px;border-radius:8px;cursor:pointer;transition:.15s}
+.copy:hover{border-color:var(--term-cyan);color:#fff}
+.copy.done{background:var(--ok);border-color:var(--ok);color:#fff}
+
+/* ---------- 提示框 ---------- */
+.box{border-radius:12px;padding:15px 18px;margin:20px 0;border:1px solid var(--line);background:var(--panel);font-size:16px}
+.box .bt{font-weight:700;margin-bottom:5px;display:flex;align-items:center;gap:8px}
+.box p{margin:7px 0}
+.box.tip{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.box.tip .bt{color:var(--ok)}
+.box.warn{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 42%,transparent)}
+.box.warn .bt{color:var(--warn)}
+.box.danger{background:var(--crimson-soft);border-color:color-mix(in srgb,var(--crimson) 42%,transparent)}
+.box.danger .bt{color:var(--crimson)}
+
+/* ---------- 表格 ---------- */
+.tw{overflow-x:auto;margin:20px 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:460px}
+th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;
+  border-bottom:2px solid var(--line);white-space:nowrap}
+tbody tr:hover{background:var(--panel-2)}
+td code{font-size:.9em}
+
+/* ---------- 结果预览（终端输出）---------- */
+.out{background:var(--term-bg);color:var(--term-dim);border-radius:12px;padding:15px 17px;margin:18px 0;
+  font-family:var(--mono);font-size:14px;line-height:1.7;overflow-x:auto;white-space:pre;border:1px solid #2A2F3A}
+.out .ok{color:var(--term-green)}
+.out .hd{color:#fff;font-weight:700}
+
+/* ---------- 检查点 ---------- */
+.check{display:flex;gap:12px;align-items:flex-start;background:var(--ok-soft);
+  border:1px solid color-mix(in srgb,var(--ok) 40%,transparent);border-radius:12px;padding:14px 17px;margin:20px 0}
+.check .ci{font-size:20px;line-height:1.3}
+.check b{color:var(--ok)}
+
+/* ---------- 页脚 ---------- */
+footer{border-top:1px solid var(--line);background:var(--panel-2);padding:30px 0;margin-top:20px}
+.foot{max-width:1180px;margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:14px;font-size:14px;color:var(--ink-soft)}
+.foot img{width:34px;height:34px}
+.foot .fr{margin-left:auto;font:600 11px var(--mono);letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase}
+@media (max-width:560px){ .foot .fr{display:none} body{font-size:16.5px} }
+
+@media print{
+  header,#toc,#bar,.copy,footer{display:none!important}
+  .shell{display:block;padding:0} main{max-width:none}
+  .cmd{break-inside:avoid} .cmd pre{white-space:pre-wrap}
+  body{background:#fff;font-size:11pt}
+}
+</style>
+</head>
+<body>
+
+<div id="bar"></div>
+
+<header>
+  <nav class="nav">
+    <a class="brand" href="index.html">
+      <img src="sjtu.png" alt="上海交通大学">
+      <span>零基础 RISC-V 芯片智能体开发<br><span class="b2">SJTU · Xuesen Camp</span></span>
+    </a>
+    <div class="sp">
+      <a class="backlink" href="index.html">← 课程主页</a>
+      <button class="tbtn" id="themeBtn" title="切换深浅色" aria-label="切换深浅色">◐</button>
+    </div>
+  </nav>
+</header>
+
+<div class="shell">
+
+  <!-- ===== 左侧目录 ===== -->
+  <nav id="toc">
+    <div class="t">实验步骤</div>
+    <a href="#intro">这个实验在干什么</a>
+    <a href="#prep">动手前的准备</a>
+    <a href="#s1">1 · 注册 GitHub</a>
+    <a href="#s2">2 · 办一把万能钥匙</a>
+    <a href="#s3">3 · 让小龙虾建仓库</a>
+    <a href="#s4">4 · 让小龙虾做网页</a>
+    <a href="#s5">5 · 让小龙虾上线</a>
+    <a href="#s6">6 · 全世界都能看到</a>
+    <a href="#s7">7 · 继续改它</a>
+    <a href="#trouble">🔧 卡住了怎么办</a>
+    <a href="#cheat">附录 A · 命令小抄</a>
+    <a href="#inside">附录 B · 背后发生了什么</a>
+    <a href="#privacy">附录 C · 隐私清单</a>
+  </nav>
+
+  <main>
+
+    <!-- ===== 首屏 ===== -->
+    <div class="hero">
+      <span class="optional">🌟 选修 · 做不做都不影响结营，但做完很酷</span>
+      <span class="eyebrow">选修实验 · 配套第 2 / 第 3 讲</span>
+      <h1>注册 GitHub，<br>让小龙虾给你做个人主页</h1>
+      <p class="sub">你只需要亲手做一件事：<b>注册账号</b>。建仓库、写网页、部署上线，<b>全部交给小龙虾</b>。做完你会拥有一个全世界都能打开的网址。</p>
+      <div class="facts">
+        <span class="fact">⏱️ 约 40 分钟</span>
+        <span class="fact">🧑‍💻 需先完成实验一</span>
+        <span class="fact">💰 完全免费</span>
+        <span class="fact">🌍 成品：一个真网址</span>
+      </div>
+    </div>
+
+    <!-- ===== 导入 ===== -->
+    <h2 id="intro">这个实验在干什么？</h2>
+    <p>一句话：<b>你在 GitHub 开个户、配一把钥匙，剩下的——领地皮、盖房子、交付上线——全让小龙虾干。</b></p>
+    <p>做完以后，你会有一个这样的网址（把 <code>你的用户名</code> 换成你自己的）：</p>
+    <div class="out"><span class="hd">https://你的用户名.github.io</span></div>
+    <p>这个网址<b>任何人、在任何地方、用手机都能打开</b>。你可以发给爸妈、发给同学，写在简历上。</p>
+
+    <h3>三个角色，先认清楚</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>角色</th><th>是谁</th><th>这次负责什么</th></tr></thead>
+        <tbody>
+          <tr><td>🧑‍🎓 <b>你</b></td><td>老板</td><td>注册账号、提供素材、批准操作、验收网页</td></tr>
+          <tr><td>🦞 <b>小龙虾</b></td><td>就是实验一装的 OpenClaw，住在你的板子里</td><td><b>建仓库、写代码、提交、推送上线</b></td></tr>
+          <tr><td>🐙 <b>GitHub</b></td><td>全世界程序员放代码的地方，还免费送你一个网站空间</td><td>存代码 + 把网页发布到互联网</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box tip">
+      <div class="bt">💡 为什么只有注册要你自己来？</div>
+      <p>因为注册要过<b>人机验证</b>（那个"我不是机器人"的小游戏）—— 那道关卡就是专门用来拦住 AI 的。小龙虾确实是个机器人，它过不去，这活儿只能你干。 😄</p>
+      <p>但注册完之后，GitHub 的一切都能通过一个叫 <b>API</b> 的"程序专用入口"操作 —— <b>建仓库、传文件、查状态，小龙虾全都能自己来</b>。你一行代码、一次鼠标点击都不用。</p>
+    </div>
+
+    <h2 id="prep">动手前的准备</h2>
+    <ul>
+      <li>✅ <b>实验一已经做完</b>——小龙虾能在浏览器里跟你聊天（左下角是绿点）</li>
+      <li>✅ 一个<b>能收邮件的邮箱</b>（QQ 邮箱、163、Outlook 都行，用你常看的那个）</li>
+      <li>✅ 想清楚<b>你想在主页上放什么</b>（名字、爱好、这几天在营里做了什么）</li>
+      <li>✅ 隧道窗口还开着（就是那条 <code>ssh -L 18789:...</code>，关了就重开一次）</li>
+    </ul>
+    <div class="box warn">
+      <div class="bt">📶 关于网络</div>
+      <p>GitHub 在国内偶尔会慢或者连不上，这不是你操作错了。慢就等一等、刷新一下；实在不行叫助教，我们有加速地址（见<a href="#trouble">卡住了怎么办</a>）。</p>
+    </div>
+
+    <hr>
+
+    <!-- ===== 第 1 步 ===== -->
+    <h2 id="s1"><span class="num">1</span>注册 GitHub 账号 🐙</h2>
+    <p>这一步<b>只有这一步</b>是纯人工。打开 👉 <a href="https://github.com/signup" target="_blank" rel="noopener">github.com/signup</a></p>
+
+    <h3>1.1 填三样东西</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>它问什么</th><th>你填什么</th><th>注意</th></tr></thead>
+        <tbody>
+          <tr><td><b>Email</b></td><td>你常看的邮箱</td><td>后面要收验证码，别填错</td></tr>
+          <tr><td><b>Password</b></td><td>至少 8 位，含数字和小写字母</td><td>记在手机备忘录里，别忘了</td></tr>
+          <tr><td><b>Username</b></td><td>你的用户名</td><td>⚠️ <b>看下面这条，很重要</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box danger">
+      <div class="bt">⚠️ 用户名会变成你的网址，想好了再填</div>
+      <p>你填 <code>xiaoming2026</code>，你的主页就是 <code>https://xiaoming2026.github.io</code>。<b>这串东西以后你会到处用它</b>。</p>
+      <p><b>建议：</b>用拼音 + 数字，全小写，短一点好记，比如 <code>lixiaolong07</code>、<code>wangyu-sjtu</code>。</p>
+      <p><b>不建议：</b><code>xxx_666_tql</code> 这种——三年后你在简历上写它会想删掉自己。 😅</p>
+      <p>只能用<b>英文字母、数字和连字符 <code>-</code></b>，不能有中文、空格、下划线开头。名字被占了它会提示你，换一个就行。</p>
+    </div>
+
+    <h3>1.2 过人机验证 + 邮箱验证</h3>
+    <p>它会让你玩一个小验证（拖动/点图），然后往你邮箱发一个 <b>8 位数字验证码</b>。去邮箱抄过来填上。</p>
+    <div class="box warn">
+      <div class="bt">📬 收不到验证码？</div>
+      <p>先看<b>垃圾邮件箱</b>（QQ 邮箱尤其爱把它扔那儿）。等 1～2 分钟再点"重新发送"，别狂点。</p>
+    </div>
+    <p>后面它会问你"团队多大""想用来干什么"之类的问卷 —— <b>随便选，或者直接点跳过（Skip）</b>，不影响任何事。看到要不要买收费版时，选 <b>Free</b>（免费版）。</p>
+
+    <div class="check">
+      <span class="ci">✅</span>
+      <div><b>检查点：</b>你能打开 <code>https://github.com/你的用户名</code> 并看到自己的头像页，就注册成功了。🎉</div>
+    </div>
+
+    <hr>
+
+    <!-- ===== 第 2 步 ===== -->
+    <h2 id="s2"><span class="num">2</span>给小龙虾办一把"万能钥匙" 🔑</h2>
+    <p>还记得实验一里那把 DeepSeek 的钥匙吗？同样的道理再来一次：<b>小龙虾要替你操作 GitHub 账号，得先证明"我是你派来的"。</b></p>
+    <p>GitHub 早就不让用密码了（太危险）。它给的是一种可以随时吊销、还能限定权限的钥匙，叫 <b>Personal Access Token</b>（个人访问令牌），下面简称 <b>token</b>。</p>
+    <p>拿到这把钥匙，小龙虾就能<b>替你建仓库、传文件、查状态</b> —— 后面所有步骤你都不用再碰 GitHub 网页了。</p>
+
+    <h3>2.1 创建 token</h3>
+    <ol>
+      <li>打开 👉 <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener">github.com/settings/tokens/new</a>（这是 classic 版，最简单）</li>
+      <li><b>Note</b>（备注）：填 <code>summer-camp</code>，方便你以后认出它</li>
+      <li><b>Expiration</b>（有效期）：选 <b>30 days</b> —— 营结束后它自己失效，很安全</li>
+      <li><b>Select scopes</b>（权限范围）：只勾最上面那一个 <code>repo</code>
+        <div class="box tip" style="margin:12px 0">
+          <div class="bt">🔐 为什么只勾一个？</div>
+          <p>这叫<b>最小权限原则</b>：只给它干这件事必需的权力。<code>repo</code> = "可以新建、读写我的仓库"，正好够用 —— 建仓库和推代码都在这一项里。别的都不勾，万一钥匙丢了，损失也小。</p>
+        </div>
+      </li>
+      <li>拉到最下面点 <b>Generate token</b></li>
+    </ol>
+
+    <p>屏幕上会出现一串以 <code>ghp_</code> 开头的字符，这就是 token：</p>
+    <div class="out">ghp_<span class="ok">XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</span></div>
+
+    <div class="box warn">
+      <div class="bt">⚠️ 又是"只显示一次"</div>
+      <p>跟 DeepSeek 那把钥匙一模一样：<b>关掉页面就再也看不到了。</b>立刻点复制按钮，粘到记事本里存好。</p>
+      <p>丢了也不用慌 —— 回来把它 Delete 掉，重新 Generate 一个，不花钱。</p>
+    </div>
+
+    <div class="box danger">
+      <div class="bt">🔒 三条规矩（跟上次一样，但更重要）</div>
+      <p><b>1. 这把钥匙能改你 GitHub 上的所有仓库。</b>别人拿到它，可以删你的东西、以你的名义提交代码。</p>
+      <p><b>2. 不要发群里、不要截图、不要写进网页文件里。</b>特别注意：<b>写进仓库里就等于发布到全世界</b>，GitHub 还会自动扫出来并作废它。</p>
+      <p><b>3. 下一步要把它发给小龙虾</b> —— 这是必要的，它得拿着钥匙去开门。但<b>发的时候顺手补一句</b>："这个 token 只用来操作 GitHub，不要写进任何文件、不要打印出来。"</p>
+    </div>
+
+    <hr>
+
+    <!-- ===== 第 3 步 ===== -->
+    <h2 id="s3"><span class="num">3</span>让小龙虾替你建仓库 🦞</h2>
+    <p>打开你的 OpenClaw 聊天页（<code>http://localhost:18789</code>）。<b>从这里开始，你只需要打字。</b></p>
+
+    <h3>先记住一条"魔法规则"</h3>
+    <p>GitHub 有个特殊约定：如果一个仓库的名字正好等于 <code>你的用户名.github.io</code>，那么这个仓库里的网页会<b>自动被发布成网站</b>，不用做任何额外设置。</p>
+    <p>比如用户名是 <code>lixiaolong07</code>，仓库就得叫 <code>lixiaolong07.github.io</code>，网址就是 <code>https://lixiaolong07.github.io</code>。<b>一字不差，全小写，中间是英文句点。</b></p>
+    <p>我们要用的就是这条魔法。你把规则告诉小龙虾，它去建：</p>
+
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">发给 <b>小龙虾</b> 的话 · 建仓库</span></div>
+      <button class="copy">复制</button>
+      <pre>帮我在 GitHub 上新建一个仓库，我要用它做 GitHub Pages 个人主页。
+
+- 我的 GitHub 用户名：[lixiaolong07]
+- 仓库名必须正好是：[lixiaolong07].github.io
+- 必须是 public（公开），否则网站发布不出来
+- 不要初始化 README、不要 .gitignore、不要 license，我要一个完全空的仓库
+- 我的 token：[ghp_把你的token粘在这里]
+
+用 GitHub 的 API 建（curl 调 https://api.github.com/user/repos），
+token 放在请求头里。建好之后：
+1. 再查一次确认它真的存在、而且是 public；
+2. 把仓库地址和我将来的网址告诉我。
+
+重要：这个 token 只用来操作 GitHub。
+不要把它写进任何文件、不要 echo 出来、不要提交进仓库。</pre>
+    </div>
+
+    <p>它大概会这么干（你在屏幕上能看到）：</p>
+    <div class="out"><span class="hd">▶ 小龙虾正在干的事（示意）</span>
+  curl -X POST https://api.github.com/user/repos \
+       -H "Authorization: Bearer ***" \
+       -d '{"name":"lixiaolong07.github.io","private":false}'
+  <span class="ok">← 建好了</span>
+  curl https://api.github.com/repos/…   <span class="ok">← 它在自己复查</span></div>
+
+    <div class="box tip">
+      <div class="bt">🤖 什么是 API？</div>
+      <p>你平时用 GitHub 是<b>点鼠标</b>；程序不会点鼠标，所以网站另开了一个<b>给程序走的门</b>，这就是 API。</p>
+      <p>你在网页上点一下"Create repository"，和小龙虾发一条 <code>POST /user/repos</code>，<b>在 GitHub 那边是同一件事</b>。</p>
+      <p>这也是智能体能干活的根本原因：只要一件事有 API 或者有命令行，它就能替你做。</p>
+    </div>
+
+    <div class="box warn">
+      <div class="bt">🙋 万一它建不出来（网络不通、token 不对）</div>
+      <p>先让它把<b>报错原文</b>贴给你，通常一眼就能看出是 token 错了还是网络不通。</p>
+      <p>实在不行你也可以自己去 <a href="https://github.com/new" target="_blank" rel="noopener">github.com/new</a> 点几下建（仓库名照上面的规则填、选 Public、什么都不要勾），然后回来告诉它"仓库我建好了，接着往下做"。<b>能自己兜底，也是本事。</b></p>
+    </div>
+
+    <div class="check">
+      <span class="ci">✅</span>
+      <div><b>检查点：</b>浏览器打开 <code>https://github.com/你的用户名/你的用户名.github.io</code>，能看到一个空仓库，标签是 <b>Public</b>。<b>这是你人生第一个由 AI 替你创建的东西。</b></div>
+    </div>
+
+    <hr>
+
+    <!-- ===== 第 4 步 ===== -->
+    <h2 id="s4"><span class="num">4</span>让小龙虾做网页 🦞</h2>
+    <p>地皮有了，该盖房子了。<b>接着在同一个聊天窗口里说下去</b>（同一个会话它才记得你是谁、仓库叫什么）—— 我们开始<b>用说话的方式编程</b>。</p>
+
+    <h3>4.1 先想清楚要放什么</h3>
+    <p>AI 不认识你。你给的素材越具体，它做出来的东西越像你、越不像模板。花两分钟想想：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>要素</th><th>举例</th></tr></thead>
+        <tbody>
+          <tr><td>你想被怎么称呼</td><td>李小龙 / Xiaolong Li / 小龙</td></tr>
+          <tr><td>一句话介绍自己</td><td>"某中学高二学生，喜欢拆东西和写小游戏"</td></tr>
+          <tr><td>3 个爱好 / 擅长的事</td><td>打篮球、剪视频、Python 小脚本</td></tr>
+          <tr><td>这几天在营里做了什么</td><td>"用 SSH 连上了一块 8 核 RISC-V 板子，让 AI 智能体在上面写了个测温脚本"</td></tr>
+          <tr><td>一句喜欢的话</td><td>随便，一句歌词也算</td></tr>
+          <tr><td>想不想留联系方式</td><td><b>可以不留</b>。要留就留邮箱，<b>别留手机号</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box danger">
+      <div class="bt">🛡️ 这是公开网页，先记住三个"不要"</div>
+      <p><b>不要</b>写手机号、家庭住址、身份证号、具体的班级。</p>
+      <p><b>不要</b>放别人的照片和别人的真实姓名（同学的也不行——那是他们的隐私，不是你的）。</p>
+      <p><b>不要</b>写"某某中学高二 3 班李小龙" —— 姓名 + 学校 + 班级凑在一起，就足够陌生人找到你了。写"上海某中学高中生"完全够。</p>
+      <p>完整清单见 <a href="#privacy">附录 C</a>，做之前扫一眼。</p>
+    </div>
+
+    <h3>4.2 把活儿派给它</h3>
+    <p>把下面这段<b>整段</b>复制到聊天框，<b>把方括号里的内容换成你自己的</b>，然后回车：</p>
+
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">发给 <b>小龙虾</b> 的话 · 第一条</span></div>
+      <button class="copy">复制</button>
+      <pre>帮我在板子上做一个我的个人主页，纯静态网页，准备发布到 GitHub Pages。
+
+请在 ~/mysite 目录里做，入口文件必须叫 index.html。
+
+关于我：
+- 称呼：[李小龙]
+- 一句话介绍：[上海某中学高中生，喜欢拆东西和写小游戏]
+- 爱好/擅长：[打篮球]、[剪视频]、[写 Python 小脚本]
+- 最近在做：[参加交大学森暑期营，用 SSH 连上一块 8 核 RISC-V 板子，
+  让 AI 智能体在上面写了个 CPU 测温脚本]
+- 喜欢的一句话：[种一棵树最好的时间是十年前，其次是现在]
+
+设计要求：
+1. 单个 index.html 搞定，CSS 写在里面，不要引用任何外部网站的字体或库
+   （不然打开会很慢）。
+2. 手机上也要好看（响应式）。
+3. 支持深色模式，跟随系统。
+4. 有一个"关于我""我的爱好""最近在做什么"三段式结构，加一点淡入动画。
+5. 配色干净，别用花里胡哨的渐变，字体用系统自带的中文字体栈。
+6. 页面里不要出现我的手机号、学校班级等隐私信息。
+
+做完先别管上线，把文件路径告诉我，我要先看看。</pre>
+    </div>
+
+    <p>接下来<b>盯着它干活</b>，这才是这个实验最好看的部分：</p>
+    <ul>
+      <li>它会先 <code>mkdir ~/mysite</code>，然后<b>真的动手写文件</b>（不是把代码打印给你看）</li>
+      <li>可能会跑 <code>ls</code>、<code>wc -l</code> 检查自己写没写完</li>
+      <li>如果它觉得需求有歧义（比如"要不要放照片"），它<b>会反问你</b> —— 回答它就行</li>
+    </ul>
+
+    <h3>4.3 先在板子上预览一下</h3>
+    <p>上线之前当然要先看一眼。让它起一个临时的小服务器：</p>
+
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">发给 <b>小龙虾</b> 的话</span></div>
+      <button class="copy">复制</button>
+      <pre>在 ~/mysite 里用 python3 起一个 http 服务，端口 8080，后台跑着，
+然后告诉我怎么在我自己的电脑上看到它。</pre>
+    </div>
+
+    <p>然后在<b>你自己的电脑</b>上再开一条隧道（第三个终端窗口，别关前面两个）：</p>
+
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">在<b>你自己的电脑</b>上运行 · 新窗口</span></div>
+      <button class="copy">复制</button>
+      <pre>ssh -L 8080:127.0.0.1:8080 用户名@板子IP</pre>
+    </div>
+
+    <p>浏览器打开 👉 <code>http://localhost:8080</code></p>
+    <div class="box tip">
+      <div class="bt">🚇 又是隧道？</div>
+      <p>对，跟实验一第 4 步一模一样的道理：网页跑在板子上，隧道把板子的 8080 号门接到你电脑门口。<b>同一个套路你已经会用第二次了。</b></p>
+    </div>
+
+    <h3>4.4 不满意就直接说</h3>
+    <p>这才是用智能体开发的爽点 —— <b>你不用会 CSS，你只要会挑刺</b>：</p>
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">发给 <b>小龙虾</b> 的话 · 想改就改</span></div>
+      <button class="copy">复制</button>
+      <pre>标题太小了，放大一点。主色改成深蓝。
+"我的爱好"那三项改成三个卡片并排，手机上再变成上下排列。
+改完刷新给我看。</pre>
+    </div>
+
+    <div class="check">
+      <span class="ci">✅</span>
+      <div><b>检查点：</b>在 <code>localhost:8080</code> 看到一个你自己满意的页面。<b>满意了再往下走</b>，上线以后改也行，但先改舒服一点更省事。</div>
+    </div>
+
+    <hr>
+
+    <!-- ===== 第 5 步 ===== -->
+    <h2 id="s5"><span class="num">5</span>让小龙虾把它送上线 🚀</h2>
+    <p>网页在板子上躺着，只有你能看。现在让小龙虾把它<b>推送</b>到第 3 步它自己建的那个仓库里。</p>
+    <p>还是同一个聊天窗口，把下面这段发过去（<b>只有邮箱那一处要换</b>，仓库和 token 它刚才已经知道了）：</p>
+
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">发给 <b>小龙虾</b> 的话 · 上线</span></div>
+      <button class="copy">复制</button>
+      <pre>把 ~/mysite 推送到你刚才帮我建的那个仓库，发布成 GitHub Pages。
+用刚才那把 token，仓库地址和用户名你已经知道了。
+
+- 我的邮箱（给 git 提交用）：[我的邮箱@example.com]
+
+请你：
+1. 在 ~/mysite 里 git init，分支叫 main。
+2. 先检查一遍要提交的文件，确认里面没有 token、没有密码、没有我的隐私信息，
+   列给我看一眼。
+3. 配好 git 的 user.name 和 user.email，提交信息写 "我的第一个个人主页"。
+4. 推送到那个仓库的 main 分支。
+
+重要：token 只用来推送。
+不要把它写进任何文件（包括 .git/config 里的 remote 地址），
+不要 echo 出来，不要提交进仓库。
+推送完成后告诉我我的网址是什么，以及大概多久能打开。</pre>
+    </div>
+
+    <div class="box tip">
+      <div class="bt">🤨 为什么特意提"不要写进 .git/config"？</div>
+      <p>因为最省事的推送写法是把 token 直接塞在仓库地址里（<code>https://token@github.com/...</code>），那样它会被<b>存进本地的 <code>.git/config</code> 文件</b>里 —— 板子是公用的，下一个同学就能翻到。</p>
+      <p>你这一句话，就是在教它<b>用更安全的写法</b>（比如只在这一次推送时临时带上）。<b>让 AI 干活的人，得比 AI 多想一步。</b></p>
+    </div>
+
+    <p>它会依次做这些事，你在屏幕上能一条条看到：</p>
+    <div class="out"><span class="hd">▶ 小龙虾正在干的事（示意）</span>
+  git init -b main
+  git add -A
+  git status            <span class="ok">← 它在自查有没有夹带私货</span>
+  git config user.name / user.email
+  git commit -m "我的第一个个人主页"
+  git remote add origin https://…
+  git push -u origin main
+                        <span class="ok">✔ 推上去了</span></div>
+
+    <div class="box warn">
+      <div class="bt">🛑 它会先请示你</div>
+      <p>还记得实验一第 5 步那个<b>请示框</b>吗？<code>git push</code> 属于"会影响外部世界"的操作，它大概率会弹框问你。</p>
+      <p><b>看清楚命令再点「允许」</b> —— 这个习惯比这次实验本身更重要。</p>
+    </div>
+
+    <div class="box tip">
+      <div class="bt">🐢 推送很慢或者失败？</div>
+      <p>GitHub 在国内不太稳。让它<b>重试两次</b>；还不行就告诉它："用 <code>https://gh-proxy.com/https://github.com/...</code> 这个加速地址再试一次。"</p>
+    </div>
+
+    <hr>
+
+    <!-- ===== 第 6 步 ===== -->
+    <h2 id="s6"><span class="num">6</span>全世界都能看到了 🌍</h2>
+    <p>推送成功后，GitHub 需要<b>大约 1～2 分钟</b>把你的网页发布出去（第一次可能要 3 分钟，耐心点）。</p>
+    <p>然后打开：</p>
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">在<b>任何</b>浏览器里打开 · 手机也行</span></div>
+      <button class="copy">复制</button>
+      <pre>https://你的用户名.github.io</pre>
+    </div>
+
+    <div class="box warn">
+      <div class="bt">😐 显示 404 怎么办？</div>
+      <p><b>八成是还没发布完</b>，等 2 分钟，然后按 <code>Ctrl + Shift + R</code> 强制刷新。</p>
+      <p>还是 404 的话，去仓库页面点 <b>Settings → Pages</b> 看一眼状态；或者检查这三件事：仓库是不是 <b>Public</b>、仓库名是不是<b>一字不差</b>、根目录下有没有 <code>index.html</code>。</p>
+    </div>
+
+    <div class="check">
+      <span class="ci">🎉</span>
+      <div><b>检查点：</b><b>用你的手机（关掉 WiFi，用流量）打开这个网址。</b>能看到 —— 说明它真的在互联网上了，而不只是在你的电脑里。把网址发给爸妈看看。</div>
+    </div>
+
+    <div class="box tip">
+      <div class="bt">🤯 想一想刚刚发生了什么</div>
+      <p>你没写一行 HTML、没背一条 git 命令，但你现在<b>拥有一个真实的、全球可访问的网站</b>。</p>
+      <p>过程里你干的事是：<b>说清楚要什么 → 检查它做得对不对 → 批准关键操作</b>。</p>
+      <p>这就是这门课想教你的东西。不是"AI 替你做作业"，而是<b>你当项目负责人，AI 当施工队</b>。</p>
+    </div>
+
+    <hr>
+
+    <!-- ===== 第 7 步 ===== -->
+    <h2 id="s7"><span class="num">7</span>继续改它（这才是刚开始）</h2>
+    <p>上线之后再改，流程简单得多：<b>改文件 → 再推一次 → 等 1 分钟</b>。而这两步还是它干。</p>
+
+    <div class="cmd">
+      <div class="cmd-h"><span class="w">发给 <b>小龙虾</b> 的话 · 改完顺手上线</span></div>
+      <button class="copy">复制</button>
+      <pre>在主页上加一个"暑期营记录"板块，写我这四天学到的东西：
+第一天连上板子学 Linux，第二天给板子装了 AI 智能体，
+第三天让它写程序，第四天做了这个网页。
+做成一条竖着的时间线，每一项有个小图标。
+改完直接 commit 并 push 上线，然后告诉我什么时候能刷新看到。</pre>
+    </div>
+
+    <h3>还可以让它加点什么</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th>想法</th><th>直接这么说</th></tr></thead>
+        <tbody>
+          <tr><td>放张照片</td><td>"我把照片放在 ~/mysite/me.jpg 了，圆形头像放在标题旁边"（<b>放风景/宠物比放自己的正脸更稳妥</b>）</td></tr>
+          <tr><td>加个手动深浅色开关</td><td>"右上角加一个切换深浅色的按钮，选择要记住"</td></tr>
+          <tr><td>展示营里的作品</td><td>"加一个项目卡片，写我的 cpu_temp.py 干什么用，附上代码片段"</td></tr>
+          <tr><td>加个访客彩蛋</td><td>"页面底部加一句每次刷新都不一样的随机格言"</td></tr>
+          <tr><td>让它自己挑刺</td><td>"你自己审一遍这个页面，从手机适配、无障碍、加载速度三个角度挑 5 个问题并修好"</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box tip">
+      <div class="bt">💡 最后一条最值得试</div>
+      <p>让 AI <b>批评自己的成果</b>，往往比你自己憋着想改哪里更有效。这招在任何任务上都好用。</p>
+    </div>
+
+    <hr>
+
+    <!-- ===== 排查 ===== -->
+    <h2 id="trouble">🔧 卡住了怎么办</h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>你看到的</th><th>什么原因</th><th>怎么办</th></tr></thead>
+        <tbody>
+          <tr><td>注册时用户名说被占了</td><td>确实有人用了</td><td>加数字或连字符，如 <code>lixiaolong-07</code></td></tr>
+          <tr><td>收不到邮箱验证码</td><td>进了垃圾箱</td><td>翻垃圾邮件；等 2 分钟再重发，别狂点</td></tr>
+          <tr><td>网址打开是 <b>404</b></td><td>多半还没发布完</td><td>等 2 分钟 + <code>Ctrl+Shift+R</code>；再查仓库名/Public/index.html</td></tr>
+          <tr><td>网址打开是仓库的文件列表</td><td>仓库名拼错了（不是 <code>用户名.github.io</code>）</td><td>Settings → 改仓库名，改对就自动生效</td></tr>
+          <tr><td>push 报 <code>Authentication failed</code></td><td>token 贴错 / 已过期 / 没勾 <code>repo</code></td><td>重新生成一个 token，记得勾 <code>repo</code></td></tr>
+          <tr><td>建仓库报 <code>name already exists</code></td><td>这个仓库你已经有了</td><td>跟它说"仓库已存在，直接用它"</td></tr>
+          <tr><td>建仓库报 <code>Bad credentials</code></td><td>token 贴错了或漏了字符</td><td>回官网重新复制，或重新生成一个</td></tr>
+          <tr><td>push 报 <code>rejected</code> / <code>non-fast-forward</code></td><td>仓库不是空的（带了 README 之类）</td><td>跟它说："先 <code>git pull --rebase origin main</code> 再推"</td></tr>
+          <tr><td>push 卡住不动 / <code>Connection reset</code></td><td>网络问题</td><td>重试两次；不行让它换 <code>gh-proxy.com</code> 加速地址</td></tr>
+          <tr><td>GitHub 发邮件说你的 token 泄露了</td><td>token 被提交进仓库了</td><td>它已被自动作废。去删掉、重新建一个，并让小龙虾把它从文件里清掉</td></tr>
+          <tr><td><code>localhost:8080</code> 打不开</td><td>第三条隧道没开 / 服务停了</td><td>重跑 <code>ssh -L 8080:...</code>；问它"http 服务还活着吗"</td></tr>
+          <tr><td>页面样子跟预览不一样</td><td>浏览器缓存</td><td><code>Ctrl+Shift+R</code> 强制刷新</td></tr>
+          <tr><td>它写的网页太丑</td><td>需求给得太笼统</td><td><b>具体地骂它</b>：哪块、多大、什么颜色。越具体越好</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box danger">
+      <div class="bt">⚠️ 两条保命提醒</div>
+      <p><b>1. 🔑 营结束后，去把 token 删掉。</b><a href="https://github.com/settings/tokens" target="_blank" rel="noopener">github.com/settings/tokens</a> → Delete。板子是公用的，钥匙别留在上面。（选了 30 天有效期的话它也会自己过期。）</p>
+      <p><b>2. 🌍 GitHub 上的东西删了也可能还在。</b>互联网有存档。所以隐私信息<b>一开始就别写上去</b>，而不是"以后再删"。</p>
+    </div>
+
+    <hr>
+
+    <!-- ===== 附录 A ===== -->
+    <h2 id="cheat">📎 附录 A · 命令小抄</h2>
+    <p>这些都是小龙虾替你敲的。<b>但看懂它们，你就出师了</b>——下次不用 AI 你也能自己上线。</p>
+    <p>在<b>板子上</b>的 <code>~/mysite</code> 目录里：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>想干什么</th><th>敲什么</th></tr></thead>
+        <tbody>
+          <tr><td>建一个 GitHub 仓库（不点鼠标）</td><td><code>curl -X POST https://api.github.com/user/repos -H "Authorization: Bearer 你的token" -d '{"name":"xxx.github.io","private":false}'</code></td></tr>
+          <tr><td>把这个文件夹变成 git 仓库</td><td><code>git init -b main</code></td></tr>
+          <tr><td>看现在有哪些改动</td><td><code>git status</code></td></tr>
+          <tr><td>把所有改动装进箱子</td><td><code>git add -A</code></td></tr>
+          <tr><td>封箱并写个标签</td><td><code>git commit -m "改了标题"</code></td></tr>
+          <tr><td>看历史提交</td><td><code>git log --oneline</code></td></tr>
+          <tr><td>看远端仓库地址</td><td><code>git remote -v</code></td></tr>
+          <tr><td>推送上线</td><td><code>git push origin main</code></td></tr>
+          <tr><td>本地预览</td><td><code>python3 -m http.server 8080</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>在<b>你自己电脑上</b>：</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>想干什么</th><th>敲什么</th></tr></thead>
+        <tbody>
+          <tr><td>开智能体控制台的隧道</td><td><code>ssh -L 18789:127.0.0.1:18789 用户名@板子IP</code></td></tr>
+          <tr><td>开网页预览的隧道</td><td><code>ssh -L 8080:127.0.0.1:8080 用户名@板子IP</code></td></tr>
+          <tr><td>看上线后的成品</td><td>浏览器打开 <code>https://你的用户名.github.io</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr>
+
+    <!-- ===== 附录 B ===== -->
+    <h2 id="inside">📎 附录 B · 背后到底发生了什么？</h2>
+    <p>四个概念，一次讲明白。以后你会一直用到它们。</p>
+
+    <h3>git 是什么</h3>
+    <p>一台<b>时光机</b>。每次 <code>commit</code> 都是给你的文件夹拍一张照片，存下来。改坏了可以回到任何一张照片。它记录的是"谁、什么时候、改了哪一行"。</p>
+
+    <h3>GitHub 是什么</h3>
+    <p>git 是本地的时光机，GitHub 是<b>放在云上的备份 + 广场</b>。<code>push</code> = 把你本地的照片上传上去。全世界的开源代码都堆在那儿。</p>
+
+    <h3>GitHub Pages 是什么</h3>
+    <p>GitHub 附带的<b>免费虚拟主机</b>。它看到你仓库里有 <code>index.html</code>，就把它当网站放到互联网上，还免费送你 HTTPS。</p>
+    <div class="box tip">
+      <div class="bt">🏫 你正在看的这个页面就是这么来的</div>
+      <p>这门课的所有讲义 —— 包括你现在读的这一页 —— 就放在 GitHub 上，用 GitHub Pages 发布的。<b>你刚做的事和老师做的事，是同一件事。</b></p>
+    </div>
+
+    <h3>为什么叫"静态网站"</h3>
+    <p>因为服务器不做任何计算，就是把 <code>.html</code> 文件原封不动发给浏览器。<b>优点：</b>飞快、免费、几乎不会宕机、没有后端可以被黑。个人主页、博客、课程讲义，用静态就够了。</p>
+
+    <h3>token 和 API key，其实是一回事</h3>
+    <div class="tw">
+      <table>
+        <thead><tr><th></th><th>DeepSeek API key</th><th>GitHub token</th></tr></thead>
+        <tbody>
+          <tr><td>长什么样</td><td><code>sk-...</code></td><td><code>ghp_...</code></td></tr>
+          <tr><td>用来开哪扇门</td><td>大模型机房</td><td>你的代码仓库</td></tr>
+          <tr><td>丢了会怎样</td><td>别人花你的钱</td><td>别人改你的代码</td></tr>
+          <tr><td>怎么办</td><td colspan="2">删掉旧的，建个新的。<b>永远不要写进代码里</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>你以后接触的每一个云服务，都是这个套路。<b>认出这个套路，比记住某一家的操作步骤有用得多。</b></p>
+
+    <hr>
+
+    <!-- ===== 附录 C ===== -->
+    <h2 id="privacy">📎 附录 C · 上线前的隐私清单</h2>
+    <p>公开网页 = 全世界（包括搜索引擎、包括陌生人）都能看。<b>点「push」之前，把这张表过一遍。</b></p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>内容</th><th>能放吗</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>昵称 / 名字</td><td>✅ 可以</td><td>用昵称或英文名更稳</td></tr>
+          <tr><td>爱好、作品、代码</td><td>✅ 放心放</td><td>这才是主页的重点</td></tr>
+          <tr><td>"上海某中学高中生"</td><td>✅ 可以</td><td>模糊一点，够用了</td></tr>
+          <tr><td>邮箱</td><td>🟡 想清楚</td><td>会被爬虫收集去发垃圾邮件。真要留，建议新注册一个</td></tr>
+          <tr><td>自己的正脸照</td><td>🟡 想清楚</td><td>不确定就别放，或者放张背影、风景、宠物</td></tr>
+          <tr><td>手机号 / 微信号</td><td>❌ 不要</td><td>会被骚扰，而且很难撤回</td></tr>
+          <tr><td>学校 + 班级 + 全名</td><td>❌ 不要</td><td>三个凑一起就能定位到你本人</td></tr>
+          <tr><td>家庭住址、身份证、生日全称</td><td>❌ 绝对不要</td><td>这是身份信息</td></tr>
+          <tr><td>同学的照片和真名</td><td>❌ 不要</td><td>那是<b>别人的</b>隐私，你没权替他们决定</td></tr>
+          <tr><td>任何 key / token / 密码</td><td>❌ 绝对不要</td><td>等于把钥匙挂在门上</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box tip">
+      <div class="bt">🤖 让小龙虾帮你把最后一道关</div>
+      <p>推送前发它一句：</p>
+      <p><code>把要提交的所有文件过一遍，检查有没有手机号、邮箱、住址、班级、token 或密码，列出来给我看。</code></p>
+      <p>它比你眼睛快，而且不会因为"赶时间"而跳过检查。</p>
+    </div>
+
+    <p style="margin-top:44px;font-size:19px"><b>做完记得把网址发到群里，让大家互相串门。</b> 🚀</p>
+
+  </main>
+</div>
+
+<footer>
+  <div class="foot">
+    <img src="sjtu.png" alt="上海交通大学">
+    <div>
+      <div><b>选修实验 · GitHub 与个人主页</b></div>
+      <div>上海交通大学学森暑期营 · 2026 暑期</div>
+    </div>
+    <div class="fr">SJTU · RISC-V · AI AGENT</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // —— 主题切换（浅/深），与课程主页共用同一个记忆键 ——
+  var root=document.documentElement, btn=document.getElementById('themeBtn');
+  function cur(){
+    var t=root.getAttribute('data-theme');
+    if(t) return t;
+    return window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  }
+  function apply(t){ if(t){root.setAttribute('data-theme',t);} btn.textContent = cur()==='dark'?'☀':'◐'; }
+  try{ var saved=localStorage.getItem('camp-theme'); if(saved) apply(saved); else apply(); }catch(e){ apply(); }
+  btn.addEventListener('click',function(){
+    var next=cur()==='dark'?'light':'dark';
+    apply(next);
+    try{ localStorage.setItem('camp-theme',next); }catch(e){}
+  });
+
+  // —— 命令一键复制 ——
+  [].slice.call(document.querySelectorAll('.cmd')).forEach(function(box){
+    var b=box.querySelector('.copy'), pre=box.querySelector('pre');
+    if(!b||!pre) return;
+    b.addEventListener('click',function(){
+      var text=pre.textContent;
+      function done(){
+        b.textContent='已复制 ✓'; b.classList.add('done');
+        setTimeout(function(){ b.textContent='复制'; b.classList.remove('done'); },1600);
+      }
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done,fallback);
+      }else{ fallback(); }
+      function fallback(){
+        // http 页面下 clipboard API 可能不可用，退回选中文本让学生手动复制
+        var r=document.createRange(); r.selectNodeContents(pre);
+        var s=window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        try{ document.execCommand('copy'); done(); }
+        catch(e){ b.textContent='请按 Ctrl+C'; setTimeout(function(){ b.textContent='复制'; },2200); }
+      }
+    });
+  });
+
+  // —— 阅读进度条 + 目录高亮 ——
+  var links=[].slice.call(document.querySelectorAll('#toc a'));
+  var targets=links.map(function(a){ return document.getElementById(a.getAttribute('href').slice(1)); });
+  var bar=document.getElementById('bar');
+  function onScroll(){
+    var h=document.documentElement;
+    var max=h.scrollHeight-h.clientHeight;
+    bar.style.width = (max>0 ? (h.scrollTop/max*100) : 0) + '%';
+    var idx=0;
+    for(var i=0;i<targets.length;i++){
+      if(targets[i] && targets[i].getBoundingClientRect().top<=120) idx=i;
+    }
+    links.forEach(function(a,i){ a.classList.toggle('on', i===idx); });
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',onScroll);
+  onScroll();
+})();
+</script>
+</body>
+</html>

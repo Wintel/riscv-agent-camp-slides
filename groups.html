@@ -150,6 +150,28 @@ h2.sec{font-size:clamp(24px,3.4vw,32px);line-height:1.15;font-weight:800;margin:
 .empty{display:none;text-align:center;color:var(--ink-faint);padding:40px 0;font-size:15px}
 .empty.on{display:block}
 
+/* ---------- 答辩顺序表 ---------- */
+.dwrap{margin-top:24px;background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  box-shadow:var(--shadow);overflow:hidden}
+.dscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.dt{border-collapse:collapse;width:100%;min-width:420px;font-size:15.5px}
+table.dt th,table.dt td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.dt thead th{font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);
+  background:var(--panel-2);border-bottom:2px solid var(--line)}
+table.dt tbody tr:last-child td{border-bottom:none}
+table.dt tbody tr:hover{background:var(--panel-2)}
+.dseq{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;
+  background:var(--crimson-soft);color:var(--crimson);font:800 13px var(--mono)}
+.dtime{font:700 15px var(--mono);color:var(--crimson)}
+.dgrp{font-weight:700}
+.dnum{font:600 13px var(--mono);color:var(--ink-faint)}
+.dnote{margin:0;padding:13px 16px;background:var(--panel-2);border-top:1px solid var(--line);
+  font-size:13.5px;color:var(--ink-soft)}
+.dcards{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));margin-top:24px}
+.dcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+.dcard .dh{display:flex;align-items:center;gap:9px;font-size:15.5px;font-weight:700}
+.dcard p{margin:7px 0 0;font-size:14px;color:var(--ink-soft);line-height:1.6}
+
 /* ---------- 提示条 ---------- */
 .pin{margin:22px 0 0;display:flex;gap:10px;align-items:flex-start;background:var(--crimson-soft);
   border:1px solid color-mix(in srgb,var(--crimson) 30%,transparent);border-radius:12px;padding:12px 16px;
@@ -194,6 +216,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
     </a>
     <div class="links">
       <a href="index.html">← 返回主页</a>
+      <a href="#defense">答辩顺序</a>
       <a href="index.html#schedule">日程</a>
       <a href="index.html#resources">资源</a>
     </div>
@@ -216,11 +239,68 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
         <span class="fact"><span class="i">🌐</span>192.168.31.100–111</span>
       </div>
 
+      <div class="pin" style="margin-top:26px"><span class="i">📣</span><span><b>今天下午 15:30 成果答辩</b>，每组 10 分钟，出场顺序已随机抽签 —— <a href="#defense" style="color:inherit;text-decoration:underline">点这里看你是第几个上 →</a></span></div>
+
       <div class="how">
         <div class="ht"><span>🔌</span>怎么连上自己那块板子？</div>
         <code class="hc">ssh <span class="hv">ubuntu</span>@<span class="hp">192.168.31.1</span><span class="hv">xx</span>&nbsp;&nbsp;<span style="color:#8C857C"># 比如第 3 组：ssh ubuntu@192.168.31.102</span></code>
         <p class="hn">用户名<strong>统一是 <b>ubuntu</b></strong>，密码由助教现场发给大家。IP 的规则很简单：<b>IP = 192.168.31.(99 + 组号)</b> —— 第 1 组是 <b>192.168.31.100</b>，第 2 组是 <b>192.168.31.101</b>，依次往后，第 12 组是 <b>192.168.31.111</b>。</p>
         <p class="hn">连之前先确认自己的电脑和板子在<strong>同一个局域网（同一个 Wi-Fi / 同一台交换机）</strong>；连不上就先 <span class="mono" style="color:var(--crimson)">ping</span> 一下 IP，看看板子在不在线。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 今天下午的答辩安排 ===== -->
+  <section id="defense" style="background:var(--panel-2)">
+    <div class="wrap">
+      <div class="reveal">
+        <span class="eyebrow">7/30 下午 · 成果答辩</span>
+        <h2 class="sec">答辩顺序与时间</h2>
+        <p class="sec-lead"><b>15:30 准时开始</b>，每组 <b>10 分钟</b>，12 组连着讲完。<b>出场顺序是随机抽签定的</b>，跟组号无关 —— 请对照下面的表，看清自己是第几个上。</p>
+      </div>
+
+      <div class="dwrap reveal" style="margin-top:22px">
+        <div class="dscroll">
+          <table class="dt">
+            <thead>
+              <tr><th>出场顺序</th><th>时间</th><th>组别</th><th>人数</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="dseq">1</span></td><td class="dtime">15:30–15:40</td><td class="dgrp">第 5 组</td><td class="dnum">3 人</td></tr>
+              <tr><td><span class="dseq">2</span></td><td class="dtime">15:40–15:50</td><td class="dgrp">第 8 组</td><td class="dnum">2 人</td></tr>
+              <tr><td><span class="dseq">3</span></td><td class="dtime">15:50–16:00</td><td class="dgrp">第 11 组</td><td class="dnum">3 人</td></tr>
+              <tr><td><span class="dseq">4</span></td><td class="dtime">16:00–16:10</td><td class="dgrp">第 4 组</td><td class="dnum">3 人</td></tr>
+              <tr><td><span class="dseq">5</span></td><td class="dtime">16:10–16:20</td><td class="dgrp">第 7 组</td><td class="dnum">2 人</td></tr>
+              <tr><td><span class="dseq">6</span></td><td class="dtime">16:20–16:30</td><td class="dgrp">第 9 组</td><td class="dnum">2 人</td></tr>
+              <tr><td><span class="dseq">7</span></td><td class="dtime">16:30–16:40</td><td class="dgrp">第 3 组</td><td class="dnum">3 人</td></tr>
+              <tr><td><span class="dseq">8</span></td><td class="dtime">16:40–16:50</td><td class="dgrp">第 1 组</td><td class="dnum">3 人</td></tr>
+              <tr><td><span class="dseq">9</span></td><td class="dtime">16:50–17:00</td><td class="dgrp">第 12 组</td><td class="dnum">3 人</td></tr>
+              <tr><td><span class="dseq">10</span></td><td class="dtime">17:00–17:10</td><td class="dgrp">第 2 组</td><td class="dnum">3 人</td></tr>
+              <tr><td><span class="dseq">11</span></td><td class="dtime">17:10–17:20</td><td class="dgrp">第 6 组</td><td class="dnum">2 人</td></tr>
+              <tr><td><span class="dseq">12</span></td><td class="dtime">17:20–17:30</td><td class="dgrp">第 10 组</td><td class="dnum">2 人</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="dnote">⏱️ 表里的时间是<b>理想排期</b>，现场可能略有前后浮动。<b>请你的前后两组盯着轮次</b>：上一组开始讲时，下一组就到侧边准备。</p>
+      </div>
+
+      <div class="dcards reveal">
+        <div class="dcard">
+          <div class="dh"><span>🕙</span>10 分钟怎么分</div>
+          <p>建议 <b>6–7 分钟</b>讲 + 演示，留 <b>3–4 分钟</b>给助教提问和点评。到点会提醒你收尾。</p>
+        </div>
+        <div class="dcard">
+          <div class="dh"><span>🎤</span>讲什么</div>
+          <p>你们做了什么、<b>怎么指挥智能体做的</b>、中间卡在哪、最后怎么解决的。<b>现场演示比讲 PPT 加分。</b></p>
+        </div>
+        <div class="dcard">
+          <div class="dh"><span>👥</span>谁来讲</div>
+          <p>组内每个人<b>都要说上话</b>，自己商量好分工。可以一人主讲、一人操作演示。</p>
+        </div>
+        <div class="dcard">
+          <div class="dh"><span>📝</span>怎么打分</div>
+          <p>助教现场打分 + 点评。<b>做得不完美没关系</b>，能说清楚踩过的坑同样得分。</p>
+        </div>
       </div>
     </div>
   </section>
