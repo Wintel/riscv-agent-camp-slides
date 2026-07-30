@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>F1 方程式竞速 - 3D 赛车模拟</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #000; font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    canvas { display: block; }
+    
+    /* 加载动画 */
+    #loading {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: #0a0a0a; display: flex;
+      flex-direction: column; align-items: center; justify-content: center;
+      z-index: 999; color: #fff;
+      transition: opacity 0.5s;
+    }
+    #loading h1 {
+      font-size: 32px; color: #cc0000; margin-bottom: 20px;
+      letter-spacing: 4px;
+    }
+    #loading-bar {
+      width: 200px; height: 4px; background: #333; border-radius: 2px; overflow: hidden;
+    }
+    #loading-bar-inner {
+      width: 0%; height: 100%; background: #cc0000;
+      transition: width 0.3s;
+      border-radius: 2px;
+    }
+    #loading-text {
+      margin-top: 12px; color: #666; font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <h1>🏎️ F1 方程式竞速</h1>
+    <div id="loading-bar"><div id="loading-bar-inner"></div></div>
+    <div id="loading-text">初始化引擎...</div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import { F1Game } from './js/main.js';
+
+    // 模拟加载进度
+    let progress = 0;
+    const bar = document.getElementById('loading-bar-inner');
+    const text = document.getElementById('loading-text');
+    const loadingEl = document.getElementById('loading');
+    
+    const loadMsgs = [
+      '初始化引擎...',
+      '加载赛道数据...',
+      '编译着色器...',
+      '生成赛车模型...',
+      '校准物理引擎...',
+      '准备就绪！',
+    ];
+
+    const loadInterval = setInterval(() => {
+      progress += 8 + Math.random() * 10;
+      if (progress > 100) progress = 100;
+      bar.style.width = progress + '%';
+      text.textContent = loadMsgs[Math.floor(progress / 20) % loadMsgs.length];
+      
+      if (progress >= 100) {
+        clearInterval(loadInterval);
+        setTimeout(() => {
+          loadingEl.style.opacity = '0';
+          setTimeout(() => {
+            loadingEl.style.display = 'none';
+            // 启动游戏
+            new F1Game();
+          }, 500);
+        }, 300);
+      }
+    }, 150);
+  </script>
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,maximum-scale=1.0">
+<base href="/game/">
+<title>F1 方程式竞速 — 3D高清赛车模拟</title>
+<style>
+/* ═══════════════════════════════════════════════════
+ *  全局重置与基础
+ * ═══════════════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',Arial,sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
+canvas{display:block}
+
+/* ═══════════════════════════════════════════════════
+ *  加载画面
+ * ═══════════════════════════════════════════════════ */
+#loadingScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;color:#fff;transition:opacity .6s}
+#loadingScreen.hidden{opacity:0;pointer-events:none}
+#loadingScreen h1{font-size:36px;color:#e03030;margin-bottom:24px;letter-spacing:6px;font-weight:900}
+#loadingScreen h1 small{display:block;font-size:14px;color:#666;font-weight:400;letter-spacing:3px;margin-top:6px}
+#loadingBar{width:280px;height:4px;background:#222;border-radius:2px;overflow:hidden;margin-bottom:12px}
+#loadingBarInner{width:0%;height:100%;background:linear-gradient(90deg,#e03030,#ff6b35);border-radius:2px;transition:width .3s}
+#loadingText{color:#666;font-size:13px;letter-spacing:2px}
+#loadingSub{color:#444;font-size:11px;margin-top:8px;letter-spacing:1px}
+
+/* ═══════════════════════════════════════════════════
+ *  全局退出按钮
+ * ═══════════════════════════════════════════════════ */
+.global-exit{position:fixed;top:16px;left:50%;transform:translateX(-50%);padding:8px 22px;border-radius:20px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);font-size:13px;cursor:pointer;z-index:999;backdrop-filter:blur(8px);font-family:inherit;letter-spacing:1px;transition:all .3s}
+.global-exit:hover{background:rgba(200,50,50,0.25);border-color:rgba(255,80,80,0.2);color:#fff}
+
+/* ═══════════════════════════════════════════════════
+ *  游戏UI容器
+ * ═══════════════════════════════════════════════════ */
+#gameUI{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
+
+/* ═══════════════════════════════════════════════════
+ *  HUD - 比赛中的抬头显示
+ * ═══════════════════════════════════════════════════ */
+#hud{position:absolute;top:0;left:0;width:100%;height:100%;display:none}
+#hud.active{display:block}
+.hud-speed{position:absolute;bottom:40px;left:40px;color:#fff;font-size:54px;font-weight:900;text-shadow:0 2px 30px rgba(0,0,0,0.8);letter-spacing:2px;font-variant-numeric:tabular-nums;line-height:1}
+.hud-speed span{font-size:14px;font-weight:400;opacity:0.45;margin-left:4px}
+.hud-gear{position:absolute;bottom:100px;left:42px;color:#ff4500;font-size:30px;font-weight:700;text-shadow:0 2px 12px rgba(0,0,0,0.8)}.hud-gear span{font-size:14px;font-weight:400;color:rgba(255,255,255,0.3)}
+.hud-lap{position:absolute;top:20px;left:20px;color:#fff;font-size:18px;font-weight:600;text-shadow:0 2px 10px rgba(0,0,0,0.8);letter-spacing:1px}
+.hud-lap span{opacity:0.6;font-weight:400}
+.hud-pos{position:absolute;top:20px;right:20px;color:#ffd700;font-size:36px;font-weight:900;text-shadow:0 2px 20px rgba(0,0,0,0.8);text-align:right;line-height:1}
+.hud-pos span{display:block;font-size:13px;color:rgba(255,255,255,0.35);font-weight:400;letter-spacing:1px;margin-top:2px}
+.hud-timer{position:absolute;top:56px;left:20px;color:#fff;font-size:14px;text-shadow:0 2px 10px rgba(0,0,0,0.8);line-height:1.6;font-variant-numeric:tabular-nums}
+.hud-timer .current{font-size:24px;font-weight:700;color:#ffd700}
+.hud-timer div{opacity:0.65;font-weight:300;margin-top:1px;font-size:13px}
+#hudExtra{position:absolute;top:82px;left:20px;color:rgba(255,255,255,0.5);font-size:12px;line-height:1.9;text-shadow:0 2px 10px rgba(0,0,0,0.8)}
+#hudExtra .val{color:#ffd700;font-weight:600}
+#hudExtra .pen{color:#ff4444}
+#drsActiveText{display:none;color:#00ff88;font-weight:700;font-size:14px;margin-top:3px;text-shadow:0 0 20px rgba(0,255,136,0.4);animation:drsPulse .7s infinite alternate}
+@keyframes drsPulse{from{opacity:.7}to{opacity:1}}
+
+/* DRS指示器 */
+#drsIndicator{position:absolute;top:50%;right:30px;transform:translateY(-50%);display:none;flex-direction:column;align-items:center;gap:4px}
+#drsIndicator.active{display:flex}
+.drs-light{width:28px;height:6px;border-radius:3px;background:rgba(255,255,255,0.06);transition:all .3s}
+.drs-light.active{background:#00ff88;box-shadow:0 0 15px rgba(0,255,136,0.5)}
+.drs-label{color:rgba(255,255,255,0.2);font-size:9px;letter-spacing:3px;margin-top:3px}
+.drs-status{font-size:11px;font-weight:700;letter-spacing:1px}
+
+/* 轮胎磨损组件 */
+#tireWidget{position:absolute;bottom:40px;right:40px;display:flex;gap:5px}
+#tireWidget .tire{width:16px;height:28px;border-radius:3px;border:1px solid rgba(255,255,255,0.12);position:relative;overflow:hidden;background:rgba(0,0,0,0.3)}
+#tireWidget .tire-fill{position:absolute;bottom:0;left:0;width:100%;transition:height .3s,background .3s;border-radius:0 0 2px 2px}
+#tireWidget .tire-label{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.25);font-size:7px;letter-spacing:0.5px;white-space:nowrap}
+
+/* 最小圈速提示 */
+#bestLapNotify{position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);color:#ffd700;font-size:22px;font-weight:700;letter-spacing:3px;text-shadow:0 0 40px rgba(255,215,0,0.3);opacity:0;transition:opacity .8s;pointer-events:none}
+#bestLapNotify.show{opacity:1}
+
+/* ═══════════════════════════════════════════════════
+ *  触屏控件
+ * ═══════════════════════════════════════════════════ */
+#touchControls{position:absolute;bottom:0;left:0;width:100%;height:260px;display:none;pointer-events:none}
+#touchControls.active{display:block;pointer-events:auto}
+.touch-steer{position:absolute;bottom:24px;left:24px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.08)}
+.touch-steer-inner{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,0.08);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border:1px solid rgba(255,255,255,0.1)}
+.touch-pedals{position:absolute;bottom:24px;right:24px;display:flex;gap:12px;align-items:flex-end}
+.touch-btn{width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.1);display:flex;justify-content:center;align-items:center;color:#fff;font-size:11px;font-weight:600;letter-spacing:1px;transition:all .1s;flex-shrink:0}
+.touch-btn:active{transform:scale(0.92)}
+.touch-btn.gas{border-color:rgba(0,200,100,0.3);height:80px;width:80px}
+.touch-btn.gas:active{background:rgba(0,200,100,0.2)}
+.touch-btn.brake{border-color:rgba(200,50,50,0.3)}
+.touch-btn.brake:active{background:rgba(200,50,50,0.2)}
+.touch-extras{position:absolute;bottom:115px;right:24px;display:flex;gap:8px}
+.touch-drs-btn{width:50px;height:50px;font-size:9px;border-color:rgba(0,200,255,0.3);border-radius:50%;background:rgba(255,255,255,0.04);display:flex;justify-content:center;align-items:center;color:#fff;font-weight:600;letter-spacing:1px;transition:all .1s;border:2px solid rgba(255,255,255,0.1)}
+.touch-drs-btn:active{background:rgba(0,200,255,0.2);transform:scale(0.92)}
+
+/* ═══════════════════════════════════════════════════
+ *  赛道文字标注（开场动画用）
+ * ═══════════════════════════════════════════════════ */
+#trackAnnotation{position:absolute;display:none;color:#fff;font-size:15px;font-weight:700;text-shadow:0 2px 20px rgba(0,0,0,0.9);letter-spacing:2px;text-align:center;pointer-events:none}
+
+/* ═══════════════════════════════════════════════════
+ *  倒计时覆盖层
+ * ═══════════════════════════════════════════════════ */
+#countdownOverlay{position:fixed;top:0;left:0;width:100%;height:100%;display:none;justify-content:center;align-items:center;z-index:50;pointer-events:none;background:rgba(0,0,0,0.2)}
+.countdown-num{font-size:180px;font-weight:900;color:#ff1801;text-shadow:0 0 80px rgba(255,24,1,0.4);opacity:0;transform:scale(2.5);transition:all .5s cubic-bezier(.22,1,.36,1);font-variant-numeric:tabular-nums}
+.countdown-num.show{opacity:1;transform:scale(1)}
+.countdown-num.go{color:#ffd700;text-shadow:0 0 120px rgba(255,215,0,0.5)}
+
+/* ═══════════════════════════════════════════════════
+ *  开场动画UI
+ * ═══════════════════════════════════════════════════ */
+#openerUI{position:fixed;top:0;left:0;width:100%;height:100%;display:none;z-index:30;pointer-events:none}
+.track-name-text{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:56px;font-weight:900;text-shadow:0 4px 60px rgba(0,0,0,0.9);letter-spacing:12px;opacity:0;transition:opacity 1.2s cubic-bezier(.22,1,.36,1);text-align:center;line-height:1.3}
+.track-name-text .sub{display:block;font-size:16px;font-weight:400;opacity:0.45;letter-spacing:4px;margin-top:8px}
+.track-name-text.show{opacity:1}
+.drs-annotation{position:absolute;bottom:32%;left:50%;transform:translateX(-50%);color:rgba(0,220,255,0.85);font-size:26px;font-weight:700;letter-spacing:10px;text-shadow:0 2px 40px rgba(0,0,0,0.8);opacity:0;transition:opacity 1s}
+.drs-annotation .sub{display:block;font-size:12px;font-weight:400;opacity:0.4;letter-spacing:5px;margin-top:5px}
+.drs-annotation.show{opacity:1}
+
+/* ═══════════════════════════════════════════════════
+ *  颁奖典礼UI
+ * ═══════════════════════════════════════════════════ */
+#ceremonyUI{position:fixed;top:0;left:0;width:100%;height:100%;display:none;z-index:40;pointer-events:none}
+.podium-header{position:absolute;top:8%;left:50%;transform:translateX(-50%);color:#ffd700;font-size:44px;font-weight:900;letter-spacing:12px;text-shadow:0 4px 60px rgba(0,0,0,0.9);opacity:0;transition:opacity 2s}
+.podium-header.show{opacity:1}
+.results-panel{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px 40px;min-width:420px;opacity:0;transition:opacity 2s;backdrop-filter:blur(20px)}
+.results-panel.show{opacity:1}
+.results-panel h3{color:rgba(255,255,255,0.4);font-size:13px;letter-spacing:5px;margin-bottom:14px;font-weight:400;text-align:center}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.03);color:#fff;font-size:15px}
+.result-row:last-child{border:none}
+.result-row .pos{width:44px;font-weight:700;color:#ffd700;font-variant-numeric:tabular-nums}
+.result-row .name{flex:1;margin-left:6px}
+.result-row .time{font-variant-numeric:tabular-nums;color:rgba(255,255,255,0.4);font-size:13px}
+.result-row.p1 .name{color:#ffd700;font-weight:700}
+.result-row.p2 .name{color:#c0c0c0;font-weight:600}
+.result-row.p3 .name{color:#cd7f32;font-weight:600}
+#postRaceBtns{position:absolute;bottom:3%;left:50%;transform:translateX(-50%);display:flex;gap:24px;opacity:0;transition:opacity 2s;pointer-events:none}
+#postRaceBtns.show{opacity:1;pointer-events:auto}
+.btn-restart,.btn-exit{padding:14px 36px;border-radius:14px;border:1px solid rgba(255,255,255,0.08);font-size:15px;font-weight:600;cursor:pointer;transition:all .3s;font-family:inherit;letter-spacing:1px}
+.btn-restart{background:rgba(0,200,100,0.12);color:#4ade80;border-color:rgba(0,200,100,0.15)}
+.btn-restart:hover{background:rgba(0,200,100,0.25);transform:scale(1.03)}
+.btn-exit{background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.45)}
+.btn-exit:hover{background:rgba(255,50,50,0.12);color:#ff4444}
+
+/* ═══════════════════════════════════════════════════
+ *  Toast消息
+ * ═══════════════════════════════════════════════════ */
+#infoToast{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px 32px;color:#fff;font-size:18px;font-weight:600;text-align:center;display:none;pointer-events:none;backdrop-filter:blur(12px);z-index:60;letter-spacing:1px}
+
+/* ═══════════════════════════════════════════════════
+ *  轮胎选择弹窗
+ * ═══════════════════════════════════════════════════ */
+#tireSelectModal{position:fixed;top:0;left:0;width:100%;height:100%;display:none;justify-content:center;align-items:center;z-index:70;background:rgba(0,0,0,0.65);pointer-events:auto}
+#tireSelectModal.active{display:flex}
+.modal-box{background:rgba(12,12,22,0.96);border:1px solid rgba(255,255,255,0.06);border-radius:24px;padding:40px 48px;max-width:540px;width:92%;text-align:center;backdrop-filter:blur(24px)}
+.modal-box h2{color:#fff;font-size:26px;margin-bottom:4px;letter-spacing:3px}
+.modal-box .subtitle{color:rgba(255,255,255,0.35);font-size:14px;margin-bottom:24px;letter-spacing:1px}
+.tire-options{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.tire-opt{flex:1;min-width:140px;padding:20px 16px;border-radius:16px;border:2px solid rgba(255,255,255,0.05);cursor:pointer;transition:all .3s;background:rgba(255,255,255,0.015)}
+.tire-opt:hover{border-color:rgba(255,255,255,0.12);background:rgba(255,255,255,0.03);transform:translateY(-2px)}
+.tire-opt.selected{border-color:#ffd700;background:rgba(255,215,0,0.04);box-shadow:0 0 20px rgba(255,215,0,0.05)}
+.tire-opt .tire-icon{font-size:32px;margin-bottom:8px}
+.tire-opt .tire-name{font-size:18px;font-weight:700;color:#fff;margin-bottom:6px}
+.tire-opt .tire-stat{color:rgba(255,255,255,0.45);font-size:12px;margin:3px 0;line-height:1.5}
+.tire-opt .tire-stat span{color:rgba(255,255,255,0.75);font-weight:600}
+.tire-opt .tire-desc{color:rgba(255,255,255,0.2);font-size:11px;margin-top:6px;line-height:1.4}
+.tire-opt.soft .tire-name{color:#ff6b6b}
+.tire-opt.medium .tire-name{color:#ffd93d}
+.tire-opt.hard .tire-name{color:#d0d0d0}
+.confirm-btn{margin-top:22px;padding:14px 48px;border-radius:14px;border:none;background:linear-gradient(135deg,#d02020,#ff6b35);color:#fff;font-size:17px;font-weight:700;cursor:pointer;transition:all .3s;font-family:inherit;letter-spacing:3px}
+.confirm-btn:hover{transform:scale(1.03);box-shadow:0 6px 30px rgba(208,32,32,0.35)}
+.confirm-btn:disabled{opacity:0.25;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* 闪白特效 */
+.flash-white{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:100;pointer-events:none;opacity:0;transition:opacity .15s}
+</style>
+</head>
+<body>
+
+<!-- ═══ 加载画面 ═══ -->
+<div id="loadingScreen">
+  <h1>🏎️ F1 方程式竞速<small>3D高清赛车模拟</small></h1>
+  <div id="loadingBar"><div id="loadingBarInner"></div></div>
+  <div id="loadingText">初始化引擎...</div>
+  <div id="loadingSub">Three.js · PBR渲染 · 物理模拟</div>
+</div>
+
+<!-- ═══ 退出按钮 ═══ -->
+<div class="global-exit" onclick="document.querySelector('.global-exit')&&window.location.href.replace('/game','')||(window.location.href='/')">✕ 退出</div>
+
+<div id="gameUI">
+  <!-- ═══ HUD ═══ -->
+  <div id="hud">
+    <div class="hud-speed" id="speedDisplay">0 <span>km/h</span></div>
+    <div class="hud-gear" id="gearDisplay">N <span>gear</span></div>
+    <div class="hud-lap">Lap <span id="currentLap">1</span> / <span id="totalLaps">5</span></div>
+    <div class="hud-pos">P<span id="racePosition">1</span><span>/6</span></div>
+    <div class="hud-timer">
+      <div class="current" id="raceTimer">00:00.000</div>
+      <div>Lap: <span id="lapTimer">00:00.000</span> &nbsp;|&nbsp; Best: <span id="bestLapDisplay">--</span></div>
+    </div>
+    <div id="hudExtra">
+      <div>⛽ 燃油: <span class="val" id="fuelDisplay">100%</span></div>
+      <div>🔧 维修区: <span class="val" id="pitDistDisplay">--m</span></div>
+      <div>⚠️ 罚时: <span class="pen" id="penaltyDisplay">+0.0s</span></div>
+      <div id="drsActiveText">⚡ DRS 已激活 ⚡</div>
+    </div>
+    <div id="drsIndicator">
+      <div class="drs-light" id="drsLight1"></div>
+      <div class="drs-light" id="drsLight2"></div>
+      <div class="drs-label">DRS</div>
+      <div class="drs-status" id="drsStatus">LOCKED</div>
+    </div>
+    <div id="tireWidget">
+      <div class="tire tire-FL"><div class="tire-fill" style="height:100%;background:#22c55e"></div><div class="tire-label">FL</div></div>
+      <div class="tire tire-FR"><div class="tire-fill" style="height:100%;background:#22c55e"></div><div class="tire-label">FR</div></div>
+      <div class="tire tire-RL"><div class="tire-fill" style="height:100%;background:#22c55e"></div><div class="tire-label">RL</div></div>
+      <div class="tire tire-RR"><div class="tire-fill" style="height:100%;background:#22c55e"></div><div class="tire-label">RR</div></div>
+    </div>
+    <div id="bestLapNotify">🏆 新圈速纪录!</div>
+  </div>
+
+  <!-- ═══ 倒计时 ═══ -->
+  <div id="countdownOverlay"><div class="countdown-num" id="countdownNum">3</div></div>
+
+  <!-- ═══ 开场UI ═══ -->
+  <div id="openerUI">
+    <div class="track-name-text" id="trackNameText">上海国际赛车场<span class="sub">Shanghai International Circuit · 5.451 km · 16 弯道</span></div>
+    <div class="drs-annotation" id="drsAnnotation">⚡ DRS 激活区域 ⚡<span class="sub">Drag Reduction System — 可变尾翼减阻系统</span></div>
+  </div>
+
+  <!-- ═══ 颁奖典礼UI ═══ -->
+  <div id="ceremonyUI">
+    <div class="podium-header" id="podiumTitle">🏆 比赛结果</div>
+    <div class="results-panel" id="resultsPanel">
+      <h3>最终排名</h3>
+      <div id="resultsList"></div>
+    </div>
+    <div id="postRaceBtns">
+      <button class="btn-restart" onclick="location.reload()">🔄 重新开局</button>
+      <button class="btn-exit" onclick="window.location.href='/'">🚪 退出游戏</button>
+    </div>
+  </div>
+
+  <!-- ═══ Toast ═══ -->
+  <div id="infoToast"></div>
+
+  <!-- ═══ 轮胎选择弹窗 ═══ -->
+  <div id="tireSelectModal">
+    <div class="modal-box">
+      <h2>🏁 选择起步轮胎</h2>
+      <div class="subtitle">不同配方影响抓地力与磨损速度 · 比赛中可进站更换</div>
+      <div class="tire-options">
+        <div class="tire-opt soft" data-tire="soft" onclick="selectTire('soft')">
+          <div class="tire-icon">🟥</div>
+          <div class="tire-name">软胎</div>
+          <div class="tire-stat">抓地力 <span>+30%</span> · 磨损 <span>极快</span></div>
+          <div class="tire-desc">起步圈速最快，但需提前进站<br>Undercut战术利器</div>
+        </div>
+        <div class="tire-opt medium selected" data-tire="medium" onclick="selectTire('medium')">
+          <div class="tire-icon">🟡</div>
+          <div class="tire-name">中性胎</div>
+          <div class="tire-stat">抓地力 <span>+15%</span> · 磨损 <span>中等</span></div>
+          <div class="tire-desc">全能平衡之选<br>适合大多数赛道策略</div>
+        </div>
+        <div class="tire-opt hard" data-tire="hard" onclick="selectTire('hard')">
+          <div class="tire-icon">⬜</div>
+          <div class="tire-name">硬胎</div>
+          <div class="tire-stat">抓地力 <span>0%</span> · 磨损 <span>极慢</span></div>
+          <div class="tire-desc">超长续航，少进站<br>Overcut反超战术首选</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.18);margin-top:14px;letter-spacing:1px">
+        💡 进站策略：软胎 Undercut 快攻 · 硬胎 Overcut 长距 · 中性胎稳健
+      </div>
+      <button class="confirm-btn" id="tireConfirmBtn" onclick="confirmTire()" disabled>确认 — 进入赛道</button>
+    </div>
+  </div>
+
+  <!-- ═══ 触屏控件 ═══ -->
+  <div id="touchControls">
+    <div class="touch-steer" id="touchSteerArea">
+      <div class="touch-steer-inner" id="touchSteerDot"></div>
+    </div>
+    <div class="touch-extras">
+      <div class="touch-drs-btn" id="touchDRS" ontouchstart="window.f1Input&&(f1Input.onDRS=true)" ontouchend="window.f1Input&&(f1Input.onDRS=false)">DRS</div>
+      <div class="touch-drs-btn" onclick="window.f1Game&&f1Game.cycleCamera(1)">CAM</div>
+    </div>
+    <div class="touch-pedals">
+      <div class="touch-btn brake" id="touchBrake" ontouchstart="window.f1Input&&(f1Input.onBrake=true)" ontouchend="window.f1Input&&(f1Input.onBrake=false)">BRAKE</div>
+      <div class="touch-btn gas" id="touchGas" ontouchstart="window.f1Input&&(f1Input.onGas=true)" ontouchend="window.f1Input&&(f1Input.onGas=false)">GAS</div>
+    </div>
+  </div>
+</div>
+
+<div class="flash-white" id="flashWhite"></div>
+
+<!-- ═══ Three.js 导入映射 ═══ -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<!-- ═══ 模块加载入口 ═══ -->
+<script type="module">
+import { F1Game } from './js/main.js';
+
+// 加载进度模拟
+let p = 0;
+const bar = document.getElementById('loadingBarInner');
+const txt = document.getElementById('loadingText');
+const sub = document.getElementById('loadingSub');
+const screen = document.getElementById('loadingScreen');
+const msgs = [
+  '初始化Three.js引擎...',
+  '编译PBR着色器...',
+  '生成赛道数据...',
+  '构建赛车模型...',
+  '校准物理参数...',
+  '加载完成！',
+];
+const subs = [
+  'WebGL 渲染管线准备',
+  '金属车漆 · 碳纤维 · 橡胶材质',
+  'Catmull-Rom 曲线插值',
+  'DRS可变尾翼 · 轮胎磨损系统',
+  '空气下压力 · 惯性 · 刹车阻尼',
+  '🏁 READY TO RACE',
+];
+
+const iv = setInterval(() => {
+  p += 6 + Math.random() * 8;
+  if (p > 100) p = 100;
+  bar.style.width = p + '%';
+  const idx = Math.min(Math.floor(p / 18), msgs.length - 1);
+  txt.textContent = msgs[idx];
+  sub.textContent = subs[idx];
+  if (p >= 100) {
+    clearInterval(iv);
+    setTimeout(() => {
+      screen.classList.add('hidden');
+      setTimeout(() => { screen.style.display = 'none'; }, 600);
+      // 启动游戏
+      const game = new F1Game();
+      window.f1Game = game;
+    }, 400);
+  }
+}, 140);
+</script>
+</body>
+</html>
