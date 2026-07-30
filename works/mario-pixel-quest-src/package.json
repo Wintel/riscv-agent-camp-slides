@@ -1,0 +1,25 @@
+{
+  "name": "mario-pixel-quest-static",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "build:ssr-test": "vite build --ssr src/ssr-entry.tsx --outDir dist-ssr",
+    "preview": "vite preview",
+    "test": "npm run build && npm run build:ssr-test && node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.2.1",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.2",
+    "tailwindcss": "4.2.1",
+    "typescript": "5.9.3",
+    "vite": "8.0.13"
+  }
+}
