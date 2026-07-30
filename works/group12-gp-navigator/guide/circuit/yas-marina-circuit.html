@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yas Marina Circuit - F1入门查找</title><style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Noto Serif CJK SC", KaiTi, STKaiti, "AR PL UKai CN", serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .container { text-align: center; width: 100%; max-width: 680px; padding: 2rem; }
+  h1 { color: #f1f5f9; font-size: 2.0rem; font-weight: 600; margin-bottom: 0.3rem; letter-spacing: 0.02em; }
+  .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+  .back-row { text-align: left; margin-bottom: 1.2rem; }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: #94a3b8; text-decoration: none; font-size: 0.95rem;
+    cursor: pointer; transition: color 0.2s, transform 0.3s ease;
+    background: none; border: none; font-family: inherit;
+  }
+  .back-btn:hover { color: #e2e8f0; transform: translateX(-4px); }
+  .list-grid { display: flex; flex-direction: column; gap: 0.8rem; }
+  .list-item {
+    display: flex; align-items: center; gap: 0.8rem;
+    background: rgba(30,41,59,0.7); backdrop-filter: blur(6px);
+    border: 1px solid #334155; border-radius: 12px;
+    padding: 0.8rem 1.2rem; cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    text-align: left; position: relative; overflow: hidden;
+  }
+  .list-item:hover {
+    border-color: #e11d48; background: rgba(30,41,59,0.9);
+    transform: translateY(-2px); box-shadow: 0 6px 24px rgba(225,29,72,0.12);
+  }
+  .list-item.expanding {
+    transform: scale(1.06); border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225,29,72,0.25), 0 10px 32px rgba(225,29,72,0.2);
+  }
+  .item-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); }
+  .list-item .item-info { flex: 1; }
+  .list-item .item-name { color: #f1f5f9; font-size: 1.05rem; font-weight: 500; }
+  .list-item .item-team { color: #64748b; font-size: 0.78rem; margin-top: 0.1rem; }
+  .list-item .item-arrow { color: #475569; font-size: 0.9rem; transition: transform 0.3s; }
+  .list-item:hover .item-arrow { transform: translateX(4px); color: #e11d48; }
+
+  .detail-header { display: flex; align-items: center; gap: 1.2rem; text-align: left; margin-bottom: 2rem; }
+  .detail-header .big-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); }
+  .detail-header .detail-title { flex: 1; }
+  .detail-header .detail-title .name { color: #f1f5f9; font-size: 1.6rem; font-weight: 600; }
+  .detail-header .detail-title .team { color: #94a3b8; font-size: 0.85rem; margin-top: 0.2rem; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+  .detail-card { background: rgba(30,41,59,0.7); backdrop-filter: blur(6px); border: 1px solid #334155; border-radius: 12px; padding: 0.9rem 1.1rem; text-align: left; }
+  .detail-card.full { grid-column: 1 / -1; }
+  .detail-card .label { color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .detail-card .value { color: #f1f5f9; font-size: 1.0rem; font-weight: 500; }
+  .detail-card .value.highlight { color: #e11d48; }
+  .bio-card { background: rgba(30,41,59,0.5); border: 1px solid #334155; border-radius: 12px; padding: 1.2rem 1.4rem; text-align: left; }
+    .bio-card .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .bio-card .stat-line { color: #64748b; font-size: 0.78rem; margin-top: 0.5rem; text-align: right; }
+  /* 赛道详情双栏布局 */
+  .circuit-bottom { display: flex; gap: 1rem; align-items: stretch; margin-bottom: 0.5rem; }
+  .circuit-bio {
+    flex: 1; background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 1rem 1.2rem; text-align: left;
+    display: flex; align-items: center;
+  }
+  .circuit-bio .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .circuit-map {
+    flex: 0 0 260px; max-width: 260px;
+    background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) {
+    .circuit-bottom { flex-direction: column; }
+    .circuit-map { width: 100%; }
+  }
+</style></head>
+<body>
+<div class="container">
+  <div class="back-row">
+    <button class="back-btn" onclick="history.back()">&#x2190; 返回</button>
+  </div>
+  <div class="detail-header">
+    <img class="big-avatar" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2272%22%20height%3D%2272%22%20viewBox%3D%220%200%2072%2072%22%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%2236%22%20fill%3D%22%231a6b3c%22/%3E%3Ctext%20x%3D%2236%22%20y%3D%2236%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20fill%3D%22%23fff%22%20font-size%3D%2224%22%20font-weight%3D%22600%22%20font-family%3D%22Arial%2Csans-serif%22%3EYM%3C/text%3E%3C/svg%3E" alt="Yas Marina Circuit">
+    <div class="detail-title"><div class="name">Yas Marina Circuit</div><div class="team">阿布扎比 &#x2022; 赛道</div></div>
+  </div>
+  <div class="detail-grid"><div class="detail-card"><div class="label">国家</div><div class="value">阿布扎比</div></div><div class="detail-card"><div class="label">类型</div><div class="value highlight">赛道</div></div><div class="detail-card"><div class="label">单圈长度</div><div class="value">5.281km</div></div><div class="detail-card"><div class="label">比赛圈数</div><div class="value">58 圈</div></div><div class="detail-card"><div class="label">比赛总里程</div><div class="value">306.2km</div></div><div class="detail-card"><div class="label">圈速纪录</div><div class="value highlight">1:26.103 (Verstappen 2024)</div></div><div class="detail-card full"><div class="label">首次举办</div><div class="value">2009 年</div></div></div>
+  <div class="circuit-bottom">
+  <div class="circuit-bio"><div class="bio-text">F1赛季收官战。亚斯岛上的豪华赛道，从日落比赛到夜幕降临的景色壮丽。酒店穿过的独特设计。</div></div>
+  <div class="circuit-map"><svg viewBox="0 0 500 500" width="100%" height="220" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="500" rx="10" fill="#0f1923"/>
+  <path d="M63.9,157.0 C53.0,139.3,79.0,131.8,89.1,121.7 C99.1,111.7,110.8,103.3,124.3,96.6 C137.7,89.9,153.6,84.9,169.5,81.5 C185.5,78.2,203.1,76.5,219.8,76.5 C236.6,76.5,253.4,78.2,270.1,81.5 C286.9,84.9,304.5,89.9,320.4,96.6 C336.3,103.3,351.4,111.7,365.7,121.7 C379.9,131.8,394.2,143.5,405.9,157.0 C417.7,170.4,427.7,186.3,436.1,202.2 C444.5,218.1,452.0,235.7,456.2,252.5 C460.4,269.3,462.1,286.9,461.2,302.8 C460.4,318.7,457.1,333.8,451.2,348.1 C445.3,362.3,436.1,377.4,426.0,388.3 C416.0,399.2,404.2,407.6,390.8,413.5 C377.4,419.3,360.7,422.7,345.6,423.5 C330.5,424.4,315.4,421.8,300.3,418.5 C285.2,415.1,269.3,410.1,255.0,403.4 C240.8,396.7,226.5,387.5,214.8,378.3 C203.1,369.0,193.8,359.8,184.6,348.1 C175.4,336.3,167.0,321.3,159.5,307.8 C151.9,294.4,145.2,281.9,139.3,267.6 C133.5,253.4,128.5,236.6,124.3,222.3 C120.1,208.1,117.6,195.5,114.2,182.1 C110.8,168.7,108.3,153.6,104.1,141.9 C100.0,130.1,94.9,118.4,89.1,111.7 C83.2,105.0,75.6,101.6,68.9,101.6 C62.2,101.6,53.8,105.0,48.8,111.7 C43.8,118.4,39.6,131.0,38.8,141.9 C37.9,152.8,40.4,166.2,43.8,177.1 C47.1,188.0,52.2,198.0,58.9,207.2 C65.6,216.5,74.0,225.7,84.0,232.4 C94.1,239.1,107.5,244.1,119.2,247.5 C131.0,250.8,143.5,253.4,154.4,252.5 C165.3,251.7,174.6,247.5,184.6,242.5 C194.7,237.4,207.2,229.9,214.8,222.3 C222.3,214.8,226.5,206.4,229.9,197.2 C233.2,188.0,235.7,177.1,234.9,167.0 C234.1,157.0,229.9,145.2,224.9,136.8 C219.8,128.5,213.1,120.9,204.7,116.7 C196.4,112.5,184.6,110.8,174.6,111.7 C164.5,112.5,152.8,115.9,144.4,121.7 C136.0,127.6,128.5,137.7,124.3,146.9 C120.1,156.1,118.4,167.0,119.2,177.1 C120.1,187.1,123.4,198.9,129.3,207.2 C135.2,215.6,165.3,235.7,154.4,227.4 C143.5,219.0,74.8,174.6,63.9,157.0" fill="none" stroke="#2d5a27" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M63.9,157.0 C53.0,139.3,79.0,131.8,89.1,121.7 C99.1,111.7,110.8,103.3,124.3,96.6 C137.7,89.9,153.6,84.9,169.5,81.5 C185.5,78.2,203.1,76.5,219.8,76.5 C236.6,76.5,253.4,78.2,270.1,81.5 C286.9,84.9,304.5,89.9,320.4,96.6 C336.3,103.3,351.4,111.7,365.7,121.7 C379.9,131.8,394.2,143.5,405.9,157.0 C417.7,170.4,427.7,186.3,436.1,202.2 C444.5,218.1,452.0,235.7,456.2,252.5 C460.4,269.3,462.1,286.9,461.2,302.8 C460.4,318.7,457.1,333.8,451.2,348.1 C445.3,362.3,436.1,377.4,426.0,388.3 C416.0,399.2,404.2,407.6,390.8,413.5 C377.4,419.3,360.7,422.7,345.6,423.5 C330.5,424.4,315.4,421.8,300.3,418.5 C285.2,415.1,269.3,410.1,255.0,403.4 C240.8,396.7,226.5,387.5,214.8,378.3 C203.1,369.0,193.8,359.8,184.6,348.1 C175.4,336.3,167.0,321.3,159.5,307.8 C151.9,294.4,145.2,281.9,139.3,267.6 C133.5,253.4,128.5,236.6,124.3,222.3 C120.1,208.1,117.6,195.5,114.2,182.1 C110.8,168.7,108.3,153.6,104.1,141.9 C100.0,130.1,94.9,118.4,89.1,111.7 C83.2,105.0,75.6,101.6,68.9,101.6 C62.2,101.6,53.8,105.0,48.8,111.7 C43.8,118.4,39.6,131.0,38.8,141.9 C37.9,152.8,40.4,166.2,43.8,177.1 C47.1,188.0,52.2,198.0,58.9,207.2 C65.6,216.5,74.0,225.7,84.0,232.4 C94.1,239.1,107.5,244.1,119.2,247.5 C131.0,250.8,143.5,253.4,154.4,252.5 C165.3,251.7,174.6,247.5,184.6,242.5 C194.7,237.4,207.2,229.9,214.8,222.3 C222.3,214.8,226.5,206.4,229.9,197.2 C233.2,188.0,235.7,177.1,234.9,167.0 C234.1,157.0,229.9,145.2,224.9,136.8 C219.8,128.5,213.1,120.9,204.7,116.7 C196.4,112.5,184.6,110.8,174.6,111.7 C164.5,112.5,152.8,115.9,144.4,121.7 C136.0,127.6,128.5,137.7,124.3,146.9 C120.1,156.1,118.4,167.0,119.2,177.1 C120.1,187.1,123.4,198.9,129.3,207.2 C135.2,215.6,165.3,235.7,154.4,227.4 C143.5,219.0,74.8,174.6,63.9,157.0" fill="none" stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M63.9,157.0 C53.0,139.3,79.0,131.8,89.1,121.7 C99.1,111.7,110.8,103.3,124.3,96.6 C137.7,89.9,153.6,84.9,169.5,81.5 C185.5,78.2,203.1,76.5,219.8,76.5 C236.6,76.5,253.4,78.2,270.1,81.5 C286.9,84.9,304.5,89.9,320.4,96.6 C336.3,103.3,351.4,111.7,365.7,121.7 C379.9,131.8,394.2,143.5,405.9,157.0 C417.7,170.4,427.7,186.3,436.1,202.2 C444.5,218.1,452.0,235.7,456.2,252.5 C460.4,269.3,462.1,286.9,461.2,302.8 C460.4,318.7,457.1,333.8,451.2,348.1 C445.3,362.3,436.1,377.4,426.0,388.3 C416.0,399.2,404.2,407.6,390.8,413.5 C377.4,419.3,360.7,422.7,345.6,423.5 C330.5,424.4,315.4,421.8,300.3,418.5 C285.2,415.1,269.3,410.1,255.0,403.4 C240.8,396.7,226.5,387.5,214.8,378.3 C203.1,369.0,193.8,359.8,184.6,348.1 C175.4,336.3,167.0,321.3,159.5,307.8 C151.9,294.4,145.2,281.9,139.3,267.6 C133.5,253.4,128.5,236.6,124.3,222.3 C120.1,208.1,117.6,195.5,114.2,182.1 C110.8,168.7,108.3,153.6,104.1,141.9 C100.0,130.1,94.9,118.4,89.1,111.7 C83.2,105.0,75.6,101.6,68.9,101.6 C62.2,101.6,53.8,105.0,48.8,111.7 C43.8,118.4,39.6,131.0,38.8,141.9 C37.9,152.8,40.4,166.2,43.8,177.1 C47.1,188.0,52.2,198.0,58.9,207.2 C65.6,216.5,74.0,225.7,84.0,232.4 C94.1,239.1,107.5,244.1,119.2,247.5 C131.0,250.8,143.5,253.4,154.4,252.5 C165.3,251.7,174.6,247.5,184.6,242.5 C194.7,237.4,207.2,229.9,214.8,222.3 C222.3,214.8,226.5,206.4,229.9,197.2 C233.2,188.0,235.7,177.1,234.9,167.0 C234.1,157.0,229.9,145.2,224.9,136.8 C219.8,128.5,213.1,120.9,204.7,116.7 C196.4,112.5,184.6,110.8,174.6,111.7 C164.5,112.5,152.8,115.9,144.4,121.7 C136.0,127.6,128.5,137.7,124.3,146.9 C120.1,156.1,118.4,167.0,119.2,177.1 C120.1,187.1,123.4,198.9,129.3,207.2 C135.2,215.6,165.3,235.7,154.4,227.4 C143.5,219.0,74.8,174.6,63.9,157.0" fill="none" stroke="#4ade80" stroke-width="3" stroke-dasharray="8,10" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <rect x="56.90532544378701" y="144.9526627218935" width="14" height="8" fill="#fff" rx="1.5"/>
+  <rect x="56.90532544378701" y="160.9526627218935" width="14" height="8" fill="#e11d48" rx="1.5"/>
+  <polygon points="53.90532544378701,146.9526627218935 66.905325443787,138.9526627218935 66.905325443787,154.9526627218935" fill="#94a3b8" opacity="0.6"/>
+  <text x="480" y="20" fill="#64748b" font-size="11" text-anchor="end" font-family="sans-serif">▶ 顺时针</text>
+</svg></div>
+</div>
+  <div class="stat-line" style="text-align:right;margin-top:0.5rem;color:#64748b;font-size:0.78rem">&#x1F4CD; 数据更新至2026赛季</div>
+</div></body></html>

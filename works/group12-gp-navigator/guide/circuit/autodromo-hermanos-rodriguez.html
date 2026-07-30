@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autodromo Hermanos Rodriguez - F1入门查找</title><style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Noto Serif CJK SC", KaiTi, STKaiti, "AR PL UKai CN", serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .container { text-align: center; width: 100%; max-width: 680px; padding: 2rem; }
+  h1 { color: #f1f5f9; font-size: 2.0rem; font-weight: 600; margin-bottom: 0.3rem; letter-spacing: 0.02em; }
+  .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+  .back-row { text-align: left; margin-bottom: 1.2rem; }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: #94a3b8; text-decoration: none; font-size: 0.95rem;
+    cursor: pointer; transition: color 0.2s, transform 0.3s ease;
+    background: none; border: none; font-family: inherit;
+  }
+  .back-btn:hover { color: #e2e8f0; transform: translateX(-4px); }
+  .list-grid { display: flex; flex-direction: column; gap: 0.8rem; }
+  .list-item {
+    display: flex; align-items: center; gap: 0.8rem;
+    background: rgba(30,41,59,0.7); backdrop-filter: blur(6px);
+    border: 1px solid #334155; border-radius: 12px;
+    padding: 0.8rem 1.2rem; cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    text-align: left; position: relative; overflow: hidden;
+  }
+  .list-item:hover {
+    border-color: #e11d48; background: rgba(30,41,59,0.9);
+    transform: translateY(-2px); box-shadow: 0 6px 24px rgba(225,29,72,0.12);
+  }
+  .list-item.expanding {
+    transform: scale(1.06); border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225,29,72,0.25), 0 10px 32px rgba(225,29,72,0.2);
+  }
+  .item-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); }
+  .list-item .item-info { flex: 1; }
+  .list-item .item-name { color: #f1f5f9; font-size: 1.05rem; font-weight: 500; }
+  .list-item .item-team { color: #64748b; font-size: 0.78rem; margin-top: 0.1rem; }
+  .list-item .item-arrow { color: #475569; font-size: 0.9rem; transition: transform 0.3s; }
+  .list-item:hover .item-arrow { transform: translateX(4px); color: #e11d48; }
+
+  .detail-header { display: flex; align-items: center; gap: 1.2rem; text-align: left; margin-bottom: 2rem; }
+  .detail-header .big-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); }
+  .detail-header .detail-title { flex: 1; }
+  .detail-header .detail-title .name { color: #f1f5f9; font-size: 1.6rem; font-weight: 600; }
+  .detail-header .detail-title .team { color: #94a3b8; font-size: 0.85rem; margin-top: 0.2rem; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+  .detail-card { background: rgba(30,41,59,0.7); backdrop-filter: blur(6px); border: 1px solid #334155; border-radius: 12px; padding: 0.9rem 1.1rem; text-align: left; }
+  .detail-card.full { grid-column: 1 / -1; }
+  .detail-card .label { color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .detail-card .value { color: #f1f5f9; font-size: 1.0rem; font-weight: 500; }
+  .detail-card .value.highlight { color: #e11d48; }
+  .bio-card { background: rgba(30,41,59,0.5); border: 1px solid #334155; border-radius: 12px; padding: 1.2rem 1.4rem; text-align: left; }
+    .bio-card .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .bio-card .stat-line { color: #64748b; font-size: 0.78rem; margin-top: 0.5rem; text-align: right; }
+  /* 赛道详情双栏布局 */
+  .circuit-bottom { display: flex; gap: 1rem; align-items: stretch; margin-bottom: 0.5rem; }
+  .circuit-bio {
+    flex: 1; background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 1rem 1.2rem; text-align: left;
+    display: flex; align-items: center;
+  }
+  .circuit-bio .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .circuit-map {
+    flex: 0 0 260px; max-width: 260px;
+    background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) {
+    .circuit-bottom { flex-direction: column; }
+    .circuit-map { width: 100%; }
+  }
+</style></head>
+<body>
+<div class="container">
+  <div class="back-row">
+    <button class="back-btn" onclick="history.back()">&#x2190; 返回</button>
+  </div>
+  <div class="detail-header">
+    <img class="big-avatar" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2272%22%20height%3D%2272%22%20viewBox%3D%220%200%2072%2072%22%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%2236%22%20fill%3D%22%231a6b3c%22/%3E%3Ctext%20x%3D%2236%22%20y%3D%2236%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20fill%3D%22%23fff%22%20font-size%3D%2224%22%20font-weight%3D%22600%22%20font-family%3D%22Arial%2Csans-serif%22%3EAH%3C/text%3E%3C/svg%3E" alt="Autodromo Hermanos Rodriguez">
+    <div class="detail-title"><div class="name">Autodromo Hermanos Rodriguez</div><div class="team">墨西哥 &#x2022; 赛道</div></div>
+  </div>
+  <div class="detail-grid"><div class="detail-card"><div class="label">国家</div><div class="value">墨西哥</div></div><div class="detail-card"><div class="label">类型</div><div class="value highlight">赛道</div></div><div class="detail-card"><div class="label">单圈长度</div><div class="value">4.304km</div></div><div class="detail-card"><div class="label">比赛圈数</div><div class="value">71 圈</div></div><div class="detail-card"><div class="label">比赛总里程</div><div class="value">305.5km</div></div><div class="detail-card"><div class="label">圈速纪录</div><div class="value highlight">1:17.774 (Perez 2021)</div></div><div class="detail-card full"><div class="label">首次举办</div><div class="value">1963 年</div></div></div>
+  <div class="circuit-bottom">
+  <div class="circuit-bio"><div class="bio-text">海拔2200米的挑战。稀薄空气导致赛车下压力大减但引擎功率更高。体育场段的Foro Sol氛围热烈。</div></div>
+  <div class="circuit-map"><svg viewBox="0 0 500 500" width="100%" height="220" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="500" rx="10" fill="#0f1923"/>
+  <path d="M332.4,52.3 C336.8,31.5,308.2,41.3,292.8,39.1 C277.5,37.0,256.6,37.0,240.1,39.1 C223.6,41.3,209.4,45.7,194.0,52.3 C178.6,58.9,162.1,67.7,147.9,78.7 C133.6,89.7,119.3,103.9,108.3,118.2 C97.4,132.5,89.7,147.9,82.0,164.3 C74.3,180.8,66.6,198.4,62.2,217.1 C57.8,235.7,54.5,257.7,55.6,276.4 C56.7,295.0,62.2,311.5,68.8,329.1 C75.4,346.6,84.2,366.4,95.2,381.8 C106.1,397.2,120.4,410.3,134.7,421.3 C149.0,432.3,164.3,441.1,180.8,447.7 C197.3,454.3,214.9,459.8,233.5,460.9 C252.2,462.0,275.3,458.7,292.8,454.3 C310.4,449.9,324.7,443.3,339.0,434.5 C353.2,425.7,366.4,413.6,378.5,401.6 C390.6,389.5,402.6,376.3,411.4,362.0 C420.2,347.7,425.7,332.4,431.2,315.9 C436.7,299.4,443.3,280.7,444.4,263.2 C445.5,245.6,441.1,226.9,437.8,210.5 C434.5,194.0,431.2,178.6,424.6,164.3 C418.0,150.1,409.2,136.9,398.3,124.8 C387.3,112.7,373.0,100.6,358.7,91.9 C344.4,83.1,328.0,76.5,312.6,72.1 C297.2,67.7,281.8,65.5,266.5,65.5 C251.1,65.5,234.6,67.7,220.3,72.1 C206.1,76.5,192.9,83.1,180.8,91.9 C168.7,100.6,157.8,112.7,147.9,124.8 C138.0,136.9,128.1,149.0,121.5,164.3 C114.9,179.7,109.4,199.5,108.3,217.1 C107.2,234.6,110.5,253.3,114.9,269.8 C119.3,286.2,125.9,302.7,134.7,315.9 C143.5,329.1,155.6,340.1,167.6,348.8 C179.7,357.6,192.9,365.3,207.2,368.6 C221.4,371.9,239.0,370.8,253.3,368.6 C267.6,366.4,280.7,362.0,292.8,355.4 C304.9,348.8,317.0,339.0,325.8,329.1 C334.6,319.2,340.1,308.2,345.5,296.1 C351.0,284.0,357.6,269.8,358.7,256.6 C359.8,243.4,356.5,229.1,352.1,217.1 C347.7,205.0,341.1,192.9,332.4,184.1 C323.6,175.3,310.4,167.6,299.4,164.3 C288.4,161.0,261.0,183.0,266.5,164.3 C272.0,145.7,328.0,73.2,332.4,52.3" fill="none" stroke="#2d5a27" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M332.4,52.3 C336.8,31.5,308.2,41.3,292.8,39.1 C277.5,37.0,256.6,37.0,240.1,39.1 C223.6,41.3,209.4,45.7,194.0,52.3 C178.6,58.9,162.1,67.7,147.9,78.7 C133.6,89.7,119.3,103.9,108.3,118.2 C97.4,132.5,89.7,147.9,82.0,164.3 C74.3,180.8,66.6,198.4,62.2,217.1 C57.8,235.7,54.5,257.7,55.6,276.4 C56.7,295.0,62.2,311.5,68.8,329.1 C75.4,346.6,84.2,366.4,95.2,381.8 C106.1,397.2,120.4,410.3,134.7,421.3 C149.0,432.3,164.3,441.1,180.8,447.7 C197.3,454.3,214.9,459.8,233.5,460.9 C252.2,462.0,275.3,458.7,292.8,454.3 C310.4,449.9,324.7,443.3,339.0,434.5 C353.2,425.7,366.4,413.6,378.5,401.6 C390.6,389.5,402.6,376.3,411.4,362.0 C420.2,347.7,425.7,332.4,431.2,315.9 C436.7,299.4,443.3,280.7,444.4,263.2 C445.5,245.6,441.1,226.9,437.8,210.5 C434.5,194.0,431.2,178.6,424.6,164.3 C418.0,150.1,409.2,136.9,398.3,124.8 C387.3,112.7,373.0,100.6,358.7,91.9 C344.4,83.1,328.0,76.5,312.6,72.1 C297.2,67.7,281.8,65.5,266.5,65.5 C251.1,65.5,234.6,67.7,220.3,72.1 C206.1,76.5,192.9,83.1,180.8,91.9 C168.7,100.6,157.8,112.7,147.9,124.8 C138.0,136.9,128.1,149.0,121.5,164.3 C114.9,179.7,109.4,199.5,108.3,217.1 C107.2,234.6,110.5,253.3,114.9,269.8 C119.3,286.2,125.9,302.7,134.7,315.9 C143.5,329.1,155.6,340.1,167.6,348.8 C179.7,357.6,192.9,365.3,207.2,368.6 C221.4,371.9,239.0,370.8,253.3,368.6 C267.6,366.4,280.7,362.0,292.8,355.4 C304.9,348.8,317.0,339.0,325.8,329.1 C334.6,319.2,340.1,308.2,345.5,296.1 C351.0,284.0,357.6,269.8,358.7,256.6 C359.8,243.4,356.5,229.1,352.1,217.1 C347.7,205.0,341.1,192.9,332.4,184.1 C323.6,175.3,310.4,167.6,299.4,164.3 C288.4,161.0,261.0,183.0,266.5,164.3 C272.0,145.7,328.0,73.2,332.4,52.3" fill="none" stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M332.4,52.3 C336.8,31.5,308.2,41.3,292.8,39.1 C277.5,37.0,256.6,37.0,240.1,39.1 C223.6,41.3,209.4,45.7,194.0,52.3 C178.6,58.9,162.1,67.7,147.9,78.7 C133.6,89.7,119.3,103.9,108.3,118.2 C97.4,132.5,89.7,147.9,82.0,164.3 C74.3,180.8,66.6,198.4,62.2,217.1 C57.8,235.7,54.5,257.7,55.6,276.4 C56.7,295.0,62.2,311.5,68.8,329.1 C75.4,346.6,84.2,366.4,95.2,381.8 C106.1,397.2,120.4,410.3,134.7,421.3 C149.0,432.3,164.3,441.1,180.8,447.7 C197.3,454.3,214.9,459.8,233.5,460.9 C252.2,462.0,275.3,458.7,292.8,454.3 C310.4,449.9,324.7,443.3,339.0,434.5 C353.2,425.7,366.4,413.6,378.5,401.6 C390.6,389.5,402.6,376.3,411.4,362.0 C420.2,347.7,425.7,332.4,431.2,315.9 C436.7,299.4,443.3,280.7,444.4,263.2 C445.5,245.6,441.1,226.9,437.8,210.5 C434.5,194.0,431.2,178.6,424.6,164.3 C418.0,150.1,409.2,136.9,398.3,124.8 C387.3,112.7,373.0,100.6,358.7,91.9 C344.4,83.1,328.0,76.5,312.6,72.1 C297.2,67.7,281.8,65.5,266.5,65.5 C251.1,65.5,234.6,67.7,220.3,72.1 C206.1,76.5,192.9,83.1,180.8,91.9 C168.7,100.6,157.8,112.7,147.9,124.8 C138.0,136.9,128.1,149.0,121.5,164.3 C114.9,179.7,109.4,199.5,108.3,217.1 C107.2,234.6,110.5,253.3,114.9,269.8 C119.3,286.2,125.9,302.7,134.7,315.9 C143.5,329.1,155.6,340.1,167.6,348.8 C179.7,357.6,192.9,365.3,207.2,368.6 C221.4,371.9,239.0,370.8,253.3,368.6 C267.6,366.4,280.7,362.0,292.8,355.4 C304.9,348.8,317.0,339.0,325.8,329.1 C334.6,319.2,340.1,308.2,345.5,296.1 C351.0,284.0,357.6,269.8,358.7,256.6 C359.8,243.4,356.5,229.1,352.1,217.1 C347.7,205.0,341.1,192.9,332.4,184.1 C323.6,175.3,310.4,167.6,299.4,164.3 C288.4,161.0,261.0,183.0,266.5,164.3 C272.0,145.7,328.0,73.2,332.4,52.3" fill="none" stroke="#4ade80" stroke-width="3" stroke-dasharray="8,10" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <rect x="325.3643410852713" y="40.32558139534885" width="14" height="8" fill="#fff" rx="1.5"/>
+  <rect x="325.3643410852713" y="56.32558139534885" width="14" height="8" fill="#e11d48" rx="1.5"/>
+  <polygon points="322.3643410852713,42.32558139534885 335.3643410852713,34.32558139534885 335.3643410852713,50.32558139534885" fill="#94a3b8" opacity="0.6"/>
+  <text x="480" y="20" fill="#64748b" font-size="11" text-anchor="end" font-family="sans-serif">▶ 顺时针</text>
+</svg></div>
+</div>
+  <div class="stat-line" style="text-align:right;margin-top:0.5rem;color:#64748b;font-size:0.78rem">&#x1F4CD; 数据更新至2026赛季</div>
+</div></body></html>

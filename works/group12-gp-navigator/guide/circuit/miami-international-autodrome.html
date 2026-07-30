@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Miami International Autodrome - F1入门查找</title><style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Noto Serif CJK SC", KaiTi, STKaiti, "AR PL UKai CN", serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .container { text-align: center; width: 100%; max-width: 680px; padding: 2rem; }
+  h1 { color: #f1f5f9; font-size: 2.0rem; font-weight: 600; margin-bottom: 0.3rem; letter-spacing: 0.02em; }
+  .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+  .back-row { text-align: left; margin-bottom: 1.2rem; }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: #94a3b8; text-decoration: none; font-size: 0.95rem;
+    cursor: pointer; transition: color 0.2s, transform 0.3s ease;
+    background: none; border: none; font-family: inherit;
+  }
+  .back-btn:hover { color: #e2e8f0; transform: translateX(-4px); }
+  .list-grid { display: flex; flex-direction: column; gap: 0.8rem; }
+  .list-item {
+    display: flex; align-items: center; gap: 0.8rem;
+    background: rgba(30,41,59,0.7); backdrop-filter: blur(6px);
+    border: 1px solid #334155; border-radius: 12px;
+    padding: 0.8rem 1.2rem; cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    text-align: left; position: relative; overflow: hidden;
+  }
+  .list-item:hover {
+    border-color: #e11d48; background: rgba(30,41,59,0.9);
+    transform: translateY(-2px); box-shadow: 0 6px 24px rgba(225,29,72,0.12);
+  }
+  .list-item.expanding {
+    transform: scale(1.06); border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225,29,72,0.25), 0 10px 32px rgba(225,29,72,0.2);
+  }
+  .item-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); }
+  .list-item .item-info { flex: 1; }
+  .list-item .item-name { color: #f1f5f9; font-size: 1.05rem; font-weight: 500; }
+  .list-item .item-team { color: #64748b; font-size: 0.78rem; margin-top: 0.1rem; }
+  .list-item .item-arrow { color: #475569; font-size: 0.9rem; transition: transform 0.3s; }
+  .list-item:hover .item-arrow { transform: translateX(4px); color: #e11d48; }
+
+  .detail-header { display: flex; align-items: center; gap: 1.2rem; text-align: left; margin-bottom: 2rem; }
+  .detail-header .big-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); }
+  .detail-header .detail-title { flex: 1; }
+  .detail-header .detail-title .name { color: #f1f5f9; font-size: 1.6rem; font-weight: 600; }
+  .detail-header .detail-title .team { color: #94a3b8; font-size: 0.85rem; margin-top: 0.2rem; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+  .detail-card { background: rgba(30,41,59,0.7); backdrop-filter: blur(6px); border: 1px solid #334155; border-radius: 12px; padding: 0.9rem 1.1rem; text-align: left; }
+  .detail-card.full { grid-column: 1 / -1; }
+  .detail-card .label { color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .detail-card .value { color: #f1f5f9; font-size: 1.0rem; font-weight: 500; }
+  .detail-card .value.highlight { color: #e11d48; }
+  .bio-card { background: rgba(30,41,59,0.5); border: 1px solid #334155; border-radius: 12px; padding: 1.2rem 1.4rem; text-align: left; }
+    .bio-card .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .bio-card .stat-line { color: #64748b; font-size: 0.78rem; margin-top: 0.5rem; text-align: right; }
+  /* 赛道详情双栏布局 */
+  .circuit-bottom { display: flex; gap: 1rem; align-items: stretch; margin-bottom: 0.5rem; }
+  .circuit-bio {
+    flex: 1; background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 1rem 1.2rem; text-align: left;
+    display: flex; align-items: center;
+  }
+  .circuit-bio .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .circuit-map {
+    flex: 0 0 260px; max-width: 260px;
+    background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) {
+    .circuit-bottom { flex-direction: column; }
+    .circuit-map { width: 100%; }
+  }
+</style></head>
+<body>
+<div class="container">
+  <div class="back-row">
+    <button class="back-btn" onclick="history.back()">&#x2190; 返回</button>
+  </div>
+  <div class="detail-header">
+    <img class="big-avatar" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2272%22%20height%3D%2272%22%20viewBox%3D%220%200%2072%2072%22%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%2236%22%20fill%3D%22%23e11d48%22/%3E%3Ctext%20x%3D%2236%22%20y%3D%2236%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20fill%3D%22%23fff%22%20font-size%3D%2224%22%20font-weight%3D%22600%22%20font-family%3D%22Arial%2Csans-serif%22%3EMI%3C/text%3E%3C/svg%3E" alt="Miami International Autodrome">
+    <div class="detail-title"><div class="name">Miami International Autodrome</div><div class="team">美国(迈阿密) &#x2022; 街道赛</div></div>
+  </div>
+  <div class="detail-grid"><div class="detail-card"><div class="label">国家</div><div class="value">美国(迈阿密)</div></div><div class="detail-card"><div class="label">类型</div><div class="value highlight">街道赛</div></div><div class="detail-card"><div class="label">单圈长度</div><div class="value">5.412km</div></div><div class="detail-card"><div class="label">比赛圈数</div><div class="value">57 圈</div></div><div class="detail-card"><div class="label">比赛总里程</div><div class="value">308.4km</div></div><div class="detail-card"><div class="label">圈速纪录</div><div class="value highlight">1:31.361 (Verstappen 2024)</div></div><div class="detail-card full"><div class="label">首次举办</div><div class="value">2022 年</div></div></div>
+  <div class="circuit-bottom">
+  <div class="circuit-bio"><div class="bio-text">围绕硬石体育场修建的临时赛道，穿越体育场停车场和周边道路。充满派对氛围的周末。</div></div>
+  <div class="circuit-map"><svg viewBox="0 0 500 500" width="100%" height="220" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="500" rx="10" fill="#0f1923"/>
+  <path d="M314.3,53.6 C317.9,1.2,279.2,40.5,260.7,39.3 C242.3,38.1,221.4,40.5,203.6,46.4 C185.7,52.4,169.0,63.1,153.6,75.0 C138.1,86.9,122.6,101.2,110.7,117.9 C98.8,134.5,89.3,154.8,82.1,175.0 C75.0,195.2,69.0,217.9,67.9,239.3 C66.7,260.7,70.2,283.3,75.0,303.6 C79.8,323.8,85.7,342.9,96.4,360.7 C107.1,378.6,122.6,396.4,139.3,410.7 C156.0,425.0,176.2,438.1,196.4,446.4 C216.7,454.8,239.3,459.5,260.7,460.7 C282.1,461.9,306.0,459.5,325.0,453.6 C344.0,447.6,360.7,436.9,375.0,425.0 C389.3,413.1,401.2,398.8,410.7,382.1 C420.2,365.5,428.6,344.0,432.1,325.0 C435.7,306.0,435.7,285.7,432.1,267.9 C428.6,250.0,420.2,233.3,410.7,217.9 C401.2,202.4,389.3,186.9,375.0,175.0 C360.7,163.1,341.7,152.4,325.0,146.4 C308.3,140.5,291.7,139.3,275.0,139.3 C258.3,139.3,240.5,140.5,225.0,146.4 C209.5,152.4,192.9,161.9,182.1,175.0 C171.4,188.1,165.5,207.1,160.7,225.0 C156.0,242.9,152.4,264.3,153.6,282.1 C154.8,300.0,159.5,317.9,167.9,332.1 C176.2,346.4,190.5,360.7,203.6,367.9 C216.7,375.0,232.1,376.2,246.4,375.0 C260.7,373.8,276.2,367.9,289.3,360.7 C302.4,353.6,316.7,344.0,325.0,332.1 C333.3,320.2,336.9,304.8,339.3,289.3 C341.7,273.8,342.9,254.8,339.3,239.3 C335.7,223.8,327.4,207.1,317.9,196.4 C308.3,185.7,295.2,178.6,282.1,175.0 C269.0,171.4,252.4,171.4,239.3,175.0 C226.2,178.6,213.1,185.7,203.6,196.4 C194.0,207.1,185.7,223.8,182.1,239.3 C178.6,254.8,178.6,273.8,182.1,289.3 C185.7,304.8,194.0,321.4,203.6,332.1 C213.1,342.9,220.8,400.0,239.3,353.6 C257.7,307.1,310.7,106.0,314.3,53.6" fill="none" stroke="#2d5a27" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M314.3,53.6 C317.9,1.2,279.2,40.5,260.7,39.3 C242.3,38.1,221.4,40.5,203.6,46.4 C185.7,52.4,169.0,63.1,153.6,75.0 C138.1,86.9,122.6,101.2,110.7,117.9 C98.8,134.5,89.3,154.8,82.1,175.0 C75.0,195.2,69.0,217.9,67.9,239.3 C66.7,260.7,70.2,283.3,75.0,303.6 C79.8,323.8,85.7,342.9,96.4,360.7 C107.1,378.6,122.6,396.4,139.3,410.7 C156.0,425.0,176.2,438.1,196.4,446.4 C216.7,454.8,239.3,459.5,260.7,460.7 C282.1,461.9,306.0,459.5,325.0,453.6 C344.0,447.6,360.7,436.9,375.0,425.0 C389.3,413.1,401.2,398.8,410.7,382.1 C420.2,365.5,428.6,344.0,432.1,325.0 C435.7,306.0,435.7,285.7,432.1,267.9 C428.6,250.0,420.2,233.3,410.7,217.9 C401.2,202.4,389.3,186.9,375.0,175.0 C360.7,163.1,341.7,152.4,325.0,146.4 C308.3,140.5,291.7,139.3,275.0,139.3 C258.3,139.3,240.5,140.5,225.0,146.4 C209.5,152.4,192.9,161.9,182.1,175.0 C171.4,188.1,165.5,207.1,160.7,225.0 C156.0,242.9,152.4,264.3,153.6,282.1 C154.8,300.0,159.5,317.9,167.9,332.1 C176.2,346.4,190.5,360.7,203.6,367.9 C216.7,375.0,232.1,376.2,246.4,375.0 C260.7,373.8,276.2,367.9,289.3,360.7 C302.4,353.6,316.7,344.0,325.0,332.1 C333.3,320.2,336.9,304.8,339.3,289.3 C341.7,273.8,342.9,254.8,339.3,239.3 C335.7,223.8,327.4,207.1,317.9,196.4 C308.3,185.7,295.2,178.6,282.1,175.0 C269.0,171.4,252.4,171.4,239.3,175.0 C226.2,178.6,213.1,185.7,203.6,196.4 C194.0,207.1,185.7,223.8,182.1,239.3 C178.6,254.8,178.6,273.8,182.1,289.3 C185.7,304.8,194.0,321.4,203.6,332.1 C213.1,342.9,220.8,400.0,239.3,353.6 C257.7,307.1,310.7,106.0,314.3,53.6" fill="none" stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M314.3,53.6 C317.9,1.2,279.2,40.5,260.7,39.3 C242.3,38.1,221.4,40.5,203.6,46.4 C185.7,52.4,169.0,63.1,153.6,75.0 C138.1,86.9,122.6,101.2,110.7,117.9 C98.8,134.5,89.3,154.8,82.1,175.0 C75.0,195.2,69.0,217.9,67.9,239.3 C66.7,260.7,70.2,283.3,75.0,303.6 C79.8,323.8,85.7,342.9,96.4,360.7 C107.1,378.6,122.6,396.4,139.3,410.7 C156.0,425.0,176.2,438.1,196.4,446.4 C216.7,454.8,239.3,459.5,260.7,460.7 C282.1,461.9,306.0,459.5,325.0,453.6 C344.0,447.6,360.7,436.9,375.0,425.0 C389.3,413.1,401.2,398.8,410.7,382.1 C420.2,365.5,428.6,344.0,432.1,325.0 C435.7,306.0,435.7,285.7,432.1,267.9 C428.6,250.0,420.2,233.3,410.7,217.9 C401.2,202.4,389.3,186.9,375.0,175.0 C360.7,163.1,341.7,152.4,325.0,146.4 C308.3,140.5,291.7,139.3,275.0,139.3 C258.3,139.3,240.5,140.5,225.0,146.4 C209.5,152.4,192.9,161.9,182.1,175.0 C171.4,188.1,165.5,207.1,160.7,225.0 C156.0,242.9,152.4,264.3,153.6,282.1 C154.8,300.0,159.5,317.9,167.9,332.1 C176.2,346.4,190.5,360.7,203.6,367.9 C216.7,375.0,232.1,376.2,246.4,375.0 C260.7,373.8,276.2,367.9,289.3,360.7 C302.4,353.6,316.7,344.0,325.0,332.1 C333.3,320.2,336.9,304.8,339.3,289.3 C341.7,273.8,342.9,254.8,339.3,239.3 C335.7,223.8,327.4,207.1,317.9,196.4 C308.3,185.7,295.2,178.6,282.1,175.0 C269.0,171.4,252.4,171.4,239.3,175.0 C226.2,178.6,213.1,185.7,203.6,196.4 C194.0,207.1,185.7,223.8,182.1,239.3 C178.6,254.8,178.6,273.8,182.1,289.3 C185.7,304.8,194.0,321.4,203.6,332.1 C213.1,342.9,220.8,400.0,239.3,353.6 C257.7,307.1,310.7,106.0,314.3,53.6" fill="none" stroke="#4ade80" stroke-width="3" stroke-dasharray="8,10" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <rect x="307.2857142857143" y="41.571428571428555" width="14" height="8" fill="#fff" rx="1.5"/>
+  <rect x="307.2857142857143" y="57.571428571428555" width="14" height="8" fill="#e11d48" rx="1.5"/>
+  <polygon points="304.2857142857143,43.571428571428555 317.2857142857143,35.571428571428555 317.2857142857143,51.571428571428555" fill="#94a3b8" opacity="0.6"/>
+  <text x="480" y="20" fill="#64748b" font-size="11" text-anchor="end" font-family="sans-serif">▶ 顺时针</text>
+</svg></div>
+</div>
+  <div class="stat-line" style="text-align:right;margin-top:0.5rem;color:#64748b;font-size:0.78rem">&#x1F4CD; 数据更新至2026赛季</div>
+</div></body></html>

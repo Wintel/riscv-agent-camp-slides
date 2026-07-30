@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Albert Park Circuit - F1入门查找</title><style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Noto Serif CJK SC", KaiTi, STKaiti, "AR PL UKai CN", serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .container { text-align: center; width: 100%; max-width: 680px; padding: 2rem; }
+  h1 { color: #f1f5f9; font-size: 2.0rem; font-weight: 600; margin-bottom: 0.3rem; letter-spacing: 0.02em; }
+  .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+  .back-row { text-align: left; margin-bottom: 1.2rem; }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: #94a3b8; text-decoration: none; font-size: 0.95rem;
+    cursor: pointer; transition: color 0.2s, transform 0.3s ease;
+    background: none; border: none; font-family: inherit;
+  }
+  .back-btn:hover { color: #e2e8f0; transform: translateX(-4px); }
+  .list-grid { display: flex; flex-direction: column; gap: 0.8rem; }
+  .list-item {
+    display: flex; align-items: center; gap: 0.8rem;
+    background: rgba(30,41,59,0.7); backdrop-filter: blur(6px);
+    border: 1px solid #334155; border-radius: 12px;
+    padding: 0.8rem 1.2rem; cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    text-align: left; position: relative; overflow: hidden;
+  }
+  .list-item:hover {
+    border-color: #e11d48; background: rgba(30,41,59,0.9);
+    transform: translateY(-2px); box-shadow: 0 6px 24px rgba(225,29,72,0.12);
+  }
+  .list-item.expanding {
+    transform: scale(1.06); border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225,29,72,0.25), 0 10px 32px rgba(225,29,72,0.2);
+  }
+  .item-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); }
+  .list-item .item-info { flex: 1; }
+  .list-item .item-name { color: #f1f5f9; font-size: 1.05rem; font-weight: 500; }
+  .list-item .item-team { color: #64748b; font-size: 0.78rem; margin-top: 0.1rem; }
+  .list-item .item-arrow { color: #475569; font-size: 0.9rem; transition: transform 0.3s; }
+  .list-item:hover .item-arrow { transform: translateX(4px); color: #e11d48; }
+
+  .detail-header { display: flex; align-items: center; gap: 1.2rem; text-align: left; margin-bottom: 2rem; }
+  .detail-header .big-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); }
+  .detail-header .detail-title { flex: 1; }
+  .detail-header .detail-title .name { color: #f1f5f9; font-size: 1.6rem; font-weight: 600; }
+  .detail-header .detail-title .team { color: #94a3b8; font-size: 0.85rem; margin-top: 0.2rem; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+  .detail-card { background: rgba(30,41,59,0.7); backdrop-filter: blur(6px); border: 1px solid #334155; border-radius: 12px; padding: 0.9rem 1.1rem; text-align: left; }
+  .detail-card.full { grid-column: 1 / -1; }
+  .detail-card .label { color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .detail-card .value { color: #f1f5f9; font-size: 1.0rem; font-weight: 500; }
+  .detail-card .value.highlight { color: #e11d48; }
+  .bio-card { background: rgba(30,41,59,0.5); border: 1px solid #334155; border-radius: 12px; padding: 1.2rem 1.4rem; text-align: left; }
+    .bio-card .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .bio-card .stat-line { color: #64748b; font-size: 0.78rem; margin-top: 0.5rem; text-align: right; }
+  /* 赛道详情双栏布局 */
+  .circuit-bottom { display: flex; gap: 1rem; align-items: stretch; margin-bottom: 0.5rem; }
+  .circuit-bio {
+    flex: 1; background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 1rem 1.2rem; text-align: left;
+    display: flex; align-items: center;
+  }
+  .circuit-bio .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .circuit-map {
+    flex: 0 0 260px; max-width: 260px;
+    background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) {
+    .circuit-bottom { flex-direction: column; }
+    .circuit-map { width: 100%; }
+  }
+</style></head>
+<body>
+<div class="container">
+  <div class="back-row">
+    <button class="back-btn" onclick="history.back()">&#x2190; 返回</button>
+  </div>
+  <div class="detail-header">
+    <img class="big-avatar" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2272%22%20height%3D%2272%22%20viewBox%3D%220%200%2072%2072%22%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%2236%22%20fill%3D%22%23e11d48%22/%3E%3Ctext%20x%3D%2236%22%20y%3D%2236%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20fill%3D%22%23fff%22%20font-size%3D%2224%22%20font-weight%3D%22600%22%20font-family%3D%22Arial%2Csans-serif%22%3EAP%3C/text%3E%3C/svg%3E" alt="Albert Park Circuit">
+    <div class="detail-title"><div class="name">Albert Park Circuit</div><div class="team">澳大利亚 &#x2022; 街道赛</div></div>
+  </div>
+  <div class="detail-grid"><div class="detail-card"><div class="label">国家</div><div class="value">澳大利亚</div></div><div class="detail-card"><div class="label">类型</div><div class="value highlight">街道赛</div></div><div class="detail-card"><div class="label">单圈长度</div><div class="value">5.278km</div></div><div class="detail-card"><div class="label">比赛圈数</div><div class="value">58 圈</div></div><div class="detail-card"><div class="label">比赛总里程</div><div class="value">306.1km</div></div><div class="detail-card"><div class="label">圈速纪录</div><div class="value highlight">1:20.260 (Perez 2024)</div></div><div class="detail-card full"><div class="label">首次举办</div><div class="value">1996 年</div></div></div>
+  <div class="circuit-bottom">
+  <div class="circuit-bio"><div class="bio-text">位于墨尔本阿尔伯特公园湖区的半街道赛道。F1赛季揭幕战经典之选，2022年大幅改造后速度更快。</div></div>
+  <div class="circuit-map"><svg viewBox="0 0 500 500" width="100%" height="220" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="500" rx="10" fill="#0f1923"/>
+  <path d="M95.5,397.5 C83.2,412.7,114.8,423.3,130.6,432.6 C146.4,442.0,168.6,449.0,190.3,453.7 C211.9,458.4,238.3,461.9,260.5,460.7 C282.8,459.6,303.9,453.7,323.8,446.7 C343.7,439.7,363.6,430.3,380.0,418.6 C396.3,406.9,411.6,392.8,422.1,376.4 C432.6,360.1,438.5,340.2,443.2,320.2 C447.9,300.3,451.4,278.1,450.2,257.0 C449.0,236.0,443.2,213.7,436.2,193.8 C429.1,173.9,420.9,155.2,408.1,137.6 C395.2,120.0,376.4,102.5,358.9,88.4 C341.3,74.4,322.6,61.5,302.7,53.3 C282.8,45.1,260.5,40.4,239.5,39.3 C218.4,38.1,196.1,40.4,176.2,46.3 C156.3,52.1,136.4,62.7,120.0,74.4 C103.7,86.1,88.4,100.1,77.9,116.5 C67.4,132.9,61.5,152.8,56.8,172.7 C52.1,192.6,48.6,216.0,49.8,236.0 C51.0,255.9,55.6,274.6,63.8,292.1 C72.0,309.7,84.9,328.4,99.0,341.3 C113.0,354.2,130.6,363.6,148.1,369.4 C165.7,375.3,186.8,378.8,204.3,376.4 C221.9,374.1,239.5,365.9,253.5,355.4 C267.6,344.8,280.4,328.4,288.6,313.2 C296.8,298.0,301.5,281.6,302.7,264.0 C303.9,246.5,301.5,225.4,295.7,207.9 C289.8,190.3,279.3,171.6,267.6,158.7 C255.9,145.8,240.6,136.4,225.4,130.6 C210.2,124.7,191.5,121.2,176.2,123.6 C161.0,125.9,145.8,134.1,134.1,144.6 C122.4,155.2,111.8,170.4,106.0,186.8 C100.1,203.2,97.8,225.4,99.0,243.0 C100.1,260.5,103.7,278.1,113.0,292.1 C122.4,306.2,139.9,319.1,155.2,327.3 C170.4,335.5,214.3,329.6,204.3,341.3 C194.4,353.0,107.7,382.3,95.5,397.5" fill="none" stroke="#2d5a27" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M95.5,397.5 C83.2,412.7,114.8,423.3,130.6,432.6 C146.4,442.0,168.6,449.0,190.3,453.7 C211.9,458.4,238.3,461.9,260.5,460.7 C282.8,459.6,303.9,453.7,323.8,446.7 C343.7,439.7,363.6,430.3,380.0,418.6 C396.3,406.9,411.6,392.8,422.1,376.4 C432.6,360.1,438.5,340.2,443.2,320.2 C447.9,300.3,451.4,278.1,450.2,257.0 C449.0,236.0,443.2,213.7,436.2,193.8 C429.1,173.9,420.9,155.2,408.1,137.6 C395.2,120.0,376.4,102.5,358.9,88.4 C341.3,74.4,322.6,61.5,302.7,53.3 C282.8,45.1,260.5,40.4,239.5,39.3 C218.4,38.1,196.1,40.4,176.2,46.3 C156.3,52.1,136.4,62.7,120.0,74.4 C103.7,86.1,88.4,100.1,77.9,116.5 C67.4,132.9,61.5,152.8,56.8,172.7 C52.1,192.6,48.6,216.0,49.8,236.0 C51.0,255.9,55.6,274.6,63.8,292.1 C72.0,309.7,84.9,328.4,99.0,341.3 C113.0,354.2,130.6,363.6,148.1,369.4 C165.7,375.3,186.8,378.8,204.3,376.4 C221.9,374.1,239.5,365.9,253.5,355.4 C267.6,344.8,280.4,328.4,288.6,313.2 C296.8,298.0,301.5,281.6,302.7,264.0 C303.9,246.5,301.5,225.4,295.7,207.9 C289.8,190.3,279.3,171.6,267.6,158.7 C255.9,145.8,240.6,136.4,225.4,130.6 C210.2,124.7,191.5,121.2,176.2,123.6 C161.0,125.9,145.8,134.1,134.1,144.6 C122.4,155.2,111.8,170.4,106.0,186.8 C100.1,203.2,97.8,225.4,99.0,243.0 C100.1,260.5,103.7,278.1,113.0,292.1 C122.4,306.2,139.9,319.1,155.2,327.3 C170.4,335.5,214.3,329.6,204.3,341.3 C194.4,353.0,107.7,382.3,95.5,397.5" fill="none" stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M95.5,397.5 C83.2,412.7,114.8,423.3,130.6,432.6 C146.4,442.0,168.6,449.0,190.3,453.7 C211.9,458.4,238.3,461.9,260.5,460.7 C282.8,459.6,303.9,453.7,323.8,446.7 C343.7,439.7,363.6,430.3,380.0,418.6 C396.3,406.9,411.6,392.8,422.1,376.4 C432.6,360.1,438.5,340.2,443.2,320.2 C447.9,300.3,451.4,278.1,450.2,257.0 C449.0,236.0,443.2,213.7,436.2,193.8 C429.1,173.9,420.9,155.2,408.1,137.6 C395.2,120.0,376.4,102.5,358.9,88.4 C341.3,74.4,322.6,61.5,302.7,53.3 C282.8,45.1,260.5,40.4,239.5,39.3 C218.4,38.1,196.1,40.4,176.2,46.3 C156.3,52.1,136.4,62.7,120.0,74.4 C103.7,86.1,88.4,100.1,77.9,116.5 C67.4,132.9,61.5,152.8,56.8,172.7 C52.1,192.6,48.6,216.0,49.8,236.0 C51.0,255.9,55.6,274.6,63.8,292.1 C72.0,309.7,84.9,328.4,99.0,341.3 C113.0,354.2,130.6,363.6,148.1,369.4 C165.7,375.3,186.8,378.8,204.3,376.4 C221.9,374.1,239.5,365.9,253.5,355.4 C267.6,344.8,280.4,328.4,288.6,313.2 C296.8,298.0,301.5,281.6,302.7,264.0 C303.9,246.5,301.5,225.4,295.7,207.9 C289.8,190.3,279.3,171.6,267.6,158.7 C255.9,145.8,240.6,136.4,225.4,130.6 C210.2,124.7,191.5,121.2,176.2,123.6 C161.0,125.9,145.8,134.1,134.1,144.6 C122.4,155.2,111.8,170.4,106.0,186.8 C100.1,203.2,97.8,225.4,99.0,243.0 C100.1,260.5,103.7,278.1,113.0,292.1 C122.4,306.2,139.9,319.1,155.2,327.3 C170.4,335.5,214.3,329.6,204.3,341.3 C194.4,353.0,107.7,382.3,95.5,397.5" fill="none" stroke="#4ade80" stroke-width="3" stroke-dasharray="8,10" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <rect x="88.45454545454547" y="385.5206611570248" width="14" height="8" fill="#fff" rx="1.5"/>
+  <rect x="88.45454545454547" y="401.5206611570248" width="14" height="8" fill="#e11d48" rx="1.5"/>
+  <polygon points="85.45454545454547,387.5206611570248 98.45454545454547,379.5206611570248 98.45454545454547,395.5206611570248" fill="#94a3b8" opacity="0.6"/>
+  <text x="480" y="20" fill="#64748b" font-size="11" text-anchor="end" font-family="sans-serif">▶ 顺时针</text>
+</svg></div>
+</div>
+  <div class="stat-line" style="text-align:right;margin-top:0.5rem;color:#64748b;font-size:0.78rem">&#x1F4CD; 数据更新至2026赛季</div>
+</div></body></html>

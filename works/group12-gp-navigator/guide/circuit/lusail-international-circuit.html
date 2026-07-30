@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lusail International Circuit - F1入门查找</title><style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Noto Serif CJK SC", KaiTi, STKaiti, "AR PL UKai CN", serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .container { text-align: center; width: 100%; max-width: 680px; padding: 2rem; }
+  h1 { color: #f1f5f9; font-size: 2.0rem; font-weight: 600; margin-bottom: 0.3rem; letter-spacing: 0.02em; }
+  .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+  .back-row { text-align: left; margin-bottom: 1.2rem; }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: #94a3b8; text-decoration: none; font-size: 0.95rem;
+    cursor: pointer; transition: color 0.2s, transform 0.3s ease;
+    background: none; border: none; font-family: inherit;
+  }
+  .back-btn:hover { color: #e2e8f0; transform: translateX(-4px); }
+  .list-grid { display: flex; flex-direction: column; gap: 0.8rem; }
+  .list-item {
+    display: flex; align-items: center; gap: 0.8rem;
+    background: rgba(30,41,59,0.7); backdrop-filter: blur(6px);
+    border: 1px solid #334155; border-radius: 12px;
+    padding: 0.8rem 1.2rem; cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    text-align: left; position: relative; overflow: hidden;
+  }
+  .list-item:hover {
+    border-color: #e11d48; background: rgba(30,41,59,0.9);
+    transform: translateY(-2px); box-shadow: 0 6px 24px rgba(225,29,72,0.12);
+  }
+  .list-item.expanding {
+    transform: scale(1.06); border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225,29,72,0.25), 0 10px 32px rgba(225,29,72,0.2);
+  }
+  .item-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); }
+  .list-item .item-info { flex: 1; }
+  .list-item .item-name { color: #f1f5f9; font-size: 1.05rem; font-weight: 500; }
+  .list-item .item-team { color: #64748b; font-size: 0.78rem; margin-top: 0.1rem; }
+  .list-item .item-arrow { color: #475569; font-size: 0.9rem; transition: transform 0.3s; }
+  .list-item:hover .item-arrow { transform: translateX(4px); color: #e11d48; }
+
+  .detail-header { display: flex; align-items: center; gap: 1.2rem; text-align: left; margin-bottom: 2rem; }
+  .detail-header .big-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); }
+  .detail-header .detail-title { flex: 1; }
+  .detail-header .detail-title .name { color: #f1f5f9; font-size: 1.6rem; font-weight: 600; }
+  .detail-header .detail-title .team { color: #94a3b8; font-size: 0.85rem; margin-top: 0.2rem; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+  .detail-card { background: rgba(30,41,59,0.7); backdrop-filter: blur(6px); border: 1px solid #334155; border-radius: 12px; padding: 0.9rem 1.1rem; text-align: left; }
+  .detail-card.full { grid-column: 1 / -1; }
+  .detail-card .label { color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .detail-card .value { color: #f1f5f9; font-size: 1.0rem; font-weight: 500; }
+  .detail-card .value.highlight { color: #e11d48; }
+  .bio-card { background: rgba(30,41,59,0.5); border: 1px solid #334155; border-radius: 12px; padding: 1.2rem 1.4rem; text-align: left; }
+    .bio-card .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .bio-card .stat-line { color: #64748b; font-size: 0.78rem; margin-top: 0.5rem; text-align: right; }
+  /* 赛道详情双栏布局 */
+  .circuit-bottom { display: flex; gap: 1rem; align-items: stretch; margin-bottom: 0.5rem; }
+  .circuit-bio {
+    flex: 1; background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 1rem 1.2rem; text-align: left;
+    display: flex; align-items: center;
+  }
+  .circuit-bio .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .circuit-map {
+    flex: 0 0 260px; max-width: 260px;
+    background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) {
+    .circuit-bottom { flex-direction: column; }
+    .circuit-map { width: 100%; }
+  }
+</style></head>
+<body>
+<div class="container">
+  <div class="back-row">
+    <button class="back-btn" onclick="history.back()">&#x2190; 返回</button>
+  </div>
+  <div class="detail-header">
+    <img class="big-avatar" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2272%22%20height%3D%2272%22%20viewBox%3D%220%200%2072%2072%22%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%2236%22%20fill%3D%22%231a6b3c%22/%3E%3Ctext%20x%3D%2236%22%20y%3D%2236%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20fill%3D%22%23fff%22%20font-size%3D%2224%22%20font-weight%3D%22600%22%20font-family%3D%22Arial%2Csans-serif%22%3ELI%3C/text%3E%3C/svg%3E" alt="Lusail International Circuit">
+    <div class="detail-title"><div class="name">Lusail International Circuit</div><div class="team">卡塔尔 &#x2022; 赛道</div></div>
+  </div>
+  <div class="detail-grid"><div class="detail-card"><div class="label">国家</div><div class="value">卡塔尔</div></div><div class="detail-card"><div class="label">类型</div><div class="value highlight">赛道</div></div><div class="detail-card"><div class="label">单圈长度</div><div class="value">5.419km</div></div><div class="detail-card"><div class="label">比赛圈数</div><div class="value">57 圈</div></div><div class="detail-card"><div class="label">比赛总里程</div><div class="value">308.6km</div></div><div class="detail-card"><div class="label">圈速纪录</div><div class="value highlight">1:23.196 (Verstappen 2024)</div></div><div class="detail-card full"><div class="label">首次举办</div><div class="value">2021 年</div></div></div>
+  <div class="circuit-bottom">
+  <div class="circuit-bio"><div class="bio-text">沙漠中的泛光灯赛道。中性胎必须强制使用以避免爆胎风险，2023年进行了全面翻新。</div></div>
+  <div class="circuit-map"><svg viewBox="0 0 500 500" width="100%" height="220" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="500" rx="10" fill="#0f1923"/>
+  <path d="M181.6,89.5 C170.7,70.7,153.9,76.6,140.0,77.6 C126.2,78.6,110.3,86.5,98.4,95.5 C86.5,104.4,77.6,117.2,68.7,131.1 C59.8,145.0,49.9,161.8,44.9,178.7 C40.0,195.5,39.0,214.3,39.0,232.2 C39.0,250.0,40.0,268.8,44.9,285.7 C49.9,302.5,58.8,318.4,68.7,333.2 C78.6,348.1,90.5,362.9,104.4,374.8 C118.2,386.7,135.1,396.6,151.9,404.5 C168.8,412.5,186.6,418.4,205.4,422.4 C224.2,426.3,246.0,429.3,264.9,428.3 C283.7,427.3,301.5,422.4,318.4,416.4 C335.2,410.5,351.0,402.6,365.9,392.7 C380.8,382.8,395.6,369.9,407.5,357.0 C419.4,344.1,429.3,331.2,437.2,315.4 C445.2,299.5,451.1,279.7,455.1,261.9 C459.0,244.1,461.0,226.2,461.0,208.4 C461.0,190.6,460.0,170.7,455.1,154.9 C450.1,139.0,441.2,125.2,431.3,113.3 C421.4,101.4,408.5,90.5,395.6,83.6 C382.8,76.6,368.9,73.7,354.0,71.7 C339.2,69.7,322.3,69.7,306.5,71.7 C290.6,73.7,273.8,77.6,258.9,83.6 C244.1,89.5,230.2,97.4,217.3,107.3 C204.4,117.2,190.6,129.1,181.6,143.0 C172.7,156.9,167.8,174.7,163.8,190.6 C159.8,206.4,156.9,221.3,157.9,238.1 C158.9,255.0,163.8,275.8,169.8,291.6 C175.7,307.5,183.6,321.3,193.5,333.2 C203.4,345.1,215.3,355.0,229.2,362.9 C243.1,370.9,260.9,378.8,276.7,380.8 C292.6,382.8,309.4,378.8,324.3,374.8 C339.2,370.9,354.0,364.9,365.9,357.0 C377.8,349.1,387.7,339.2,395.6,327.3 C403.6,315.4,409.5,300.5,413.5,285.7 C417.4,270.8,420.4,254.0,419.4,238.1 C418.4,222.3,413.5,204.4,407.5,190.6 C401.6,176.7,393.6,164.8,383.7,154.9 C373.8,145.0,361.0,136.1,348.1,131.1 C335.2,126.2,320.3,125.2,306.5,125.2 C292.6,125.2,277.7,126.2,264.9,131.1 C252.0,136.1,239.1,145.0,229.2,154.9 C219.3,164.8,213.3,201.5,205.4,190.6 C197.5,179.7,192.5,108.3,181.6,89.5" fill="none" stroke="#2d5a27" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M181.6,89.5 C170.7,70.7,153.9,76.6,140.0,77.6 C126.2,78.6,110.3,86.5,98.4,95.5 C86.5,104.4,77.6,117.2,68.7,131.1 C59.8,145.0,49.9,161.8,44.9,178.7 C40.0,195.5,39.0,214.3,39.0,232.2 C39.0,250.0,40.0,268.8,44.9,285.7 C49.9,302.5,58.8,318.4,68.7,333.2 C78.6,348.1,90.5,362.9,104.4,374.8 C118.2,386.7,135.1,396.6,151.9,404.5 C168.8,412.5,186.6,418.4,205.4,422.4 C224.2,426.3,246.0,429.3,264.9,428.3 C283.7,427.3,301.5,422.4,318.4,416.4 C335.2,410.5,351.0,402.6,365.9,392.7 C380.8,382.8,395.6,369.9,407.5,357.0 C419.4,344.1,429.3,331.2,437.2,315.4 C445.2,299.5,451.1,279.7,455.1,261.9 C459.0,244.1,461.0,226.2,461.0,208.4 C461.0,190.6,460.0,170.7,455.1,154.9 C450.1,139.0,441.2,125.2,431.3,113.3 C421.4,101.4,408.5,90.5,395.6,83.6 C382.8,76.6,368.9,73.7,354.0,71.7 C339.2,69.7,322.3,69.7,306.5,71.7 C290.6,73.7,273.8,77.6,258.9,83.6 C244.1,89.5,230.2,97.4,217.3,107.3 C204.4,117.2,190.6,129.1,181.6,143.0 C172.7,156.9,167.8,174.7,163.8,190.6 C159.8,206.4,156.9,221.3,157.9,238.1 C158.9,255.0,163.8,275.8,169.8,291.6 C175.7,307.5,183.6,321.3,193.5,333.2 C203.4,345.1,215.3,355.0,229.2,362.9 C243.1,370.9,260.9,378.8,276.7,380.8 C292.6,382.8,309.4,378.8,324.3,374.8 C339.2,370.9,354.0,364.9,365.9,357.0 C377.8,349.1,387.7,339.2,395.6,327.3 C403.6,315.4,409.5,300.5,413.5,285.7 C417.4,270.8,420.4,254.0,419.4,238.1 C418.4,222.3,413.5,204.4,407.5,190.6 C401.6,176.7,393.6,164.8,383.7,154.9 C373.8,145.0,361.0,136.1,348.1,131.1 C335.2,126.2,320.3,125.2,306.5,125.2 C292.6,125.2,277.7,126.2,264.9,131.1 C252.0,136.1,239.1,145.0,229.2,154.9 C219.3,164.8,213.3,201.5,205.4,190.6 C197.5,179.7,192.5,108.3,181.6,89.5" fill="none" stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M181.6,89.5 C170.7,70.7,153.9,76.6,140.0,77.6 C126.2,78.6,110.3,86.5,98.4,95.5 C86.5,104.4,77.6,117.2,68.7,131.1 C59.8,145.0,49.9,161.8,44.9,178.7 C40.0,195.5,39.0,214.3,39.0,232.2 C39.0,250.0,40.0,268.8,44.9,285.7 C49.9,302.5,58.8,318.4,68.7,333.2 C78.6,348.1,90.5,362.9,104.4,374.8 C118.2,386.7,135.1,396.6,151.9,404.5 C168.8,412.5,186.6,418.4,205.4,422.4 C224.2,426.3,246.0,429.3,264.9,428.3 C283.7,427.3,301.5,422.4,318.4,416.4 C335.2,410.5,351.0,402.6,365.9,392.7 C380.8,382.8,395.6,369.9,407.5,357.0 C419.4,344.1,429.3,331.2,437.2,315.4 C445.2,299.5,451.1,279.7,455.1,261.9 C459.0,244.1,461.0,226.2,461.0,208.4 C461.0,190.6,460.0,170.7,455.1,154.9 C450.1,139.0,441.2,125.2,431.3,113.3 C421.4,101.4,408.5,90.5,395.6,83.6 C382.8,76.6,368.9,73.7,354.0,71.7 C339.2,69.7,322.3,69.7,306.5,71.7 C290.6,73.7,273.8,77.6,258.9,83.6 C244.1,89.5,230.2,97.4,217.3,107.3 C204.4,117.2,190.6,129.1,181.6,143.0 C172.7,156.9,167.8,174.7,163.8,190.6 C159.8,206.4,156.9,221.3,157.9,238.1 C158.9,255.0,163.8,275.8,169.8,291.6 C175.7,307.5,183.6,321.3,193.5,333.2 C203.4,345.1,215.3,355.0,229.2,362.9 C243.1,370.9,260.9,378.8,276.7,380.8 C292.6,382.8,309.4,378.8,324.3,374.8 C339.2,370.9,354.0,364.9,365.9,357.0 C377.8,349.1,387.7,339.2,395.6,327.3 C403.6,315.4,409.5,300.5,413.5,285.7 C417.4,270.8,420.4,254.0,419.4,238.1 C418.4,222.3,413.5,204.4,407.5,190.6 C401.6,176.7,393.6,164.8,383.7,154.9 C373.8,145.0,361.0,136.1,348.1,131.1 C335.2,126.2,320.3,125.2,306.5,125.2 C292.6,125.2,277.7,126.2,264.9,131.1 C252.0,136.1,239.1,145.0,229.2,154.9 C219.3,164.8,213.3,201.5,205.4,190.6 C197.5,179.7,192.5,108.3,181.6,89.5" fill="none" stroke="#4ade80" stroke-width="3" stroke-dasharray="8,10" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <rect x="174.64335664335664" y="77.51048951048952" width="14" height="8" fill="#fff" rx="1.5"/>
+  <rect x="174.64335664335664" y="93.51048951048952" width="14" height="8" fill="#e11d48" rx="1.5"/>
+  <polygon points="171.64335664335664,79.51048951048952 184.64335664335664,71.51048951048952 184.64335664335664,87.51048951048952" fill="#94a3b8" opacity="0.6"/>
+  <text x="480" y="20" fill="#64748b" font-size="11" text-anchor="end" font-family="sans-serif">▶ 顺时针</text>
+</svg></div>
+</div>
+  <div class="stat-line" style="text-align:right;margin-top:0.5rem;color:#64748b;font-size:0.78rem">&#x1F4CD; 数据更新至2026赛季</div>
+</div></body></html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marina Bay Street Circuit - F1入门查找</title><style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Noto Serif CJK SC", KaiTi, STKaiti, "AR PL UKai CN", serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .container { text-align: center; width: 100%; max-width: 680px; padding: 2rem; }
+  h1 { color: #f1f5f9; font-size: 2.0rem; font-weight: 600; margin-bottom: 0.3rem; letter-spacing: 0.02em; }
+  .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+  .back-row { text-align: left; margin-bottom: 1.2rem; }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: #94a3b8; text-decoration: none; font-size: 0.95rem;
+    cursor: pointer; transition: color 0.2s, transform 0.3s ease;
+    background: none; border: none; font-family: inherit;
+  }
+  .back-btn:hover { color: #e2e8f0; transform: translateX(-4px); }
+  .list-grid { display: flex; flex-direction: column; gap: 0.8rem; }
+  .list-item {
+    display: flex; align-items: center; gap: 0.8rem;
+    background: rgba(30,41,59,0.7); backdrop-filter: blur(6px);
+    border: 1px solid #334155; border-radius: 12px;
+    padding: 0.8rem 1.2rem; cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    text-align: left; position: relative; overflow: hidden;
+  }
+  .list-item:hover {
+    border-color: #e11d48; background: rgba(30,41,59,0.9);
+    transform: translateY(-2px); box-shadow: 0 6px 24px rgba(225,29,72,0.12);
+  }
+  .list-item.expanding {
+    transform: scale(1.06); border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225,29,72,0.25), 0 10px 32px rgba(225,29,72,0.2);
+  }
+  .item-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); }
+  .list-item .item-info { flex: 1; }
+  .list-item .item-name { color: #f1f5f9; font-size: 1.05rem; font-weight: 500; }
+  .list-item .item-team { color: #64748b; font-size: 0.78rem; margin-top: 0.1rem; }
+  .list-item .item-arrow { color: #475569; font-size: 0.9rem; transition: transform 0.3s; }
+  .list-item:hover .item-arrow { transform: translateX(4px); color: #e11d48; }
+
+  .detail-header { display: flex; align-items: center; gap: 1.2rem; text-align: left; margin-bottom: 2rem; }
+  .detail-header .big-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); }
+  .detail-header .detail-title { flex: 1; }
+  .detail-header .detail-title .name { color: #f1f5f9; font-size: 1.6rem; font-weight: 600; }
+  .detail-header .detail-title .team { color: #94a3b8; font-size: 0.85rem; margin-top: 0.2rem; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+  .detail-card { background: rgba(30,41,59,0.7); backdrop-filter: blur(6px); border: 1px solid #334155; border-radius: 12px; padding: 0.9rem 1.1rem; text-align: left; }
+  .detail-card.full { grid-column: 1 / -1; }
+  .detail-card .label { color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .detail-card .value { color: #f1f5f9; font-size: 1.0rem; font-weight: 500; }
+  .detail-card .value.highlight { color: #e11d48; }
+  .bio-card { background: rgba(30,41,59,0.5); border: 1px solid #334155; border-radius: 12px; padding: 1.2rem 1.4rem; text-align: left; }
+    .bio-card .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .bio-card .stat-line { color: #64748b; font-size: 0.78rem; margin-top: 0.5rem; text-align: right; }
+  /* 赛道详情双栏布局 */
+  .circuit-bottom { display: flex; gap: 1rem; align-items: stretch; margin-bottom: 0.5rem; }
+  .circuit-bio {
+    flex: 1; background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 1rem 1.2rem; text-align: left;
+    display: flex; align-items: center;
+  }
+  .circuit-bio .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .circuit-map {
+    flex: 0 0 260px; max-width: 260px;
+    background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) {
+    .circuit-bottom { flex-direction: column; }
+    .circuit-map { width: 100%; }
+  }
+</style></head>
+<body>
+<div class="container">
+  <div class="back-row">
+    <button class="back-btn" onclick="history.back()">&#x2190; 返回</button>
+  </div>
+  <div class="detail-header">
+    <img class="big-avatar" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2272%22%20height%3D%2272%22%20viewBox%3D%220%200%2072%2072%22%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%2236%22%20fill%3D%22%23e11d48%22/%3E%3Ctext%20x%3D%2236%22%20y%3D%2236%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20fill%3D%22%23fff%22%20font-size%3D%2224%22%20font-weight%3D%22600%22%20font-family%3D%22Arial%2Csans-serif%22%3EMB%3C/text%3E%3C/svg%3E" alt="Marina Bay Street Circuit">
+    <div class="detail-title"><div class="name">Marina Bay Street Circuit</div><div class="team">新加坡 &#x2022; 街道赛</div></div>
+  </div>
+  <div class="detail-grid"><div class="detail-card"><div class="label">国家</div><div class="value">新加坡</div></div><div class="detail-card"><div class="label">类型</div><div class="value highlight">街道赛</div></div><div class="detail-card"><div class="label">单圈长度</div><div class="value">4.940km</div></div><div class="detail-card"><div class="label">比赛圈数</div><div class="value">62 圈</div></div><div class="detail-card"><div class="label">比赛总里程</div><div class="value">306.1km</div></div><div class="detail-card"><div class="label">圈速纪录</div><div class="value highlight">1:41.905 (Alonso 2023)</div></div><div class="detail-card full"><div class="label">首次举办</div><div class="value">2008 年</div></div></div>
+  <div class="circuit-bottom">
+  <div class="circuit-bio"><div class="bio-text">F1首场夜赛。滨海湾璀璨夜景下比赛，高温高湿对车手体能是极限考验。</div></div>
+  <div class="circuit-map"><svg viewBox="0 0 500 500" width="100%" height="220" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="500" rx="10" fill="#0f1923"/>
+  <path d="M397.8,105.9 C417.5,92.3,379.3,84.9,368.3,76.3 C357.2,67.7,344.9,60.3,331.3,54.1 C317.8,48.0,301.7,40.6,287.0,39.3 C272.2,38.1,257.4,41.8,242.6,46.7 C227.8,51.7,211.8,59.1,198.3,68.9 C184.7,78.8,172.4,92.3,161.3,105.9 C150.2,119.4,140.4,134.2,131.7,150.2 C123.1,166.2,114.5,183.5,109.6,202.0 C104.6,220.4,102.2,241.4,102.2,261.1 C102.2,280.8,104.6,301.7,109.6,320.2 C114.5,338.7,123.1,355.9,131.7,372.0 C140.4,388.0,149.0,404.0,161.3,416.3 C173.6,428.6,189.6,438.5,205.7,445.9 C221.7,453.3,241.4,460.7,257.4,460.7 C273.4,460.7,288.2,453.3,301.7,445.9 C315.3,438.5,327.6,428.6,338.7,416.3 C349.8,404.0,360.9,388.0,368.3,372.0 C375.7,355.9,380.6,337.5,383.0,320.2 C385.5,303.0,386.7,285.7,383.0,268.5 C379.3,251.2,369.5,231.5,360.9,216.7 C352.2,202.0,343.6,190.9,331.3,179.8 C319.0,168.7,301.7,157.6,287.0,150.2 C272.2,142.8,257.4,136.7,242.6,135.4 C227.8,134.2,211.8,137.9,198.3,142.8 C184.7,147.8,172.4,155.1,161.3,165.0 C150.2,174.9,139.1,187.2,131.7,202.0 C124.3,216.7,118.2,236.4,117.0,253.7 C115.7,270.9,118.2,289.4,124.3,305.4 C130.5,321.4,142.8,338.7,153.9,349.8 C165.0,360.9,177.3,368.3,190.9,372.0 C204.4,375.7,221.7,375.7,235.2,372.0 C248.8,368.3,261.1,359.6,272.2,349.8 C283.3,339.9,294.3,326.4,301.7,312.8 C309.1,299.3,315.3,284.5,316.5,268.5 C317.8,252.5,314.1,231.5,309.1,216.7 C304.2,202.0,296.8,189.6,287.0,179.8 C277.1,169.9,231.5,169.9,250.0,157.6 C268.5,145.3,378.1,119.4,397.8,105.9" fill="none" stroke="#2d5a27" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M397.8,105.9 C417.5,92.3,379.3,84.9,368.3,76.3 C357.2,67.7,344.9,60.3,331.3,54.1 C317.8,48.0,301.7,40.6,287.0,39.3 C272.2,38.1,257.4,41.8,242.6,46.7 C227.8,51.7,211.8,59.1,198.3,68.9 C184.7,78.8,172.4,92.3,161.3,105.9 C150.2,119.4,140.4,134.2,131.7,150.2 C123.1,166.2,114.5,183.5,109.6,202.0 C104.6,220.4,102.2,241.4,102.2,261.1 C102.2,280.8,104.6,301.7,109.6,320.2 C114.5,338.7,123.1,355.9,131.7,372.0 C140.4,388.0,149.0,404.0,161.3,416.3 C173.6,428.6,189.6,438.5,205.7,445.9 C221.7,453.3,241.4,460.7,257.4,460.7 C273.4,460.7,288.2,453.3,301.7,445.9 C315.3,438.5,327.6,428.6,338.7,416.3 C349.8,404.0,360.9,388.0,368.3,372.0 C375.7,355.9,380.6,337.5,383.0,320.2 C385.5,303.0,386.7,285.7,383.0,268.5 C379.3,251.2,369.5,231.5,360.9,216.7 C352.2,202.0,343.6,190.9,331.3,179.8 C319.0,168.7,301.7,157.6,287.0,150.2 C272.2,142.8,257.4,136.7,242.6,135.4 C227.8,134.2,211.8,137.9,198.3,142.8 C184.7,147.8,172.4,155.1,161.3,165.0 C150.2,174.9,139.1,187.2,131.7,202.0 C124.3,216.7,118.2,236.4,117.0,253.7 C115.7,270.9,118.2,289.4,124.3,305.4 C130.5,321.4,142.8,338.7,153.9,349.8 C165.0,360.9,177.3,368.3,190.9,372.0 C204.4,375.7,221.7,375.7,235.2,372.0 C248.8,368.3,261.1,359.6,272.2,349.8 C283.3,339.9,294.3,326.4,301.7,312.8 C309.1,299.3,315.3,284.5,316.5,268.5 C317.8,252.5,314.1,231.5,309.1,216.7 C304.2,202.0,296.8,189.6,287.0,179.8 C277.1,169.9,231.5,169.9,250.0,157.6 C268.5,145.3,378.1,119.4,397.8,105.9" fill="none" stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M397.8,105.9 C417.5,92.3,379.3,84.9,368.3,76.3 C357.2,67.7,344.9,60.3,331.3,54.1 C317.8,48.0,301.7,40.6,287.0,39.3 C272.2,38.1,257.4,41.8,242.6,46.7 C227.8,51.7,211.8,59.1,198.3,68.9 C184.7,78.8,172.4,92.3,161.3,105.9 C150.2,119.4,140.4,134.2,131.7,150.2 C123.1,166.2,114.5,183.5,109.6,202.0 C104.6,220.4,102.2,241.4,102.2,261.1 C102.2,280.8,104.6,301.7,109.6,320.2 C114.5,338.7,123.1,355.9,131.7,372.0 C140.4,388.0,149.0,404.0,161.3,416.3 C173.6,428.6,189.6,438.5,205.7,445.9 C221.7,453.3,241.4,460.7,257.4,460.7 C273.4,460.7,288.2,453.3,301.7,445.9 C315.3,438.5,327.6,428.6,338.7,416.3 C349.8,404.0,360.9,388.0,368.3,372.0 C375.7,355.9,380.6,337.5,383.0,320.2 C385.5,303.0,386.7,285.7,383.0,268.5 C379.3,251.2,369.5,231.5,360.9,216.7 C352.2,202.0,343.6,190.9,331.3,179.8 C319.0,168.7,301.7,157.6,287.0,150.2 C272.2,142.8,257.4,136.7,242.6,135.4 C227.8,134.2,211.8,137.9,198.3,142.8 C184.7,147.8,172.4,155.1,161.3,165.0 C150.2,174.9,139.1,187.2,131.7,202.0 C124.3,216.7,118.2,236.4,117.0,253.7 C115.7,270.9,118.2,289.4,124.3,305.4 C130.5,321.4,142.8,338.7,153.9,349.8 C165.0,360.9,177.3,368.3,190.9,372.0 C204.4,375.7,221.7,375.7,235.2,372.0 C248.8,368.3,261.1,359.6,272.2,349.8 C283.3,339.9,294.3,326.4,301.7,312.8 C309.1,299.3,315.3,284.5,316.5,268.5 C317.8,252.5,314.1,231.5,309.1,216.7 C304.2,202.0,296.8,189.6,287.0,179.8 C277.1,169.9,231.5,169.9,250.0,157.6 C268.5,145.3,378.1,119.4,397.8,105.9" fill="none" stroke="#4ade80" stroke-width="3" stroke-dasharray="8,10" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <rect x="390.82608695652175" y="93.86956521739131" width="14" height="8" fill="#fff" rx="1.5"/>
+  <rect x="390.82608695652175" y="109.86956521739131" width="14" height="8" fill="#e11d48" rx="1.5"/>
+  <polygon points="387.82608695652175,95.86956521739131 400.82608695652175,87.86956521739131 400.82608695652175,103.86956521739131" fill="#94a3b8" opacity="0.6"/>
+  <text x="480" y="20" fill="#64748b" font-size="11" text-anchor="end" font-family="sans-serif">▶ 顺时针</text>
+</svg></div>
+</div>
+  <div class="stat-line" style="text-align:right;margin-top:0.5rem;color:#64748b;font-size:0.78rem">&#x1F4CD; 数据更新至2026赛季</div>
+</div></body></html>

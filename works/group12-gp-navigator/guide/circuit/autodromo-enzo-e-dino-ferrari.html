@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autodromo Enzo e Dino Ferrari - F1入门查找</title><style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Noto Serif CJK SC", KaiTi, STKaiti, "AR PL UKai CN", serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .container { text-align: center; width: 100%; max-width: 680px; padding: 2rem; }
+  h1 { color: #f1f5f9; font-size: 2.0rem; font-weight: 600; margin-bottom: 0.3rem; letter-spacing: 0.02em; }
+  .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+  .back-row { text-align: left; margin-bottom: 1.2rem; }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: #94a3b8; text-decoration: none; font-size: 0.95rem;
+    cursor: pointer; transition: color 0.2s, transform 0.3s ease;
+    background: none; border: none; font-family: inherit;
+  }
+  .back-btn:hover { color: #e2e8f0; transform: translateX(-4px); }
+  .list-grid { display: flex; flex-direction: column; gap: 0.8rem; }
+  .list-item {
+    display: flex; align-items: center; gap: 0.8rem;
+    background: rgba(30,41,59,0.7); backdrop-filter: blur(6px);
+    border: 1px solid #334155; border-radius: 12px;
+    padding: 0.8rem 1.2rem; cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    text-align: left; position: relative; overflow: hidden;
+  }
+  .list-item:hover {
+    border-color: #e11d48; background: rgba(30,41,59,0.9);
+    transform: translateY(-2px); box-shadow: 0 6px 24px rgba(225,29,72,0.12);
+  }
+  .list-item.expanding {
+    transform: scale(1.06); border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225,29,72,0.25), 0 10px 32px rgba(225,29,72,0.2);
+  }
+  .item-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); }
+  .list-item .item-info { flex: 1; }
+  .list-item .item-name { color: #f1f5f9; font-size: 1.05rem; font-weight: 500; }
+  .list-item .item-team { color: #64748b; font-size: 0.78rem; margin-top: 0.1rem; }
+  .list-item .item-arrow { color: #475569; font-size: 0.9rem; transition: transform 0.3s; }
+  .list-item:hover .item-arrow { transform: translateX(4px); color: #e11d48; }
+
+  .detail-header { display: flex; align-items: center; gap: 1.2rem; text-align: left; margin-bottom: 2rem; }
+  .detail-header .big-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); }
+  .detail-header .detail-title { flex: 1; }
+  .detail-header .detail-title .name { color: #f1f5f9; font-size: 1.6rem; font-weight: 600; }
+  .detail-header .detail-title .team { color: #94a3b8; font-size: 0.85rem; margin-top: 0.2rem; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+  .detail-card { background: rgba(30,41,59,0.7); backdrop-filter: blur(6px); border: 1px solid #334155; border-radius: 12px; padding: 0.9rem 1.1rem; text-align: left; }
+  .detail-card.full { grid-column: 1 / -1; }
+  .detail-card .label { color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .detail-card .value { color: #f1f5f9; font-size: 1.0rem; font-weight: 500; }
+  .detail-card .value.highlight { color: #e11d48; }
+  .bio-card { background: rgba(30,41,59,0.5); border: 1px solid #334155; border-radius: 12px; padding: 1.2rem 1.4rem; text-align: left; }
+    .bio-card .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .bio-card .stat-line { color: #64748b; font-size: 0.78rem; margin-top: 0.5rem; text-align: right; }
+  /* 赛道详情双栏布局 */
+  .circuit-bottom { display: flex; gap: 1rem; align-items: stretch; margin-bottom: 0.5rem; }
+  .circuit-bio {
+    flex: 1; background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 1rem 1.2rem; text-align: left;
+    display: flex; align-items: center;
+  }
+  .circuit-bio .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .circuit-map {
+    flex: 0 0 260px; max-width: 260px;
+    background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) {
+    .circuit-bottom { flex-direction: column; }
+    .circuit-map { width: 100%; }
+  }
+</style></head>
+<body>
+<div class="container">
+  <div class="back-row">
+    <button class="back-btn" onclick="history.back()">&#x2190; 返回</button>
+  </div>
+  <div class="detail-header">
+    <img class="big-avatar" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2272%22%20height%3D%2272%22%20viewBox%3D%220%200%2072%2072%22%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%2236%22%20fill%3D%22%231a6b3c%22/%3E%3Ctext%20x%3D%2236%22%20y%3D%2236%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20fill%3D%22%23fff%22%20font-size%3D%2224%22%20font-weight%3D%22600%22%20font-family%3D%22Arial%2Csans-serif%22%3EAE%3C/text%3E%3C/svg%3E" alt="Autodromo Enzo e Dino Ferrari">
+    <div class="detail-title"><div class="name">Autodromo Enzo e Dino Ferrari</div><div class="team">意大利(伊莫拉) &#x2022; 赛道</div></div>
+  </div>
+  <div class="detail-grid"><div class="detail-card"><div class="label">国家</div><div class="value">意大利(伊莫拉)</div></div><div class="detail-card"><div class="label">类型</div><div class="value highlight">赛道</div></div><div class="detail-card"><div class="label">单圈长度</div><div class="value">4.909km</div></div><div class="detail-card"><div class="label">比赛圈数</div><div class="value">63 圈</div></div><div class="detail-card"><div class="label">比赛总里程</div><div class="value">309.0km</div></div><div class="detail-card"><div class="label">圈速纪录</div><div class="value highlight">1:15.484 (Verstappen 2024)</div></div><div class="detail-card full"><div class="label">首次举办</div><div class="value">1980 年</div></div></div>
+  <div class="circuit-bottom">
+  <div class="circuit-bio"><div class="bio-text">以恩佐·法拉利及其子命名的历史赛道。高速弯道与狭窄布局的双重考验，2020年悲剧后安全问题大幅升级。</div></div>
+  <div class="circuit-map"><svg viewBox="0 0 500 500" width="100%" height="220" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="500" rx="10" fill="#0f1923"/>
+  <path d="M93.6,399.6 C77.7,413.2,117.4,424.5,134.4,433.6 C151.4,442.7,174.1,449.5,195.6,454.0 C217.1,458.5,240.9,461.9,263.6,460.8 C286.3,459.7,311.2,454.0,331.6,447.2 C352.0,440.4,370.1,431.3,386.0,420.0 C401.9,408.7,416.6,395.1,426.8,379.2 C437.0,363.3,442.7,344.1,447.2,324.8 C451.7,305.5,455.1,285.1,454.0,263.6 C452.9,242.1,447.2,217.1,440.4,195.6 C433.6,174.1,425.7,152.5,413.2,134.4 C400.7,116.3,382.6,100.4,365.6,86.8 C348.6,73.2,330.5,60.7,311.2,52.8 C291.9,44.9,270.4,40.3,250.0,39.2 C229.6,38.1,208.1,41.5,188.8,46.0 C169.5,50.5,151.4,56.2,134.4,66.4 C117.4,76.6,99.3,91.3,86.8,107.2 C74.3,123.1,66.4,142.3,59.6,161.6 C52.8,180.9,47.1,202.4,46.0,222.8 C44.9,243.2,48.3,264.7,52.8,284.0 C57.3,303.3,63.0,322.5,73.2,338.4 C83.4,354.3,98.1,369.0,114.0,379.2 C129.9,389.4,150.3,397.3,168.4,399.6 C186.5,401.9,206.9,397.3,222.8,392.8 C238.7,388.3,252.3,382.6,263.6,372.4 C274.9,362.2,284.0,346.3,290.8,331.6 C297.6,316.9,303.3,299.9,304.4,284.0 C305.5,268.1,303.3,251.1,297.6,236.4 C291.9,221.7,281.7,205.8,270.4,195.6 C259.1,185.4,243.2,177.5,229.6,175.2 C216.0,172.9,201.3,176.3,188.8,182.0 C176.3,187.7,162.7,196.7,154.8,209.2 C146.9,221.7,142.3,240.9,141.2,256.8 C140.1,272.7,141.2,290.8,148.0,304.4 C154.8,318.0,168.4,330.5,182.0,338.4 C195.6,346.3,244.3,341.8,229.6,352.0 C214.9,362.2,109.5,386.0,93.6,399.6" fill="none" stroke="#2d5a27" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M93.6,399.6 C77.7,413.2,117.4,424.5,134.4,433.6 C151.4,442.7,174.1,449.5,195.6,454.0 C217.1,458.5,240.9,461.9,263.6,460.8 C286.3,459.7,311.2,454.0,331.6,447.2 C352.0,440.4,370.1,431.3,386.0,420.0 C401.9,408.7,416.6,395.1,426.8,379.2 C437.0,363.3,442.7,344.1,447.2,324.8 C451.7,305.5,455.1,285.1,454.0,263.6 C452.9,242.1,447.2,217.1,440.4,195.6 C433.6,174.1,425.7,152.5,413.2,134.4 C400.7,116.3,382.6,100.4,365.6,86.8 C348.6,73.2,330.5,60.7,311.2,52.8 C291.9,44.9,270.4,40.3,250.0,39.2 C229.6,38.1,208.1,41.5,188.8,46.0 C169.5,50.5,151.4,56.2,134.4,66.4 C117.4,76.6,99.3,91.3,86.8,107.2 C74.3,123.1,66.4,142.3,59.6,161.6 C52.8,180.9,47.1,202.4,46.0,222.8 C44.9,243.2,48.3,264.7,52.8,284.0 C57.3,303.3,63.0,322.5,73.2,338.4 C83.4,354.3,98.1,369.0,114.0,379.2 C129.9,389.4,150.3,397.3,168.4,399.6 C186.5,401.9,206.9,397.3,222.8,392.8 C238.7,388.3,252.3,382.6,263.6,372.4 C274.9,362.2,284.0,346.3,290.8,331.6 C297.6,316.9,303.3,299.9,304.4,284.0 C305.5,268.1,303.3,251.1,297.6,236.4 C291.9,221.7,281.7,205.8,270.4,195.6 C259.1,185.4,243.2,177.5,229.6,175.2 C216.0,172.9,201.3,176.3,188.8,182.0 C176.3,187.7,162.7,196.7,154.8,209.2 C146.9,221.7,142.3,240.9,141.2,256.8 C140.1,272.7,141.2,290.8,148.0,304.4 C154.8,318.0,168.4,330.5,182.0,338.4 C195.6,346.3,244.3,341.8,229.6,352.0 C214.9,362.2,109.5,386.0,93.6,399.6" fill="none" stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M93.6,399.6 C77.7,413.2,117.4,424.5,134.4,433.6 C151.4,442.7,174.1,449.5,195.6,454.0 C217.1,458.5,240.9,461.9,263.6,460.8 C286.3,459.7,311.2,454.0,331.6,447.2 C352.0,440.4,370.1,431.3,386.0,420.0 C401.9,408.7,416.6,395.1,426.8,379.2 C437.0,363.3,442.7,344.1,447.2,324.8 C451.7,305.5,455.1,285.1,454.0,263.6 C452.9,242.1,447.2,217.1,440.4,195.6 C433.6,174.1,425.7,152.5,413.2,134.4 C400.7,116.3,382.6,100.4,365.6,86.8 C348.6,73.2,330.5,60.7,311.2,52.8 C291.9,44.9,270.4,40.3,250.0,39.2 C229.6,38.1,208.1,41.5,188.8,46.0 C169.5,50.5,151.4,56.2,134.4,66.4 C117.4,76.6,99.3,91.3,86.8,107.2 C74.3,123.1,66.4,142.3,59.6,161.6 C52.8,180.9,47.1,202.4,46.0,222.8 C44.9,243.2,48.3,264.7,52.8,284.0 C57.3,303.3,63.0,322.5,73.2,338.4 C83.4,354.3,98.1,369.0,114.0,379.2 C129.9,389.4,150.3,397.3,168.4,399.6 C186.5,401.9,206.9,397.3,222.8,392.8 C238.7,388.3,252.3,382.6,263.6,372.4 C274.9,362.2,284.0,346.3,290.8,331.6 C297.6,316.9,303.3,299.9,304.4,284.0 C305.5,268.1,303.3,251.1,297.6,236.4 C291.9,221.7,281.7,205.8,270.4,195.6 C259.1,185.4,243.2,177.5,229.6,175.2 C216.0,172.9,201.3,176.3,188.8,182.0 C176.3,187.7,162.7,196.7,154.8,209.2 C146.9,221.7,142.3,240.9,141.2,256.8 C140.1,272.7,141.2,290.8,148.0,304.4 C154.8,318.0,168.4,330.5,182.0,338.4 C195.6,346.3,244.3,341.8,229.6,352.0 C214.9,362.2,109.5,386.0,93.6,399.6" fill="none" stroke="#4ade80" stroke-width="3" stroke-dasharray="8,10" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <rect x="86.6" y="387.6" width="14" height="8" fill="#fff" rx="1.5"/>
+  <rect x="86.6" y="403.6" width="14" height="8" fill="#e11d48" rx="1.5"/>
+  <polygon points="83.6,389.6 96.6,381.6 96.6,397.6" fill="#94a3b8" opacity="0.6"/>
+  <text x="480" y="20" fill="#64748b" font-size="11" text-anchor="end" font-family="sans-serif">▶ 顺时针</text>
+</svg></div>
+</div>
+  <div class="stat-line" style="text-align:right;margin-top:0.5rem;color:#64748b;font-size:0.78rem">&#x1F4CD; 数据更新至2026赛季</div>
+</div></body></html>

@@ -255,7 +255,7 @@ export class F1Game {
 
   /** 退出到首页 */
   exitToMenu() {
-    window.location.href = '/';
+    window.location.href = './guide/index.html';
   }
 
   /** 视角循环切换 */

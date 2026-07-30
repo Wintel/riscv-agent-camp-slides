@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,maximum-scale=1.0">
-<base href="/game/">
+<base href="./">
 <title>F1 方程式竞速 — 3D高清赛车模拟</title>
 <style>
 /* ═══════════════════════════════════════════════════
@@ -186,7 +186,7 @@ canvas{display:block}
 </div>
 
 <!-- ═══ 退出按钮 ═══ -->
-<div class="global-exit" onclick="document.querySelector('.global-exit')&&window.location.href.replace('/game','')||(window.location.href='/')">✕ 退出</div>
+<div class="global-exit" onclick="window.location.href='./guide/index.html'">✕ 退出</div>
 
 <div id="gameUI">
   <!-- ═══ HUD ═══ -->
@@ -238,7 +238,7 @@ canvas{display:block}
     </div>
     <div id="postRaceBtns">
       <button class="btn-restart" onclick="location.reload()">🔄 重新开局</button>
-      <button class="btn-exit" onclick="window.location.href='/'">🚪 退出游戏</button>
+      <button class="btn-exit" onclick="window.location.href='./guide/index.html'">🚪 退出游戏</button>
     </div>
   </div>
 
@@ -299,7 +299,7 @@ canvas{display:block}
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three": "./vendor/three.module.js",
     "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
   }
 }

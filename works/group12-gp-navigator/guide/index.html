@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>F1入门查找</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Noto Serif CJK SC", KaiTi, STKaiti, "AR PL UKai CN", serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .container { text-align: center; width: 100%; max-width: 680px; padding: 2rem; }
+  h1 { color: #f1f5f9; font-size: 2.0rem; font-weight: 600; margin-bottom: 0.3rem; letter-spacing: 0.02em; }
+  .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+  .back-row { text-align: left; margin-bottom: 1.2rem; }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: #94a3b8; text-decoration: none; font-size: 0.95rem;
+    cursor: pointer; transition: color 0.2s, transform 0.3s ease;
+    background: none; border: none; font-family: inherit;
+  }
+  .back-btn:hover { color: #e2e8f0; transform: translateX(-4px); }
+  .list-grid { display: flex; flex-direction: column; gap: 0.8rem; }
+  .list-item {
+    display: flex; align-items: center; gap: 0.8rem;
+    background: rgba(30,41,59,0.7); backdrop-filter: blur(6px);
+    border: 1px solid #334155; border-radius: 12px;
+    padding: 0.8rem 1.2rem; cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    text-align: left; position: relative; overflow: hidden;
+  }
+  .list-item:hover {
+    border-color: #e11d48; background: rgba(30,41,59,0.9);
+    transform: translateY(-2px); box-shadow: 0 6px 24px rgba(225,29,72,0.12);
+  }
+  .list-item.expanding {
+    transform: scale(1.06); border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225,29,72,0.25), 0 10px 32px rgba(225,29,72,0.2);
+  }
+  .item-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); }
+  .list-item .item-info { flex: 1; }
+  .list-item .item-name { color: #f1f5f9; font-size: 1.05rem; font-weight: 500; }
+  .list-item .item-team { color: #64748b; font-size: 0.78rem; margin-top: 0.1rem; }
+  .list-item .item-arrow { color: #475569; font-size: 0.9rem; transition: transform 0.3s; }
+  .list-item:hover .item-arrow { transform: translateX(4px); color: #e11d48; }
+
+  .card-grid{display:flex;flex-direction:column;gap:1.2rem}
+  .card{background:rgba(30,41,59,.8);backdrop-filter:blur(6px);border:1px solid #334155;border-radius:16px;padding:1.8rem 2rem;cursor:pointer;transition:all 0.6s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden}
+  .card:hover{border-color:#e11d48;background:rgba(30,41,59,.95);transform:translateY(-3px);box-shadow:0 8px 30px rgba(225,29,72,.15)}
+  .card:active{transform:scale(.98)}
+  .card.expanding{transform:scale(1.08);border-color:#e11d48;box-shadow:0 0 0 4px rgba(225,29,72,.3),0 12px 40px rgba(225,29,72,.25)}
+  .card-icon{font-size:2.2rem;margin-bottom:.5rem;display:block}
+  .card-title{font-size:1.3rem;font-weight:600;color:#f1f5f9;margin-bottom:.25rem}
+  .card-desc{font-size:.85rem;color:#64748b}
+  .card::before{content:'';position:absolute;top:-60%;right:-30%;width:200px;height:200px;background:radial-gradient(circle,rgba(225,29,72,.06)0%,transparent 70%);border-radius:50%;transition:all .6s ease}
+  .card:hover::before{top:-40%;right:-20%;background:radial-gradient(circle,rgba(225,29,72,.12)0%,transparent 70%)}
+</style></head>
+<body>
+<div class="container">
+  <h1>&#x1F3CE; F1入门查找</h1>
+  <p class="subtitle">点击感兴趣的板块，深入了解更多内容</p>
+  <div class="card-grid">
+    <div class="card" data-href="drivers.html"><span class="card-icon">&#x1F3C1;</span><div class="card-title">F1现役车手</div><div class="card-desc">了解2026赛季在役的顶级赛车手</div></div>
+    <div class="card" data-href="circuits.html"><span class="card-icon">&#x1F3C6;</span><div class="card-title">F1大奖赛赛道</div><div class="card-desc">探索全球标志性赛道与城市街道</div></div>
+    <div class="card" data-href="teams.html"><span class="card-icon">&#x1F697;</span><div class="card-title">F1车队</div><div class="card-desc">认识当今F1赛场上的十支劲旅</div></div>
+    <div class="card" data-href="../game.html"><span class="card-icon">&#x1F3CE;&#xFE0F;</span><div class="card-title" style="color:#ff4500">F1驾驶体验 🏁</div><div class="card-desc">电影开场 · 五视角竞速 · DRS尾翼 · 进站换胎 · 颁奖典礼<br><span style="color:#ff4500;font-size:0.8rem">🎮 3D实时竞速游戏 · 键盘WASD/触屏双适配</span></div></div>
+  </div>
+</div>
+<script>
+var cards=document.querySelectorAll('.card');
+cards.forEach(function(c){c.addEventListener('click',function(){var h=this.dataset.href;this.classList.add('expanding');setTimeout(function(){window.location.href=h;},650);});});
+</script></body></html>

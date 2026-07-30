@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bahrain International Circuit - F1入门查找</title><style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Noto Serif CJK SC", KaiTi, STKaiti, "AR PL UKai CN", serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .container { text-align: center; width: 100%; max-width: 680px; padding: 2rem; }
+  h1 { color: #f1f5f9; font-size: 2.0rem; font-weight: 600; margin-bottom: 0.3rem; letter-spacing: 0.02em; }
+  .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+  .back-row { text-align: left; margin-bottom: 1.2rem; }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: #94a3b8; text-decoration: none; font-size: 0.95rem;
+    cursor: pointer; transition: color 0.2s, transform 0.3s ease;
+    background: none; border: none; font-family: inherit;
+  }
+  .back-btn:hover { color: #e2e8f0; transform: translateX(-4px); }
+  .list-grid { display: flex; flex-direction: column; gap: 0.8rem; }
+  .list-item {
+    display: flex; align-items: center; gap: 0.8rem;
+    background: rgba(30,41,59,0.7); backdrop-filter: blur(6px);
+    border: 1px solid #334155; border-radius: 12px;
+    padding: 0.8rem 1.2rem; cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    text-align: left; position: relative; overflow: hidden;
+  }
+  .list-item:hover {
+    border-color: #e11d48; background: rgba(30,41,59,0.9);
+    transform: translateY(-2px); box-shadow: 0 6px 24px rgba(225,29,72,0.12);
+  }
+  .list-item.expanding {
+    transform: scale(1.06); border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225,29,72,0.25), 0 10px 32px rgba(225,29,72,0.2);
+  }
+  .item-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); }
+  .list-item .item-info { flex: 1; }
+  .list-item .item-name { color: #f1f5f9; font-size: 1.05rem; font-weight: 500; }
+  .list-item .item-team { color: #64748b; font-size: 0.78rem; margin-top: 0.1rem; }
+  .list-item .item-arrow { color: #475569; font-size: 0.9rem; transition: transform 0.3s; }
+  .list-item:hover .item-arrow { transform: translateX(4px); color: #e11d48; }
+
+  .detail-header { display: flex; align-items: center; gap: 1.2rem; text-align: left; margin-bottom: 2rem; }
+  .detail-header .big-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); }
+  .detail-header .detail-title { flex: 1; }
+  .detail-header .detail-title .name { color: #f1f5f9; font-size: 1.6rem; font-weight: 600; }
+  .detail-header .detail-title .team { color: #94a3b8; font-size: 0.85rem; margin-top: 0.2rem; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+  .detail-card { background: rgba(30,41,59,0.7); backdrop-filter: blur(6px); border: 1px solid #334155; border-radius: 12px; padding: 0.9rem 1.1rem; text-align: left; }
+  .detail-card.full { grid-column: 1 / -1; }
+  .detail-card .label { color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .detail-card .value { color: #f1f5f9; font-size: 1.0rem; font-weight: 500; }
+  .detail-card .value.highlight { color: #e11d48; }
+  .bio-card { background: rgba(30,41,59,0.5); border: 1px solid #334155; border-radius: 12px; padding: 1.2rem 1.4rem; text-align: left; }
+    .bio-card .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .bio-card .stat-line { color: #64748b; font-size: 0.78rem; margin-top: 0.5rem; text-align: right; }
+  /* 赛道详情双栏布局 */
+  .circuit-bottom { display: flex; gap: 1rem; align-items: stretch; margin-bottom: 0.5rem; }
+  .circuit-bio {
+    flex: 1; background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 1rem 1.2rem; text-align: left;
+    display: flex; align-items: center;
+  }
+  .circuit-bio .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .circuit-map {
+    flex: 0 0 260px; max-width: 260px;
+    background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) {
+    .circuit-bottom { flex-direction: column; }
+    .circuit-map { width: 100%; }
+  }
+</style></head>
+<body>
+<div class="container">
+  <div class="back-row">
+    <button class="back-btn" onclick="history.back()">&#x2190; 返回</button>
+  </div>
+  <div class="detail-header">
+    <img class="big-avatar" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2272%22%20height%3D%2272%22%20viewBox%3D%220%200%2072%2072%22%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%2236%22%20fill%3D%22%231a6b3c%22/%3E%3Ctext%20x%3D%2236%22%20y%3D%2236%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20fill%3D%22%23fff%22%20font-size%3D%2224%22%20font-weight%3D%22600%22%20font-family%3D%22Arial%2Csans-serif%22%3EBI%3C/text%3E%3C/svg%3E" alt="Bahrain International Circuit">
+    <div class="detail-title"><div class="name">Bahrain International Circuit</div><div class="team">巴林 &#x2022; 赛道</div></div>
+  </div>
+  <div class="detail-grid"><div class="detail-card"><div class="label">国家</div><div class="value">巴林</div></div><div class="detail-card"><div class="label">类型</div><div class="value highlight">赛道</div></div><div class="detail-card"><div class="label">单圈长度</div><div class="value">5.412km</div></div><div class="detail-card"><div class="label">比赛圈数</div><div class="value">57 圈</div></div><div class="detail-card"><div class="label">比赛总里程</div><div class="value">308.5km</div></div><div class="detail-card"><div class="label">圈速纪录</div><div class="value highlight">1:31.447 (De Vries 2021)</div></div><div class="detail-card full"><div class="label">首次举办</div><div class="value">2004 年</div></div></div>
+  <div class="circuit-bottom">
+  <div class="circuit-bio"><div class="bio-text">位于萨基尔的沙漠赛道，拥有多条长直道和急弯组合。F1赛季揭幕战的常客，夜间比赛以灯光照明闻名。</div></div>
+  <div class="circuit-map"><svg viewBox="0 0 500 500" width="100%" height="220" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="500" rx="10" fill="#0f1923"/>
+  <path d="M66.5,374.2 C53.0,390.5,109.1,391.7,136.2,397.5 C163.3,403.3,198.1,409.1,229.1,409.1 C260.1,409.1,293.0,405.2,322.0,397.5 C351.0,389.7,382.0,378.1,403.3,362.6 C424.6,347.2,440.1,325.9,449.7,304.6 C459.4,283.3,463.3,258.1,461.3,234.9 C459.4,211.7,451.7,184.6,438.1,165.2 C424.6,145.9,401.3,130.4,380.1,118.8 C358.8,107.2,335.5,100.2,310.4,95.6 C285.2,90.9,254.3,90.1,229.1,90.9 C203.9,91.7,180.7,93.6,159.4,100.2 C138.1,106.8,118.8,117.6,101.4,130.4 C83.9,143.2,65.4,159.4,54.9,176.8 C44.5,194.3,39.8,215.6,38.7,234.9 C37.5,254.3,39.4,275.5,48.0,293.0 C56.5,310.4,73.1,327.8,89.8,339.4 C106.4,351.0,128.5,360.7,147.8,362.6 C167.2,364.6,188.5,356.8,205.9,351.0 C223.3,345.2,238.8,337.5,252.3,327.8 C265.9,318.1,279.4,306.5,287.2,293.0 C294.9,279.4,298.8,262.0,298.8,246.5 C298.8,231.0,294.9,213.6,287.2,200.1 C279.4,186.5,265.9,174.1,252.3,165.2 C238.8,156.3,221.4,148.6,205.9,146.7 C190.4,144.7,173.0,147.4,159.4,153.6 C145.9,159.8,133.1,171.0,124.6,183.8 C116.1,196.6,109.5,214.8,108.3,230.3 C107.2,245.7,109.9,263.5,117.6,276.7 C125.4,289.9,140.1,301.5,154.8,309.2 C169.5,317.0,189.6,323.2,205.9,323.2 C222.1,323.2,238.8,317.0,252.3,309.2 C265.9,301.5,280.2,289.9,287.2,276.7 C294.1,263.5,296.1,245.0,294.1,230.3 C292.2,215.6,284.4,200.1,275.5,188.5 C266.6,176.8,254.3,166.4,240.7,160.6 C227.2,154.8,207.8,152.1,194.3,153.6 C180.7,155.2,168.3,161.0,159.4,169.9 C150.5,178.8,142.8,193.1,140.8,207.0 C138.9,221.0,141.6,240.3,147.8,253.5 C154.0,266.6,166.4,278.3,178.0,286.0 C189.6,293.7,236.1,285.2,217.5,299.9 C198.9,314.6,80.1,358.0,66.5,374.2" fill="none" stroke="#2d5a27" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M66.5,374.2 C53.0,390.5,109.1,391.7,136.2,397.5 C163.3,403.3,198.1,409.1,229.1,409.1 C260.1,409.1,293.0,405.2,322.0,397.5 C351.0,389.7,382.0,378.1,403.3,362.6 C424.6,347.2,440.1,325.9,449.7,304.6 C459.4,283.3,463.3,258.1,461.3,234.9 C459.4,211.7,451.7,184.6,438.1,165.2 C424.6,145.9,401.3,130.4,380.1,118.8 C358.8,107.2,335.5,100.2,310.4,95.6 C285.2,90.9,254.3,90.1,229.1,90.9 C203.9,91.7,180.7,93.6,159.4,100.2 C138.1,106.8,118.8,117.6,101.4,130.4 C83.9,143.2,65.4,159.4,54.9,176.8 C44.5,194.3,39.8,215.6,38.7,234.9 C37.5,254.3,39.4,275.5,48.0,293.0 C56.5,310.4,73.1,327.8,89.8,339.4 C106.4,351.0,128.5,360.7,147.8,362.6 C167.2,364.6,188.5,356.8,205.9,351.0 C223.3,345.2,238.8,337.5,252.3,327.8 C265.9,318.1,279.4,306.5,287.2,293.0 C294.9,279.4,298.8,262.0,298.8,246.5 C298.8,231.0,294.9,213.6,287.2,200.1 C279.4,186.5,265.9,174.1,252.3,165.2 C238.8,156.3,221.4,148.6,205.9,146.7 C190.4,144.7,173.0,147.4,159.4,153.6 C145.9,159.8,133.1,171.0,124.6,183.8 C116.1,196.6,109.5,214.8,108.3,230.3 C107.2,245.7,109.9,263.5,117.6,276.7 C125.4,289.9,140.1,301.5,154.8,309.2 C169.5,317.0,189.6,323.2,205.9,323.2 C222.1,323.2,238.8,317.0,252.3,309.2 C265.9,301.5,280.2,289.9,287.2,276.7 C294.1,263.5,296.1,245.0,294.1,230.3 C292.2,215.6,284.4,200.1,275.5,188.5 C266.6,176.8,254.3,166.4,240.7,160.6 C227.2,154.8,207.8,152.1,194.3,153.6 C180.7,155.2,168.3,161.0,159.4,169.9 C150.5,178.8,142.8,193.1,140.8,207.0 C138.9,221.0,141.6,240.3,147.8,253.5 C154.0,266.6,166.4,278.3,178.0,286.0 C189.6,293.7,236.1,285.2,217.5,299.9 C198.9,314.6,80.1,358.0,66.5,374.2" fill="none" stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M66.5,374.2 C53.0,390.5,109.1,391.7,136.2,397.5 C163.3,403.3,198.1,409.1,229.1,409.1 C260.1,409.1,293.0,405.2,322.0,397.5 C351.0,389.7,382.0,378.1,403.3,362.6 C424.6,347.2,440.1,325.9,449.7,304.6 C459.4,283.3,463.3,258.1,461.3,234.9 C459.4,211.7,451.7,184.6,438.1,165.2 C424.6,145.9,401.3,130.4,380.1,118.8 C358.8,107.2,335.5,100.2,310.4,95.6 C285.2,90.9,254.3,90.1,229.1,90.9 C203.9,91.7,180.7,93.6,159.4,100.2 C138.1,106.8,118.8,117.6,101.4,130.4 C83.9,143.2,65.4,159.4,54.9,176.8 C44.5,194.3,39.8,215.6,38.7,234.9 C37.5,254.3,39.4,275.5,48.0,293.0 C56.5,310.4,73.1,327.8,89.8,339.4 C106.4,351.0,128.5,360.7,147.8,362.6 C167.2,364.6,188.5,356.8,205.9,351.0 C223.3,345.2,238.8,337.5,252.3,327.8 C265.9,318.1,279.4,306.5,287.2,293.0 C294.9,279.4,298.8,262.0,298.8,246.5 C298.8,231.0,294.9,213.6,287.2,200.1 C279.4,186.5,265.9,174.1,252.3,165.2 C238.8,156.3,221.4,148.6,205.9,146.7 C190.4,144.7,173.0,147.4,159.4,153.6 C145.9,159.8,133.1,171.0,124.6,183.8 C116.1,196.6,109.5,214.8,108.3,230.3 C107.2,245.7,109.9,263.5,117.6,276.7 C125.4,289.9,140.1,301.5,154.8,309.2 C169.5,317.0,189.6,323.2,205.9,323.2 C222.1,323.2,238.8,317.0,252.3,309.2 C265.9,301.5,280.2,289.9,287.2,276.7 C294.1,263.5,296.1,245.0,294.1,230.3 C292.2,215.6,284.4,200.1,275.5,188.5 C266.6,176.8,254.3,166.4,240.7,160.6 C227.2,154.8,207.8,152.1,194.3,153.6 C180.7,155.2,168.3,161.0,159.4,169.9 C150.5,178.8,142.8,193.1,140.8,207.0 C138.9,221.0,141.6,240.3,147.8,253.5 C154.0,266.6,166.4,278.3,178.0,286.0 C189.6,293.7,236.1,285.2,217.5,299.9 C198.9,314.6,80.1,358.0,66.5,374.2" fill="none" stroke="#4ade80" stroke-width="3" stroke-dasharray="8,10" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <rect x="59.53005464480876" y="362.24863387978144" width="14" height="8" fill="#fff" rx="1.5"/>
+  <rect x="59.53005464480876" y="378.24863387978144" width="14" height="8" fill="#e11d48" rx="1.5"/>
+  <polygon points="56.53005464480876,364.24863387978144 69.53005464480876,356.24863387978144 69.53005464480876,372.24863387978144" fill="#94a3b8" opacity="0.6"/>
+  <text x="480" y="20" fill="#64748b" font-size="11" text-anchor="end" font-family="sans-serif">▶ 顺时针</text>
+</svg></div>
+</div>
+  <div class="stat-line" style="text-align:right;margin-top:0.5rem;color:#64748b;font-size:0.78rem">&#x1F4CD; 数据更新至2026赛季</div>
+</div></body></html>

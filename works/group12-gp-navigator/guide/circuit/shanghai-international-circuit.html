@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shanghai International Circuit - F1入门查找</title><style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Noto Serif CJK SC", KaiTi, STKaiti, "AR PL UKai CN", serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .container { text-align: center; width: 100%; max-width: 680px; padding: 2rem; }
+  h1 { color: #f1f5f9; font-size: 2.0rem; font-weight: 600; margin-bottom: 0.3rem; letter-spacing: 0.02em; }
+  .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+  .back-row { text-align: left; margin-bottom: 1.2rem; }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: #94a3b8; text-decoration: none; font-size: 0.95rem;
+    cursor: pointer; transition: color 0.2s, transform 0.3s ease;
+    background: none; border: none; font-family: inherit;
+  }
+  .back-btn:hover { color: #e2e8f0; transform: translateX(-4px); }
+  .list-grid { display: flex; flex-direction: column; gap: 0.8rem; }
+  .list-item {
+    display: flex; align-items: center; gap: 0.8rem;
+    background: rgba(30,41,59,0.7); backdrop-filter: blur(6px);
+    border: 1px solid #334155; border-radius: 12px;
+    padding: 0.8rem 1.2rem; cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    text-align: left; position: relative; overflow: hidden;
+  }
+  .list-item:hover {
+    border-color: #e11d48; background: rgba(30,41,59,0.9);
+    transform: translateY(-2px); box-shadow: 0 6px 24px rgba(225,29,72,0.12);
+  }
+  .list-item.expanding {
+    transform: scale(1.06); border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225,29,72,0.25), 0 10px 32px rgba(225,29,72,0.2);
+  }
+  .item-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); }
+  .list-item .item-info { flex: 1; }
+  .list-item .item-name { color: #f1f5f9; font-size: 1.05rem; font-weight: 500; }
+  .list-item .item-team { color: #64748b; font-size: 0.78rem; margin-top: 0.1rem; }
+  .list-item .item-arrow { color: #475569; font-size: 0.9rem; transition: transform 0.3s; }
+  .list-item:hover .item-arrow { transform: translateX(4px); color: #e11d48; }
+
+  .detail-header { display: flex; align-items: center; gap: 1.2rem; text-align: left; margin-bottom: 2rem; }
+  .detail-header .big-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); }
+  .detail-header .detail-title { flex: 1; }
+  .detail-header .detail-title .name { color: #f1f5f9; font-size: 1.6rem; font-weight: 600; }
+  .detail-header .detail-title .team { color: #94a3b8; font-size: 0.85rem; margin-top: 0.2rem; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+  .detail-card { background: rgba(30,41,59,0.7); backdrop-filter: blur(6px); border: 1px solid #334155; border-radius: 12px; padding: 0.9rem 1.1rem; text-align: left; }
+  .detail-card.full { grid-column: 1 / -1; }
+  .detail-card .label { color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  .detail-card .value { color: #f1f5f9; font-size: 1.0rem; font-weight: 500; }
+  .detail-card .value.highlight { color: #e11d48; }
+  .bio-card { background: rgba(30,41,59,0.5); border: 1px solid #334155; border-radius: 12px; padding: 1.2rem 1.4rem; text-align: left; }
+    .bio-card .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .bio-card .stat-line { color: #64748b; font-size: 0.78rem; margin-top: 0.5rem; text-align: right; }
+  /* 赛道详情双栏布局 */
+  .circuit-bottom { display: flex; gap: 1rem; align-items: stretch; margin-bottom: 0.5rem; }
+  .circuit-bio {
+    flex: 1; background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 1rem 1.2rem; text-align: left;
+    display: flex; align-items: center;
+  }
+  .circuit-bio .bio-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; }
+  .circuit-map {
+    flex: 0 0 260px; max-width: 260px;
+    background: rgba(30,41,59,0.5); border: 1px solid #334155;
+    border-radius: 12px; padding: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 560px) {
+    .circuit-bottom { flex-direction: column; }
+    .circuit-map { width: 100%; }
+  }
+</style></head>
+<body>
+<div class="container">
+  <div class="back-row">
+    <button class="back-btn" onclick="history.back()">&#x2190; 返回</button>
+  </div>
+  <div class="detail-header">
+    <img class="big-avatar" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2272%22%20height%3D%2272%22%20viewBox%3D%220%200%2072%2072%22%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2236%22%20r%3D%2236%22%20fill%3D%22%231a6b3c%22/%3E%3Ctext%20x%3D%2236%22%20y%3D%2236%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20fill%3D%22%23fff%22%20font-size%3D%2224%22%20font-weight%3D%22600%22%20font-family%3D%22Arial%2Csans-serif%22%3ESI%3C/text%3E%3C/svg%3E" alt="Shanghai International Circuit">
+    <div class="detail-title"><div class="name">Shanghai International Circuit</div><div class="team">中国 &#x2022; 赛道</div></div>
+  </div>
+  <div class="detail-grid"><div class="detail-card"><div class="label">国家</div><div class="value">中国</div></div><div class="detail-card"><div class="label">类型</div><div class="value highlight">赛道</div></div><div class="detail-card"><div class="label">单圈长度</div><div class="value">5.451km</div></div><div class="detail-card"><div class="label">比赛圈数</div><div class="value">56 圈</div></div><div class="detail-card"><div class="label">比赛总里程</div><div class="value">305.1km</div></div><div class="detail-card"><div class="label">圈速纪录</div><div class="value highlight">1:37.810 (Perez 2024)</div></div><div class="detail-card full"><div class="label">首次举办</div><div class="value">2004 年</div></div></div>
+  <div class="circuit-bottom">
+  <div class="circuit-bio"><div class="bio-text">独特的上字形布局，拥有极具挑战性的1号弯——螺旋上升的减速弯。赛道设计融合了中国传统文化元素。</div></div>
+  <div class="circuit-map"><svg viewBox="0 0 500 500" width="100%" height="220" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="500" rx="10" fill="#0f1923"/>
+  <path d="M457.499 211.881c-5.788-8.465-14.832-13.126-25.467-13.126-10.565 0-22.335 4.768-28.618 11.593-2.966 3.22-4.412 6.674-4.192 9.985.385 5.707 4.117 12.018 11.09 18.76.58.558.56 1.21.496 1.55a1.62 1.62 0 0 1-1 1.235l-140.705 57.863c-3.676 1.504-8.039.824-11.115-1.713-4.917-4.05-10.074-8.995-15.331-14.696-1.851-2.015-1.47-4.279-1.22-5.16.254-.895 1.135-3.054 3.816-3.772 1.58-.422 3.201-.827 4.852-1.244 8.74-2.195 18.644-4.684 29.538-10.987 22.33-12.915 15.017-35.707 12.47-43.641-2.565-8.031-8.343-11.919-20.999-20.44l-6.193-4.156c-12.215-8.138-20.289-13.514-23.636-30.018-3.506-17.247 4.767-35.443 19.25-42.328 6.662-3.166 15.551-6.414 25.846-10.175 14.561-5.315 31.059-11.342 48.502-19.655 19.148-9.13 26.922-20.15 30.073-27.79a10.34 10.34 0 0 0-.9-9.615c-2.066-3.143-5.663-4.876-9.414-4.455-16.252 1.816-51.748 7.028-71.462 9.974a58.3 58.3 0 0 0-21.005 7.422c-20.09 11.804-62.168 38.651-79.331 49.643-3.812 2.446-8.639 2.984-12.89 1.413-4.633-1.708-8.56-3.524-11.661-5.395-3.042-1.84-4.912-4.103-5.412-6.544-.44-2.156.19-4.564 1.77-6.777.956-1.343 1.741-1.454 2.402-1.454 2.13 0 4.972 1.74 6.193 2.484l.6.376c2.736 1.712 7.823 4.9 13.641 4.897 4.152 0 9.95-1.642 14.011-9.46 3.332-6.412 3.271-14.022-.16-20.878-4.662-9.314-14.606-15.945-26.607-17.741-11.655-1.741-24.816 3.435-33.865 13.268-6.828 7.414-10.415 16.494-9.85 24.905l18.634 276.007a1.82 1.82 0 0 1-1.02 1.758l-85.62 40.82-1.245.837c-4.492 4.09-9.61 10.604-15.212 19.359-1.99 3.103-2.15 6.881-.425 10.109 1.731 3.235 5.022 5.245 8.584 5.245 1.336 0 2.651-.28 3.912-.83 61.903-27.052 371.598-162.394 389.161-170.146 11.926-5.263 21.7-16.983 25.512-30.587 3.62-12.923 1.56-25.963-5.798-36.72z" fill="none" stroke="#2d5a27" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M457.499 211.881c-5.788-8.465-14.832-13.126-25.467-13.126-10.565 0-22.335 4.768-28.618 11.593-2.966 3.22-4.412 6.674-4.192 9.985.385 5.707 4.117 12.018 11.09 18.76.58.558.56 1.21.496 1.55a1.62 1.62 0 0 1-1 1.235l-140.705 57.863c-3.676 1.504-8.039.824-11.115-1.713-4.917-4.05-10.074-8.995-15.331-14.696-1.851-2.015-1.47-4.279-1.22-5.16.254-.895 1.135-3.054 3.816-3.772 1.58-.422 3.201-.827 4.852-1.244 8.74-2.195 18.644-4.684 29.538-10.987 22.33-12.915 15.017-35.707 12.47-43.641-2.565-8.031-8.343-11.919-20.999-20.44l-6.193-4.156c-12.215-8.138-20.289-13.514-23.636-30.018-3.506-17.247 4.767-35.443 19.25-42.328 6.662-3.166 15.551-6.414 25.846-10.175 14.561-5.315 31.059-11.342 48.502-19.655 19.148-9.13 26.922-20.15 30.073-27.79a10.34 10.34 0 0 0-.9-9.615c-2.066-3.143-5.663-4.876-9.414-4.455-16.252 1.816-51.748 7.028-71.462 9.974a58.3 58.3 0 0 0-21.005 7.422c-20.09 11.804-62.168 38.651-79.331 49.643-3.812 2.446-8.639 2.984-12.89 1.413-4.633-1.708-8.56-3.524-11.661-5.395-3.042-1.84-4.912-4.103-5.412-6.544-.44-2.156.19-4.564 1.77-6.777.956-1.343 1.741-1.454 2.402-1.454 2.13 0 4.972 1.74 6.193 2.484l.6.376c2.736 1.712 7.823 4.9 13.641 4.897 4.152 0 9.95-1.642 14.011-9.46 3.332-6.412 3.271-14.022-.16-20.878-4.662-9.314-14.606-15.945-26.607-17.741-11.655-1.741-24.816 3.435-33.865 13.268-6.828 7.414-10.415 16.494-9.85 24.905l18.634 276.007a1.82 1.82 0 0 1-1.02 1.758l-85.62 40.82-1.245.837c-4.492 4.09-9.61 10.604-15.212 19.359-1.99 3.103-2.15 6.881-.425 10.109 1.731 3.235 5.022 5.245 8.584 5.245 1.336 0 2.651-.28 3.912-.83 61.903-27.052 371.598-162.394 389.161-170.146 11.926-5.263 21.7-16.983 25.512-30.587 3.62-12.923 1.56-25.963-5.798-36.72z" fill="none" stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M457.499 211.881c-5.788-8.465-14.832-13.126-25.467-13.126-10.565 0-22.335 4.768-28.618 11.593-2.966 3.22-4.412 6.674-4.192 9.985.385 5.707 4.117 12.018 11.09 18.76.58.558.56 1.21.496 1.55a1.62 1.62 0 0 1-1 1.235l-140.705 57.863c-3.676 1.504-8.039.824-11.115-1.713-4.917-4.05-10.074-8.995-15.331-14.696-1.851-2.015-1.47-4.279-1.22-5.16.254-.895 1.135-3.054 3.816-3.772 1.58-.422 3.201-.827 4.852-1.244 8.74-2.195 18.644-4.684 29.538-10.987 22.33-12.915 15.017-35.707 12.47-43.641-2.565-8.031-8.343-11.919-20.999-20.44l-6.193-4.156c-12.215-8.138-20.289-13.514-23.636-30.018-3.506-17.247 4.767-35.443 19.25-42.328 6.662-3.166 15.551-6.414 25.846-10.175 14.561-5.315 31.059-11.342 48.502-19.655 19.148-9.13 26.922-20.15 30.073-27.79a10.34 10.34 0 0 0-.9-9.615c-2.066-3.143-5.663-4.876-9.414-4.455-16.252 1.816-51.748 7.028-71.462 9.974a58.3 58.3 0 0 0-21.005 7.422c-20.09 11.804-62.168 38.651-79.331 49.643-3.812 2.446-8.639 2.984-12.89 1.413-4.633-1.708-8.56-3.524-11.661-5.395-3.042-1.84-4.912-4.103-5.412-6.544-.44-2.156.19-4.564 1.77-6.777.956-1.343 1.741-1.454 2.402-1.454 2.13 0 4.972 1.74 6.193 2.484l.6.376c2.736 1.712 7.823 4.9 13.641 4.897 4.152 0 9.95-1.642 14.011-9.46 3.332-6.412 3.271-14.022-.16-20.878-4.662-9.314-14.606-15.945-26.607-17.741-11.655-1.741-24.816 3.435-33.865 13.268-6.828 7.414-10.415 16.494-9.85 24.905l18.634 276.007a1.82 1.82 0 0 1-1.02 1.758l-85.62 40.82-1.245.837c-4.492 4.09-9.61 10.604-15.212 19.359-1.99 3.103-2.15 6.881-.425 10.109 1.731 3.235 5.022 5.245 8.584 5.245 1.336 0 2.651-.28 3.912-.83 61.903-27.052 371.598-162.394 389.161-170.146 11.926-5.263 21.7-16.983 25.512-30.587 3.62-12.923 1.56-25.963-5.798-36.72z" fill="none" stroke="#4ade80" stroke-width="3" stroke-dasharray="8,10" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+</svg></div>
+</div>
+  <div class="stat-line" style="text-align:right;margin-top:0.5rem;color:#64748b;font-size:0.78rem">&#x1F4CD; 数据更新至2026赛季</div>
+</div></body></html>
