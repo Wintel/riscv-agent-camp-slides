@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🏀 海滨球场 · 光影增强版</title>
+    <style>
+        /* ---------- 全局重置 ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            overflow: hidden;
+            background: #0a0a1a;
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, sans-serif;
+            user-select: none;
+        }
+        canvas {
+            display: block;
+        }
+
+        /* ---------- 准星 ---------- */
+        #crosshair {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 30;
+            pointer-events: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 28px;
+            text-shadow: 0 0 12px rgba(0, 0, 0, 0.9), 0 0 4px rgba(0, 0, 0, 0.8);
+            font-weight: 300;
+            letter-spacing: 2px;
+            opacity: 0.8;
+        }
+        #crosshair .dot {
+            display: block;
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 80, 80, 0.8);
+            border-radius: 50%;
+            margin: -3px auto 0;
+            box-shadow: 0 0 16px rgba(255, 80, 80, 0.3);
+        }
+        #crosshair .ring {
+            display: block;
+            width: 32px;
+            height: 32px;
+            border: 1.5px solid rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+            margin: -20px auto 0;
+        }
+
+        /* ---------- UI 左上 ---------- */
+        #ui-top-left {
+            position: fixed;
+            top: 24px;
+            left: 28px;
+            color: #fff;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+            pointer-events: none;
+            z-index: 10;
+            font-weight: 600;
+            line-height: 1.6;
+            letter-spacing: 0.3px;
+        }
+        #ui-top-left .score {
+            font-size: 28px;
+            font-weight: 700;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 4px 18px 4px 14px;
+            border-radius: 40px;
+            display: inline-block;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        #ui-top-left .score span {
+            color: #ffb347;
+        }
+        #ui-top-left .action {
+            font-size: 18px;
+            margin-top: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 4px 16px;
+            border-radius: 30px;
+            display: inline-block;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        #ui-top-left .action .label {
+            color: #aac;
+            font-weight: 400;
+        }
+        #ui-top-left .action .value {
+            color: #7cf;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        /* ---------- 统计面板 ---------- */
+        #stats {
+            position: fixed;
+            right: 24px;
+            top: 24px;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 14px;
+            text-align: right;
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px 20px;
+            border-radius: 16px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            line-height: 1.8;
+            min-width: 100px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+        #stats .stat-label {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        #stats .stat-value {
+            color: #fff;
+            font-weight: 600;
+        }
+        #stats .stat-value.gold {
+            color: #ffd700;
+        }
+        #stats .stat-value.green {
+            color: #6f6;
+        }
+
+        /* ---------- 蓄力条（含甜区） ---------- */
+        #power-bar-container {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 240px;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            z-index: 25;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            position: relative; /* 为甜区定位 */
+        }
+        #power-bar-container.active {
+            opacity: 1;
+        }
+        #power-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #4af, #ffd700, #ff5533);
+            border-radius: 10px;
+            transition: width 0.05s linear;
+        }
+        /* ---- 甜区标记 ---- */
+        #power-sweet-spot {
+            position: absolute;
+            top: 0;
+            left: 60%;
+            width: 25%;
+            height: 100%;
+            background: rgba(0, 255, 100, 0.25);
+            border-left: 1px solid rgba(0, 255, 100, 0.5);
+            border-right: 1px solid rgba(0, 255, 100, 0.5);
+            pointer-events: none;
+            border-radius: 2px;
+            box-shadow: 0 0 12px rgba(0, 255, 100, 0.15);
+            display: none; /* 默认隐藏，蓄力时显示 */
+        }
+        #power-bar-container.active #power-sweet-spot {
+            display: block;
+        }
+
+        #power-label {
+            position: fixed;
+            bottom: 116px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            z-index: 26;
+            pointer-events: none;
+            letter-spacing: 1px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+        #power-label.active {
+            opacity: 1;
+        }
+
+        /* ---------- 底部提示 ---------- */
+        #ui-bottom-center {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            padding: 10px 28px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            pointer-events: none;
+            z-index: 10;
+            text-align: center;
+            white-space: nowrap;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+            user-select: none;
+        }
+        #ui-bottom-center kbd {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #eee;
+            margin: 0 2px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        #ui-bottom-center .sep {
+            margin: 0 6px;
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ---------- 边缘闪光 ---------- */
+        #flash-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 20;
+            border: 0px solid transparent;
+            transition: border 0.08s ease-out, box-shadow 0.08s ease-out;
+        }
+        #flash-overlay.active {
+            border-width: 8px;
+            border-style: solid;
+            box-shadow: inset 0 0 80px rgba(255, 255, 255, 0.15);
+        }
+
+        /* ---------- 得分浮动 ---------- */
+        .score-fly {
+            position: fixed;
+            z-index: 50;
+            pointer-events: none;
+            font-size: 52px;
+            font-weight: 800;
+            color: #ffd700;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 4px 20px rgba(0, 0, 0, 0.6);
+            transition: all 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .score-fly.fly-out {
+            opacity: 0;
+            transform: translateY(-120px) scale(1.4);
+        }
+        .score-fly.miss {
+            color: #ff6b6b;
+            text-shadow: 0 0 30px rgba(255, 80, 80, 0.3), 0 4px 20px rgba(0, 0, 0, 0.6);
+            font-size: 36px;
+        }
+
+        /* ---------- 加载 ---------- */
+        #status-msg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 30px 48px;
+            border-radius: 20px;
+            font-size: 22px;
+            font-weight: 500;
+            text-align: center;
+            z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            max-width: 90vw;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            line-height: 1.6;
+        }
+        #status-msg .sub {
+            font-size: 16px;
+            color: #aaa;
+            margin-top: 12px;
+            font-weight: 400;
+        }
+        #status-msg .icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+        }
+        #status-msg.hidden {
+            display: none;
+        }
+
+        /* ---------- 响应式 ---------- */
+        @media (max-width: 768px) {
+            #ui-top-left {
+                top: 16px;
+                left: 16px;
+            }
+            #ui-top-left .score {
+                font-size: 22px;
+                padding: 2px 14px;
+            }
+            #ui-top-left .action {
+                font-size: 15px;
+                margin-top: 6px;
+                padding: 2px 12px;
+            }
+            #stats {
+                right: 12px;
+                top: 12px;
+                font-size: 12px;
+                padding: 8px 14px;
+                min-width: 70px;
+            }
+            #ui-bottom-center {
+                font-size: 12px;
+                padding: 8px 16px;
+                bottom: 18px;
+                white-space: normal;
+                max-width: 92vw;
+                line-height: 1.6;
+            }
+            #ui-bottom-center kbd {
+                font-size: 11px;
+                padding: 1px 7px;
+            }
+            #flash-overlay.active {
+                border-width: 4px;
+            }
+            #power-bar-container {
+                width: 160px;
+                height: 6px;
+                bottom: 80px;
+            }
+            #power-label {
+                bottom: 94px;
+                font-size: 10px;
+            }
+            .score-fly {
+                font-size: 36px;
+            }
+            #crosshair {
+                font-size: 20px;
+            }
+            #crosshair .ring {
+                width: 24px;
+                height: 24px;
+                margin-top: -16px;
+            }
+            #crosshair .dot {
+                width: 4px;
+                height: 4px;
+                margin-top: -2px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 准星 -->
+    <div id="crosshair"><span class="ring"></span><span class="dot"></span></div>
+
+    <!-- UI -->
+    <div id="ui-top-left">
+        <div class="score">🏀 得分 <span id="score-display">0</span></div>
+        <div class="action"><span class="label">动作</span><span class="value" id="action-display">运球</span></div>
+    </div>
+    <div id="stats">
+        <div><span class="stat-label">出手</span> <span class="stat-value" id="stat-attempts">0</span></div>
+        <div><span class="stat-label">命中</span> <span class="stat-value gold" id="stat-makes">0</span></div>
+        <div><span class="stat-label">命中率</span> <span class="stat-value" id="stat-pct">0%</span></div>
+    </div>
+
+    <!-- 蓄力（含甜区） -->
+    <div id="power-bar-container">
+        <div id="power-bar-fill"></div>
+        <div id="power-sweet-spot"></div>
+    </div>
+    <div id="power-label">⚡ 蓄力</div>
+
+    <!-- 底部提示 -->
+    <div id="ui-bottom-center">
+        <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动 &nbsp;<span class="sep">·</span>&nbsp; 🖱 鼠标环顾 &nbsp;<span class="sep">·</span>&nbsp;
+        <kbd>Q</kbd> 胯下 &nbsp;<span class="sep">·</span>&nbsp; <kbd>E</kbd> 背运 &nbsp;<span class="sep">·</span>&nbsp;
+        <kbd>F</kbd> 急停跳投 &nbsp;<span class="sep">·</span>&nbsp; <kbd>G</kbd> 后撤步 &nbsp;<span class="sep">·</span>&nbsp;
+        <kbd>C</kbd> 交叉步 &nbsp;<span class="sep">·</span>&nbsp; <kbd>空格</kbd>/左键 蓄力投篮 &nbsp;<span class="sep">·</span>&nbsp;
+        🖱 滚轮调视野
+    </div>
+
+    <!-- 闪光 -->
+    <div id="flash-overlay"></div>
+
+    <!-- 状态消息 -->
+    <div id="status-msg" class="hidden"><span class="icon">⏳</span>加载中...<div class="sub">正在初始化 3D 场景</div></div>
+
+    <!-- Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        // ==================================================================
+        // 1. 导入
+        // ==================================================================
+        import * as THREE from 'three';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+        // ==================================================================
+        // 2. DOM
+        // ==================================================================
+        const scoreEl = document.getElementById('score-display');
+        const actionEl = document.getElementById('action-display');
+        const flashEl = document.getElementById('flash-overlay');
+        const statusMsg = document.getElementById('status-msg');
+        const statAttempts = document.getElementById('stat-attempts');
+        const statMakes = document.getElementById('stat-makes');
+        const statPct = document.getElementById('stat-pct');
+        const powerBarFill = document.getElementById('power-bar-fill');
+        const powerBarContainer = document.getElementById('power-bar-container');
+        const powerLabel = document.getElementById('power-label');
+
+        // ==================================================================
+        // 3. 场景 / 相机 / 渲染器
+        // ==================================================================
+        let scene, camera, renderer, controls, composer;
+        const clock = new THREE.Clock();
+
+        try {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x2a1e30);
+            scene.fog = new THREE.Fog(0x2a1e30, 25, 50);
+
+            camera = new THREE.PerspectiveCamera(72, window.innerWidth / window.innerHeight, 0.1, 60);
+            camera.position.set(0, 1.7, 4.5);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            document.body.prepend(renderer.domElement);
+
+            // 控制器
+            controls = new PointerLockControls(camera, renderer.domElement);
+            renderer.domElement.addEventListener('click', () => { if (!controls.isLocked) controls.lock(); });
+            controls.addEventListener('lock', () => { document.body.style.cursor = 'default'; });
+            controls.addEventListener('unlock', () => { document.body.style.cursor = 'pointer'; });
+
+            // 后处理：泛光
+            composer = new EffectComposer(renderer);
+            const renderPass = new RenderPass(scene, camera);
+            composer.addPass(renderPass);
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                0.3, // 强度
+                0.4, // 半径
+                0.2 // 阈值
+            );
+            composer.addPass(bloomPass);
+
+        } catch (err) {
+            showError('初始化失败', err.message);
+            throw err;
+        }
+
+        function showError(msg, detail = '') {
+            statusMsg.classList.remove('hidden');
+            statusMsg.innerHTML = `<span class="icon">❌</span>${msg}<div class="sub">${detail || '请刷新重试'}</div>`;
+            console.error('[错误]', msg, detail);
+        }
+        window.addEventListener('unhandledrejection', (e) => showError('模块加载失败', e.reason?.message || ''));
+
+        // ==================================================================
+        // 4. 灯光 (高级) + 动态光源引用
+        // ==================================================================
+        let mainLight; // 用于动态旋转
+        try {
+            // 环境
+            const ambient = new THREE.AmbientLight(0x445566, 0.4);
+            scene.add(ambient);
+
+            // 主光源 (模拟夕阳) —— 保存引用
+            mainLight = new THREE.DirectionalLight(0xffaa66, 1.8);
+            mainLight.position.set(-10, 12, 8);
+            mainLight.castShadow = true;
+            mainLight.shadow.mapSize.width = 2048;
+            mainLight.shadow.mapSize.height = 2048;
+            mainLight.shadow.camera.near = 0.5;
+            mainLight.shadow.camera.far = 30;
+            mainLight.shadow.camera.left = -12;
+            mainLight.shadow.camera.right = 12;
+            mainLight.shadow.camera.top = 12;
+            mainLight.shadow.camera.bottom = -12;
+            mainLight.shadow.bias = -0.001;
+            scene.add(mainLight);
+
+            // 辅助暖光
+            const warm = new THREE.DirectionalLight(0xff8833, 0.6);
+            warm.position.set(5, 6, -2);
+            scene.add(warm);
+
+            // 冷补光
+            const cool = new THREE.DirectionalLight(0x88bbff, 0.3);
+            cool.position.set(-4, 5, -8);
+            scene.add(cool);
+
+            // 篮架聚光
+            const spot = new THREE.SpotLight(0xffffff, 0.8);
+            spot.position.set(0, 8, -6);
+            spot.angle = 0.5;
+            spot.penumbra = 0.3;
+            spot.decay = 1;
+            spot.distance = 25;
+            spot.castShadow = true;
+            scene.add(spot);
+
+            // 半球光
+            const hemi = new THREE.HemisphereLight(0xffaa66, 0x224466, 0.6);
+            scene.add(hemi);
+
+        } catch (err) { showError('灯光创建失败', err.message); }
+
+        // ==================================================================
+        // 5. 环境：晚霞天空球 (程序化生成)
+        // ==================================================================
+        function createSunsetSky() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            // 渐变填充 (从紫色到橙色到蓝色)
+            const grd = ctx.createLinearGradient(0, 0, 0, 512);
+            grd.addColorStop(0, '#1a0a2e');
+            grd.addColorStop(0.2, '#2d1b4e');
+            grd.addColorStop(0.4, '#6b3a5a');
+            grd.addColorStop(0.55, '#c76a4a');
+            grd.addColorStop(0.7, '#f09a4a');
+            grd.addColorStop(0.85, '#f5c87a');
+            grd.addColorStop(1, '#a8c8e0');
+            ctx.fillStyle = grd;
+            ctx.fillRect(0, 0, 1024, 512);
+
+            // 云朵 (随机半透明圆)
+            for (let i = 0; i < 60; i++) {
+                const x = Math.random() * 1024;
+                const y = 50 + Math.random() * 300;
+                const r = 20 + Math.random() * 70;
+                const alpha = 0.1 + Math.random() * 0.25;
+                const hue = 30 + Math.random() * 30;
+                ctx.fillStyle = `hsla(${hue}, 80%, 70%, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+                for (let j = 0; j < 3; j++) {
+                    const dx = (Math.random() - 0.5) * r * 1.5;
+                    const dy = (Math.random() - 0.5) * r * 0.8;
+                    const sr = r * (0.3 + Math.random() * 0.5);
+                    ctx.fillStyle = `hsla(${hue+10}, 70%, 75%, ${alpha*0.6})`;
+                    ctx.beginPath();
+                    ctx.arc(x + dx, y + dy, sr, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // 太阳 (发光圆)
+            const grdSun = ctx.createRadialGradient(800, 280, 20, 800, 280, 120);
+            grdSun.addColorStop(0, 'rgba(255,220,140,1)');
+            grdSun.addColorStop(0.2, 'rgba(255,180,80,0.8)');
+            grdSun.addColorStop(0.6, 'rgba(200,100,40,0.3)');
+            grdSun.addColorStop(1, 'rgba(200,100,40,0)');
+            ctx.fillStyle = grdSun;
+            ctx.beginPath();
+            ctx.arc(800, 280, 120, 0, Math.PI * 2);
+            ctx.fill();
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.magFilter = THREE.LinearFilter;
+            texture.minFilter = THREE.LinearFilter;
+            return texture;
+        }
+
+        const skyGeo = new THREE.SphereGeometry(48, 32, 32);
+        const skyMat = new THREE.MeshBasicMaterial({
+            map: createSunsetSky(),
+            side: THREE.BackSide,
+        });
+        const sky = new THREE.Mesh(skyGeo, skyMat);
+        scene.add(sky);
+
+        // ==================================================================
+        // 6. 海洋 + 沙滩
+        // ==================================================================
+        // 沙滩 (大平面)
+        const sandTex = (() => {
+            const c = document.createElement('canvas');
+            c.width = 512;
+            c.height = 512;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#d4b68a';
+            ctx.fillRect(0, 0, 512, 512);
+            for (let i = 0; i < 2000; i++) {
+                const x = Math.random() * 512,
+                    y = Math.random() * 512;
+                const r = 1 + Math.random() * 3;
+                const alpha = 0.1 + Math.random() * 0.3;
+                ctx.fillStyle = `rgba(180,140,100,${alpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            return new THREE.CanvasTexture(c);
+        })();
+        const sandMat = new THREE.MeshStandardMaterial({
+            map: sandTex,
+            roughness: 0.9,
+            metalness: 0,
+            color: 0xd4b68a,
+        });
+        const sand = new THREE.Mesh(new THREE.PlaneGeometry(40, 30), sandMat);
+        sand.rotation.x = -Math.PI / 2;
+        sand.position.set(0, -0.02, 2);
+        sand.receiveShadow = true;
+        scene.add(sand);
+
+        // 海洋 (半透明，带顶点动画)
+        const oceanGeo = new THREE.PlaneGeometry(60, 40, 64, 64);
+        const oceanMat = new THREE.MeshStandardMaterial({
+            color: 0x3a6b8f,
+            transparent: true,
+            opacity: 0.65,
+            roughness: 0.2,
+            metalness: 0.4,
+            side: THREE.DoubleSide,
+        });
+        const ocean = new THREE.Mesh(oceanGeo, oceanMat);
+        ocean.rotation.x = -Math.PI / 2;
+        ocean.position.set(0, -0.01, 12);
+        ocean.receiveShadow = true;
+        scene.add(ocean);
+
+        // 存储顶点用于波浪
+        const posAttr = oceanGeo.attributes.position;
+        const originalY = new Float32Array(posAttr.array);
+        const oceanVerts = [];
+
+        // 远处山丘 (简单)
+        const hillMat = new THREE.MeshStandardMaterial({ color: 0x4a6b3a, roughness: 0.8 });
+        for (let i = 0; i < 6; i++) {
+            const hill = new THREE.Mesh(new THREE.ConeGeometry(1.5 + Math.random() * 2, 0.8 + Math.random() * 1.2, 8),
+            hillMat);
+            hill.position.set(-8 + Math.random() * 16, -0.1, 14 + Math.random() * 6);
+            hill.castShadow = true;
+            hill.receiveShadow = true;
+            scene.add(hill);
+        }
+
+        // 棕榈树 (简化)
+        function createPalm(x, z) {
+            const g = new THREE.Group();
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8b6b4a, roughness: 0.8 });
+            const leafMat = new THREE.MeshStandardMaterial({ color: 0x2d6a2d, roughness: 0.6 });
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 1.2, 6), trunkMat);
+            trunk.position.y = 0.6;
+            trunk.castShadow = true;
+            g.add(trunk);
+            for (let i = 0; i < 5; i++) {
+                const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.7, 6), leafMat);
+                leaf.position.set(0, 1.2, 0);
+                leaf.rotation.z = (i / 5) * Math.PI * 2 + 0.2;
+                leaf.rotation.x = 0.4 + Math.random() * 0.3;
+                leaf.castShadow = true;
+                g.add(leaf);
+            }
+            g.position.set(x, -0.01, z);
+            return g;
+        }
+        scene.add(createPalm(-6, 6));
+        scene.add(createPalm(7, 7));
+        scene.add(createPalm(-5, 10));
+        scene.add(createPalm(6, 11));
+
+        // 观众 (小方块)
+        const crowdMat = new THREE.MeshStandardMaterial({ color: 0x8a6e5a, roughness: 0.7 });
+        for (let i = 0; i < 30; i++) {
+            const person = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.6, 0.2), crowdMat);
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 3 + Math.random() * 4;
+            person.position.set(
+                Math.cos(angle) * dist + (Math.random() - 0.5) * 2,
+                0.3,
+                Math.sin(angle) * dist - 6 + (Math.random() - 0.5) * 1
+            );
+            person.castShadow = true;
+            person.receiveShadow = true;
+            scene.add(person);
+        }
+
+        // ==================================================================
+        // 7. 篮球架 (位置不变)
+        // ==================================================================
+        function createBasketballHoop() {
+            const group = new THREE.Group();
+            const poleMat = new THREE.MeshStandardMaterial({ color: 0x8899aa, roughness: 0.4, metalness: 0.6 });
+            const backboardMat = new THREE.MeshStandardMaterial({
+                color: 0xccddee,
+                roughness: 0.3,
+                metalness: 0.05,
+                transparent: true,
+                opacity: 0.55,
+            });
+            const rimMat = new THREE.MeshStandardMaterial({ color: 0xff5533, roughness: 0.5, metalness: 0.3 });
+
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 3.8, 8), poleMat);
+            pole.position.set(0, 1.9, -7.2);
+            pole.castShadow = true;
+            group.add(pole);
+
+            const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.8, 6), poleMat);
+            beam.rotation.z = Math.PI / 2;
+            beam.position.set(0, 3.6, -6.3);
+            beam.castShadow = true;
+            group.add(beam);
+
+            const board = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.1, 0.06), backboardMat);
+            board.position.set(0, 2.75, -6.5);
+            board.castShadow = true;
+            board.receiveShadow = true;
+            group.add(board);
+
+            const rim = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.04, 12, 24), rimMat);
+            rim.position.set(0, 3.05, -7);
+            rim.rotation.x = Math.PI / 2;
+            rim.castShadow = true;
+            group.add(rim);
+
+            const conn = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.5),
+                new THREE.MeshStandardMaterial({ color: 0x8899aa, metalness: 0.5, roughness: 0.3 }));
+            conn.position.set(0, 3.05, -6.75);
+            group.add(conn);
+
+            // 网 (简化)
+            const netMat = new THREE.LineBasicMaterial({ color: 0xeeeeee, transparent: true, opacity: 0.3 });
+            for (let i = 0; i < 12; i++) {
+                const angle = (i / 12) * Math.PI * 2;
+                const pts = [];
+                for (let j = 0; j <= 8; j++) {
+                    const t = j / 8;
+                    const r = 0.28 + (0.18 - 0.28) * t * t;
+                    pts.push(new THREE.Vector3(Math.cos(angle + t * 0.3) * r, -t * 0.5, Math.sin(angle + t * 0.3) * r));
+                }
+                const geo = new THREE.BufferGeometry().setFromPoints(pts);
+                const line = new THREE.Line(geo, netMat);
+                line.position.set(0, 3.05, -7);
+                group.add(line);
+            }
+            return group;
+        }
+        const hoopGroup = createBasketballHoop();
+        scene.add(hoopGroup);
+
+        const HOOP_CENTER = new THREE.Vector3(0, 3.05, -7);
+        const HOOP_RADIUS = 0.35;
+        const BACKBOARD_POS = new THREE.Vector3(0, 2.75, -6.5);
+        const BACKBOARD_SIZE = new THREE.Vector3(0.85, 0.50, 0.06);
+
+        // ==================================================================
+        // 8. 篮球
+        // ==================================================================
+        function createBasketball() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            const grad = ctx.createRadialGradient(200, 200, 50, 256, 256, 256);
+            grad.addColorStop(0, '#f59a3c');
+            grad.addColorStop(0.5, '#e07d2a');
+            grad.addColorStop(0.85, '#c4621e');
+            grad.addColorStop(1, '#9e4a14');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 512, 512);
+
+            ctx.strokeStyle = 'rgba(30,20,15,0.5)';
+            ctx.lineWidth = 3;
+            for (let i = -2; i <= 2; i++) {
+                const y = 256 + i * 70;
+                ctx.beginPath();
+                ctx.ellipse(256, y, 200, 60, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            for (let i = -2; i <= 2; i++) {
+                const x = 256 + i * 70;
+                ctx.beginPath();
+                ctx.ellipse(x, 256, 60, 200, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.strokeStyle = 'rgba(30,20,15,0.35)';
+            ctx.lineWidth = 2;
+            for (let i = -2; i <= 2; i++) {
+                const off = i * 50;
+                ctx.beginPath();
+                ctx.moveTo(100 + off, 50);
+                ctx.lineTo(412 + off, 462);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(412 + off, 50);
+                ctx.lineTo(100 + off, 462);
+                ctx.stroke();
+            }
+            for (let i = 0; i < 600; i++) {
+                const x = Math.random() * 512,
+                    y = Math.random() * 512;
+                const r = 1 + Math.random() * 2.5,
+                    alpha = 0.1 + Math.random() * 0.25;
+                ctx.fillStyle = `rgba(40,25,15,${alpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.anisotropy = 4;
+            const mat = new THREE.MeshStandardMaterial({
+                map: texture,
+                roughness: 0.6,
+                metalness: 0.05,
+                color: 0xffaa55,
+                bumpMap: texture,
+                bumpScale: 0.02,
+            });
+            const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.24, 32, 32), mat);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            return mesh;
+        }
+
+        let basketball = createBasketball();
+        const initPos = getBallWorldPos(0, -0.8, -1.2);
+        basketball.position.copy(initPos);
+        scene.add(basketball);
+
+        function getBallWorldPos(lx, ly, lz) {
+            const offset = new THREE.Vector3(lx, ly, lz);
+            offset.applyQuaternion(camera.quaternion);
+            return camera.position.clone().add(offset);
+        }
+
+        function getCameraForward() {
+            const dir = new THREE.Vector3(0, 0, -1);
+            dir.applyQuaternion(camera.quaternion);
+            return dir;
+        }
+
+        // ==================================================================
+        // 9. 状态管理 (增加新动作)
+        // ==================================================================
+        const BALL_STATE = {
+            IDLE: 'idle',
+            BETWEEN_LEGS: 'betweenLegs',
+            BEHIND_BACK: 'behindBack',
+            SHOOTING: 'shooting',
+            CHARGING: 'charging',
+            JUMP_SHOT: 'jumpShot', // 急停跳投
+            STEP_BACK: 'stepBack', // 后撤步
+            CROSSOVER: 'crossover', // 交叉步
+        };
+
+        let ballState = BALL_STATE.IDLE;
+        let stateTimer = 0;
+        let isSprinting = false;
+        let score = 0,
+            attempts = 0,
+            makes = 0;
+        let shootData = null;
+        let chargePower = 0.5;
+        let isCharging = false;
+        let chargeStartTime = 0;
+
+        const stateNames = {
+            [BALL_STATE.IDLE]: '运球',
+            [BALL_STATE.BETWEEN_LEGS]: '胯下运球',
+            [BALL_STATE.BEHIND_BACK]: '背后运球',
+            [BALL_STATE.SHOOTING]: '投篮',
+            [BALL_STATE.CHARGING]: '蓄力',
+            [BALL_STATE.JUMP_SHOT]: '急停跳投',
+            [BALL_STATE.STEP_BACK]: '后撤步',
+            [BALL_STATE.CROSSOVER]: '交叉步',
+        };
+
+        const flashColors = {
+            [BALL_STATE.IDLE]: 'rgba(255,200,100,0)',
+            [BALL_STATE.BETWEEN_LEGS]: 'rgba(100,180,255,0.7)',
+            [BALL_STATE.BEHIND_BACK]: 'rgba(100,255,160,0.7)',
+            [BALL_STATE.SHOOTING]: 'rgba(255,255,255,0.8)',
+            [BALL_STATE.CHARGING]: 'rgba(255,200,50,0.3)',
+            [BALL_STATE.JUMP_SHOT]: 'rgba(255,150,50,0.7)',
+            [BALL_STATE.STEP_BACK]: 'rgba(200,100,255,0.7)',
+            [BALL_STATE.CROSSOVER]: 'rgba(50,255,200,0.7)',
+        };
+
+        let flashTimeout = null;
+
+        function triggerFlash(state) {
+            const color = flashColors[state] || 'rgba(255,255,255,0.5)';
+            flashEl.classList.add('active');
+            flashEl.style.borderColor = color;
+            flashEl.style.boxShadow = `inset 0 0 80px ${color}`;
+            if (flashTimeout) clearTimeout(flashTimeout);
+            flashTimeout = setTimeout(() => {
+                flashEl.classList.remove('active');
+                flashEl.style.borderColor = 'transparent';
+                flashEl.style.boxShadow = 'none';
+            }, 300);
+        }
+
+        function setBallState(newState) {
+            if (ballState === BALL_STATE.SHOOTING && newState !== BALL_STATE.IDLE) return;
+            if ((ballState === BALL_STATE.BETWEEN_LEGS || ballState === BALL_STATE.BEHIND_BACK ||
+                    ballState === BALL_STATE.JUMP_SHOT || ballState === BALL_STATE.STEP_BACK ||
+                    ballState === BALL_STATE.CROSSOVER) && newState !== BALL_STATE.IDLE) return;
+            const oldState = ballState;
+            ballState = newState;
+            stateTimer = 0;
+            if (newState !== BALL_STATE.IDLE || oldState !== BALL_STATE.IDLE) {
+                triggerFlash(newState);
+            }
+            updateUI();
+            if (newState === BALL_STATE.SHOOTING) {
+                initShoot();
+            }
+            if (newState === BALL_STATE.IDLE) {
+                shootData = null;
+                isCharging = false;
+                powerBarContainer.classList.remove('active');
+                powerLabel.classList.remove('active');
+                // 移除辅助线
+                removeTrajectoryLine();
+            }
+            if (newState === BALL_STATE.CHARGING) {
+                powerBarContainer.classList.add('active');
+                powerLabel.classList.add('active');
+                // 创建辅助线（如果尚未）
+                createTrajectoryLine();
+            }
+        }
+
+        function initShoot() {
+            const power = Math.max(0.4, Math.min(1.6, chargePower));
+            const startLocal = new THREE.Vector3(0, 0.5, -1.0);
+            const startWorld = getBallWorldPos(startLocal.x, startLocal.y, startLocal.z);
+
+            const spread = 0.25 - power * 0.08;
+            const offsetX = (Math.random() - 0.5) * spread * 1.2;
+            const offsetZ = (Math.random() - 0.5) * spread * 0.8;
+            const target = HOOP_CENTER.clone().add(new THREE.Vector3(offsetX, 0, offsetZ));
+            target.y += 0.1 + power * 0.1;
+
+            const mid = startWorld.clone().add(target).multiplyScalar(0.5);
+            mid.y = Math.max(startWorld.y, target.y) + 1.5 + power * 0.7;
+
+            shootData = {
+                start: startWorld.clone(),
+                target: target.clone(),
+                control: mid,
+                progress: 0,
+                duration: 0.8 + (1.6 - power) * 0.15,
+                scored: false,
+                bounceCount: 0,
+                isBouncing: false,
+                velY: 0,
+                hitBackboard: false,
+            };
+            powerBarContainer.classList.remove('active');
+            powerLabel.classList.remove('active');
+            isCharging = false;
+            chargePower = 0.5;
+            powerBarFill.style.width = '0%';
+            // 移除辅助线
+            removeTrajectoryLine();
+        }
+
+        function updateUI() {
+            actionEl.textContent = stateNames[ballState] || '运球';
+            scoreEl.textContent = score;
+            statAttempts.textContent = attempts;
+            statMakes.textContent = makes;
+            statPct.textContent = attempts === 0 ? '0%' : Math.round((makes / attempts) * 100) + '%';
+        }
+
+        // ==================================================================
+        // 9.1 投篮轨迹辅助线 (新增)
+        // ==================================================================
+        let trajectoryLine = null;
+        const TRAJECTORY_SEGMENTS = 30;
+
+        function createTrajectoryLine() {
+            if (trajectoryLine) {
+                scene.remove(trajectoryLine);
+                trajectoryLine.geometry.dispose();
+                trajectoryLine.material.dispose();
+                trajectoryLine = null;
+            }
+            const points = [];
+            for (let i = 0; i <= TRAJECTORY_SEGMENTS; i++) {
+                points.push(new THREE.Vector3(0, 0, 0));
+            }
+            const geo = new THREE.BufferGeometry().setFromPoints(points);
+            const mat = new THREE.LineBasicMaterial({
+                color: 0x88ddff,
+                transparent: true,
+                opacity: 0.4,
+                linewidth: 1,
+            });
+            trajectoryLine = new THREE.Line(geo, mat);
+            scene.add(trajectoryLine);
+        }
+
+        function updateTrajectoryLine() {
+            if (!trajectoryLine) return;
+            // 计算当前球位置和篮筐之间的贝塞尔曲线
+            const ballPos = basketball.position.clone();
+            const targetPos = HOOP_CENTER.clone();
+            // 控制点取中间偏上
+            const mid = ballPos.clone().add(targetPos).multiplyScalar(0.5);
+            mid.y = Math.max(ballPos.y, targetPos.y) + 2.0;
+
+            const positions = trajectoryLine.geometry.attributes.position.array;
+            for (let i = 0; i <= TRAJECTORY_SEGMENTS; i++) {
+                const t = i / TRAJECTORY_SEGMENTS;
+                const p = quadraticBezier(ballPos, mid, targetPos, t);
+                positions[i * 3] = p.x;
+                positions[i * 3 + 1] = p.y;
+                positions[i * 3 + 2] = p.z;
+            }
+            trajectoryLine.geometry.attributes.position.needsUpdate = true;
+        }
+
+        function removeTrajectoryLine() {
+            if (trajectoryLine) {
+                scene.remove(trajectoryLine);
+                trajectoryLine.geometry.dispose();
+                trajectoryLine.material.dispose();
+                trajectoryLine = null;
+            }
+        }
+
+        // ==================================================================
+        // 10. 输入 (增加新按键)
+        // ==================================================================
+        const keys = { w: false, a: false, s: false, d: false, shift: false, space: false, q: false, e: false, f: false,
+            g: false, c: false };
+        let mouseDown = false;
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (['w', 'a', 's', 'd', 'shift'].includes(key)) { keys[key] = true;
+                e.preventDefault(); }
+            if (key === ' ') {
+                keys.space = true;
+                e.preventDefault();
+                if (!controls.isLocked) return;
+                if (ballState === BALL_STATE.IDLE) startCharging();
+            }
+            if (key === 'q') { keys.q = true;
+                e.preventDefault();
+                if (ballState === BALL_STATE.IDLE) setBallState(BALL_STATE.BETWEEN_LEGS); }
+            if (key === 'e') { keys.e = true;
+                e.preventDefault();
+                if (ballState === BALL_STATE.IDLE) setBallState(BALL_STATE.BEHIND_BACK); }
+            if (key === 'f') { keys.f = true;
+                e.preventDefault();
+                if (ballState === BALL_STATE.IDLE) { setBallState(BALL_STATE.JUMP_SHOT);
+                    attempts++;
+                    updateUI(); } }
+            if (key === 'g') { keys.g = true;
+                e.preventDefault();
+                if (ballState === BALL_STATE.IDLE) { setBallState(BALL_STATE.STEP_BACK);
+                    attempts++;
+                    updateUI(); } }
+            if (key === 'c') { keys.c = true;
+                e.preventDefault();
+                if (ballState === BALL_STATE.IDLE) setBallState(BALL_STATE.CROSSOVER); }
+            // 调试重置
+            if (key === 'r' && e.shiftKey) {
+                if (ballState === BALL_STATE.SHOOTING || ballState === BALL_STATE.CHARGING ||
+                    ballState === BALL_STATE.JUMP_SHOT || ballState === BALL_STATE.STEP_BACK) {
+                    resetBallToIdle();
+                    console.log('🔄 篮球已重置');
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            if (['w', 'a', 's', 'd', 'shift'].includes(key)) { keys[key] = false;
+                e.preventDefault(); }
+            if (key === ' ') {
+                keys.space = false;
+                e.preventDefault();
+                if (isCharging) releaseShoot();
+            }
+            if (['q', 'e', 'f', 'g', 'c'].includes(key)) { keys[key] = false;
+                e.preventDefault(); }
+        });
+
+        renderer.domElement.addEventListener('mousedown', (e) => {
+            if (e.button === 0) {
+                mouseDown = true;
+                if (controls.isLocked && ballState === BALL_STATE.IDLE) startCharging();
+            }
+        });
+        renderer.domElement.addEventListener('mouseup', (e) => {
+            if (e.button === 0) {
+                mouseDown = false;
+                if (isCharging) releaseShoot();
+            }
+        });
+        renderer.domElement.addEventListener('mouseleave', () => {
+            if (mouseDown && isCharging) releaseShoot();
+            mouseDown = false;
+        });
+        renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // ---- 滚轮调节 FOV (新增) ----
+        renderer.domElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 2 : -2;
+            const newFov = Math.min(80, Math.max(40, camera.fov + delta));
+            camera.fov = newFov;
+            camera.updateProjectionMatrix();
+        }, { passive: false });
+
+        function startCharging() {
+            if (ballState !== BALL_STATE.IDLE) return;
+            isCharging = true;
+            chargePower = 0.3;
+            chargeStartTime = performance.now();
+            setBallState(BALL_STATE.CHARGING);
+            playDribbleSound(0.08);
+        }
+
+        function releaseShoot() {
+            if (!isCharging) return;
+            if (ballState === BALL_STATE.CHARGING) {
+                isCharging = false;
+                if (performance.now() - chargeStartTime < 150) {
+                    setBallState(BALL_STATE.IDLE);
+                    powerBarContainer.classList.remove('active');
+                    powerLabel.classList.remove('active');
+                    return;
+                }
+                setBallState(BALL_STATE.SHOOTING);
+                powerBarContainer.classList.remove('active');
+                powerLabel.classList.remove('active');
+                attempts++;
+                updateUI();
+            }
+        }
+
+        // ==================================================================
+        // 11. 音效
+        // ==================================================================
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) { try { audioCtx = new(window.AudioContext || window.webkitAudioContext)(); } catch (_) { return null; } }
+            return audioCtx;
+        }
+
+        function playDribbleSound(vol = 0.12) {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 180 + Math.random() * 80;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(vol, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.05);
+            } catch (_) {}
+        }
+
+        function playSwishSound() {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const bufferSize = ctx.sampleRate * 0.15;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / bufferSize * 4);
+                }
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+                const gain = ctx.createGain();
+                gain.gain.value = 0.08;
+                noise.connect(gain);
+                gain.connect(ctx.destination);
+                noise.start(ctx.currentTime);
+            } catch (_) {}
+        }
+
+        // ==================================================================
+        // 12. 得分浮动
+        // ==================================================================
+        function showScoreFly(text, worldPos, isMiss = false) {
+            const el = document.createElement('div');
+            el.textContent = text;
+            el.className = 'score-fly';
+            if (isMiss) el.classList.add('miss');
+            const vec = worldPos.clone();
+            vec.project(camera);
+            const x = (vec.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-vec.y * 0.5 + 0.5) * window.innerHeight;
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            document.body.appendChild(el);
+            requestAnimationFrame(() => { el.classList.add('fly-out'); });
+            setTimeout(() => { el.remove(); }, 1400);
+        }
+
+        // ==================================================================
+        // 13. 篮球更新 (增加新动作)
+        // ==================================================================
+        function updateBall(delta) {
+            if (!basketball) return;
+            stateTimer += delta;
+
+            // 蓄力
+            if (ballState === BALL_STATE.CHARGING && isCharging) {
+                chargePower = Math.min(1.6, chargePower + delta * 1.2);
+                const pct = ((chargePower - 0.3) / 1.3) * 100;
+                powerBarFill.style.width = Math.min(100, pct) + '%';
+                const shake = Math.sin(performance.now() / 60) * 0.003;
+                const pos = getBallWorldPos(0 + shake, -0.5, -1.0);
+                basketball.position.copy(pos);
+                basketball.rotation.x += delta * 2.0;
+                basketball.rotation.z += delta * 1.0;
+                // 更新辅助线
+                updateTrajectoryLine();
+                return;
+            }
+
+            if (ballState === BALL_STATE.SHOOTING) { updateShoot(delta); return; }
+            if (ballState === BALL_STATE.BETWEEN_LEGS) { updateBetweenLegs(delta); return; }
+            if (ballState === BALL_STATE.BEHIND_BACK) { updateBehindBack(delta); return; }
+            if (ballState === BALL_STATE.JUMP_SHOT) { updateJumpShot(delta); return; }
+            if (ballState === BALL_STATE.STEP_BACK) { updateStepBack(delta); return; }
+            if (ballState === BALL_STATE.CROSSOVER) { updateCrossover(delta); return; }
+
+            // IDLE
+            updateIdle(delta);
+        }
+
+        function updateIdle(delta) {
+            const amp = isSprinting ? 0.30 : 0.15;
+            const period = 0.5;
+            const phase = (stateTimer % period) / period;
+            const bounceY = -0.8 + Math.sin(phase * Math.PI * 2) * amp;
+            const zOff = isSprinting ? -1.4 : -1.2;
+            const pos = getBallWorldPos(0, bounceY, zOff);
+            basketball.position.copy(pos);
+            basketball.rotation.x += delta * 3.0;
+            basketball.rotation.z += delta * 1.2;
+            if (Math.abs(Math.sin(phase * Math.PI * 2)) < 0.05 && delta > 0) {
+                playDribbleSound(isSprinting ? 0.15 : 0.10);
+            }
+        }
+
+        function updateBetweenLegs(delta) {
+            const duration = 0.4,
+                progress = Math.min(stateTimer / duration, 1);
+            const start = new THREE.Vector3(0.4, -0.6, -1.0),
+                end = new THREE.Vector3(-0.4, -0.6, -1.0),
+                control = new THREE.Vector3(0, -0.85, -0.85);
+            const t = easeInOut(progress);
+            const p = quadraticBezier(start, control, end, t);
+            const pos = getBallWorldPos(p.x, p.y, p.z);
+            basketball.position.copy(pos);
+            basketball.rotation.x += delta * 5.0;
+            basketball.rotation.z += delta * 2.0;
+            if (progress >= 1) setBallState(BALL_STATE.IDLE);
+        }
+
+        function updateBehindBack(delta) {
+            const duration = 0.5,
+                progress = Math.min(stateTimer / duration, 1);
+            const start = new THREE.Vector3(0.5, -0.2, 0.3),
+                end = new THREE.Vector3(-0.5, -0.2, 0.3),
+                control = new THREE.Vector3(0, 0.15, 0.9);
+            const t = easeInOut(progress);
+            const p = quadraticBezier(start, control, end, t);
+            const pos = getBallWorldPos(p.x, p.y, p.z);
+            basketball.position.copy(pos);
+            basketball.rotation.x += delta * 4.0;
+            basketball.rotation.z += delta * 3.0;
+            if (progress >= 1) setBallState(BALL_STATE.IDLE);
+        }
+
+        // 急停跳投：球快速上升然后投篮
+        function updateJumpShot(delta) {
+            const duration = 0.7,
+                progress = Math.min(stateTimer / duration, 1);
+            const start = new THREE.Vector3(0, -0.5, -1.0);
+            const mid = new THREE.Vector3(0, 1.2, -1.5);
+            const end = new THREE.Vector3(0, 0.8, -2.0); // 出手点
+            const t = easeInOut(progress);
+            const p = quadraticBezier(start, mid, end, t);
+            const pos = getBallWorldPos(p.x, p.y, p.z);
+            basketball.position.copy(pos);
+            basketball.rotation.x += delta * 6.0;
+            basketball.rotation.z += delta * 3.0;
+
+            if (progress >= 1) {
+                // 跳投出手，转为投篮
+                const shootState = BALL_STATE.SHOOTING;
+                // 设置投篮参数
+                const power = 1.0 + Math.random() * 0.3;
+                const startWorld = basketball.position.clone();
+                const target = HOOP_CENTER.clone().add(new THREE.Vector3((Math.random() - 0.5) * 0.4, 0.1 + Math.random() *
+                0.2, (Math.random() - 0.5) * 0.3));
+                const midCtrl = startWorld.clone().add(target).multiplyScalar(0.5);
+                midCtrl.y = Math.max(startWorld.y, target.y) + 1.8 + power * 0.5;
+
+                shootData = {
+                    start: startWorld.clone(),
+                    target: target.clone(),
+                    control: midCtrl,
+                    progress: 0,
+                    duration: 0.7 + (1.6 - power) * 0.1,
+                    scored: false,
+                    bounceCount: 0,
+                    isBouncing: false,
+                    velY: 0,
+                    hitBackboard: false,
+                };
+                ballState = BALL_STATE.SHOOTING;
+                stateTimer = 0;
+                attempts++;
+                updateUI();
+                triggerFlash(BALL_STATE.SHOOTING);
+            }
+        }
+
+        // 后撤步：球向后拉再投篮
+        function updateStepBack(delta) {
+            const duration = 0.6,
+                progress = Math.min(stateTimer / duration, 1);
+            const start = new THREE.Vector3(0, -0.5, -1.0);
+            const back = new THREE.Vector3(0, -0.2, -0.2); // 后撤
+            const end = new THREE.Vector3(0, 0.6, -1.4); // 出手
+            const t = easeInOut(progress);
+            const p = quadraticBezier(start, back, end, t);
+            const pos = getBallWorldPos(p.x, p.y, p.z);
+            basketball.position.copy(pos);
+            basketball.rotation.x += delta * 5.0;
+            basketball.rotation.z += delta * 2.0;
+
+            if (progress >= 1) {
+                const power = 1.2 + Math.random() * 0.4;
+                const startWorld = basketball.position.clone();
+                const target = HOOP_CENTER.clone().add(new THREE.Vector3((Math.random() - 0.5) * 0.5, 0.1 + Math.random() *
+                0.2, (Math.random() - 0.5) * 0.4));
+                const midCtrl = startWorld.clone().add(target).multiplyScalar(0.5);
+                midCtrl.y = Math.max(startWorld.y, target.y) + 2.0 + power * 0.5;
+                shootData = {
+                    start: startWorld.clone(),
+                    target: target.clone(),
+                    control: midCtrl,
+                    progress: 0,
+                    duration: 0.8 + (1.6 - power) * 0.1,
+                    scored: false,
+                    bounceCount: 0,
+                    isBouncing: false,
+                    velY: 0,
+                    hitBackboard: false,
+                };
+                ballState = BALL_STATE.SHOOTING;
+                stateTimer = 0;
+                attempts++;
+                updateUI();
+                triggerFlash(BALL_STATE.SHOOTING);
+            }
+        }
+
+        // 交叉步：球从一侧到另一侧
+        function updateCrossover(delta) {
+            const duration = 0.4,
+                progress = Math.min(stateTimer / duration, 1);
+            const start = new THREE.Vector3(0.3, -0.7, -1.0);
+            const end = new THREE.Vector3(-0.3, -0.7, -1.0);
+            const control = new THREE.Vector3(0, -0.9, -0.8);
+            const t = easeInOut(progress);
+            const p = quadraticBezier(start, control, end, t);
+            const pos = getBallWorldPos(p.x, p.y, p.z);
+            basketball.position.copy(pos);
+            basketball.rotation.x += delta * 6.0;
+            basketball.rotation.z += delta * 2.0;
+            if (progress >= 1) setBallState(BALL_STATE.IDLE);
+        }
+
+        // ---- 投篮 (共用) ----
+        function updateShoot(delta) {
+            if (!shootData) return;
+            const data = shootData;
+
+            if (data.isBouncing) {
+                updateBounce(delta);
+                return;
+            }
+
+            data.progress += delta / data.duration;
+            let t = Math.min(data.progress, 1);
+            const p = quadraticBezier(data.start, data.control, data.target, t);
+            basketball.position.copy(p);
+            basketball.rotation.x += delta * 8.0;
+            basketball.rotation.z += delta * 4.0;
+
+            // 篮板碰撞
+            if (!data.hitBackboard && t > 0.1 && t < 0.85) {
+                const dx = p.x - BACKBOARD_POS.x,
+                    dy = p.y - BACKBOARD_POS.y,
+                    dz = p.z - BACKBOARD_POS.z;
+                if (Math.abs(dx) < BACKBOARD_SIZE.x && Math.abs(dy) < BACKBOARD_SIZE.y &&
+                    Math.abs(dz) < BACKBOARD_SIZE.z + 0.1) {
+                    data.hitBackboard = true;
+                    data.target.z = data.target.z + (data.start.z - data.target.z) * 0.5;
+                    data.control.z = data.control.z + (data.start.z - data.control.z) * 0.3;
+                    data.target.y += 0.2 + Math.random() * 0.3;
+                    data.progress = t;
+                    data.duration = data.duration * 0.6;
+                    playDribbleSound(0.2);
+                    triggerFlash(BALL_STATE.SHOOTING);
+                }
+            }
+
+            // 得分检测
+            if (!data.scored && t > 0.2) {
+                const distToHoop = p.distanceTo(HOOP_CENTER);
+                if (distToHoop < HOOP_RADIUS + 0.15) {
+                    const prevT = Math.max(0, t - delta / data.duration);
+                    const prevP = quadraticBezier(data.start, data.control, data.target, prevT);
+                    if (prevP.y > HOOP_CENTER.y && p.y <= HOOP_CENTER.y) {
+                        data.scored = true;
+                        makes++;
+                        score++;
+                        updateUI();
+                        playSwishSound();
+                        triggerFlash(BALL_STATE.SHOOTING);
+                        const texts = ['好球! 🏀', '+1', 'Nice!', '🎯'];
+                        showScoreFly(texts[Math.floor(Math.random() * 4)], p, false);
+                        flashEl.style.borderColor = 'rgba(255,215,0,0.9)';
+                        flashEl.style.boxShadow = 'inset 0 0 120px rgba(255,215,0,0.4)';
+                        setTimeout(() => {
+                            flashEl.classList.remove('active');
+                            flashEl.style.borderColor = 'transparent';
+                            flashEl.style.boxShadow = 'none';
+                        }, 500);
+                    }
+                }
+            }
+
+            if (t >= 1) {
+                if (!data.scored) {
+                    const finalDist = basketball.position.distanceTo(HOOP_CENTER);
+                    if (finalDist < HOOP_RADIUS + 0.2) {
+                        data.scored = true;
+                        makes++;
+                        score++;
+                        updateUI();
+                        playSwishSound();
+                        showScoreFly('+1', basketball.position, false);
+                        triggerFlash(BALL_STATE.SHOOTING);
+                    } else {
+                        showScoreFly('✗', basketball.position, true);
+                    }
+                }
+                data.isBouncing = true;
+                data.bounceCount = 0;
+                data.velY = -1.2;
+                data.bounceStartPos = basketball.position.clone();
+                data.bounceStartPos.y = 0.3;
+                basketball.position.y = 0.3;
+                return;
+            }
+        }
+
+        function updateBounce(delta) {
+            if (!shootData) return;
+            const data = shootData;
+            const gravity = -12,
+                bounceFactor = 0.5,
+                maxBounces = data.scored ? 1 : 2;
+            data.velY += gravity * delta;
+            basketball.position.y += data.velY * delta;
+            if (basketball.position.y < 0.05) {
+                basketball.position.y = 0.05;
+                data.velY = -data.velY * bounceFactor;
+                data.bounceCount++;
+                if (data.bounceCount >= maxBounces || Math.abs(data.velY) < 0.2) {
+                    resetBallToIdle();
+                    return;
+                }
+            }
+            basketball.rotation.x += delta * 6.0;
+            basketball.rotation.z += delta * 3.0;
+            const drift = new THREE.Vector3((Math.random() - 0.5) * 0.02, 0, (Math.random() - 0.5) * 0.02);
+            basketball.position.add(drift);
+            if (basketball.position.distanceTo(HOOP_CENTER) > 15) resetBallToIdle();
+        }
+
+        function resetBallToIdle() {
+            shootData = null;
+            isCharging = false;
+            powerBarContainer.classList.remove('active');
+            powerLabel.classList.remove('active');
+            setBallState(BALL_STATE.IDLE);
+            const pos = getBallWorldPos(0, -0.8, -1.2);
+            basketball.position.copy(pos);
+            removeTrajectoryLine();
+        }
+
+        // ---- 工具 ----
+        function quadraticBezier(p0, p1, p2, t) {
+            const mt = 1 - t;
+            return new THREE.Vector3(
+                mt * mt * p0.x + 2 * mt * t * p1.x + t * t * p2.x,
+                mt * mt * p0.y + 2 * mt * t * p1.y + t * t * p2.y,
+                mt * mt * p0.z + 2 * mt * t * p1.z + t * t * p2.z
+            );
+        }
+
+        function easeInOut(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+        // ==================================================================
+        // 14. 玩家移动
+        // ==================================================================
+        const MOVE_SPEED = 3.2,
+            SPRINT_MULTIPLIER = 1.5;
+
+        function updatePlayerMovement(delta) {
+            if (!controls.isLocked) return;
+            const forward = new THREE.Vector3(0, 0, -1);
+            forward.applyQuaternion(camera.quaternion);
+            forward.y = 0;
+            forward.normalize();
+            const right = new THREE.Vector3(1, 0, 0);
+            right.applyQuaternion(camera.quaternion);
+            right.y = 0;
+            right.normalize();
+
+            let moveX = 0,
+                moveZ = 0;
+            if (keys.w) moveZ -= 1;
+            if (keys.s) moveZ += 1;
+            if (keys.a) moveX -= 1;
+            if (keys.d) moveX += 1;
+
+            if (moveX === 0 && moveZ === 0) {
+                if (isSprinting) { isSprinting = false;
+                    updateUI(); }
+                return;
+            }
+            const len = Math.sqrt(moveX * moveX + moveZ * moveZ);
+            moveX /= len;
+            moveZ /= len;
+
+            const shouldSprint = keys.shift && (keys.w || keys.s || keys.a || keys.d);
+            if (shouldSprint && !isSprinting) { isSprinting = true;
+                updateUI();
+                triggerFlash(BALL_STATE.IDLE); } else if (!shouldSprint && isSprinting) { isSprinting = false;
+                updateUI(); }
+
+            const speed = isSprinting ? MOVE_SPEED * SPRINT_MULTIPLIER : MOVE_SPEED;
+            const moveVec = new THREE.Vector3()
+                .addScaledVector(forward, -moveZ * speed * delta)
+                .addScaledVector(right, moveX * speed * delta);
+            moveVec.y = 0;
+            camera.position.add(moveVec);
+
+            const limitX = 8.5,
+                limitZFront = 5.5,
+                limitZBack = -11;
+            camera.position.x = Math.max(-limitX, Math.min(limitX, camera.position.x));
+            camera.position.z = Math.max(limitZBack, Math.min(limitZFront, camera.position.z));
+            camera.position.y = 1.7;
+        }
+
+        // ==================================================================
+        // 15. 海洋动画
+        // ==================================================================
+        function updateOcean(time) {
+            const positions = ocean.geometry.attributes.position;
+            const array = positions.array;
+            for (let i = 0; i < array.length; i += 3) {
+                const x = array[i];
+                const z = array[i + 2];
+                const y = Math.sin(x * 0.3 + time * 0.5) * 0.08 +
+                    Math.sin(z * 0.2 + time * 0.3) * 0.06;
+                array[i + 1] = y;
+            }
+            positions.needsUpdate = true;
+        }
+
+        // ==================================================================
+        // 16. 窗口自适应
+        // ==================================================================
+        window.addEventListener('resize', () => {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                composer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+
+        // ==================================================================
+        // 17. 主循环
+        // ==================================================================
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = Math.min(clock.getDelta(), 0.05);
+            const elapsed = clock.elapsedTime;
+
+            // ---- 动态光影 (太阳缓慢绕Y轴旋转) ----
+            if (mainLight) {
+                const angle = elapsed * 0.02;
+                const radius = 18;
+                const height = 10 + Math.sin(angle) * 3;
+                mainLight.position.set(
+                    Math.sin(angle) * radius,
+                    height,
+                    Math.cos(angle) * radius
+                );
+                mainLight.target.position.set(0, 0, 0);
+                mainLight.target.updateMatrixWorld();
+            }
+
+            updateOcean(elapsed);
+            updatePlayerMovement(delta);
+            updateBall(delta);
+            if (basketball) basketball.castShadow = true;
+
+            // 通过 composer 渲染 (带泛光)
+            composer.render();
+        }
+
+        // ==================================================================
+        // 18. 启动
+        // ==================================================================
+        try {
+            statusMsg.classList.add('hidden');
+            updateUI();
+            animate();
+            console.log('🏀 海滨球场 · 光影增强版已启动！');
+            console.log('新操作: F急停跳投 | G后撤步 | C交叉步 | Shift冲刺 | 滚轮调视野');
+
+            setTimeout(() => {
+                if (!controls.isLocked) {
+                    const msg = document.createElement('div');
+                    msg.style.cssText = `
+                        position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+                        color: rgba(255,255,255,0.6); background: rgba(0,0,0,0.5);
+                        padding: 14px 30px; border-radius: 40px; font-size: 18px;
+                        z-index: 15; backdrop-filter: blur(6px);
+                        border: 1px solid rgba(255,255,255,0.1);
+                        transition: opacity 1s; pointer-events: none;
+                    `;
+                    msg.textContent = '🖱️ 点击屏幕锁定鼠标';
+                    document.body.appendChild(msg);
+                    setTimeout(() => { msg.style.opacity = '0';
+                        setTimeout(() => msg.remove(), 1000); }, 4000);
+                }
+            }, 1500);
+        } catch (err) {
+            showError('启动失败', err.message);
+            console.error(err);
+        }
+
+        console.log('✅ 加载完成');
+        window.__scene = scene;
+        window.__camera = camera;
+        window.__basketball = basketball;
+    </script>
+</body>
+</html>
