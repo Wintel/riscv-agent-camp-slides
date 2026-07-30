@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🏀 海滨球场 · 光影增强版</title>
+    <title>🏀 海滨球场 · 跳跃增强版</title>
     <style>
         /* ---------- 全局重置 ---------- */
         * {
@@ -150,7 +150,7 @@
             overflow: hidden;
             opacity: 0;
             transition: opacity 0.25s ease;
-            position: relative; /* 为甜区定位 */
+            position: relative;
         }
         #power-bar-container.active {
             opacity: 1;
@@ -162,7 +162,6 @@
             border-radius: 10px;
             transition: width 0.05s linear;
         }
-        /* ---- 甜区标记 ---- */
         #power-sweet-spot {
             position: absolute;
             top: 0;
@@ -175,7 +174,7 @@
             pointer-events: none;
             border-radius: 2px;
             box-shadow: 0 0 12px rgba(0, 255, 100, 0.15);
-            display: none; /* 默认隐藏，蓄力时显示 */
+            display: none;
         }
         #power-bar-container.active #power-sweet-spot {
             display: block;
@@ -397,13 +396,13 @@
     </div>
     <div id="power-label">⚡ 蓄力</div>
 
-    <!-- 底部提示 -->
+    <!-- 底部提示：空格改为跳跃 -->
     <div id="ui-bottom-center">
         <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动 &nbsp;<span class="sep">·</span>&nbsp; 🖱 鼠标环顾 &nbsp;<span class="sep">·</span>&nbsp;
+        <kbd>空格</kbd> 跳跃 &nbsp;<span class="sep">·</span>&nbsp; <kbd>左键</kbd> 蓄力投篮 &nbsp;<span class="sep">·</span>&nbsp;
         <kbd>Q</kbd> 胯下 &nbsp;<span class="sep">·</span>&nbsp; <kbd>E</kbd> 背运 &nbsp;<span class="sep">·</span>&nbsp;
         <kbd>F</kbd> 急停跳投 &nbsp;<span class="sep">·</span>&nbsp; <kbd>G</kbd> 后撤步 &nbsp;<span class="sep">·</span>&nbsp;
-        <kbd>C</kbd> 交叉步 &nbsp;<span class="sep">·</span>&nbsp; <kbd>空格</kbd>/左键 蓄力投篮 &nbsp;<span class="sep">·</span>&nbsp;
-        🖱 滚轮调视野
+        <kbd>C</kbd> 交叉步 &nbsp;<span class="sep">·</span>&nbsp; 🖱 滚轮调视野
     </div>
 
     <!-- 闪光 -->
@@ -470,21 +469,17 @@
             renderer.outputColorSpace = THREE.SRGBColorSpace;
             document.body.prepend(renderer.domElement);
 
-            // 控制器
             controls = new PointerLockControls(camera, renderer.domElement);
             renderer.domElement.addEventListener('click', () => { if (!controls.isLocked) controls.lock(); });
             controls.addEventListener('lock', () => { document.body.style.cursor = 'default'; });
             controls.addEventListener('unlock', () => { document.body.style.cursor = 'pointer'; });
 
-            // 后处理：泛光
             composer = new EffectComposer(renderer);
             const renderPass = new RenderPass(scene, camera);
             composer.addPass(renderPass);
             const bloomPass = new UnrealBloomPass(
                 new THREE.Vector2(window.innerWidth, window.innerHeight),
-                0.3, // 强度
-                0.4, // 半径
-                0.2 // 阈值
+                0.3, 0.4, 0.2
             );
             composer.addPass(bloomPass);
 
@@ -501,15 +496,13 @@
         window.addEventListener('unhandledrejection', (e) => showError('模块加载失败', e.reason?.message || ''));
 
         // ==================================================================
-        // 4. 灯光 (高级) + 动态光源引用
+        // 4. 灯光
         // ==================================================================
-        let mainLight; // 用于动态旋转
+        let mainLight;
         try {
-            // 环境
             const ambient = new THREE.AmbientLight(0x445566, 0.4);
             scene.add(ambient);
 
-            // 主光源 (模拟夕阳) —— 保存引用
             mainLight = new THREE.DirectionalLight(0xffaa66, 1.8);
             mainLight.position.set(-10, 12, 8);
             mainLight.castShadow = true;
@@ -524,17 +517,14 @@
             mainLight.shadow.bias = -0.001;
             scene.add(mainLight);
 
-            // 辅助暖光
             const warm = new THREE.DirectionalLight(0xff8833, 0.6);
             warm.position.set(5, 6, -2);
             scene.add(warm);
 
-            // 冷补光
             const cool = new THREE.DirectionalLight(0x88bbff, 0.3);
             cool.position.set(-4, 5, -8);
             scene.add(cool);
 
-            // 篮架聚光
             const spot = new THREE.SpotLight(0xffffff, 0.8);
             spot.position.set(0, 8, -6);
             spot.angle = 0.5;
@@ -544,14 +534,13 @@
             spot.castShadow = true;
             scene.add(spot);
 
-            // 半球光
             const hemi = new THREE.HemisphereLight(0xffaa66, 0x224466, 0.6);
             scene.add(hemi);
 
         } catch (err) { showError('灯光创建失败', err.message); }
 
         // ==================================================================
-        // 5. 环境：晚霞天空球 (程序化生成)
+        // 5. 环境：晚霞天空球
         // ==================================================================
         function createSunsetSky() {
             const canvas = document.createElement('canvas');
@@ -559,7 +548,6 @@
             canvas.height = 512;
             const ctx = canvas.getContext('2d');
 
-            // 渐变填充 (从紫色到橙色到蓝色)
             const grd = ctx.createLinearGradient(0, 0, 0, 512);
             grd.addColorStop(0, '#1a0a2e');
             grd.addColorStop(0.2, '#2d1b4e');
@@ -571,7 +559,6 @@
             ctx.fillStyle = grd;
             ctx.fillRect(0, 0, 1024, 512);
 
-            // 云朵 (随机半透明圆)
             for (let i = 0; i < 60; i++) {
                 const x = Math.random() * 1024;
                 const y = 50 + Math.random() * 300;
@@ -593,7 +580,6 @@
                 }
             }
 
-            // 太阳 (发光圆)
             const grdSun = ctx.createRadialGradient(800, 280, 20, 800, 280, 120);
             grdSun.addColorStop(0, 'rgba(255,220,140,1)');
             grdSun.addColorStop(0.2, 'rgba(255,180,80,0.8)');
@@ -619,9 +605,8 @@
         scene.add(sky);
 
         // ==================================================================
-        // 6. 海洋 + 沙滩
+        // 6. 海洋 + 沙滩 + 棕榈树 + 观众
         // ==================================================================
-        // 沙滩 (大平面)
         const sandTex = (() => {
             const c = document.createElement('canvas');
             c.width = 512;
@@ -653,7 +638,6 @@
         sand.receiveShadow = true;
         scene.add(sand);
 
-        // 海洋 (半透明，带顶点动画)
         const oceanGeo = new THREE.PlaneGeometry(60, 40, 64, 64);
         const oceanMat = new THREE.MeshStandardMaterial({
             color: 0x3a6b8f,
@@ -669,12 +653,10 @@
         ocean.receiveShadow = true;
         scene.add(ocean);
 
-        // 存储顶点用于波浪
         const posAttr = oceanGeo.attributes.position;
         const originalY = new Float32Array(posAttr.array);
         const oceanVerts = [];
 
-        // 远处山丘 (简单)
         const hillMat = new THREE.MeshStandardMaterial({ color: 0x4a6b3a, roughness: 0.8 });
         for (let i = 0; i < 6; i++) {
             const hill = new THREE.Mesh(new THREE.ConeGeometry(1.5 + Math.random() * 2, 0.8 + Math.random() * 1.2, 8),
@@ -685,7 +667,6 @@
             scene.add(hill);
         }
 
-        // 棕榈树 (简化)
         function createPalm(x, z) {
             const g = new THREE.Group();
             const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8b6b4a, roughness: 0.8 });
@@ -710,7 +691,6 @@
         scene.add(createPalm(-5, 10));
         scene.add(createPalm(6, 11));
 
-        // 观众 (小方块)
         const crowdMat = new THREE.MeshStandardMaterial({ color: 0x8a6e5a, roughness: 0.7 });
         for (let i = 0; i < 30; i++) {
             const person = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.6, 0.2), crowdMat);
@@ -727,7 +707,7 @@
         }
 
         // ==================================================================
-        // 7. 篮球架 (位置不变)
+        // 7. 篮球架
         // ==================================================================
         function createBasketballHoop() {
             const group = new THREE.Group();
@@ -769,7 +749,6 @@
             conn.position.set(0, 3.05, -6.75);
             group.add(conn);
 
-            // 网 (简化)
             const netMat = new THREE.LineBasicMaterial({ color: 0xeeeeee, transparent: true, opacity: 0.3 });
             for (let i = 0; i < 12; i++) {
                 const angle = (i / 12) * Math.PI * 2;
@@ -883,7 +862,7 @@
         }
 
         // ==================================================================
-        // 9. 状态管理 (增加新动作)
+        // 9. 状态管理
         // ==================================================================
         const BALL_STATE = {
             IDLE: 'idle',
@@ -891,9 +870,9 @@
             BEHIND_BACK: 'behindBack',
             SHOOTING: 'shooting',
             CHARGING: 'charging',
-            JUMP_SHOT: 'jumpShot', // 急停跳投
-            STEP_BACK: 'stepBack', // 后撤步
-            CROSSOVER: 'crossover', // 交叉步
+            JUMP_SHOT: 'jumpShot',
+            STEP_BACK: 'stepBack',
+            CROSSOVER: 'crossover',
         };
 
         let ballState = BALL_STATE.IDLE;
@@ -906,6 +885,14 @@
         let chargePower = 0.5;
         let isCharging = false;
         let chargeStartTime = 0;
+
+        // ---------- 跳跃物理 ----------
+        let playerVelY = 0;
+        let isGrounded = true;
+        const GRAVITY = -14;
+        const JUMP_SPEED = 5.2;
+        const GROUND_Y = 1.7;
+        const MAX_JUMP_HEIGHT = 4.2;
 
         const stateNames = {
             [BALL_STATE.IDLE]: '运球',
@@ -964,13 +951,11 @@
                 isCharging = false;
                 powerBarContainer.classList.remove('active');
                 powerLabel.classList.remove('active');
-                // 移除辅助线
                 removeTrajectoryLine();
             }
             if (newState === BALL_STATE.CHARGING) {
                 powerBarContainer.classList.add('active');
                 powerLabel.classList.add('active');
-                // 创建辅助线（如果尚未）
                 createTrajectoryLine();
             }
         }
@@ -1006,7 +991,6 @@
             isCharging = false;
             chargePower = 0.5;
             powerBarFill.style.width = '0%';
-            // 移除辅助线
             removeTrajectoryLine();
         }
 
@@ -1019,7 +1003,7 @@
         }
 
         // ==================================================================
-        // 9.1 投篮轨迹辅助线 (新增)
+        // 9.1 投篮轨迹辅助线
         // ==================================================================
         let trajectoryLine = null;
         const TRAJECTORY_SEGMENTS = 30;
@@ -1048,10 +1032,8 @@
 
         function updateTrajectoryLine() {
             if (!trajectoryLine) return;
-            // 计算当前球位置和篮筐之间的贝塞尔曲线
             const ballPos = basketball.position.clone();
             const targetPos = HOOP_CENTER.clone();
-            // 控制点取中间偏上
             const mid = ballPos.clone().add(targetPos).multiplyScalar(0.5);
             mid.y = Math.max(ballPos.y, targetPos.y) + 2.0;
 
@@ -1076,7 +1058,7 @@
         }
 
         // ==================================================================
-        // 10. 输入 (增加新按键)
+        // 10. 输入（空格 → 跳跃，左键 → 蓄力投篮）
         // ==================================================================
         const keys = { w: false, a: false, s: false, d: false, shift: false, space: false, q: false, e: false, f: false,
             g: false, c: false };
@@ -1086,31 +1068,58 @@
             const key = e.key.toLowerCase();
             if (['w', 'a', 's', 'd', 'shift'].includes(key)) { keys[key] = true;
                 e.preventDefault(); }
+
+            // ---- 空格：跳跃 ----
             if (key === ' ') {
                 keys.space = true;
                 e.preventDefault();
                 if (!controls.isLocked) return;
-                if (ballState === BALL_STATE.IDLE) startCharging();
+                // 只有在地面且非蓄力状态才能跳跃
+                if (isGrounded && ballState !== BALL_STATE.CHARGING) {
+                    playerVelY = JUMP_SPEED;
+                    isGrounded = false;
+                    triggerFlash(BALL_STATE.IDLE);
+                    playDribbleSound(0.18);
+                }
             }
-            if (key === 'q') { keys.q = true;
+
+            // ---- 花式动作（需要地面） ----
+            if (key === 'q') {
+                keys.q = true;
                 e.preventDefault();
-                if (ballState === BALL_STATE.IDLE) setBallState(BALL_STATE.BETWEEN_LEGS); }
-            if (key === 'e') { keys.e = true;
+                if (ballState === BALL_STATE.IDLE && isGrounded) setBallState(BALL_STATE.BETWEEN_LEGS);
+            }
+            if (key === 'e') {
+                keys.e = true;
                 e.preventDefault();
-                if (ballState === BALL_STATE.IDLE) setBallState(BALL_STATE.BEHIND_BACK); }
-            if (key === 'f') { keys.f = true;
+                if (ballState === BALL_STATE.IDLE && isGrounded) setBallState(BALL_STATE.BEHIND_BACK);
+            }
+            if (key === 'c') {
+                keys.c = true;
                 e.preventDefault();
-                if (ballState === BALL_STATE.IDLE) { setBallState(BALL_STATE.JUMP_SHOT);
+                if (ballState === BALL_STATE.IDLE && isGrounded) setBallState(BALL_STATE.CROSSOVER);
+            }
+
+            // ---- 快捷投篮（可空中使用） ----
+            if (key === 'f') {
+                keys.f = true;
+                e.preventDefault();
+                if (ballState === BALL_STATE.IDLE) {
+                    setBallState(BALL_STATE.JUMP_SHOT);
                     attempts++;
-                    updateUI(); } }
-            if (key === 'g') { keys.g = true;
+                    updateUI();
+                }
+            }
+            if (key === 'g') {
+                keys.g = true;
                 e.preventDefault();
-                if (ballState === BALL_STATE.IDLE) { setBallState(BALL_STATE.STEP_BACK);
+                if (ballState === BALL_STATE.IDLE) {
+                    setBallState(BALL_STATE.STEP_BACK);
                     attempts++;
-                    updateUI(); } }
-            if (key === 'c') { keys.c = true;
-                e.preventDefault();
-                if (ballState === BALL_STATE.IDLE) setBallState(BALL_STATE.CROSSOVER); }
+                    updateUI();
+                }
+            }
+
             // 调试重置
             if (key === 'r' && e.shiftKey) {
                 if (ballState === BALL_STATE.SHOOTING || ballState === BALL_STATE.CHARGING ||
@@ -1125,15 +1134,13 @@
             const key = e.key.toLowerCase();
             if (['w', 'a', 's', 'd', 'shift'].includes(key)) { keys[key] = false;
                 e.preventDefault(); }
-            if (key === ' ') {
-                keys.space = false;
-                e.preventDefault();
-                if (isCharging) releaseShoot();
-            }
+            if (key === ' ') { keys.space = false;
+                e.preventDefault(); }
             if (['q', 'e', 'f', 'g', 'c'].includes(key)) { keys[key] = false;
                 e.preventDefault(); }
         });
 
+        // ---- 鼠标左键：蓄力投篮（与跳跃独立） ----
         renderer.domElement.addEventListener('mousedown', (e) => {
             if (e.button === 0) {
                 mouseDown = true;
@@ -1152,7 +1159,7 @@
         });
         renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
 
-        // ---- 滚轮调节 FOV (新增) ----
+        // ---- 滚轮调视野 ----
         renderer.domElement.addEventListener('wheel', (e) => {
             e.preventDefault();
             const delta = e.deltaY > 0 ? 2 : -2;
@@ -1161,6 +1168,7 @@
             camera.updateProjectionMatrix();
         }, { passive: false });
 
+        // ---- 蓄力控制 ----
         function startCharging() {
             if (ballState !== BALL_STATE.IDLE) return;
             isCharging = true;
@@ -1255,13 +1263,12 @@
         }
 
         // ==================================================================
-        // 13. 篮球更新 (增加新动作)
+        // 13. 篮球更新
         // ==================================================================
         function updateBall(delta) {
             if (!basketball) return;
             stateTimer += delta;
 
-            // 蓄力
             if (ballState === BALL_STATE.CHARGING && isCharging) {
                 chargePower = Math.min(1.6, chargePower + delta * 1.2);
                 const pct = ((chargePower - 0.3) / 1.3) * 100;
@@ -1271,7 +1278,6 @@
                 basketball.position.copy(pos);
                 basketball.rotation.x += delta * 2.0;
                 basketball.rotation.z += delta * 1.0;
-                // 更新辅助线
                 updateTrajectoryLine();
                 return;
             }
@@ -1283,7 +1289,6 @@
             if (ballState === BALL_STATE.STEP_BACK) { updateStepBack(delta); return; }
             if (ballState === BALL_STATE.CROSSOVER) { updateCrossover(delta); return; }
 
-            // IDLE
             updateIdle(delta);
         }
 
@@ -1332,13 +1337,12 @@
             if (progress >= 1) setBallState(BALL_STATE.IDLE);
         }
 
-        // 急停跳投：球快速上升然后投篮
         function updateJumpShot(delta) {
             const duration = 0.7,
                 progress = Math.min(stateTimer / duration, 1);
             const start = new THREE.Vector3(0, -0.5, -1.0);
             const mid = new THREE.Vector3(0, 1.2, -1.5);
-            const end = new THREE.Vector3(0, 0.8, -2.0); // 出手点
+            const end = new THREE.Vector3(0, 0.8, -2.0);
             const t = easeInOut(progress);
             const p = quadraticBezier(start, mid, end, t);
             const pos = getBallWorldPos(p.x, p.y, p.z);
@@ -1347,9 +1351,6 @@
             basketball.rotation.z += delta * 3.0;
 
             if (progress >= 1) {
-                // 跳投出手，转为投篮
-                const shootState = BALL_STATE.SHOOTING;
-                // 设置投篮参数
                 const power = 1.0 + Math.random() * 0.3;
                 const startWorld = basketball.position.clone();
                 const target = HOOP_CENTER.clone().add(new THREE.Vector3((Math.random() - 0.5) * 0.4, 0.1 + Math.random() *
@@ -1377,13 +1378,12 @@
             }
         }
 
-        // 后撤步：球向后拉再投篮
         function updateStepBack(delta) {
             const duration = 0.6,
                 progress = Math.min(stateTimer / duration, 1);
             const start = new THREE.Vector3(0, -0.5, -1.0);
-            const back = new THREE.Vector3(0, -0.2, -0.2); // 后撤
-            const end = new THREE.Vector3(0, 0.6, -1.4); // 出手
+            const back = new THREE.Vector3(0, -0.2, -0.2);
+            const end = new THREE.Vector3(0, 0.6, -1.4);
             const t = easeInOut(progress);
             const p = quadraticBezier(start, back, end, t);
             const pos = getBallWorldPos(p.x, p.y, p.z);
@@ -1418,7 +1418,6 @@
             }
         }
 
-        // 交叉步：球从一侧到另一侧
         function updateCrossover(delta) {
             const duration = 0.4,
                 progress = Math.min(stateTimer / duration, 1);
@@ -1434,7 +1433,7 @@
             if (progress >= 1) setBallState(BALL_STATE.IDLE);
         }
 
-        // ---- 投篮 (共用) ----
+        // ---- 投篮 ----
         function updateShoot(delta) {
             if (!shootData) return;
             const data = shootData;
@@ -1451,7 +1450,6 @@
             basketball.rotation.x += delta * 8.0;
             basketball.rotation.z += delta * 4.0;
 
-            // 篮板碰撞
             if (!data.hitBackboard && t > 0.1 && t < 0.85) {
                 const dx = p.x - BACKBOARD_POS.x,
                     dy = p.y - BACKBOARD_POS.y,
@@ -1469,7 +1467,6 @@
                 }
             }
 
-            // 得分检测
             if (!data.scored && t > 0.2) {
                 const distToHoop = p.distanceTo(HOOP_CENTER);
                 if (distToHoop < HOOP_RADIUS + 0.15) {
@@ -1568,13 +1565,34 @@
         function easeInOut(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
 
         // ==================================================================
-        // 14. 玩家移动
+        // 14. 玩家移动 + 跳跃物理
         // ==================================================================
         const MOVE_SPEED = 3.2,
             SPRINT_MULTIPLIER = 1.5;
 
         function updatePlayerMovement(delta) {
             if (!controls.isLocked) return;
+
+            // ---- 跳跃物理 ----
+            playerVelY += GRAVITY * delta;
+            camera.position.y += playerVelY * delta;
+
+            // 地面碰撞
+            if (camera.position.y <= GROUND_Y) {
+                camera.position.y = GROUND_Y;
+                playerVelY = 0;
+                isGrounded = true;
+            } else {
+                isGrounded = false;
+            }
+
+            // 限制最高高度
+            if (camera.position.y > MAX_JUMP_HEIGHT) {
+                camera.position.y = MAX_JUMP_HEIGHT;
+                playerVelY = Math.min(playerVelY, 0);
+            }
+
+            // ---- 水平移动 ----
             const forward = new THREE.Vector3(0, 0, -1);
             forward.applyQuaternion(camera.quaternion);
             forward.y = 0;
@@ -1613,12 +1631,12 @@
             moveVec.y = 0;
             camera.position.add(moveVec);
 
+            // 水平边界
             const limitX = 8.5,
                 limitZFront = 5.5,
                 limitZBack = -11;
             camera.position.x = Math.max(-limitX, Math.min(limitX, camera.position.x));
             camera.position.z = Math.max(limitZBack, Math.min(limitZFront, camera.position.z));
-            camera.position.y = 1.7;
         }
 
         // ==================================================================
@@ -1657,7 +1675,6 @@
             const delta = Math.min(clock.getDelta(), 0.05);
             const elapsed = clock.elapsedTime;
 
-            // ---- 动态光影 (太阳缓慢绕Y轴旋转) ----
             if (mainLight) {
                 const angle = elapsed * 0.02;
                 const radius = 18;
@@ -1676,7 +1693,6 @@
             updateBall(delta);
             if (basketball) basketball.castShadow = true;
 
-            // 通过 composer 渲染 (带泛光)
             composer.render();
         }
 
@@ -1687,8 +1703,8 @@
             statusMsg.classList.add('hidden');
             updateUI();
             animate();
-            console.log('🏀 海滨球场 · 光影增强版已启动！');
-            console.log('新操作: F急停跳投 | G后撤步 | C交叉步 | Shift冲刺 | 滚轮调视野');
+            console.log('🏀 海滨球场 · 跳跃增强版已启动！');
+            console.log('新操作: 空格跳跃 | 左键蓄力投篮 | F急停跳投 | G后撤步 | C交叉步 | Shift冲刺 | 滚轮调视野');
 
             setTimeout(() => {
                 if (!controls.isLocked) {
@@ -1701,7 +1717,7 @@
                         border: 1px solid rgba(255,255,255,0.1);
                         transition: opacity 1s; pointer-events: none;
                     `;
-                    msg.textContent = '🖱️ 点击屏幕锁定鼠标';
+                    msg.textContent = '🖱️ 点击屏幕锁定鼠标 · 空格跳跃';
                     document.body.appendChild(msg);
                     setTimeout(() => { msg.style.opacity = '0';
                         setTimeout(() => msg.remove(), 1000); }, 4000);
