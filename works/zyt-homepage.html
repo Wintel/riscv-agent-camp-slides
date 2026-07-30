@@ -1,0 +1,562 @@
+html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>张彦同 · 个人主页</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+    <style>
+        /* ===== 全局重置 & 基础 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            background: #0b0710;
+            color: #e0e0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* ===== 宇宙背景 ===== */
+        .universe {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(60, 30, 120, 0.35) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(20, 60, 140, 0.30) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(100, 40, 160, 0.20) 0%, transparent 50%),
+                #0b0710;
+            overflow: hidden;
+        }
+
+        /* 星星 - 使用 box-shadow 生成大量光点 */
+        .stars {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: transparent;
+            box-shadow:
+                /* 第一层 小星星 */
+                120px 80px 0 0 #ffffffcc, 340px 220px 0 0 #ffffffaa, 580px 130px 0 0 #ffffffdd,
+                760px 370px 0 0 #ffffffbb, 1020px 90px 0 0 #ffffffcc, 1240px 280px 0 0 #ffffffaa,
+                1460px 140px 0 0 #ffffffdd, 1680px 410px 0 0 #ffffffbb, 1900px 200px 0 0 #ffffffcc,
+                2100px 480px 0 0 #ffffffaa, 80px 520px 0 0 #ffffffdd, 300px 680px 0 0 #ffffffbb,
+                550px 780px 0 0 #ffffffcc, 800px 620px 0 0 #ffffffaa, 1050px 750px 0 0 #ffffffdd,
+                1280px 890px 0 0 #ffffffbb, 1500px 680px 0 0 #ffffffcc, 1720px 920px 0 0 #ffffffaa,
+                1950px 790px 0 0 #ffffffdd, 2150px 950px 0 0 #ffffffbb,
+                /* 第二层 中星星 */
+                60px 160px 0 1px #aaccffcc, 420px 400px 0 1px #ccddffbb, 700px 60px 0 1px #aaccffdd,
+                940px 450px 0 1px #ccddffaa, 1180px 180px 0 1px #aaccffcc, 1400px 520px 0 1px #ccddffbb,
+                1620px 260px 0 1px #aaccffdd, 1840px 540px 0 1px #ccddffaa, 2040px 380px 0 1px #aaccffcc,
+                100px 920px 0 1px #ccddffbb, 380px 840px 0 1px #aaccffdd, 660px 980px 0 1px #ccddffaa,
+                920px 820px 0 1px #aaccffcc, 1150px 980px 0 1px #ccddffbb,
+                /* 第三层 亮星 + 闪烁感 */
+                200px 300px 0 2px #ffffffdd, 880px 280px 0 2px #ffffffcc, 1560px 340px 0 2px #ffffffdd,
+                440px 740px 0 2px #ffffffcc, 1320px 640px 0 2px #ffffffdd, 1880px 860px 0 2px #ffffffcc;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite alternate;
+        }
+
+        .stars::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            box-shadow: inherit;
+            transform: translateX(20px) translateY(30px);
+            opacity: 0.6;
+            animation: twinkle 4s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* 星云光晕 */
+        .nebula {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.25;
+            pointer-events: none;
+        }
+        .nebula.n1 {
+            width: 600px;
+            height: 600px;
+            top: -10%;
+            left: -5%;
+            background: radial-gradient(circle, #6a3fa0, transparent 70%);
+            animation: drift 18s ease-in-out infinite alternate;
+        }
+        .nebula.n2 {
+            width: 500px;
+            height: 500px;
+            bottom: -10%;
+            right: -5%;
+            background: radial-gradient(circle, #1a4a8a, transparent 70%);
+            animation: drift 22s ease-in-out infinite alternate-reverse;
+        }
+        .nebula.n3 {
+            width: 400px;
+            height: 400px;
+            top: 40%;
+            left: 60%;
+            background: radial-gradient(circle, #7a3a7a, transparent 70%);
+            animation: drift 16s ease-in-out infinite alternate;
+            opacity: 0.15;
+        }
+
+        @keyframes drift {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                transform: translate(40px, 30px) scale(1.2);
+            }
+        }
+
+        /* ===== 主容器 ===== */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* ===== 卡片通用 ===== */
+        .card {
+            background: rgba(12, 8, 24, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(160, 140, 255, 0.15);
+            border-radius: 1.75rem;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            transition: transform 0.25s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(180, 160, 255, 0.30);
+            box-shadow: 0 12px 48px rgba(80, 40, 180, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            transform: translateY(-2px);
+        }
+
+        /* ===== 头部 ===== */
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem 2rem;
+        }
+
+        .name-title h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #e8e0ff 0%, #b8aaff 60%, #8a7aff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+
+        .name-title .sub {
+            font-size: 0.95rem;
+            opacity: 0.7;
+            letter-spacing: 2px;
+            margin-top: 0.15rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem 1.2rem;
+        }
+
+        .name-title .sub span {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 0.15rem 0.9rem;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.85rem;
+            color: #c8c0e8;
+        }
+
+        .badge-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 0.8rem;
+        }
+
+        .badge {
+            background: rgba(120, 80, 220, 0.20);
+            border: 1px solid rgba(160, 130, 255, 0.25);
+            border-radius: 60px;
+            padding: 0.4rem 1.2rem;
+            font-size: 0.80rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            color: #d4ccff;
+            backdrop-filter: blur(4px);
+            white-space: nowrap;
+        }
+
+        .badge.glow {
+            background: rgba(200, 160, 255, 0.12);
+            border-color: rgba(200, 170, 255, 0.35);
+            box-shadow: 0 0 20px rgba(160, 120, 255, 0.08);
+        }
+
+        /* ===== 网格布局 ===== */
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .grid-3col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* ===== 卡片内容 ===== */
+        .card-title {
+            font-size: 0.70rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #a098d0;
+            opacity: 0.6;
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #e4e0f5;
+        }
+
+        .card-body strong {
+            color: #d4ccff;
+            font-weight: 600;
+        }
+
+        .card-body .highlight {
+            color: #c8b8ff;
+            background: rgba(160, 130, 255, 0.10);
+            padding: 0.1rem 0.6rem;
+            border-radius: 30px;
+            border: 1px solid rgba(160, 130, 255, 0.12);
+            font-weight: 500;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 0.7rem;
+            margin-top: 0.3rem;
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 40px;
+            padding: 0.2rem 1rem;
+            font-size: 0.85rem;
+            color: #d0c8ec;
+        }
+
+        .tag.astro {
+            border-color: rgba(120, 180, 255, 0.25);
+            background: rgba(60, 100, 200, 0.12);
+        }
+
+        .tag.game {
+            border-color: rgba(200, 120, 255, 0.20);
+            background: rgba(140, 70, 200, 0.10);
+        }
+
+        .tag.music {
+            border-color: rgba(255, 180, 100, 0.20);
+            background: rgba(200, 120, 60, 0.08);
+        }
+
+        .tag.sport {
+            border-color: rgba(100, 220, 180, 0.20);
+            background: rgba(60, 180, 140, 0.08);
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.6rem 1.2rem;
+        }
+
+        .chip {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 60px;
+            padding: 0.25rem 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.90rem;
+        }
+
+        .chip .num {
+            color: #b8aaff;
+            font-weight: 600;
+            margin-right: 0.2rem;
+        }
+
+        .divider-light {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(160, 140, 255, 0.15), transparent);
+            margin: 0.4rem 0 0.8rem 0;
+        }
+
+        /* ===== 特殊区块：个性签名 ===== */
+        .signature {
+            font-style: italic;
+            color: #b8b0e0;
+            font-size: 0.95rem;
+            border-left: 2px solid rgba(160, 130, 255, 0.25);
+            padding-left: 1.2rem;
+            margin-top: 0.2rem;
+        }
+
+        .signature em {
+            color: #d0c0ff;
+            font-style: normal;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 820px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+            .grid-3col {
+                grid-template-columns: 1fr 1fr;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .badge-group {
+                margin-top: 0.2rem;
+            }
+            .name-title h1 {
+                font-size: 2.2rem;
+            }
+            .card {
+                padding: 1.2rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 540px) {
+            .grid-3col {
+                grid-template-columns: 1fr;
+            }
+            .name-title h1 {
+                font-size: 1.8rem;
+            }
+            .card {
+                padding: 1rem 1.2rem;
+                border-radius: 1.25rem;
+            }
+            .container {
+                gap: 0.9rem;
+            }
+            .badge {
+                font-size: 0.70rem;
+                padding: 0.25rem 0.9rem;
+            }
+            .tag {
+                font-size: 0.75rem;
+            }
+            .chip-row {
+                gap: 0.4rem 0.8rem;
+            }
+            .chip {
+                font-size: 0.80rem;
+                padding: 0.15rem 0.9rem;
+            }
+        }
+
+        /* ===== 滚动条美化 ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            background: transparent;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(20, 10, 40, 0.4);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(160, 130, 255, 0.30);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(160, 130, 255, 0.50);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 宇宙背景 ===== -->
+    <div class="universe">
+        <div class="stars"></div>
+        <div class="nebula n1"></div>
+        <div class="nebula n2"></div>
+        <div class="nebula n3"></div>
+    </div>
+
+    <!-- ===== 主容器 ===== -->
+    <div class="container">
+
+        <!-- 头部卡片 -->
+        <div class="card header">
+            <div class="name-title">
+                <h1>张彦同</h1>
+                <div class="sub">
+                    <span>♊ 10后 · 双子座</span>
+                    <span>🧠 ENTP</span>
+                    <span>🎯 物化生</span>
+                </div>
+            </div>
+            <div class="badge-group">
+                <span class="badge glow">🚀 RISCV 挑战营</span>
+                <span class="badge">🎹 上音10级</span>
+                <span class="badge">🏀 篮球</span>
+            </div>
+        </div>
+
+        <!-- 2列：个人简介 + 游戏 -->
+        <div class="grid-2col">
+            <!-- 个人简介 -->
+            <div class="card">
+                <div class="card-title">✦ 关于我</div>
+                <div class="card-body">
+                    <p style="margin-bottom: 0.5rem;">
+                        10后 <strong>ENTP</strong>，双子座，选课 <span class="highlight">物化生</span>。
+                        课余喜欢打篮球，钢琴业余 <strong>上音10级</strong>。
+                    </p>
+                    <p style="margin-bottom: 0.3rem;">
+                        最近在 <strong>上交大学森</strong> 参加 <span class="highlight">RISCV 芯片挑战营</span>，
+                        喜欢钻研天文学。
+                    </p>
+                    <div class="signature">
+                        “ 喜欢吃辣，但不吃压力。 ”
+                    </div>
+                </div>
+            </div>
+
+            <!-- 游戏 & 其他 -->
+            <div class="card">
+                <div class="card-title">🎮 游戏 · 日常</div>
+                <div class="card-body">
+                    <div class="chip-row" style="margin-bottom: 0.6rem;">
+                        <span class="chip"><span class="num">✦</span> 崩坏·星穹铁道</span>
+                        <span class="chip"><span class="num">⚔</span> 王者荣耀 · 巅峰 2142</span>
+                    </div>
+                    <div style="margin-top: 0.3rem;">
+                        <span class="tag game">🌌 星穹铁道</span>
+                        <span class="tag game">🏆 巅峰赛 2142</span>
+                    </div>
+                    <div class="divider-light"></div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem 1.2rem; font-size: 0.92rem;">
+                        <span>❤️ 恋爱：<span style="color:#b8aaff;">没谈过</span></span>
+                        <span>🌟 素质：<span style="color:#b8aaff;">还行</span></span>
+                        <span>🌶️ 吃辣 ✓ &nbsp; 压力 ✗</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3列：兴趣标签 + 天文学 + 芯片营 -->
+        <div class="grid-3col">
+            <!-- 兴趣标签 -->
+            <div class="card">
+                <div class="card-title">🏷️ 兴趣 · 标签</div>
+                <div class="card-body">
+                    <div class="tag-list">
+                        <span class="tag sport">🏀 篮球</span>
+                        <span class="tag music">🎹 钢琴 · 10级</span>
+                        <span class="tag astro">🔭 天文学</span>
+                        <span class="tag">⚛️ 物化生</span>
+                        <span class="tag game">🎮 星穹铁道</span>
+                        <span class="tag game">👑 王者荣耀</span>
+                        <span class="tag astro">🪐 宇宙</span>
+                        <span class="tag">🧠 ENTP</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 天文学 -->
+            <div class="card">
+                <div class="card-title">🔭 天文学</div>
+                <div class="card-body">
+                    <p style="font-size: 0.95rem;">
+                        喜欢观测深空天体，关注 <strong>系外行星</strong> 与 <strong>恒星演化</strong>。
+                        最近在读《宇宙的结构》。
+                    </p>
+                    <div style="margin-top: 0.4rem; opacity: 0.5; font-size: 0.75rem; letter-spacing: 1px;">
+                        ✦ 星云 · 星系 · 黑洞 ✦
+                    </div>
+                </div>
+            </div>
+
+            <!-- RISCV 芯片挑战营 -->
+            <div class="card">
+                <div class="card-title">⚡ 上交大学森 · RISCV</div>
+                <div class="card-body">
+                    <p style="font-size: 0.95rem;">
+                        正在 <strong>上交大学森</strong> 参与 <span class="highlight">RISCV 芯片挑战营</span>，
+                        学习处理器架构与开源指令集。
+                    </p>
+                    <div style="margin-top: 0.5rem; display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                        <span class="badge" style="font-size:0.70rem;">🧩 硬件</span>
+                        <span class="badge" style="font-size:0.70rem;">📟 汇编</span>
+                        <span class="badge" style="font-size:0.70rem;">⚙️ 开源</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部：一句话总结 -->
+        <div class="card" style="text-align: center; padding: 1rem 2rem; border-color: rgba(160,140,255,0.08);">
+            <div style="font-size: 0.85rem; opacity: 0.5; letter-spacing: 2px;">
+                ✦ 在宇宙与芯片之间，寻找自己的轨道 ✦
+            </div>
+            <div style="margin-top: 0.3rem; font-size: 0.70rem; opacity: 0.25;">
+                张彦同 · 2026 · 太空频率
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
