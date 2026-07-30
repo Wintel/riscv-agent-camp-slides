@@ -1,0 +1,3464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌿 LifeCombo</title>
+<style>
+/* ===== 全局样式 ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #f9f5f0 0%, #ede6f0 100%);
+  min-height: 100vh; color: #2c3e50; padding: 0 16px 80px;
+  -webkit-font-smoothing: antialiased;
+}
+/* 睡眠债务横幅 */
+#debt-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: #e74c3c; color: #fff; text-align: center;
+  padding: 10px 16px; font-size: 0.95rem; cursor: pointer;
+  transform: translateY(-100%); transition: transform 0.4s;
+  box-shadow: 0 2px 12px rgba(231,76,60,0.3);
+}
+#debt-banner.show { transform: translateY(0); }
+
+/* ===== 顶部标题栏 ===== */
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 0 12px; flex-wrap: wrap; gap: 8px;
+}
+.header-title { font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; }
+.header-right { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; color: #7f8c8d; }
+#clock { font-variant-numeric: tabular-nums; }
+
+/* ===== Tab 导航 ===== */
+.tabs {
+  display: flex; justify-content: center; gap: 20px;
+  padding: 16px 0 20px; position: relative;
+}
+.tab-btn {
+  width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ddd;
+  background: #fff; font-size: 1.6rem; cursor: pointer; transition: all 0.3s;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.tab-btn:hover { border-color: #b0aec0; transform: scale(1.05); }
+.tab-btn.active {
+  border-color: #5b6abf; background: #f0eeff;
+  box-shadow: 0 0 0 4px rgba(91,106,191,0.15);
+}
+.tab-btn:active { transform: scale(0.92); }
+
+/* ===== 主卡片 ===== */
+.card {
+  background: #fff; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  padding: 24px; max-width: 820px; margin: 0 auto;
+  transition: opacity 0.3s ease;
+}
+.card.fade { opacity: 0; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ===== 通用组件样式 ===== */
+input, textarea, select {
+  font-family: inherit; font-size: 0.9rem; padding: 8px 12px;
+  border: 1.5px solid #e0e0e0; border-radius: 12px; outline: none;
+  background: #fafafa; transition: border 0.2s; color: #2c3e50;
+}
+input:focus, textarea:focus { border-color: #5b6abf; background: #fff; }
+button {
+  font-family: inherit; cursor: pointer; border: none; outline: none;
+  border-radius: 999px; padding: 8px 20px; font-size: 0.9rem;
+  transition: all 0.2s; user-select: none;
+}
+button:active { transform: scale(0.95); }
+.btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+.btn-orange { background: #e67e22; color: #fff; }
+.btn-orange:hover { background: #f39c12; }
+.btn-indigo { background: #5b6abf; color: #fff; }
+.btn-indigo:hover { background: #6f7ed6; }
+.btn-gray { background: #ecf0f1; color: #2c3e50; }
+.btn-gray:hover { background: #d5dbdb; }
+.btn-red { background: #e74c3c; color: #fff; }
+.btn-red:hover { background: #c0392b; }
+.btn-green { background: #27ae60; color: #fff; }
+.btn-green:hover { background: #2ecc71; }
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #f0f0f5; border-radius: 999px; padding: 4px 12px; font-size: 0.85rem;
+  margin: 3px; white-space: nowrap;
+}
+.tag .del { cursor: pointer; font-weight: bold; color: #999; }
+.tag .del:hover { color: #e74c3c; }
+
+/* ===== 🍅 专注农场 ===== */
+.focus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.timer-section { text-align: center; position: relative; display: inline-block; }
+#progress-canvas { display: block; margin: 0 auto; }
+#timer-display {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem; font-weight: 700;
+  pointer-events: none;
+}
+.timer-controls { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+.timer-setting { margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.timer-setting input { width: 60px; text-align: center; }
+.pet-section { text-align: center; }
+#pet-canvas { display: block; margin: 0 auto; }
+.pet-name { font-weight: 600; margin: 4px 0 2px; }
+.pet-status { font-size: 0.85rem; color: #7f8c8d; margin-bottom: 4px; }
+.pet-emoji { font-size: 2rem; transition: all 0.5s; }
+.pet-buttons { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin: 4px 0; }
+.pet-select-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; font-size: 0.78rem; border-radius: 999px;
+  border: 1.5px solid #ddd; background: #fff;
+  cursor: pointer; transition: all 0.2s;
+}
+.pet-select-btn:hover { border-color: #b0aec0; transform: scale(1.05); }
+.pet-select-btn.active {
+  border-color: #e67e22; background: #fef5e7;
+  box-shadow: 0 0 0 3px rgba(230,126,34,0.15); font-weight: 600;
+}
+/* 宠物对话气泡 */
+#pet-bubble {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  background: #fff; border: 1.5px solid #e0d5c4;
+  border-radius: 14px; padding: 6px 14px; font-size: 0.82rem;
+  white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  opacity: 0; transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none; z-index: 10;
+  max-width: 160px; overflow: hidden; text-overflow: ellipsis;
+}
+#pet-bubble::after {
+  content: ''; position: absolute; bottom: -8px; left: 50%;
+  transform: translateX(-50%);
+  border-left: 8px solid transparent; border-right: 8px solid transparent;
+  border-top: 8px solid #fff;
+}
+#pet-bubble.show {
+  opacity: 1; transform: translateX(-50%) translateY(-8px);
+}
+.pet-section { position: relative; }
+.todo-section { grid-column: 1 / -1; margin-top: 4px; }
+.todo-input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.todo-input-row input { flex: 1; }
+.todo-list { list-style: none; }
+.todo-list li {
+  display: flex; align-items: center; gap: 8px; padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.todo-list li:last-child { border-bottom: none; }
+.todo-list li input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+.todo-list li .todo-text { flex: 1; }
+.todo-list li .todo-text.done { text-decoration: line-through; color: #bdc3c7; }
+.todo-list li .del-btn { color: #e74c3c; cursor: pointer; font-weight: bold; padding: 2px 6px; border-radius: 50%; }
+.todo-list li .del-btn:hover { background: #fce4e4; }
+.stats-section { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-top: 4px; }
+.stat-item { text-align: center; min-width: 70px; }
+.stat-item .num { font-size: 1.4rem; font-weight: 700; color: #e67e22; }
+.stat-item .label { font-size: 0.75rem; color: #7f8c8d; }
+#week-chart-canvas { display: block; margin: 8px auto 0; border-radius: 8px; background: #fcfcfc; }
+
+/* ===== 🎲 决策轮盘 ===== */
+.decide-section { text-align: center; }
+.option-input-row { display: flex; gap: 8px; margin-bottom: 8px; justify-content: center; flex-wrap: wrap; }
+.option-input-row input { flex: 1; max-width: 320px; }
+.option-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin: 4px 0; min-height: 36px; padding: 4px 0; }
+.presets { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
+.presets button { background: #f0f0f5; color: #2c3e50; font-size: 0.8rem; padding: 5px 14px; }
+.presets button:hover { background: #ddddee; }
+#wheel-canvas { display: block; margin: 0 auto; cursor: pointer; }
+.decide-result { margin-top: 12px; padding: 14px; background: #fafafa; border-radius: 16px; }
+.decide-result h3 { font-size: 1.2rem; margin-bottom: 4px; }
+.decide-result .scores { display: flex; gap: 20px; justify-content: center; margin: 6px 0; font-size: 0.9rem; }
+.decide-result .comment { font-size: 0.85rem; color: #7f8c8d; font-style: italic; }
+.history-section { margin-top: 16px; }
+.history-section h4 { margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+.history-list { list-style: none; max-height: 240px; overflow-y: auto; }
+.history-list li { padding: 6px 8px; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; }
+.history-list li:last-child { border-bottom: none; }
+
+/* ===== 推荐面板（模块二子功能） ===== */
+.sub-tabs { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+.sub-tab-btn {
+  padding: 6px 16px; border-radius: 999px; border: 1.5px solid #ddd;
+  background: #fff; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+}
+.sub-tab-btn:hover { border-color: #b0aec0; }
+.sub-tab-btn.active { background: #5b6abf; color: #fff; border-color: #5b6abf; }
+.sub-tab-content { display: none; }
+.sub-tab-content.active { display: block; }
+.rec-panel { text-align: left; }
+.rec-panel label { display: block; font-size: 0.82rem; color: #7f8c8d; margin-top: 8px; margin-bottom: 2px; }
+.rec-panel input, .rec-panel select { width: 100%; max-width: 400px; }
+.rec-panel button { margin-top: 6px; }
+.rec-results { margin-top: 12px; }
+.rec-card {
+  background: #fafafa; border-radius: 14px; padding: 14px; margin-bottom: 10px;
+  border-left: 4px solid #e67e22; transition: transform 0.15s;
+}
+.rec-card:hover { transform: translateX(4px); }
+.rec-card h4 { margin-bottom: 4px; font-size: 1rem; }
+.rec-card .rec-tag { display: inline-block; background: #f0eeff; color: #5b6abf; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; margin: 2px; }
+.rec-card .rec-desc { font-size: 0.85rem; color: #555; margin-top: 4px; }
+.rec-card .rec-meta { font-size: 0.78rem; color: #999; margin-top: 2px; }
+.empty-rec { color: #bdc3c7; text-align: center; padding: 20px; font-size: 0.9rem; }
+
+/* ===== 💤 眠眠账本 ===== */
+.sleep-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.sleep-form label { display: block; font-size: 0.82rem; color: #7f8c8d; margin-top: 8px; margin-bottom: 2px; }
+.sleep-form input { width: 100%; }
+.sleep-form button { margin-top: 12px; }
+.sleep-summary { text-align: center; }
+.sleep-summary .big-num { font-size: 2rem; font-weight: 700; }
+.sleep-summary .big-num.green { color: #27ae60; }
+.sleep-summary .big-num.red { color: #e74c3c; }
+.sleep-summary .sub-text { font-size: 0.82rem; color: #7f8c8d; }
+#sleep-chart-canvas { display: block; margin: 10px auto 0; border-radius: 8px; background: #fcfcfc; }
+.koala-msg { color: #e67e22; font-weight: 600; font-size: 0.9rem; margin-top: 4px; }
+.dream-section { margin-top: 20px; }
+.dream-section h3 { margin-bottom: 8px; }
+.dream-form-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.dream-form-row input, .dream-form-row textarea { flex: 1; min-width: 120px; }
+.dream-form-row textarea { min-height: 60px; resize: vertical; }
+.dream-list { margin-top: 10px; }
+.dream-list .search-box { width: 100%; margin-bottom: 8px; }
+.dream-item {
+  border: 1px solid #eee; border-radius: 12px; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; transition: background 0.2s;
+}
+.dream-item:hover { background: #f9f9ff; }
+.dream-item .dream-title { font-weight: 600; display: flex; justify-content: space-between; }
+.dream-item .dream-meta { font-size: 0.78rem; color: #7f8c8d; margin-top: 2px; }
+.dream-item .dream-content { margin-top: 8px; display: none; font-size: 0.88rem; line-height: 1.5; }
+.dream-item.open .dream-content { display: block; }
+.dream-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+.dream-tag-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 3px; }
+
+/* ===== 词云 / 分析报告弹窗 ===== */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.show { display: flex; }
+.modal-content {
+  background: #fff; border-radius: 20px; padding: 24px; max-width: 560px;
+  width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+.modal-content h3 { margin-bottom: 12px; }
+.modal-close { float: right; background: none; font-size: 1.3rem; color: #999; padding: 0 4px; }
+.modal-close:hover { color: #333; }
+#wordcloud-canvas { display: block; margin: 8px auto; border-radius: 8px; background: #fcfcfc; }
+.analysis-stats { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin: 10px 0; }
+.analysis-stats .a-item { text-align: center; }
+.analysis-stats .a-num { font-size: 1.4rem; font-weight: 700; }
+.analysis-stats .a-label { font-size: 0.78rem; color: #7f8c8d; }
+
+/* ===== 底部语录 ===== */
+.footer-quote {
+  text-align: center; padding: 24px 0 16px; font-size: 0.95rem;
+  color: #7f8c8d; max-width: 600px; margin: 0 auto; font-style: italic;
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 680px) {
+  .focus-grid { grid-template-columns: 1fr; }
+  .sleep-grid { grid-template-columns: 1fr; }
+  .header { flex-direction: column; text-align: center; }
+  .header-right { flex-wrap: wrap; justify-content: center; }
+  .card { padding: 16px; border-radius: 16px; }
+  .timer-setting { flex-wrap: wrap; }
+}
+@media (max-width: 400px) {
+  .tab-btn { width: 50px; height: 50px; font-size: 1.3rem; }
+  .tabs { gap: 12px; }
+  .pet-buttons { flex-direction: column; align-items: center; }
+}
+
+/* ===== 无障碍设置面板 ===== */
+#settings-btn {
+  background: none; border: 1.5px solid #ddd; border-radius: 50%; width: 36px; height: 36px;
+  font-size: 1.1rem; padding: 0; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s;
+}
+#settings-btn:hover { border-color: #5b6abf; background: #f0eeff; }
+#settings-panel {
+  position: fixed; top: 70px; right: 16px; z-index: 300;
+  background: #fff; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  padding: 16px 20px; min-width: 220px; display: none;
+}
+#settings-panel.show { display: block; }
+.setting-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 0.88rem; }
+.setting-row .label { flex: 1; color: #2c3e50; }
+.setting-row button { padding: 4px 12px; font-size: 0.82rem; background: #ecf0f1; color: #2c3e50; border-radius: 8px; }
+.setting-row button.active { background: #5b6abf; color: #fff; }
+.setting-row button:hover { background: #d5dbdb; }
+.setting-row button.active:hover { background: #6f7ed6; }
+.setting-row input[type="color"] { width: 32px; height: 32px; border: none; border-radius: 8px; cursor: pointer; padding: 0; }
+.setting-row .font-label { min-width: 28px; text-align: center; font-weight: 600; }
+
+/* ===== 高对比度模式 ===== */
+body.high-contrast {
+  background: #1a1a2e !important; color: #f0e6d0;
+}
+body.high-contrast .card { background: #16213e; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+body.high-contrast .header-title { color: #f0e6d0; }
+body.high-contrast .tab-btn { background: #16213e; border-color: #0f3460; color: #f0e6d0; }
+body.high-contrast .tab-btn.active { background: #0f3460; border-color: #e94560; box-shadow: 0 0 0 4px rgba(233,69,96,0.25); }
+body.high-contrast input, body.high-contrast textarea, body.high-contrast select {
+  background: #1a1a2e; border-color: #0f3460; color: #f0e6d0;
+}
+body.high-contrast .btn-gray { background: #0f3460; color: #f0e6d0; }
+body.high-contrast .rec-card, body.high-contrast .decide-result,
+body.high-contrast .dream-item { background: #1a1a2e; border-color: #0f3460; }
+body.high-contrast .modal-content { background: #16213e; }
+body.high-contrast .modal-overlay { background: rgba(0,0,0,0.6); }
+body.high-contrast #settings-panel { background: #16213e; border: 1px solid #0f3460; }
+body.high-contrast .history-list li { border-color: #0f3460; }
+body.high-contrast .todo-list li { border-color: #0f3460; }
+body.high-contrast #debt-banner { background: #e94560; }
+body.high-contrast .footer-quote { color: #a0a0b0; }
+
+/* ===== 字体大小 ===== */
+body.font-small { zoom: 0.9; }
+body.font-medium { zoom: 1; }
+body.font-large { zoom: 1.15; }
+</style>
+</head>
+<body>
+<!-- 睡眠债务横幅 -->
+<div id="debt-banner"></div>
+
+<!-- 分析报告弹窗 -->
+<div class="modal-overlay" id="report-modal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeReport()">✕</button>
+    <h3>📊 梦境分析周报</h3>
+    <div class="analysis-stats" id="analysis-stats"></div>
+    <canvas id="wordcloud-canvas" width="480" height="300"></canvas>
+    <p id="analysis-comment" style="margin-top:8px;font-size:0.9rem;color:#7f8c8d;text-align:center;"></p>
+  </div>
+</div>
+
+<!-- 全局容器 -->
+<div class="header">
+  <div class="header-title">🌿 LifeCombo</div>
+  <div class="header-right">
+    <span id="clock"></span>
+    <span id="greeting"></span>
+    <button id="settings-btn" onclick="toggleSettings()" title="无障碍设置">⚙️</button>
+  </div>
+  <!-- 设置面板 -->
+  <div id="settings-panel">
+    <div class="setting-row">
+      <span class="label">🎨 色弱模式</span>
+      <button id="hc-toggle" onclick="toggleHighContrast()">关闭</button>
+    </div>
+    <div class="setting-row">
+      <span class="label">🔤 字体大小</span>
+      <button onclick="adjustFont(-1)">A−</button>
+      <span class="font-label" id="font-label">中</span>
+      <button onclick="adjustFont(1)">A+</button>
+    </div>
+    <div class="setting-row">
+      <span class="label">🎨 背景色</span>
+      <input type="color" id="bg-picker" value="#f9f5f0" onchange="changeBg(this.value)">
+      <button onclick="resetBg()">重置</button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="pomodoro" onclick="switchTab('pomodoro')">🍅</button>
+  <button class="tab-btn" data-tab="decide" onclick="switchTab('decide')">🎲</button>
+  <button class="tab-btn" data-tab="sleep" onclick="switchTab('sleep')">💤</button>
+</div>
+
+<div class="card" id="main-card">
+  <!-- ====== 🍅 专注农场 ====== -->
+  <div class="tab-content active" id="tab-pomodoro">
+    <div class="focus-grid">
+      <!-- 番茄钟 -->
+      <div class="timer-section">
+        <canvas id="progress-canvas" width="200" height="200"></canvas>
+        <div id="timer-display">25:00</div>
+        <div class="timer-controls">
+          <button class="btn-orange" onclick="startTimer()" id="btn-start">▶ 开始</button>
+          <button class="btn-gray" onclick="pauseTimer()" id="btn-pause" style="display:none;">⏸ 暂停</button>
+          <button class="btn-gray" onclick="resetTimer()">↺ 重置</button>
+        </div>
+        <div class="timer-setting">
+          <span>专注</span>
+          <input type="number" id="focus-min" value="25" min="5" max="60" onchange="updateFocusMin()">
+          <span>分钟</span>
+          <span style="margin-left:10px;" id="rest-badge"></span>
+        </div>
+      </div>
+      <!-- 宠物 -->
+      <div class="pet-section">
+        <canvas id="pet-canvas" width="140" height="140" style="cursor:pointer;"></canvas>
+        <div id="pet-bubble"></div>
+        <div class="pet-name" id="pet-name">小奶橘</div>
+        <div class="pet-select-btns" style="margin:2px 0;display:flex;gap:4px;justify-content:center;flex-wrap:wrap;">
+          <button class="pet-select-btn active" data-pet="cat" onclick="selectPet('cat')">🐱 小猫咪</button>
+          <button class="pet-select-btn" data-pet="dog" onclick="selectPet('dog')">🐶 小狗狗</button>
+          <button class="pet-select-btn" data-pet="redpanda" onclick="selectPet('redpanda')">🦊 小浣熊</button>
+        </div>
+        <div class="pet-status" id="pet-status">Lv.1 | ❤️ 100</div>
+        <div class="pet-emoji" id="pet-emoji">😊</div>
+        <div class="pet-buttons">
+          <button class="btn-sm btn-green" onclick="feedPet()">🍬 喂食</button>
+          <button class="btn-sm btn-gray" onclick="petTalk()">💬 戳一下</button>
+          <button class="btn-sm btn-indigo" onclick="openPetCustomize()">🎨 装扮</button>
+        </div>
+      </div>
+      <!-- Todo -->
+      <div class="todo-section">
+        <div class="todo-input-row">
+          <input type="text" id="todo-input" placeholder="添加任务（最多10个）" onkeydown="if(event.key==='Enter')addTodo()">
+          <button class="btn-sm btn-indigo" onclick="addTodo()">添加</button>
+        </div>
+        <ul class="todo-list" id="todo-list"></ul>
+      </div>
+      <!-- 统计 -->
+      <div class="stats-section">
+        <div class="stat-item"><div class="num" id="stat-today">0</div><div class="label">今日番茄</div></div>
+        <div class="stat-item"><div class="num" id="stat-mins">0</div><div class="label">专注分钟</div></div>
+        <div class="stat-item"><div class="num" id="stat-lv">1</div><div class="label">宠物等级</div></div>
+        <div class="stat-item"><div class="num" id="stat-coins">0</div><div class="label">番茄币</div></div>
+        <canvas id="week-chart-canvas" width="700" height="100"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 🎲 决策轮盘 + 推荐 ====== -->
+  <div class="tab-content" id="tab-decide">
+    <!-- 子导航 -->
+    <div class="sub-tabs">
+      <button class="sub-tab-btn active" data-subtab="wheel" onclick="switchSubTab('wheel')">🎯 决策</button>
+      <button class="sub-tab-btn" data-subtab="food" onclick="switchSubTab('food')">🍜 美食</button>
+      <button class="sub-tab-btn" data-subtab="play" onclick="switchSubTab('play')">🎢 游玩</button>
+      <button class="sub-tab-btn" data-subtab="movie" onclick="switchSubTab('movie')">🎬 影片</button>
+    </div>
+
+    <!-- 子面板：决策轮盘 -->
+    <div class="sub-tab-content active" id="subtab-wheel">
+      <div class="decide-section">
+        <div class="option-input-row">
+          <input type="text" id="option-input" placeholder="输入选项" onkeydown="if(event.key==='Enter')addOption()">
+          <button class="btn-sm btn-indigo" onclick="addOption()">添加</button>
+        </div>
+        <div class="option-tags" id="option-tags">
+          <span style="color:#bdc3c7;font-size:0.85rem;">添加 2~8 个选项开始决策（虽然我也不会选）</span>
+        </div>
+        <div class="presets">
+          <button onclick="presetOptions('lunch')">🍜 中午吃什么</button>
+          <button onclick="presetOptions('weekend')">🏞 周末去哪玩</button>
+          <button onclick="presetOptions('tv')">📺 今晚看什么</button>
+        </div>
+        <canvas id="wheel-canvas" width="360" height="360"></canvas>
+        <div style="margin-top:8px;">
+          <button class="btn-orange" onclick="spinWheel()" id="btn-spin">🎯 转盘</button>
+        </div>
+        <div class="decide-result" id="decide-result" style="display:none;"></div>
+        <div class="history-section">
+          <h4>📋 决策历史 <button class="btn-sm btn-red" onclick="clearHistory()">清空</button></h4>
+          <ul class="history-list" id="history-list"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 子面板：美食推荐 -->
+    <div class="sub-tab-content rec-panel" id="subtab-food">
+      <label>🌍 国家 / 省份</label>
+      <input type="text" id="food-province" placeholder="如：广东、四川、日本、意大利" list="province-list">
+      <datalist id="province-list"></datalist>
+      <label>🏛️ 城市</label>
+      <input type="text" id="food-city" placeholder="如：广州、成都、杭州" list="city-list">
+      <datalist id="city-list"></datalist>
+      <label>📍 区/县（可选）</label>
+      <input type="text" id="food-district" placeholder="如：天河区、武侯区">
+      <button class="btn-indigo" onclick="searchFood()">🔍 搜索美食</button>
+      <div class="rec-results" id="food-results">
+        <div class="empty-rec">输入国家/省份和城市，看看当地有什么好吃的～</div>
+      </div>
+    </div>
+
+    <!-- 子面板：游玩推荐 -->
+    <div class="sub-tab-content rec-panel" id="subtab-play">
+      <label>👥 和谁一起去？</label>
+      <input type="text" id="play-with" placeholder="如：朋友、恋人、父母、领导、同事、自己" list="play-list">
+      <datalist id="play-list">
+        <option value="自己/独自"><option value="朋友"><option value="恋人/对象">
+        <option value="父母"><option value="领导/老板"><option value="同事/团建"><option value="孩子/亲子">
+      </datalist>
+      <button class="btn-indigo" onclick="searchPlay()">🎯 推荐游玩</button>
+      <div class="rec-results" id="play-results">
+        <div class="empty-rec">告诉我和谁去，我来推荐最合适的玩法～</div>
+      </div>
+    </div>
+
+    <!-- 子面板：影片推荐 -->
+    <div class="sub-tab-content rec-panel" id="subtab-movie">
+      <label>🎞️ 影片类型</label>
+      <input type="text" id="movie-genre" placeholder="如：纪录片、恐怖片、电视剧、动画、爱情片" list="genre-list">
+      <datalist id="genre-list">
+        <option value="纪录片"><option value="恐怖片"><option value="电视剧">
+        <option value="动画"><option value="爱情片"><option value="喜剧"><option value="动作片">
+      </datalist>
+      <label>🏷️ 偏好（可选，逗号分隔）</label>
+      <input type="text" id="movie-pref" placeholder="如：国外、欧美、日韩、国产、女性、励志、科幻、悬疑">
+      <button class="btn-indigo" onclick="searchMovie()">🎬 推荐影片</button>
+      <div class="rec-results" id="movie-results">
+        <div class="empty-rec">选个类型和偏好，我帮你挑片～</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 💤 眠眠账本 ====== -->
+  <div class="tab-content" id="tab-sleep">
+    <div class="sleep-grid">
+      <!-- 左栏：录入 -->
+      <div class="sleep-form">
+        <label>日期</label>
+        <input type="date" id="sleep-date">
+        <label>😴 入睡时间</label>
+        <input type="time" id="sleep-bedtime">
+        <label>☀️ 醒来时间</label>
+        <input type="time" id="sleep-waketime">
+        <label>🎯 理想睡眠时长（小时）</label>
+        <input type="number" id="sleep-ideal" value="8" min="4" max="14" step="0.5">
+        <button class="btn-indigo" onclick="saveSleep()">💾 保存记录</button>
+        <button class="btn-sm btn-gray" onclick="exportSleepReport()" style="margin-top:6px;">📤 导出睡眠报告</button>
+      </div>
+      <!-- 右栏：统计 -->
+      <div class="sleep-summary">
+        <div>今日睡眠</div>
+        <div><span class="big-num" id="sleep-today-num">0.0</span><span class="sub-text"> 小时</span></div>
+        <div id="sleep-today-debt" style="font-size:0.85rem;"></div>
+        <div style="margin-top:10px;">累计睡眠债务</div>
+        <div><span class="big-num red" id="sleep-total-debt">0.0</span><span class="sub-text"> 小时</span></div>
+        <div id="koala-msg" class="koala-msg" style="display:none;"></div>
+        <canvas id="sleep-chart-canvas" width="600" height="160"></canvas>
+      </div>
+    </div>
+
+    <!-- 梦境 -->
+    <div class="dream-section">
+      <h3>🌙 梦境记事本</h3>
+      <div style="margin-bottom:8px;">
+        <input type="text" id="dream-title" placeholder="梦境标题" style="margin-right:4px;">
+        <textarea id="dream-content" placeholder="梦境内容…" style="width:100%;margin:4px 0;"></textarea>
+        <input type="text" id="dream-tags" placeholder="标签（逗号分隔，如：飞行, 怪兽）" style="margin-right:4px;">
+        <input type="date" id="dream-date">
+        <button class="btn-sm btn-indigo" onclick="saveDream()" style="margin-top:4px;">💾 记录梦境</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;">
+        <button class="btn-sm btn-indigo" onclick="openReport()">📊 生成周报</button>
+        <input type="text" id="dream-search" placeholder="🔍 搜索梦境…" style="flex:1;min-width:100px;" oninput="renderDreams()">
+      </div>
+      <div class="dream-list" id="dream-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 宠物装扮弹窗 -->
+<div class="modal-overlay" id="pet-custom-modal">
+  <div class="modal-content" style="max-width:420px;">
+    <button class="modal-close" onclick="closePetCustomize()">✕</button>
+    <h3 id="custom-modal-title">🎨 装扮你的宠物</h3>
+    <div id="custom-fur-section" style="margin:12px 0 8px;"><strong>🐱 毛色</strong></div>
+    <div id="custom-fur-buttons" style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn-sm" style="background:#f5cba7;color:#5d4037;" onclick="setPetFur('orange')">🍊 奶橘</button>
+      <button class="btn-sm" style="background:#bdc3c7;color:#2c3e50;" onclick="setPetFur('gray')">🐭 银灰</button>
+      <button class="btn-sm" style="background:#fdfefe;color:#2c3e50;border:1px solid #ddd;" onclick="setPetFur('white')">☁️ 雪白</button>
+      <button class="btn-sm" style="background:#4a5568;color:#fff;" onclick="setPetFur('black')">🌙 玄黑</button>
+      <button class="btn-sm" style="background:linear-gradient(90deg,#f5cba7,#fff,#5d6d7e);color:#2c3e50;" onclick="setPetFur('calico')">🌈 三花</button>
+      <button class="btn-sm" style="background:#fdebd0;color:#5d4037;" onclick="setPetFur('cream')">🍦 奶油</button>
+    </div>
+    <div style="margin:12px 0 8px;"><strong>🎀 配饰</strong></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn-sm btn-gray" onclick="setPetAcc('none')">无</button>
+      <button class="btn-sm" style="background:#e74c3c;color:#fff;" onclick="setPetAcc('hat')">🧢 小帽</button>
+      <button class="btn-sm" style="background:#27ae60;color:#fff;" onclick="setPetAcc('scarf')">🧣 围巾</button>
+      <button class="btn-sm" style="background:#e84393;color:#fff;" onclick="setPetAcc('bowtie')">🎀 蝴蝶结</button>
+      <button class="btn-sm" style="background:#2c3e50;color:#fff;" onclick="setPetAcc('glasses')">👓 眼镜</button>
+      <button class="btn-sm" style="background:#f1c40f;color:#2c3e50;" onclick="setPetAcc('crown')">👑 皇冠</button>
+      <button class="btn-sm" style="background:#ff6b81;color:#fff;" onclick="setPetAcc('flower')">🌸 小花</button>
+      <button class="btn-sm" style="background:#9b59b6;color:#fff;" onclick="setPetAcc('ribbon')">🎗️ 发带</button>
+    </div>
+    <div style="margin:12px 0 8px;"><strong>🌄 场景</strong></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn-sm btn-gray" onclick="setPetScene('cozy')">🏠 温馨小屋</button>
+      <button class="btn-sm" style="background:#a8d8a8;color:#2c3e50;" onclick="setPetScene('garden')">🌿 花园</button>
+      <button class="btn-sm" style="background:#1a1a3e;color:#fff;" onclick="setPetScene('night')">🌙 夜空</button>
+      <button class="btn-sm" style="background:#f5deb3;color:#2c3e50;" onclick="setPetScene('beach')">🏖️ 海滩</button>
+      <button class="btn-sm" style="background:#2d1b4e;color:#fff;" onclick="setPetScene('starry')">✨ 星穹</button>
+    </div>
+    <div style="margin:12px 0 8px;"><strong>✏️ 自定义名字</strong></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="text" id="pet-custom-name" maxlength="10" placeholder="输入新名字..."
+        style="flex:1;font-size:0.9rem;" onkeydown="if(event.key==='Enter')savePetName()">
+      <button class="btn-sm btn-indigo" onclick="savePetName()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 底部语录 -->
+<div class="footer-quote" id="footer-quote"></div>
+
+<script>
+/* ================================================================
+   全局数据 & 初始化
+   ================================================================ */
+const QUOTES = [
+  "今天也要像番茄一样红红火火。",
+  "你超棒的，今天也是！",
+  "做选择没那么难——反正都会后悔（不是。",
+  "睡个好觉，世界都会温柔一点。",
+  "先休息五分钟，然后继续发光。",
+  "你专注的样子，真的很帅。",
+  "别忘了喝水，也别忘了呼吸。",
+  "今天的你，比昨天又成长了一点点。",
+  "有时候，停一下也是进步。",
+  "梦想不管大小，都值得被记住。",
+  "慢慢来，比较快。",
+  "即使只有一分钟的专注，也值得鼓掌。",
+  "你值得拥有完整的睡眠。",
+  "生活就像轮盘，转一转总有惊喜。",
+  "偶尔摆烂，也是人生智慧。",
+  "今天的云很好看，你看过了吗？",
+  "你已经在很努力地生活了。",
+  "允许自己不完美，但别放弃尝试。",
+  "做一个温暖的人，像阳光一样。",
+  "晚安，好梦。明天会更好。",
+  "你已经坚持很久了，休息一下再继续。",
+  "幸福就是，小憩片刻也心安。"
+];
+
+const PET_TALK = [
+  "你再不专注，我就要睡着了。",
+  "我的梦想是进化成彩虹猫，你呢？",
+  "喂，你的番茄要糊了！",
+  "我觉得你该休息了…我说的对不？",
+  "今天好无聊，陪我玩会儿。",
+  "哼，你都多久没完成任务了。",
+  "我好像又胖了一圈…都是你喂的。",
+  "再努力一下，我给你踩奶！",
+  "星星说，你今晚会睡个好觉。",
+  "你猜我现在是什么形态的猫猫？",
+  "专注的时候，连猫粮都是甜的。",
+  "喵~ 你专心工作的样子让我想打盹。",
+  "我的肉垫是蜜桃粉的，想捏吗？",
+  "别摸鱼了…虽然摸我的确很舒服。",
+  "呼噜呼噜~ 你再不动我要睡着了。"
+];
+
+const DECIDE_COMMENTS = [
+  "理智告诉你选 A，但你的胃在喊 B——所以建议抛硬币。",
+  "这个选择太难了，不如去吃顿火锅再想？",
+  "选哪个都会后悔，不如选今天开心的那个。",
+  "根据最新研究，你内心其实已经选好了。",
+  "别纠结了，命运已经替你决定了——好吧并没有。",
+  "转发这条锦鲤，选哪个都能保平安。",
+  "你的大脑在选A，你的心在选B，建议选C。",
+  "要不…掷个骰子？反正我随便。",
+  "这个问题建议交给明天的你。",
+  "从星座学来说，今天适合不做决定。",
+  "你问我的意见？我只是一段代码啊！",
+  "成年人当然全都要——但只能选一个。",
+  "深呼吸，选那个让你心跳加速的。",
+  "温馨提示：选错了也是经历。",
+  "不管选哪个，我都支持你（毕竟我没得选）。"
+];
+
+const PSEUDO_SCIENCE = [
+  "研究表明，侧睡有助于清除大脑垃圾。",
+  "月相变化会影响睡眠质量——满月时睡得浅。",
+  "蓝色灯光会抑制褪黑素分泌，少看手机。",
+  "做梦时大脑在整理记忆，相当于夜间文件管理。",
+  "人类是唯一会主动推迟睡觉时间的物种。",
+  "室温18-22°C是最适合入睡的温度。",
+  "午睡超过30分钟反而会更困。",
+  "听白噪音可以提升深度睡眠达30%。",
+  "床只能用来睡觉——在床上工作会影响睡眠质量。",
+  "你的身体没有'睡眠银行'，欠的债必须还。",
+  "睡前喝牛奶其实是心理安慰，但有用就行。",
+  "数羊没用，数呼吸更有助于入睡。"
+];
+
+const FORTUNE_SIGNS = [
+  "宜发呆，忌开会",
+  "宜躺平，忌内卷",
+  "宜吃甜食，忌称体重",
+  "宜早睡，忌熬夜刷手机",
+  "宜出门散步，忌宅家自闭",
+  "宜主动出击，忌犹豫不决",
+  "宜夸自己，忌自我怀疑",
+  "宜摸鱼十分钟，忌高强度用脑",
+  "宜断舍离，忌囤积焦虑",
+  "宜听歌，忌胡思乱想"
+];
+
+const FORTUNE_EXPLAIN = [
+  "水星逆行影响你的选择能力。",
+  "今天木星与土星呈90度夹角，决策需谨慎。",
+  "月亮进入双鱼座，直觉特别准。",
+  "金星在射手座，适合冒险尝试。",
+  "火星与天王星对冲，今天的你特别纠结。",
+  "宇宙能量波动，建议你什么都别选。",
+  "星座运势显示，今天是'随便'日。",
+  "星象学家说：你的选择困难是遗传的。"
+];
+
+const DREAM_FEELGOOD = ['快乐','幸福','美好','飞翔','自由','温暖','阳光','甜蜜','浪漫','奇妙','奇妙','开心','激动','惊喜'];
+const DREAM_BIZARRE = ['外星人','飞行','怪兽','时空','穿越','魔法','龙','鬼','迷宫','深渊','变形','透明','漂浮'];
+
+// localStorage 助手
+function lsGet(key, def) { try { const v = localStorage.getItem('lifecombo_'+key); return v ? JSON.parse(v) : def; } catch(e){return def;} }
+function lsSet(key, val) { localStorage.setItem('lifecombo_'+key, JSON.stringify(val)); }
+
+// ====== 时间 & 问候 ======
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  const h = now.getHours();
+  let g = '';
+  if (h<6) g='🌙 夜深了，早点休息～';
+  else if (h<9) g='🌅 早上好，新的一天！';
+  else if (h<12) g='☀️ 上午好，元气满满！';
+  else if (h<14) g='🌤 中午好，吃饭了吗？';
+  else if (h<17) g='🌤 下午好～';
+  else if (h<19) g='🌅 傍晚好，快下班了吧？';
+  else if (h<22) g='🌆 晚上好，放松一下吧～';
+  else g='🌙 夜深了，准备睡吧～';
+  document.getElementById('greeting').textContent = g;
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ====== Tab 切换 ======
+let currentTab = 'pomodoro';
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.querySelector('.tab-btn[data-tab="'+tab+'"]').classList.add('active');
+  currentTab = tab;
+  // 淡入淡出
+  const card = document.getElementById('main-card');
+  card.classList.add('fade');
+  setTimeout(() => { card.classList.remove('fade'); }, 300);
+  updateQuote();
+  // 切到对应 tab 时重新绘制 Canvas（尺寸修复）
+  setTimeout(() => {
+    if (tab === 'pomodoro') { drawProgress(); drawPet(); drawWeekChart(); }
+    if (tab === 'decide') { drawWheel(); }
+    if (tab === 'sleep') { drawSleepChart(); }
+  }, 50);
+}
+
+// ====== 底部语录 ======
+function updateQuote() {
+  const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  document.getElementById('footer-quote').textContent = '💬 ' + q;
+}
+updateQuote();
+
+/* ================================================================
+   🍅 专注农场
+   ================================================================ */
+// 状态
+let pomState = lsGet('pomodoro', { focusMin: 25, totalDone: 0, weekData: {} });
+let petState = lsGet('pet', { level:1, exp:0, expMax:30, mood:100, coins:0, totalTomatoes:0, phase:0,
+  furColor:'orange', accessory:'none', scene:'cozy', petType:'cat', customName:'' });
+let todos = lsGet('todos', []);
+let timerRemaining = pomState.focusMin * 60;
+let timerRunning = false;
+let timerPaused = false;
+let timerInterval = null;
+let isRest = false;
+let restTimer = 5 * 60;
+
+function getTodayKey() { return new Date().toISOString().slice(0,10); }
+
+function savePom() { lsSet('pomodoro', pomState); }
+function savePet() { lsSet('pet', petState); }
+function saveTodos() { lsSet('todos', todos); }
+
+// 进度环
+function drawProgress() {
+  const canvas = document.getElementById('progress-canvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height, cx = w/2, cy = h/2, r = 85;
+  ctx.clearRect(0,0,w,h);
+  // 背景弧
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.strokeStyle='#f0f0f0'; ctx.lineWidth=12; ctx.stroke();
+  // 进度弧
+  const total = (isRest ? restTimer : (pomState.focusMin*60));
+  const progress = total > 0 ? 1 - timerRemaining / total : 0;
+  ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2, -Math.PI/2 + Math.PI*2*progress);
+  ctx.strokeStyle=isRest?'#5b6abf':'#e67e22'; ctx.lineWidth=12; ctx.lineCap='round'; ctx.stroke();
+}
+
+function formatTime(s) { const m=Math.floor(s/60); const sec=s%60; return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); }
+
+function updateTimerDisplay() {
+  const display = document.getElementById('timer-display');
+  if (isRest) display.textContent = '💤 ' + formatTime(timerRemaining);
+  else display.textContent = formatTime(timerRemaining);
+  document.getElementById('rest-badge').textContent = isRest ? '🟣 休息中' : '';
+  drawProgress();
+}
+
+function startTimer() {
+  if (timerRunning) return;
+  if (timerRemaining <= 0) {
+    resetTimer();
+    return;
+  }
+  timerRunning = true; timerPaused = false;
+  document.getElementById('btn-start').style.display='none';
+  document.getElementById('btn-pause').style.display='inline-block';
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval); timerInterval=null; timerRunning=false;
+      document.getElementById('btn-start').style.display='inline-block';
+      document.getElementById('btn-pause').style.display='none';
+      if (isRest) {
+        // 休息结束
+        isRest = false;
+        timerRemaining = pomState.focusMin * 60;
+        updateTimerDisplay();
+        beep(3);
+        alert('☕ 休息结束！继续加油！');
+      } else {
+        // 专注完成
+        completePomodoro();
+      }
+    }
+    updateTimerDisplay();
+  }, 1000);
+  updateTimerDisplay();
+}
+
+function pauseTimer() {
+  if (!timerRunning) return;
+  timerPaused = !timerPaused;
+  if (timerPaused) {
+    clearInterval(timerInterval); timerInterval=null;
+    document.getElementById('btn-pause').textContent = '▶ 继续';
+  } else {
+    document.getElementById('btn-pause').textContent = '⏸ 暂停';
+    startTimer();
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval); timerInterval=null;
+  timerRunning=false; timerPaused=false;
+  if (!isRest && timerRemaining > 0 && timerRemaining < pomState.focusMin*60) {
+    // 中途放弃
+    petState.mood = Math.max(0, petState.mood - 20);
+    savePet(); updatePetUI();
+  }
+  isRest = false;
+  timerRemaining = pomState.focusMin * 60;
+  document.getElementById('btn-start').style.display='inline-block';
+  document.getElementById('btn-pause').style.display='none';
+  document.getElementById('btn-pause').textContent = '⏸ 暂停';
+  updateTimerDisplay();
+}
+
+function updateFocusMin() {
+  const v = parseInt(document.getElementById('focus-min').value) || 25;
+  if (v<5) document.getElementById('focus-min').value=5;
+  if (v>60) document.getElementById('focus-min').value=60;
+  pomState.focusMin = parseInt(document.getElementById('focus-min').value);
+  if (!timerRunning && !isRest) { timerRemaining = pomState.focusMin * 60; updateTimerDisplay(); }
+  savePom();
+}
+
+function completePomodoro() {
+  beep(3);
+  petState.exp += 10;
+  petState.mood = Math.min(100, petState.mood + 15);
+  petState.coins += 1;
+  petState.totalTomatoes += 1;
+  // 周统计
+  const key = getTodayKey();
+  if (!pomState.weekData) pomState.weekData = {};
+  pomState.weekData[key] = (pomState.weekData[key]||0) + 1;
+  pomState.totalDone = (pomState.totalDone||0) + 1;
+  // 等级检查
+  while (petState.exp >= petState.expMax && petState.level < 20) {
+    petState.exp -= petState.expMax;
+    petState.level++;
+    petState.expMax = Math.min(300, 30 + petState.level * 15);
+  }
+  savePom(); savePet();
+  updateStatsUI(); updatePetUI(); drawWeekChart();
+  // 显示表情
+  showPetEmoji('🤩');
+  setTimeout(() => updatePetEmoji(), 3000);
+
+  alert('🎉 专注完成！奖励宠物 +10 经验，+1 番茄币。');
+  // 进入休息
+  isRest = true;
+  timerRemaining = 5 * 60;
+  document.getElementById('btn-start').style.display='inline-block';
+  document.getElementById('btn-pause').style.display='none';
+  updateTimerDisplay();
+  // 自动开始休息倒计时
+  setTimeout(() => { if (!timerRunning) startTimer(); }, 100);
+}
+
+// Web Audio 叮声
+function beep(count) {
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    for (let i=0; i<count; i++) {
+      setTimeout(() => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 800; osc.type = 'sine';
+        gain.gain.value = 0.3; gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.15);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.15);
+      }, i*250);
+    }
+  } catch(e) {}
+}
+
+// ====== 宠物 ======
+function getPetPhase() {
+  const t = petState.totalTomatoes;
+  if (t>=17) return 5;
+  if (t>=11) return 4;
+  if (t>=6) return 3;
+  if (t>=3) return 2;
+  return 1;
+}
+
+function drawPet() {
+  const canvas = document.getElementById('pet-canvas');
+  const ctx = canvas.getContext('2d');
+  const w=canvas.width, h=canvas.height, cx=w/2, cy=h/2;
+  ctx.clearRect(0,0,w,h);
+  const phase = getPetPhase();
+  const mood = petState.mood;
+  ctx.save();
+
+  // 根据宠物类型绘制
+  if (petState.petType === 'dog') {
+    drawPuppy(ctx, cx, cy, mood);
+    ctx.restore();
+    return;
+  }
+  if (petState.petType === 'redpanda') {
+    drawRedPanda(ctx, cx, cy, mood);
+    ctx.restore();
+    return;
+  }
+
+  // 所有阶段共用的毛毯
+  drawBlanket(ctx, cx, cy);
+
+  if (phase === 1) {
+    /* ====== 小奶橘 · 奶油小猫 ====== */
+    drawKittenBody(ctx, cx, cy, 1.0);
+  } else if (phase === 2) {
+    /* ====== 火焰猫 ====== */
+    // 火焰光环
+    for (let i=0;i<6;i++) {
+      const a = Date.now()/200 + i*1.047;
+      const fx = cx + Math.sin(a)*38; const fy = cy - 28 + Math.cos(a*1.3)*14;
+      ctx.beginPath(); ctx.arc(fx,fy,8+Math.sin(a)*3,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${20+i*10},90%,60%,0.6)`;
+      ctx.fill();
+    }
+    drawKittenBody(ctx, cx, cy, 1.05);
+    // 火焰纹
+    ctx.fillStyle='rgba(255,200,50,0.15)';
+    for (let i=0;i<4;i++) {
+      const a = Date.now()/300 + i*1.57;
+      ctx.beginPath(); ctx.ellipse(cx+Math.sin(a)*22, cy-18+Math.cos(a*1.5)*8, 10, 6, 0, 0, Math.PI*2); ctx.fill();
+    }
+  } else if (phase === 3) {
+    /* ====== 星尘猫 ====== */
+    drawKittenBody(ctx, cx, cy, 1.05);
+    // 星星飘浮
+    for (let i=0;i<10;i++) {
+      const a = Date.now()/400 + i*0.628;
+      const sx = cx + Math.sin(a)*46; const sy = cy - 30 + Math.cos(a*1.2)*32;
+      ctx.fillStyle=`rgba(255,255,255,${0.3+Math.sin(a+1)*0.2})`;
+      ctx.font='8px sans-serif'; ctx.textAlign='center'; ctx.fillText('✦',sx,sy);
+    }
+    // 紫色调叠加
+    ctx.fillStyle='rgba(196,132,252,0.12)'; ctx.beginPath(); ctx.arc(cx,cy,48,0,Math.PI*2); ctx.fill();
+  } else if (phase === 4) {
+    /* ====== 幻影猫 ====== */
+    ctx.globalAlpha = 0.75;
+    drawKittenBody(ctx, cx, cy, 1.1);
+    ctx.globalAlpha = 1.0;
+    // 幻影残影
+    for (let i=1;i<=2;i++) {
+      ctx.globalAlpha = 0.2 - i*0.05;
+      ctx.translate(-i*6, i*4);
+      drawKittenBody(ctx, cx, cy, 1.0);
+      ctx.translate(i*6, -i*4);
+    }
+    ctx.globalAlpha = 1.0;
+  } else {
+    /* ====== 彩虹猫 (最终形态) ====== */
+    // 彩虹光晕
+    const g = ctx.createRadialGradient(cx,cy,10,cx,cy,55);
+    g.addColorStop(0,'rgba(255,255,255,0)');
+    g.addColorStop(0.5,'rgba(255,255,255,0)');
+    g.addColorStop(0.7,'rgba(249,115,22,0.08)');
+    g.addColorStop(0.8,'rgba(34,197,94,0.08)');
+    g.addColorStop(0.9,'rgba(59,130,246,0.08)');
+    g.addColorStop(1,'rgba(139,92,246,0.08)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,55,0,Math.PI*2); ctx.fill();
+    drawKittenBody(ctx, cx, cy, 1.12);
+    // 彩虹条纹
+    const colors = ['#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899'];
+    for (let i=0;i<6;i++) {
+      const a = Date.now()/500 + i*1.047;
+      ctx.strokeStyle=colors[i]; ctx.lineWidth=2; ctx.globalAlpha=0.35;
+      ctx.beginPath(); ctx.arc(cx+Math.sin(a)*12, cy-6+Math.cos(a)*8, 18+Math.sin(a)*4, 0, Math.PI*2); ctx.stroke();
+    }
+    ctx.globalAlpha=1.0;
+    // 彩虹小皇冠
+    ctx.fillStyle='#eab308'; ctx.font='16px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('👑', cx, cy-48);
+  }
+  ctx.restore();
+  // 心情低落时的眼泪
+  if (mood < 40 && phase === 1) {
+    ctx.fillStyle='rgba(180,210,255,0.6)'; ctx.font='14px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('💧',cx-16,cy+20); ctx.fillText('💧',cx+16,cy+20);
+  }
+}
+
+/* 绘制米白针织毛毯 */
+/* ====== 场景绘制 ====== */
+function drawBlanket(ctx, cx, cy) {
+  ctx.save();
+  const scene = petState.scene || 'cozy';
+  if (scene === 'cozy') {
+    ctx.fillStyle='#f5f0e8'; ctx.beginPath();
+    ctx.ellipse(cx, cy+20, 52, 22, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#e8dfd0'; ctx.lineWidth=1;
+    for (let i=0;i<8;i++) {
+      const x1 = cx-40+i*12, y1 = cy+4;
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x1+5,y1+16); ctx.stroke();
+    }
+    ctx.strokeStyle='#e0d5c4'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.ellipse(cx, cy+20, 52, 22, 0, 0, Math.PI*2); ctx.stroke();
+  } else if (scene === 'garden') {
+    // 草地 + 小花
+    ctx.fillStyle='#b8d8a8'; ctx.beginPath();
+    ctx.ellipse(cx, cy+22, 54, 20, 0, 0, Math.PI*2); ctx.fill();
+    for (let i=0;i<6;i++) {
+      const fx = cx-30+i*12, fy = cy+14+Math.sin(i*1.5)*4;
+      ctx.fillStyle=['#ff9999','#ffcc66','#c9a0dc','#ff9999','#87ceeb','#ffcc66'][i];
+      ctx.beginPath(); ctx.arc(fx,fy,4,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#5d8a3c';
+      ctx.fillRect(fx-0.5,fy+2,1,6);
+    }
+  } else if (scene === 'night') {
+    ctx.fillStyle='#1a1a3e'; ctx.beginPath();
+    ctx.ellipse(cx, cy+22, 54, 20, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,255,200,0.4)';
+    for (let i=0;i<5;i++) {
+      const sx = cx-25+i*14, sy = cy+10+Math.sin(i*2)*3;
+      ctx.beginPath(); ctx.arc(sx,sy,1.5,0,Math.PI*2); ctx.fill();
+    }
+  } else if (scene === 'beach') {
+    ctx.fillStyle='#f5deb3'; ctx.beginPath();
+    ctx.ellipse(cx, cy+22, 54, 20, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(100,180,230,0.3)';
+    ctx.beginPath(); ctx.ellipse(cx+10, cy+8, 20, 8, 0, 0, Math.PI*2); ctx.fill();
+  } else if (scene === 'starry') {
+    ctx.fillStyle='#2d1b4e'; ctx.beginPath();
+    ctx.ellipse(cx, cy+22, 54, 20, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.5)';
+    for (let i=0;i<8;i++) {
+      const a=i*0.8+Date.now()/1500;
+      const sx=cx-30+Math.sin(a)*35, sy=cy+8+Math.cos(a)*12;
+      ctx.beginPath(); ctx.arc(sx,sy,1.2+Math.sin(a)*0.5,0,Math.PI*2); ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+/* ====== 毛色颜色表 ====== */
+const FUR_COLORS = {
+  orange: { body:['#fdebd0','#f5cba7','#e8b88a','#dba47a'], tail:'#f5cba7', tailStroke:'#e8b88a', ear:'#f5cba7', earInner:'#fadbd8' },
+  gray:   { body:['#f0f0f0','#bdc3c7','#95a5a6','#7f8c8d'], tail:'#bdc3c7', tailStroke:'#95a5a6', ear:'#bdc3c7', earInner:'#e8e8e8' },
+  white:  { body:['#fff','#fdfefe','#f0f0f0','#e8e8e8'], tail:'#fdfefe', tailStroke:'#f0f0f0', ear:'#fdfefe', earInner:'#fce4ec' },
+  black:  { body:['#5d6d7e','#4a5568','#2c3e50','#1a1a2e'], tail:'#4a5568', tailStroke:'#2c3e50', ear:'#4a5568', earInner:'#5d6d7e' },
+  calico: { body:['#fef9f0','#f5cba7','#fff','#5d6d7e'], tail:'#f5cba7', tailStroke:'#8b6f47', ear:'#5d6d7e', earInner:'#fadbd8' },
+  cream:  { body:['#fffde7','#fdebd0','#f5d5a8','#efc898'], tail:'#fdebd0', tailStroke:'#f5d5a8', ear:'#fdebd0', earInner:'#fce4ec' }
+};
+
+/* 绘制小猫身体核心（支持毛色 + 配饰） */
+function drawKittenBody(ctx, cx, cy, scale) {
+  ctx.save();
+  ctx.translate(cx, cy); ctx.scale(scale, scale); ctx.translate(-cx, -cy);
+  const fur = FUR_COLORS[petState.furColor] || FUR_COLORS.orange;
+  const acc = petState.accessory || 'none';
+
+  // --- 尾巴 ---
+  ctx.beginPath(); ctx.moveTo(cx-18, cy+6);
+  ctx.bezierCurveTo(cx-36, cy-8, cx-44, cy+16, cx-38, cy+24);
+  ctx.bezierCurveTo(cx-32, cy+30, cx-20, cy+22, cx-18, cy+14);
+  ctx.fillStyle=fur.tail; ctx.fill();
+  ctx.strokeStyle=fur.tailStroke; ctx.lineWidth=1; ctx.stroke();
+  ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=0.8;
+  for (let i=0;i<3;i++) { const a=0.5+i*0.3;
+    ctx.beginPath(); ctx.moveTo(cx-36+a*4, cy+6+a*8); ctx.lineTo(cx-40+a*6, cy+14+a*6); ctx.stroke(); }
+
+  // --- 身体 ---
+  const bodyGrad = ctx.createRadialGradient(cx-8, cy-2, 6, cx, cy+8, 40);
+  bodyGrad.addColorStop(0, fur.body[0]);
+  bodyGrad.addColorStop(0.4, fur.body[1]);
+  bodyGrad.addColorStop(0.8, fur.body[2]);
+  bodyGrad.addColorStop(1, fur.body[3]);
+  ctx.fillStyle = bodyGrad;
+  ctx.beginPath(); ctx.ellipse(cx, cy+8, 36, 28, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fef9f0';
+  ctx.beginPath(); ctx.ellipse(cx, cy+14, 20, 14, 0, 0, Math.PI*2); ctx.fill();
+
+  // --- 前爪 ---
+  ctx.fillStyle='#fadbd8'; ctx.beginPath(); ctx.ellipse(cx-12, cy+24, 10, 6, -0.15, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#f0c0b8'; ctx.lineWidth=1; ctx.stroke();
+  ctx.fillStyle='#fadbd8'; ctx.beginPath(); ctx.ellipse(cx+12, cy+24, 10, 6, 0.15, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#f0c0b8'; ctx.lineWidth=1; ctx.stroke();
+  ctx.fillStyle='#f5b7b1'; ctx.beginPath(); ctx.ellipse(cx-12, cy+25, 4, 3, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+12, cy+25, 4, 3, 0, 0, Math.PI*2); ctx.fill();
+
+  // --- 头部 ---
+  const headGrad = ctx.createRadialGradient(cx-4, cy-20, 4, cx, cy-12, 26);
+  headGrad.addColorStop(0, fur.body[0]);
+  headGrad.addColorStop(0.3, fur.body[1]);
+  headGrad.addColorStop(0.7, fur.body[2]);
+  headGrad.addColorStop(1, fur.body[3]);
+  ctx.fillStyle = headGrad;
+  ctx.beginPath(); ctx.arc(cx, cy-12, 24, 0, Math.PI*2); ctx.fill();
+
+  // --- 耳朵 ---
+  ctx.beginPath(); ctx.moveTo(cx-18, cy-30); ctx.lineTo(cx-26, cy-44); ctx.lineTo(cx-10, cy-36); ctx.closePath();
+  ctx.fillStyle=fur.ear; ctx.fill(); ctx.strokeStyle=fur.tailStroke; ctx.lineWidth=1; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx-16, cy-32); ctx.lineTo(cx-22, cy-41); ctx.lineTo(cx-12, cy-35); ctx.closePath();
+  ctx.fillStyle=fur.earInner; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(cx+18, cy-30); ctx.lineTo(cx+26, cy-44); ctx.lineTo(cx+10, cy-36); ctx.closePath();
+  ctx.fillStyle=fur.ear; ctx.fill(); ctx.strokeStyle=fur.tailStroke; ctx.lineWidth=1; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+16, cy-32); ctx.lineTo(cx+22, cy-41); ctx.lineTo(cx+12, cy-35); ctx.closePath();
+  ctx.fillStyle=fur.earInner; ctx.fill();
+
+  // --- 眼睛 ---
+  ctx.fillStyle='#fffcf5'; ctx.beginPath(); ctx.ellipse(cx-10, cy-14, 10, 11, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+10, cy-14, 10, 11, 0, 0, Math.PI*2); ctx.fill();
+  const ig = ctx.createRadialGradient(cx-9, cy-15, 2, cx-10, cy-14, 8);
+  ig.addColorStop(0,'#f5d76e'); ig.addColorStop(0.5,'#e8b830'); ig.addColorStop(1,'#d4a020');
+  ctx.fillStyle=ig; ctx.beginPath(); ctx.arc(cx-10, cy-14, 7.5, 0, Math.PI*2); ctx.fill();
+  const ig2 = ctx.createRadialGradient(cx+11, cy-15, 2, cx+10, cy-14, 8);
+  ig2.addColorStop(0,'#f5d76e'); ig2.addColorStop(0.5,'#e8b830'); ig2.addColorStop(1,'#d4a020');
+  ctx.fillStyle=ig2; ctx.beginPath(); ctx.arc(cx+10, cy-14, 7.5, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#2c1810'; ctx.beginPath(); ctx.arc(cx-10, cy-13, 4.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+10, cy-13, 4.5, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cx-7, cy-17, 2.8, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+13, cy-17, 2.8, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.beginPath(); ctx.arc(cx-13, cy-12, 1.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+7, cy-12, 1.5, 0, Math.PI*2); ctx.fill();
+
+  // --- 腮红 ---
+  ctx.fillStyle='rgba(255,182,170,0.35)';
+  ctx.beginPath(); ctx.ellipse(cx-14, cy-7, 7, 5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+14, cy-7, 7, 5, 0, 0, Math.PI*2); ctx.fill();
+
+  // --- 鼻子 & 嘴巴 ---
+  ctx.fillStyle='#f5a0a0'; ctx.beginPath();
+  ctx.moveTo(cx, cy-8); ctx.lineTo(cx-4, cy-4); ctx.lineTo(cx+4, cy-4); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#d4958a'; ctx.lineWidth=1.2;
+  ctx.beginPath(); ctx.moveTo(cx, cy-4); ctx.lineTo(cx-4, cy-2); ctx.moveTo(cx, cy-4); ctx.lineTo(cx+4, cy-2); ctx.stroke();
+
+  // --- 胡须 ---
+  ctx.strokeStyle='rgba(200,190,180,0.5)'; ctx.lineWidth=0.8;
+  for (let s=-1;s<=1;s+=2) for (let j=0;j<3;j++)
+    ctx.beginPath(), ctx.moveTo(cx+s*12,cy-5+j*4), ctx.lineTo(cx+s*(30+j*4),cy-4+j*2), ctx.stroke();
+
+  // ====== 配饰绘制 ======
+  if (acc === 'hat') {
+    // 小帽子
+    ctx.fillStyle='#e74c3c'; ctx.beginPath();
+    ctx.ellipse(cx, cy-38, 20, 6, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx, cy-44, 12, 16, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cx, cy-44, 3, 0, Math.PI*2); ctx.fill();
+  } else if (acc === 'scarf') {
+    ctx.fillStyle='#27ae60'; ctx.beginPath();
+    ctx.ellipse(cx, cy-2, 24, 8, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#2ecc71';
+    ctx.beginPath(); ctx.ellipse(cx+12, cy+2, 10, 16, 0.2, 0, Math.PI*2); ctx.fill();
+  } else if (acc === 'bowtie') {
+    ctx.fillStyle='#e84393';
+    ctx.beginPath(); ctx.moveTo(cx-14, cy-8); ctx.lineTo(cx-6, cy-4); ctx.lineTo(cx-14, cy); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx+14, cy-8); ctx.lineTo(cx+6, cy-4); ctx.lineTo(cx+14, cy); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#d63384'; ctx.beginPath(); ctx.arc(cx, cy-4, 4, 0, Math.PI*2); ctx.fill();
+  } else if (acc === 'glasses') {
+    ctx.strokeStyle='#2c3e50'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(cx-8, cy-14, 9, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx+8, cy-14, 9, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx-16, cy-14); ctx.lineTo(cx-20, cy-16); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+16, cy-14); ctx.lineTo(cx+20, cy-16); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx-1, cy-14); ctx.lineTo(cx+1, cy-14); ctx.stroke();
+  } else if (acc === 'crown') {
+    ctx.fillStyle='#f1c40f';
+    ctx.beginPath(); ctx.moveTo(cx-16, cy-34); ctx.lineTo(cx-16, cy-42);
+    ctx.lineTo(cx-10, cy-38); ctx.lineTo(cx-5, cy-44); ctx.lineTo(cx, cy-38);
+    ctx.lineTo(cx+5, cy-44); ctx.lineTo(cx+10, cy-38); ctx.lineTo(cx+16, cy-42);
+    ctx.lineTo(cx+16, cy-34); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#e74c3c';
+    ctx.beginPath(); ctx.arc(cx-5, cy-42, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx+5, cy-42, 1.5, 0, Math.PI*2); ctx.fill();
+  } else if (acc === 'flower') {
+    ctx.fillStyle='#ff6b81'; ctx.font='18px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('🌸', cx-24, cy-38);
+  } else if (acc === 'ribbon') {
+    ctx.fillStyle='#9b59b6';
+    ctx.beginPath(); ctx.moveTo(cx-18, cy-36); ctx.lineTo(cx-14, cy-44); ctx.lineTo(cx-10, cy-36); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#8e44ad';
+    ctx.beginPath(); ctx.arc(cx-14, cy-36, 3, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ===================================================================
+   绘制 · 比熊幼犬（小白团）
+   画面主体：毛茸茸的白色比熊幼犬，圆滚滚身体像棉花糖
+   蓬松毛发，大眼睛黑葡萄般，歪头抬爪打招呼
+   =================================================================== */
+function drawPuppy(ctx, cx, cy, mood) {
+  const s = 1; // scale factor (可整体缩放)
+  ctx.save();
+  ctx.translate(cx, cy); ctx.scale(s,s); ctx.translate(-cx, -cy);
+
+  // --- 场景背景 ---
+  const scene = petState.scene || 'cozy';
+  if (scene==='garden') {
+    ctx.fillStyle='#d5e8c8'; ctx.beginPath(); ctx.arc(cx,cy,68,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#b8d8a8'; ctx.beginPath(); ctx.ellipse(cx, cy+36, 44, 14, 0, 0, Math.PI*2); ctx.fill();
+    for (let i=0;i<5;i++) {
+      const fx=cx-25+i*12, fy=cy+28+Math.sin(i*1.5)*3;
+      ctx.fillStyle=['#ff9999','#ffcc66','#c9a0dc','#87ceeb','#ffcc66'][i];
+      ctx.beginPath(); ctx.arc(fx,fy,4,0,Math.PI*2); ctx.fill();
+    }
+  } else if (scene==='night') {
+    ctx.fillStyle='#1a1a3e'; ctx.beginPath(); ctx.arc(cx,cy,68,0,Math.PI*2); ctx.fill();
+    for (let i=0;i<6;i++) {
+      const sx=cx-30+i*12, sy=cy-20+Math.sin(i*2)*6;
+      ctx.fillStyle='rgba(255,255,200,0.4)';
+      ctx.beginPath(); ctx.arc(sx,sy,1.5,0,Math.PI*2); ctx.fill();
+    }
+    ctx.fillStyle='#2a2a5e'; ctx.beginPath(); ctx.ellipse(cx, cy+36, 44, 14, 0, 0, Math.PI*2); ctx.fill();
+  } else if (scene==='beach') {
+    ctx.fillStyle='#e8e0c8'; ctx.beginPath(); ctx.arc(cx,cy,68,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(100,180,230,0.3)'; ctx.beginPath(); ctx.ellipse(cx+10, cy+20, 30, 12, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#f5deb3'; ctx.beginPath(); ctx.ellipse(cx, cy+36, 44, 14, 0, 0, Math.PI*2); ctx.fill();
+  } else if (scene==='starry') {
+    ctx.fillStyle='#2d1b4e'; ctx.beginPath(); ctx.arc(cx,cy,68,0,Math.PI*2); ctx.fill();
+    for (let i=0;i<10;i++) {
+      const a=i*0.63, sx=cx-30+Math.sin(a)*35, sy=cy-20+Math.cos(a)*25;
+      ctx.fillStyle='rgba(255,255,255,0.5)';
+      ctx.beginPath(); ctx.arc(sx,sy,1.2,0,Math.PI*2); ctx.fill();
+    }
+    ctx.fillStyle='#3d2b6e'; ctx.beginPath(); ctx.ellipse(cx, cy+36, 44, 14, 0, 0, Math.PI*2); ctx.fill();
+  } else {
+    // cozy 默认
+    ctx.fillStyle='#f0f0f0'; ctx.beginPath(); ctx.arc(cx,cy,68,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#dce8f5'; ctx.beginPath(); ctx.ellipse(cx, cy+36, 44, 14, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#c5d8ed'; ctx.beginPath(); ctx.ellipse(cx-4, cy+38, 36, 10, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#b8cce8'; ctx.lineWidth=1.5;
+    for (let i=0;i<10;i++) { const a=-0.6+i*0.13;
+      ctx.beginPath(); ctx.moveTo(cx+Math.sin(a)*38, cy+36+Math.cos(a)*12);
+      ctx.lineTo(cx+Math.sin(a)*44, cy+36+Math.cos(a)*14); ctx.stroke(); }
+  }
+
+  // --- 尾巴（左侧小绒球） ---
+  ctx.fillStyle='#fefefe';
+  ctx.beginPath(); ctx.arc(cx-30, cy-6, 8, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#f5f5f5';
+  ctx.beginPath(); ctx.arc(cx-34, cy-10, 5, 0, Math.PI*2); ctx.fill();
+
+  // --- 身体：圆滚滚像棉花糖 ---
+  const bodyGrad = ctx.createRadialGradient(cx-6, cy-4, 8, cx+2, cy+8, 34);
+  bodyGrad.addColorStop(0,'#ffffff');
+  bodyGrad.addColorStop(0.6,'#fdfdfd');
+  bodyGrad.addColorStop(0.9,'#f2f2f2');
+  bodyGrad.addColorStop(1,'#e8e8e8');
+  ctx.fillStyle = bodyGrad;
+  ctx.beginPath(); ctx.ellipse(cx, cy+12, 30, 26, 0, 0, Math.PI*2); ctx.fill();
+
+  // --- 后腿（坐下时两侧） ---
+  ctx.fillStyle='#fdfcfc';
+  ctx.beginPath(); ctx.ellipse(cx-18, cy+24, 10, 12, -0.2, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+18, cy+24, 10, 12, 0.2, 0, Math.PI*2); ctx.fill();
+
+  // --- 粉嫩肉垫（后腿） ---
+  ctx.fillStyle='#f5b7b1';
+  ctx.beginPath(); ctx.ellipse(cx-18, cy+30, 5, 4, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+18, cy+30, 5, 4, 0, 0, Math.PI*2); ctx.fill();
+
+  // --- 前腿 ---
+  ctx.fillStyle='#fefefe';
+  // 左前腿（站立，肉垫接地）
+  ctx.beginPath(); ctx.ellipse(cx-12, cy+30, 7, 8, 0, 0, Math.PI*2); ctx.fill();
+  // 右前腿（抬起打招呼！）
+  ctx.beginPath(); ctx.ellipse(cx+14, cy+4, 7, 9, 0.3, 0, Math.PI*2); ctx.fill();
+
+  // --- 肉垫 ---
+  ctx.fillStyle='#f5b7b1';
+  ctx.beginPath(); ctx.ellipse(cx-12, cy+33, 4, 3, 0, 0, Math.PI*2); ctx.fill();
+  // 抬起的爪子肉垫
+  ctx.beginPath(); ctx.ellipse(cx+14, cy-2, 4, 3, 0.3, 0, Math.PI*2); ctx.fill();
+
+  // --- 头部（歪头效果：稍微右偏并旋转） ---
+  ctx.save();
+  ctx.translate(cx+3, cy-10);
+  ctx.rotate(0.08);
+  ctx.translate(-cx-3, -cy+10);
+
+  // 头部主体
+  const headGrad = ctx.createRadialGradient(cx-2, cy-20, 5, cx, cy-10, 26);
+  headGrad.addColorStop(0,'#ffffff');
+  headGrad.addColorStop(0.5,'#fdfdfd');
+  headGrad.addColorStop(0.9,'#f2f2f2');
+  headGrad.addColorStop(1,'#e8e8e8');
+  ctx.fillStyle = headGrad;
+  ctx.beginPath(); ctx.arc(cx, cy-10, 24, 0, Math.PI*2); ctx.fill();
+
+  // 蓬松毛发纹理（头部周围小圆球）
+  ctx.fillStyle='#ffffff';
+  for (let i=0; i<12; i++) {
+    const a = i*0.52;
+    const rx = cx + Math.cos(a) * 24;
+    const ry = cy-10 + Math.sin(a) * 23;
+    ctx.beginPath(); ctx.arc(rx, ry, 6, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.fillStyle='#f5f5f5';
+  for (let i=0; i<8; i+=2) {
+    const a = i*0.52+0.26;
+    const rx = cx + Math.cos(a) * 23;
+    const ry = cy-10 + Math.sin(a) * 22;
+    ctx.beginPath(); ctx.arc(rx, ry, 4, 0, Math.PI*2); ctx.fill();
+  }
+
+  // --- 耳朵（自然下垂，边缘淡淡米黄色） ---
+  ctx.fillStyle='#fdf6e3';
+  ctx.beginPath(); ctx.ellipse(cx-22, cy-2, 10, 16, -0.3, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#f5e6c8';
+  ctx.beginPath(); ctx.ellipse(cx-24, cy-1, 7, 13, -0.3, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fdf6e3';
+  ctx.beginPath(); ctx.ellipse(cx+22, cy-2, 10, 16, 0.3, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#f5e6c8';
+  ctx.beginPath(); ctx.ellipse(cx+24, cy-1, 7, 13, 0.3, 0, Math.PI*2); ctx.fill();
+
+  // --- 眼睛（又大又圆，像黑葡萄） ---
+  // 眼白
+  ctx.fillStyle='#ffffff';
+  ctx.beginPath(); ctx.ellipse(cx-10, cy-13, 9, 10, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+10, cy-13, 9, 10, 0, 0, Math.PI*2); ctx.fill();
+  // 黑色瞳孔（大眼睛）
+  const eyeGrad = ctx.createRadialGradient(cx-9, cy-14, 2, cx-10, cy-13, 8);
+  eyeGrad.addColorStop(0,'#2c1810'); eyeGrad.addColorStop(0.6,'#1a0f08'); eyeGrad.addColorStop(1,'#0d0704');
+  ctx.fillStyle=eyeGrad;
+  ctx.beginPath(); ctx.arc(cx-10, cy-13, 7.5, 0, Math.PI*2); ctx.fill();
+  const eyeGrad2 = ctx.createRadialGradient(cx+11, cy-14, 2, cx+10, cy-13, 8);
+  eyeGrad2.addColorStop(0,'#2c1810'); eyeGrad2.addColorStop(0.6,'#1a0f08'); eyeGrad2.addColorStop(1,'#0d0704');
+  ctx.fillStyle=eyeGrad2;
+  ctx.beginPath(); ctx.arc(cx+10, cy-13, 7.5, 0, Math.PI*2); ctx.fill();
+  // 高光（眼神水汪汪）
+  ctx.fillStyle='#ffffff';
+  ctx.beginPath(); ctx.arc(cx-7, cy-17, 3, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+13, cy-17, 3, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.5)';
+  ctx.beginPath(); ctx.arc(cx-13, cy-12, 1.8, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+7, cy-12, 1.8, 0, Math.PI*2); ctx.fill();
+
+  // --- 小鼻子（黑色） ---
+  ctx.fillStyle='#3a3a3a';
+  ctx.beginPath(); ctx.ellipse(cx, cy-6, 4, 3, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#2a2a2a';
+  ctx.beginPath(); ctx.ellipse(cx, cy-7, 2.5, 2, 0, 0, Math.PI*2); ctx.fill();
+
+  // --- 嘴巴和粉色小舌头 ---
+  ctx.strokeStyle='#ccaaa0'; ctx.lineWidth=1.2;
+  ctx.beginPath(); ctx.moveTo(cx, cy-5);
+  ctx.quadraticCurveTo(cx-5, cy-1, cx-8, cy-3); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, cy-5);
+  ctx.quadraticCurveTo(cx+5, cy-1, cx+8, cy-3); ctx.stroke();
+  // 粉色小舌头
+  ctx.fillStyle='#f5a0b0';
+  ctx.beginPath(); ctx.ellipse(cx-2, cy-1, 4, 3, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#f08090';
+  ctx.beginPath(); ctx.ellipse(cx-2, cy-2, 2, 1.5, 0, 0, Math.PI*2); ctx.fill();
+
+  ctx.restore(); // restore head rotation
+
+  // --- 腮红（淡淡粉色） ---
+  ctx.fillStyle='rgba(255,182,170,0.25)';
+  ctx.beginPath(); ctx.ellipse(cx-14, cy-5, 5, 3.5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+16, cy-5, 5, 3.5, 0, 0, Math.PI*2); ctx.fill();
+
+  // ====== 配饰绘制 ======
+  const acc = petState.accessory || 'none';
+  if (acc === 'hat') {
+    ctx.fillStyle='#e74c3c'; ctx.beginPath(); ctx.ellipse(cx+3, cy-38, 20, 6, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx+3, cy-44, 12, 16, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cx+3, cy-44, 3, 0, Math.PI*2); ctx.fill();
+  } else if (acc === 'scarf') {
+    ctx.fillStyle='#27ae60'; ctx.beginPath(); ctx.ellipse(cx+3, cy-2, 24, 8, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#2ecc71'; ctx.beginPath(); ctx.ellipse(cx+15, cy+2, 10, 16, 0.2, 0, Math.PI*2); ctx.fill();
+  } else if (acc === 'bowtie') {
+    ctx.fillStyle='#e84393';
+    ctx.beginPath(); ctx.moveTo(cx-11, cy-8); ctx.lineTo(cx-3, cy-4); ctx.lineTo(cx-11, cy); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx+17, cy-8); ctx.lineTo(cx+9, cy-4); ctx.lineTo(cx+17, cy); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#d63384'; ctx.beginPath(); ctx.arc(cx+3, cy-4, 4, 0, Math.PI*2); ctx.fill();
+  } else if (acc === 'glasses') {
+    ctx.strokeStyle='#2c3e50'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(cx-5, cy-12, 9, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx+11, cy-12, 9, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx-13, cy-12); ctx.lineTo(cx-17, cy-14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+19, cy-12); ctx.lineTo(cx+23, cy-14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+2, cy-12); ctx.lineTo(cx+4, cy-12); ctx.stroke();
+  } else if (acc === 'crown') {
+    ctx.fillStyle='#f1c40f';
+    ctx.beginPath(); ctx.moveTo(cx-13, cy-34); ctx.lineTo(cx-13, cy-42);
+    ctx.lineTo(cx-7, cy-38); ctx.lineTo(cx-2, cy-44); ctx.lineTo(cx+3, cy-38);
+    ctx.lineTo(cx+8, cy-44); ctx.lineTo(cx+13, cy-38); ctx.lineTo(cx+19, cy-42);
+    ctx.lineTo(cx+19, cy-34); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#e74c3c';
+    ctx.beginPath(); ctx.arc(cx-2, cy-42, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx+8, cy-42, 1.5, 0, Math.PI*2); ctx.fill();
+  } else if (acc === 'flower') {
+    ctx.fillStyle='#ff6b81'; ctx.font='18px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('🌸', cx-16, cy-38);
+  } else if (acc === 'ribbon') {
+    ctx.fillStyle='#9b59b6';
+    ctx.beginPath(); ctx.moveTo(cx-15, cy-36); ctx.lineTo(cx-11, cy-44); ctx.lineTo(cx-7, cy-36); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#8e44ad'; ctx.beginPath(); ctx.arc(cx-11, cy-36, 3, 0, Math.PI*2); ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+/* ===================================================================
+   绘制 · 小浣熊
+   红棕色圆滚滚身体，白色脸颊，标志性环纹大尾巴
+   坐在草地上抱着一颗红苹果
+   =================================================================== */
+function drawRedPanda(ctx, cx, cy, mood) {
+  ctx.save();
+
+  // --- 场景背景 ---
+  const scene = petState.scene || 'cozy';
+  if (scene==='garden') {
+    ctx.fillStyle='#d5e8c8'; ctx.beginPath(); ctx.arc(cx,cy,68,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#b8d8a8'; ctx.beginPath(); ctx.ellipse(cx, cy+30, 48, 16, 0, 0, Math.PI*2); ctx.fill();
+    for (let i=0;i<6;i++) {
+      const fx=cx-28+i*10, fy=cy+22+Math.sin(i*1.5)*3;
+      ctx.fillStyle=['#ff9999','#ffcc66','#c9a0dc','#ff9999','#87ceeb','#ffcc66'][i];
+      ctx.beginPath(); ctx.arc(fx,fy,4,0,Math.PI*2); ctx.fill();
+    }
+  } else if (scene==='night') {
+    ctx.fillStyle='#1a1a3e'; ctx.beginPath(); ctx.arc(cx,cy,68,0,Math.PI*2); ctx.fill();
+    for (let i=0;i<8;i++) {
+      const sx=cx-30+i*8, sy=cy-20+Math.sin(i*2)*8;
+      ctx.fillStyle='rgba(255,255,200,0.4)';
+      ctx.beginPath(); ctx.arc(sx,sy,1.5,0,Math.PI*2); ctx.fill();
+    }
+    ctx.fillStyle='#2a3a1a'; ctx.beginPath(); ctx.ellipse(cx, cy+30, 48, 16, 0, 0, Math.PI*2); ctx.fill();
+  } else if (scene==='beach') {
+    ctx.fillStyle='#c8e0f0'; ctx.beginPath(); ctx.arc(cx,cy,68,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(100,180,230,0.3)'; ctx.beginPath(); ctx.ellipse(cx+10, cy+16, 30, 12, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#f5deb3'; ctx.beginPath(); ctx.ellipse(cx, cy+30, 48, 16, 0, 0, Math.PI*2); ctx.fill();
+  } else if (scene==='starry') {
+    ctx.fillStyle='#2d1b4e'; ctx.beginPath(); ctx.arc(cx,cy,68,0,Math.PI*2); ctx.fill();
+    for (let i=0;i<12;i++) {
+      const a=i*0.52, sx=cx-30+Math.sin(a)*38, sy=cy-20+Math.cos(a)*28;
+      ctx.fillStyle='rgba(255,255,255,0.5)';
+      ctx.beginPath(); ctx.arc(sx,sy,1.2+Math.sin(a)*0.5,0,Math.PI*2); ctx.fill();
+    }
+    ctx.fillStyle='#3d2b5e'; ctx.beginPath(); ctx.ellipse(cx, cy+30, 48, 16, 0, 0, Math.PI*2); ctx.fill();
+  } else {
+    // cozy 森林默认
+    const skyGrad = ctx.createLinearGradient(cx, cy-70, cx, cy+40);
+    skyGrad.addColorStop(0,'#b5dffa'); skyGrad.addColorStop(0.5,'#d6edfc'); skyGrad.addColorStop(1,'#e8f4fd');
+    ctx.fillStyle = skyGrad;
+    ctx.beginPath(); ctx.arc(cx,cy,68,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(100,160,100,0.2)';
+    for (let i=0;i<3;i++) {
+      const tx=cx-30+i*30;
+      ctx.beginPath(); ctx.moveTo(tx-12,cy-40); ctx.lineTo(tx+12,cy-40); ctx.lineTo(tx+8,cy); ctx.lineTo(tx-8,cy); ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle='rgba(80,140,80,0.15)';
+    for (let i=0;i<5;i++) { const fx=cx-40+i*20; ctx.beginPath(); ctx.arc(fx,cy-30,18+Math.sin(i)*6,0,Math.PI*2); ctx.fill(); }
+    ctx.fillStyle='#90c965'; ctx.beginPath(); ctx.ellipse(cx, cy+30, 48, 16, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#7db84d'; ctx.beginPath(); ctx.ellipse(cx-3, cy+32, 40, 12, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#7db84d'; ctx.lineWidth=1.5;
+    for (let i=0;i<8;i++) {
+      const gx=cx-28+i*8+Math.sin(i)*2;
+      ctx.beginPath(); ctx.moveTo(gx,cy+26); ctx.quadraticCurveTo(gx+Math.sin(i*2)*3,cy+20,gx+Math.sin(i*3)*4,cy+18); ctx.stroke();
+    }
+  }
+
+  // --- 标志性大尾巴（红棕黑环纹） ---
+  // 尾巴主体
+  ctx.beginPath(); ctx.moveTo(cx-8, cy+12);
+  ctx.bezierCurveTo(cx-34, cy-10, cx-46, cy+20, cx-34, cy+30);
+  ctx.bezierCurveTo(cx-24, cy+38, cx-6, cy+24, cx-2, cy+18);
+  ctx.fillStyle='#c06838'; ctx.fill();
+  // 环纹（黑色条纹）
+  ctx.strokeStyle='#3a2a1a'; ctx.lineWidth=6;
+  for (let i=0; i<3; i++) {
+    const t = 0.2 + i*0.28;
+    const bx = cx-8 + (-34+8)*t + (2*(-34+8)*t*(1-t)) + (-34+8)*t*t;
+    const by = cy+12 + (-10-12)*t + (20-12)*t*(1-t)*2 + (30-12)*t*t;
+    ctx.beginPath();
+    if (i===0) ctx.arc(bx-6, by-2, 3, 0, Math.PI*2);
+    else if (i===1) ctx.arc(bx-16, by+8, 3.5, 0, Math.PI*2);
+    else ctx.arc(bx-18, by+16, 3, 0, Math.PI*2);
+    ctx.stroke();
+  }
+  // 尾巴尖黑色
+  ctx.fillStyle='#3a2a1a';
+  ctx.beginPath(); ctx.arc(cx-28, cy+28, 5, 0, Math.PI*2); ctx.fill();
+
+  // --- 身体（圆滚滚红棕色） ---
+  const bodyGrad = ctx.createRadialGradient(cx-4, cy-2, 6, cx, cy+10, 30);
+  bodyGrad.addColorStop(0,'#d47848');
+  bodyGrad.addColorStop(0.4,'#c06838');
+  bodyGrad.addColorStop(0.8,'#a85428');
+  bodyGrad.addColorStop(1,'#8a4420');
+  ctx.fillStyle = bodyGrad;
+  ctx.beginPath(); ctx.ellipse(cx, cy+10, 26, 24, 0, 0, Math.PI*2); ctx.fill();
+
+  // --- 腹部（深色） ---
+  ctx.fillStyle='#5a3420';
+  ctx.beginPath(); ctx.ellipse(cx, cy+14, 14, 14, 0, 0, Math.PI*2); ctx.fill();
+
+  // --- 前腿（抱着苹果） ---
+  ctx.fillStyle='#a85428';
+  ctx.beginPath(); ctx.ellipse(cx-6, cy+20, 5, 8, 0.2, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+6, cy+20, 5, 8, -0.2, 0, Math.PI*2); ctx.fill();
+
+  // --- 红苹果（怀里抱着的） ---
+  ctx.fillStyle='#e62e2e';
+  ctx.beginPath(); ctx.arc(cx, cy+8, 9, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#d42222';
+  ctx.beginPath(); ctx.arc(cx-1, cy+7, 7, 0, Math.PI*2); ctx.fill();
+  // 苹果高光
+  ctx.fillStyle='rgba(255,255,255,0.25)';
+  ctx.beginPath(); ctx.arc(cx-3, cy+4, 2.5, 0, Math.PI*2); ctx.fill();
+  // 苹果柄
+  ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(cx, cy-1); ctx.lineTo(cx+2, cy-4); ctx.stroke();
+  // 小叶子
+  ctx.fillStyle='#4a8a30';
+  ctx.beginPath(); ctx.ellipse(cx+4, cy-4, 3, 5, 0.3, 0, Math.PI*2); ctx.fill();
+
+  // --- 头部 ---
+  const headGrad = ctx.createRadialGradient(cx-2, cy-16, 5, cx, cy-8, 24);
+  headGrad.addColorStop(0,'#d47848');
+  headGrad.addColorStop(0.5,'#c06838');
+  headGrad.addColorStop(0.9,'#b05c30');
+  headGrad.addColorStop(1,'#9a4c24');
+  ctx.fillStyle = headGrad;
+  ctx.beginPath(); ctx.arc(cx, cy-8, 22, 0, Math.PI*2); ctx.fill();
+
+  // --- 白色脸颊（两边小腮红一样） ---
+  ctx.fillStyle='#fcf5ec';
+  ctx.beginPath(); ctx.ellipse(cx-14, cy-6, 8, 9, -0.1, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+14, cy-6, 8, 9, 0.1, 0, Math.PI*2); ctx.fill();
+
+  // --- 耳朵（圆润小耳朵） ---
+  ctx.fillStyle='#b05c30';
+  ctx.beginPath(); ctx.ellipse(cx-14, cy-26, 7, 9, -0.2, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+14, cy-26, 7, 9, 0.2, 0, Math.PI*2); ctx.fill();
+  // 耳内白色
+  ctx.fillStyle='#fcf5ec';
+  ctx.beginPath(); ctx.ellipse(cx-14, cy-25, 4, 6, -0.2, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+14, cy-25, 4, 6, 0.2, 0, Math.PI*2); ctx.fill();
+
+  // --- 眼睛（又大又圆，深棕色，无辜眼神） ---
+  ctx.fillStyle='#ffffff';
+  ctx.beginPath(); ctx.ellipse(cx-9, cy-10, 8, 9, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+9, cy-10, 8, 9, 0, 0, Math.PI*2); ctx.fill();
+  // 深棕色瞳孔
+  const eyeGrad = ctx.createRadialGradient(cx-8, cy-11, 2, cx-9, cy-10, 7);
+  eyeGrad.addColorStop(0,'#4a3020'); eyeGrad.addColorStop(0.5,'#2c1a10'); eyeGrad.addColorStop(1,'#1a0e08');
+  ctx.fillStyle=eyeGrad;
+  ctx.beginPath(); ctx.arc(cx-9, cy-10, 6.5, 0, Math.PI*2); ctx.fill();
+  const eyeGrad2 = ctx.createRadialGradient(cx+10, cy-11, 2, cx+9, cy-10, 7);
+  eyeGrad2.addColorStop(0,'#4a3020'); eyeGrad2.addColorStop(0.5,'#2c1a10'); eyeGrad2.addColorStop(1,'#1a0e08');
+  ctx.fillStyle=eyeGrad2;
+  ctx.beginPath(); ctx.arc(cx+9, cy-10, 6.5, 0, Math.PI*2); ctx.fill();
+  // 高光
+  ctx.fillStyle='#ffffff';
+  ctx.beginPath(); ctx.arc(cx-6, cy-14, 2.8, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+12, cy-14, 2.8, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.4)';
+  ctx.beginPath(); ctx.arc(cx-12, cy-9, 1.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+6, cy-9, 1.5, 0, Math.PI*2); ctx.fill();
+
+  // --- 小鼻子（深棕色） ---
+  ctx.fillStyle='#3a2a1a';
+  ctx.beginPath(); ctx.ellipse(cx, cy-5, 3, 2.5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#2a1a0e';
+  ctx.beginPath(); ctx.ellipse(cx, cy-5.5, 1.8, 1.5, 0, 0, Math.PI*2); ctx.fill();
+
+  // --- 嘴巴（无辜的小表情） ---
+  ctx.strokeStyle='#a07050'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(cx-4, cy-3); ctx.quadraticCurveTo(cx, cy-1, cx+4, cy-3); ctx.stroke();
+
+  // --- 腮红 ---
+  ctx.fillStyle='rgba(200,100,80,0.2)';
+  ctx.beginPath(); ctx.ellipse(cx-16, cy-4, 5, 3, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+16, cy-4, 5, 3, 0, 0, Math.PI*2); ctx.fill();
+
+  // --- 阳光透过树叶的斑驳光影 ---
+  ctx.fillStyle='rgba(255,255,200,0.08)';
+  for (let i=0;i<4;i++) {
+    const a = i*1.57 + Date.now()/5000;
+    const sx = cx + Math.sin(a)*30;
+    const sy = cy + Math.cos(a)*20;
+    ctx.beginPath(); ctx.arc(sx, sy, 8+Math.sin(a*2)*4, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.fillStyle='rgba(255,255,200,0.05)';
+  for (let i=0;i<3;i++) {
+    const a = i*2.09 + Date.now()/8000;
+    const sx = cx + Math.sin(a)*40;
+    const sy = cy + Math.cos(a)*25;
+    ctx.beginPath(); ctx.arc(sx, sy, 12+Math.sin(a*3)*5, 0, Math.PI*2); ctx.fill();
+  }
+
+  // ====== 配饰绘制 ======
+  const acc = petState.accessory || 'none';
+  if (acc === 'hat') {
+    ctx.fillStyle='#e74c3c';
+    ctx.beginPath(); ctx.ellipse(cx, cy-32, 18, 5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx, cy-38, 10, 14, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cx, cy-38, 3, 0, Math.PI*2); ctx.fill();
+  } else if (acc === 'scarf') {
+    ctx.fillStyle='#27ae60'; ctx.beginPath(); ctx.ellipse(cx, cy+2, 22, 7, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#2ecc71'; ctx.beginPath(); ctx.ellipse(cx+10, cy+6, 8, 14, 0.2, 0, Math.PI*2); ctx.fill();
+  } else if (acc === 'bowtie') {
+    ctx.fillStyle='#e84393';
+    ctx.beginPath(); ctx.moveTo(cx-12, cy-2); ctx.lineTo(cx-4, cy+2); ctx.lineTo(cx-12, cy+6); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx+12, cy-2); ctx.lineTo(cx+4, cy+2); ctx.lineTo(cx+12, cy+6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#d63384'; ctx.beginPath(); ctx.arc(cx, cy+2, 4, 0, Math.PI*2); ctx.fill();
+  } else if (acc === 'glasses') {
+    ctx.strokeStyle='#2c3e50'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(cx-8, cy-10, 8, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx+8, cy-10, 8, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx-15, cy-10); ctx.lineTo(cx-19, cy-12); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+15, cy-10); ctx.lineTo(cx+19, cy-12); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx-1, cy-10); ctx.lineTo(cx+1, cy-10); ctx.stroke();
+  } else if (acc === 'crown') {
+    ctx.fillStyle='#f1c40f';
+    ctx.beginPath(); ctx.moveTo(cx-14, cy-28); ctx.lineTo(cx-14, cy-36);
+    ctx.lineTo(cx-8, cy-32); ctx.lineTo(cx-3, cy-38); ctx.lineTo(cx+2, cy-32);
+    ctx.lineTo(cx+7, cy-38); ctx.lineTo(cx+12, cy-32); ctx.lineTo(cx+18, cy-36);
+    ctx.lineTo(cx+18, cy-28); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#e74c3c';
+    ctx.beginPath(); ctx.arc(cx-3, cy-36, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx+7, cy-36, 1.5, 0, Math.PI*2); ctx.fill();
+  } else if (acc === 'flower') {
+    ctx.fillStyle='#ff6b81'; ctx.font='18px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('🌸', cx-18, cy-32);
+  } else if (acc === 'ribbon') {
+    ctx.fillStyle='#9b59b6';
+    ctx.beginPath(); ctx.moveTo(cx-16, cy-30); ctx.lineTo(cx-12, cy-38); ctx.lineTo(cx-8, cy-30); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#8e44ad'; ctx.beginPath(); ctx.arc(cx-12, cy-30, 3, 0, Math.PI*2); ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function updatePetEmoji() {
+  const el = document.getElementById('pet-emoji');
+  if (petState.mood >= 70) el.textContent = '😊';
+  else if (petState.mood >= 40) el.textContent = '😐';
+  else el.textContent = '😢';
+}
+function showPetEmoji(e) { document.getElementById('pet-emoji').textContent = e; }
+
+function updatePetUI() {
+  const phase = getPetPhase();
+  const names = ['小奶橘','火焰猫','星尘猫','幻影猫','彩虹猫'];
+  const furNames = { orange:'小奶橘', gray:'小银猫', white:'小雪猫', black:'小夜猫', calico:'小花猫', cream:'小奶油' };
+  const base = names[phase-1] || '彩虹猫';
+  const petNames = { cat: phase===1 ? (furNames[petState.furColor]||'小奶橘') : base, dog:'小白团', redpanda:'小浣熊' };
+  var nameKey = petState.customName && petState.customName.trim() ? petState.customName : (petNames[petState.petType] || petNames.cat);
+  document.getElementById('pet-name').textContent = nameKey;
+  document.getElementById('pet-status').textContent = `Lv.${petState.level} | ❤️ ${petState.mood}`;
+  updatePetEmoji();
+  drawPet();
+  if (petState.petType === 'cat' && phase >= 2) { cancelAnimationFrame(petFrame); petFrame = requestAnimationFrame(petAnimLoop); }
+}
+let petFrame = 0;
+function petAnimLoop() { drawPet(); petFrame = requestAnimationFrame(petAnimLoop); }
+
+// 宠物类型切换
+function selectPet(type) {
+  petState.petType = type;
+  savePet();
+  updatePetUI();
+  document.querySelectorAll('.pet-select-btn').forEach(b => b.classList.toggle('active', b.dataset.pet === type));
+  // 更新表情
+  updatePetEmoji();
+}
+
+// ====== 宠物点击互动 ======
+const PET_REACTIONS = {
+  cat: {
+    head: ['摸头杀~呼噜呼噜~', '再摸一下嘛~', '好舒服~喵~'],
+    ear: ['别碰耳朵！痒~', '耳朵很敏感啦！', '啊~别捏耳朵~'],
+    body: ['顺毛中~舒服~', '再摸摸肚子~', '嗯~好暖和~'],
+    tail: ['尾巴别碰！啊~', '甩你一脸尾巴！', '痒死了~别碰~'],
+    paw: ['肉垫好软~', '别捏了啦~', '脚脚好痒哈哈~']
+  },
+  dog: {
+    head: ['嘿嘿好舒服~', '摸摸头！再摸摸！', '汪~好开心~'],
+    ear: ['别碰耳朵~痒死了！', '啊哈哈别~', '耳朵好痒~'],
+    body: ['揉揉肚子~舒服~', '再揉揉嘛~', '肚皮软软的~'],
+    paw: ['握手！你好呀~', '爪爪给你~', '抬爪！砰！'],
+    tail: ['尾巴摇摇~', '别拽尾巴啦！', '痒~好痒~']
+  },
+  redpanda: {
+    head: ['唔~好困~', '摸摸头~', '再摸一下下~'],
+    ear: ['耳朵！啊~别~', '痒死了~', '耳朵好敏感~'],
+    body: ['肚子软软的~', '再抱抱~', '好暖和呀~'],
+    tail: ['尾巴是我的宝贝！', '别拽尾巴~', '环纹尾巴最漂亮~'],
+    apple: ['我的苹果！不许抢！', '啊呜~苹果~', '别碰我的苹果！']
+  }
+};
+
+function getPetClickRegion(cx, cy, x, y) {
+  // 根据点击坐标 (x,y) 判断点击了哪个部位，返回部位 key
+  const dx = x - cx, dy = y - cy;
+  const d = Math.sqrt(dx*dx + dy*dy);
+  const type = petState.petType;
+  if (type === 'cat') {
+    // head: circle (0,-12) r=24
+    if (Math.sqrt(dx*dx + (dy+12)*(dy+12)) < 18) return 'head';
+    // ears: triangles around (-18,-34) and (18,-34)
+    if (Math.sqrt((dx+18)*(dx+18) + (dy+34)*(dy+34)) < 12) return 'ear';
+    if (Math.sqrt((dx-18)*(dx-18) + (dy+34)*(dy+34)) < 12) return 'ear';
+    // body: ellipse (0,6) rx=32 ry=24
+    if ((dx*dx)/(32*32) + ((dy-6)*(dy-6))/(24*24) < 1) return 'body';
+    // tail: left side arc
+    if (dx < -20 && dy > -6 && dy < 24) return 'tail';
+    // paws: bottom
+    if (dy > 18 && Math.abs(dx) < 20) return 'paw';
+    return 'body';
+  } else if (type === 'dog') {
+    // 小狗坐标偏移：cx+3, cy-10 是头部中心
+    const hx = dx - 3, hy = dy + 10;
+    // head: circle r=24
+    if (Math.sqrt(hx*hx + hy*hy) < 18) return 'head';
+    // ears: left (cx-22, cy-2), right (cx+24, cy-2)
+    if (Math.sqrt((dx+22)*(dx+22) + (dy+2)*(dy+2)) < 12) return 'ear';
+    if (Math.sqrt((dx-24)*(dx-24) + (dy+2)*(dy+2)) < 12) return 'ear';
+    // raised paw: right side (cx+14, cy+4)
+    if (Math.sqrt((dx-14)*(dx-14) + (dy-4)*(dy-4)) < 10) return 'paw';
+    // body: ellipse (0,12) rx=28 ry=22
+    if ((dx*dx)/(28*28) + ((dy-12)*(dy-12))/(22*22) < 1) return 'body';
+    // tail: left (cx-30, cy-6)
+    if (Math.sqrt((dx+30)*(dx+30) + (dy+6)*(dy+6)) < 12) return 'tail';
+    // ground paws
+    if (dy > 22) return 'paw';
+    return 'body';
+  } else { // redpanda
+    // head: circle (0,-8) r=22
+    if (Math.sqrt(dx*dx + (dy+8)*(dy+8)) < 16) return 'head';
+    // ears: left (cx-14, cy-26), right (cx+14, cy-26)
+    if (Math.sqrt((dx+14)*(dx+14) + (dy+26)*(dy+26)) < 10) return 'ear';
+    if (Math.sqrt((dx-14)*(dx-14) + (dy+26)*(dy+26)) < 10) return 'ear';
+    // apple: circle (0,8) r=9
+    if (Math.sqrt(dx*dx + (dy-8)*(dy-8)) < 11) return 'apple';
+    // body: ellipse (0,10) rx=24 ry=20
+    if ((dx*dx)/(24*24) + ((dy-10)*(dy-10))/(20*20) < 1) return 'body';
+    // tail: left side
+    if (dx < -20 && dy > -4 && dy < 30) return 'tail';
+    return 'body';
+  }
+}
+
+function showPetBubble(text) {
+  const el = document.getElementById('pet-bubble');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.add('show');
+  if (window._petBubbleTimer) clearTimeout(window._petBubbleTimer);
+  window._petBubbleTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function handlePetClick(e) {
+  const canvas = document.getElementById('pet-canvas');
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const mx = (e.clientX - rect.left) * scaleX;
+  const my = (e.clientY - rect.top) * scaleY;
+  const cx = 70, cy = 70;
+  const region = getPetClickRegion(cx, cy, mx, my);
+  const reacts = PET_REACTIONS[petState.petType] || PET_REACTIONS.cat;
+  const msgs = reacts[region] || reacts.body;
+  const msg = msgs[Math.floor(Math.random() * msgs.length)];
+  showPetBubble(msg);
+}
+
+function feedPet() {
+  if (petState.coins <= 0) { alert('🍅 番茄币不够啦！先完成一个番茄吧！'); return; }
+  petState.coins--;
+  petState.mood = Math.min(100, petState.mood + 10);
+  savePet(); updatePetUI(); updateStatsUI();
+}
+
+function petTalk() {
+  const msg = PET_TALK[Math.floor(Math.random() * PET_TALK.length)];
+  alert('💬 ' + msg);
+}
+
+// ---- 装扮功能 ----
+function openPetCustomize() {
+  const type = petState.petType;
+  const titles = { cat:'🎨 装扮你的小猫', dog:'🎨 装扮小白团', redpanda:'🎨 装扮小浣熊' };
+  document.getElementById('custom-modal-title').textContent = titles[type] || '🎨 装扮你的宠物';
+  // 毛色仅限猫咪
+  const furSection = document.getElementById('custom-fur-section');
+  const furBtns = document.getElementById('custom-fur-buttons');
+  const isCat = type === 'cat';
+  furSection.style.display = isCat ? '' : 'none';
+  furBtns.style.display = isCat ? '' : 'none';
+  // 填入当前名字
+  document.getElementById('pet-custom-name').value = petState.customName || '';
+  document.getElementById('pet-custom-modal').classList.add('show');
+}
+function closePetCustomize() {
+  document.getElementById('pet-custom-modal').classList.remove('show');
+}
+function setPetFur(color) {
+  petState.furColor = color; savePet(); updatePetUI(); closePetCustomize();
+}
+function setPetAcc(acc) {
+  petState.accessory = acc; savePet(); updatePetUI(); closePetCustomize();
+}
+function setPetScene(scene) {
+  petState.scene = scene; savePet(); updatePetUI(); closePetCustomize();
+}
+// 保存自定义名字
+function savePetName() {
+  const name = document.getElementById('pet-custom-name').value.trim();
+  if (!name) { petState.customName = ''; }
+  else { petState.customName = name.slice(0,10); }
+  savePet(); updatePetUI(); closePetCustomize();
+}
+
+let petFrameRunning = false;
+
+// ====== Todo ======
+function addTodo() {
+  const input = document.getElementById('todo-input');
+  const text = input.value.trim();
+  if (!text) return;
+  if (todos.length >= 10) { alert('最多 10 个任务哦～'); return; }
+  todos.push({ text, done: false });
+  input.value = '';
+  saveTodos(); renderTodos();
+}
+
+function renderTodos() {
+  const list = document.getElementById('todo-list');
+  list.innerHTML = '';
+  if (todos.length === 0) { list.innerHTML = '<li style="color:#bdc3c7;font-size:0.85rem;">暂无任务，添加一个吧～</li>'; return; }
+  todos.forEach((t,i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo(${i})">
+      <span class="todo-text ${t.done?'done':''}">${escapeHtml(t.text)}</span>
+      <span class="del-btn" onclick="delTodo(${i})">✕</span>`;
+    list.appendChild(li);
+  });
+}
+
+function toggleTodo(i) {
+  const t = todos[i];
+  if (!t.done) {
+    t.done = true;
+    petState.exp += 5;
+    while (petState.exp >= petState.expMax && petState.level < 20) {
+      petState.exp -= petState.expMax;
+      petState.level++;
+      petState.expMax = Math.min(300, 30 + petState.level * 15);
+    }
+    savePet(); updatePetUI(); updateStatsUI();
+    const msgs = ['真棒！继续加油！','任务完成，奖励经验！','效率满满！','好样的！'];
+    alert('✅ ' + msgs[Math.floor(Math.random()*msgs.length)]);
+  } else {
+    t.done = false;
+  }
+  saveTodos(); renderTodos();
+}
+
+function delTodo(i) { todos.splice(i,1); saveTodos(); renderTodos(); }
+
+// ====== 统计 ======
+function updateStatsUI() {
+  const key = getTodayKey();
+  const todayCount = pomState.weekData?.[key] || 0;
+  const totalMins = Object.entries(pomState.weekData||{}).reduce((s,[k,v])=>{
+    if (k.slice(0,7)===key.slice(0,7)) { const wd = lsGet('pomodoro',{}); return s + v * (wd.focusMin||25); }
+    return s;
+  }, 0);
+  // 简化：今天专注分钟数
+  const todayMins = todayCount * pomState.focusMin;
+  document.getElementById('stat-today').textContent = todayCount;
+  document.getElementById('stat-mins').textContent = todayMins;
+  document.getElementById('stat-lv').textContent = petState.level;
+  document.getElementById('stat-coins').textContent = petState.coins;
+}
+
+function drawWeekChart() {
+  const canvas = document.getElementById('week-chart-canvas');
+  if (!canvas || canvas.offsetWidth===0) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+  const days = [];
+  for (let i=6; i>=0; i--) { const d = new Date(); d.setDate(d.getDate()-i); days.push(d.toISOString().slice(0,10)); }
+  const data = days.map(d => (pomState.weekData||{})[d] || 0);
+  const max = Math.max(...data,1);
+  const barW = (w-40) / 7 - 6;
+  data.forEach((v,i) => {
+    const x = 20 + i * ((w-40)/7);
+    const bh = (v/max) * (h-30);
+    ctx.fillStyle = '#e67e22'; ctx.beginPath();
+    ctx.roundRect(x, h-20-bh, barW, bh, 4); ctx.fill();
+    ctx.fillStyle='#7f8c8d'; ctx.font='10px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(days[i].slice(5), x+barW/2, h-4);
+    ctx.fillText(v, x+barW/2, h-22-bh);
+  });
+}
+// roundRect polyfill for Canvas
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r) {
+    if (r>w/2) r=w/2; if (r>h/2) r=h/2;
+    this.moveTo(x+r,y); this.lineTo(x+w-r,y); this.quadraticCurveTo(x+w,y,x+w,y+r);
+    this.lineTo(x+w,y+h-r); this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    this.lineTo(x+r,y+h); this.quadraticCurveTo(x,y+h,x,y+h-r);
+    this.lineTo(x,y+r); this.quadraticCurveTo(x,y,x+r,y);
+  };
+}
+
+// 自然衰减定时器（每10分钟 -1）
+setInterval(() => {
+  if (petState.mood > 0) { petState.mood = Math.max(0, petState.mood-1); savePet(); updatePetUI(); }
+}, 600000);
+
+// 初始化番茄钟 UI
+(function initPomodoro() {
+  timerRemaining = pomState.focusMin * 60;
+  updateTimerDisplay();
+  // 恢复保存的宠物类型并高亮按钮
+  document.querySelectorAll('.pet-select-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.pet === petState.petType));
+  updatePetUI();
+  renderTodos();
+  updateStatsUI();
+  drawWeekChart();
+  // 启动宠物动画
+  if (getPetPhase() >= 2) { petFrame = requestAnimationFrame(petAnimLoop); }
+  // 绑定宠物点击交互
+  const petCanvas = document.getElementById('pet-canvas');
+  petCanvas.addEventListener('click', handlePetClick);
+})();
+
+/* ================================================================
+   🎲 决策轮盘
+   ================================================================ */
+let options = [];
+let history = lsGet('decisions', []);
+let wheelAngle = 0;
+let wheelSpinning = false;
+
+function addOption() {
+  const input = document.getElementById('option-input');
+  const text = input.value.trim();
+  if (!text) return;
+  if (options.length >= 8) { alert('最多 8 个选项～不然轮盘放不下啦！'); return; }
+  options.push(text);
+  input.value = '';
+  renderOptions(); drawWheel();
+}
+
+function renderOptions() {
+  const c = document.getElementById('option-tags');
+  if (options.length === 0) {
+    c.innerHTML = '<span style="color:#bdc3c7;font-size:0.85rem;">添加几个选项，让我帮你做选择吧（虽然我也不会）。</span>';
+    return;
+  }
+  c.innerHTML = options.map((o,i) =>
+    `<span class="tag" draggable="true" data-idx="${i}" ondragstart="dragOpt(event)" ondragover="dragOver(event)" ondrop="dropOpt(event)">${escapeHtml(o)} <span class="del" onclick="delOption(${i})">×</span></span>`
+  ).join('');
+}
+
+function delOption(i) { options.splice(i,1); renderOptions(); drawWheel(); }
+
+function presetOptions(type) {
+  const presets = {
+    lunch: ['麻辣烫','兰州拉面','黄焖鸡','沙县小吃','麦当劳','寿司','回家吃泡面'],
+    weekend: ['爬山','看电影','逛书店','宅家打游戏','约朋友吃饭','去公园野餐','看展'],
+    tv: ['悬疑剧','恋爱番','搞笑综艺','纪录片','老电影','刷短视频'] };
+  options = presets[type] || [];
+  renderOptions(); drawWheel();
+}
+
+// 拖拽排序
+let dragIdx = null;
+function dragOpt(e) { dragIdx = parseInt(e.target.dataset.idx); e.dataTransfer.effectAllowed='move'; }
+function dragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect='move'; }
+function dropOpt(e) {
+  e.preventDefault(); const target = e.target.closest('.tag');
+  if (!target) return; const toIdx = parseInt(target.dataset.idx);
+  if (dragIdx===null || dragIdx===toIdx) return;
+  const [item] = options.splice(dragIdx,1); options.splice(toIdx,0,item);
+  dragIdx=null; renderOptions(); drawWheel();
+}
+
+function drawWheel() {
+  const canvas = document.getElementById('wheel-canvas');
+  const ctx = canvas.getContext('2d');
+  const w=canvas.width, h=canvas.height, cx=w/2, cy=h/2, r=Math.min(cx,cy)-8;
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(wheelAngle);
+  ctx.clearRect(-cx,-cy,w,h);
+  const n = options.length;
+  if (n === 0) {
+    ctx.restore();
+    // 星座占卜风格背景
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle='#f0eeff'; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#5b6abf'; ctx.font='16px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('🔮 占卜',cx,cy-8);
+    ctx.fillStyle='#7f8c8d'; ctx.font='12px sans-serif'; ctx.fillText('点击转盘试试手气',cx,cy+18);
+    return;
+  }
+  const arc = Math.PI*2/n;
+  for (let i=0; i<n; i++) {
+    ctx.beginPath(); ctx.moveTo(0,0);
+    ctx.arc(0,0,r,i*arc,(i+1)*arc);
+    ctx.closePath();
+    ctx.fillStyle = `hsl(${(360/n)*i}, 70%, 65%)`;
+    ctx.fill(); ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+    ctx.save(); ctx.rotate(i*arc + arc/2);
+    ctx.fillStyle='#fff'; ctx.font='12px sans-serif'; ctx.textAlign='right';
+    const txt = options[i].length > 5 ? options[i].slice(0,5)+'…' : options[i];
+    ctx.fillText(txt, r-12, 4);
+    ctx.restore();
+  }
+  // 中心圆
+  ctx.beginPath(); ctx.arc(0,0,14,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.strokeStyle='#ddd'; ctx.lineWidth=2; ctx.stroke();
+  ctx.restore();
+  // 指针
+  ctx.beginPath();
+  ctx.moveTo(cx, cy-r-8); ctx.lineTo(cx-10, cy-r+6); ctx.lineTo(cx+10, cy-r+6);
+  ctx.closePath(); ctx.fillStyle='#e74c3c'; ctx.fill();
+}
+
+function spinWheel() {
+  if (wheelSpinning) return;
+  if (options.length < 2) {
+    // 运势占卜彩蛋
+    fortuneMode();
+    return;
+  }
+  wheelSpinning = true;
+  document.getElementById('btn-spin').textContent = '🌀 旋转中';
+  document.getElementById('decide-result').style.display='none';
+  const targetAngle = wheelAngle + Math.PI * 2 * (8 + Math.random() * 6);
+  const startAngle = wheelAngle;
+  const duration = 3000 + Math.random() * 1000;
+  const startTime = performance.now();
+
+  function anim(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    // 缓出
+    const eased = 1 - Math.pow(1 - t, 3);
+    wheelAngle = startAngle + (targetAngle - startAngle) * eased;
+    drawWheel();
+    if (t < 1) { requestAnimationFrame(anim); }
+    else {
+      wheelAngle = targetAngle % (Math.PI*2);
+      wheelSpinning = false;
+      document.getElementById('btn-spin').textContent = '🎯 转盘';
+      showWheelResult();
+    }
+  }
+  requestAnimationFrame(anim);
+}
+
+function showWheelResult() {
+  const n = options.length;
+  if (n < 2) return;
+  const arc = Math.PI*2/n;
+  // 指针指向 12 点方向
+  const pointerAngle = -Math.PI/2;
+  let idx = Math.floor(((pointerAngle - wheelAngle) % (Math.PI*2) + Math.PI*4) / arc) % n;
+  const result = options[idx];
+  const resultDiv = document.getElementById('decide-result');
+  const wisdom = Math.floor(Math.random()*3)+7;
+  const impulse = Math.floor(Math.random()*10)+1;
+  const comment = DECIDE_COMMENTS[Math.floor(Math.random()*DECIDE_COMMENTS.length)];
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = `
+    <h3>🎯 ${escapeHtml(result)}</h3>
+    <div class="scores">
+      <span>🧠 理智评分：<strong>${wisdom}/10</strong></span>
+      <span>🔥 冲动评分：<strong>${impulse}/10</strong></span>
+    </div>
+    <div class="comment">💬 ${comment}</div>
+    <button class="btn-sm btn-gray" onclick="resetDecide()" style="margin-top:8px;">🔄 再转一次</button>
+  `;
+  // 保存历史
+  const entry = {
+    time: new Date().toLocaleString('zh-CN'), options: [...options], result,
+    wisdom, impulse, comment
+  };
+  history.unshift(entry);
+  if (history.length > 10) history.pop();
+  lsSet('decisions', history);
+  renderHistory();
+}
+
+function resetDecide() {
+  document.getElementById('decide-result').style.display='none';
+}
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  if (history.length === 0) { list.innerHTML = '<li style="color:#bdc3c7;font-size:0.85rem;">暂无决策记录</li>'; return; }
+  list.innerHTML = history.map(h =>
+    `<li><strong>${escapeHtml(h.result)}</strong> · ${h.time}<br><span style="color:#999;">${escapeHtml(h.options.join(', '))}</span></li>`
+  ).join('');
+}
+
+function clearHistory() { history = []; lsSet('decisions', []); renderHistory(); }
+
+// 运势占卜
+function fortuneMode() {
+  const resultDiv = document.getElementById('decide-result');
+  const sign = FORTUNE_SIGNS[Math.floor(Math.random()*FORTUNE_SIGNS.length)];
+  const explain = FORTUNE_EXPLAIN[Math.floor(Math.random()*FORTUNE_EXPLAIN.length)];
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = `
+    <h3>🔮 今日运势</h3>
+    <div style="font-size:1.6rem;margin:8px 0;">${sign}</div>
+    <div class="comment">✨ ${explain}</div>
+    <div style="margin-top:6px;">
+      <span style="font-size:1.2rem;" id="fortune-stars">⭐</span>
+    </div>
+    <button class="btn-sm btn-gray" onclick="resetDecide()" style="margin-top:8px;">🔄 再算一卦</button>
+  `;
+  // 闪烁星星
+  let starCount = 3;
+  const starInterval = setInterval(() => {
+    const el = document.getElementById('fortune-stars');
+    if (!el) { clearInterval(starInterval); return; }
+    starCount = starCount >= 5 ? 3 : starCount+1;
+    el.textContent = '⭐'.repeat(starCount);
+  }, 400);
+  setTimeout(() => clearInterval(starInterval), 3000);
+}
+
+// 初始化轮盘
+(function initDecide() { renderOptions(); drawWheel(); renderHistory(); })();
+
+/* ================================================================
+   推荐系统 · 模块二子功能
+   ================================================================ */
+// 子导航切换
+function switchSubTab(tab) {
+  document.querySelectorAll('#tab-decide .sub-tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('#tab-decide .sub-tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('subtab-'+tab).classList.add('active');
+  document.querySelector('.sub-tab-btn[data-subtab="'+tab+'"]').classList.add('active');
+  if (tab === 'wheel') { setTimeout(()=>drawWheel(), 50); }
+}
+
+// ====== 美食数据库 ======
+const FOOD_DATA = {
+  // ====== 直辖市 ======
+  '北京': { cities: { '北京': { foods: ['北京烤鸭','炸酱面','豆汁儿焦圈','涮羊肉','炒肝','卤煮火烧','京酱肉丝','豌豆黄','驴打滚','爆肚'],
+        restaurants: ['全聚德烤鸭','大董烤鸭','海碗居炸酱面','东来顺涮羊肉','姚记炒肝','小肠陈卤煮','护国寺小吃','便宜坊烤鸭'] }}},
+  '上海': { cities: { '上海': { foods: ['小笼包','生煎馒头','本帮红烧肉','蟹粉豆腐','葱油拌面','排骨年糕','腌笃鲜','八宝辣酱','白斩鸡','酒酿圆子'],
+        restaurants: ['南翔馒头店','大壶春生煎','老吉士','绿波廊','王宝和','杏花楼','功德林','新雅粤菜馆'] }}},
+  '重庆': { cities: { '重庆': { foods: ['重庆火锅','小面','酸辣粉','毛血旺','辣子鸡','水煮鱼','黔江鸡杂','豆花饭','烤鱼','万州格格'],
+        restaurants: ['佩姐老火锅','秦云老太婆摊摊面','李子坝梁山鸡','渝味晓宇火锅','珮姐老火锅','花市豌杂面'] }}},
+  '天津': { cities: { '天津': { foods: ['狗不理包子','煎饼果子','耳朵眼炸糕','麻花','嘎巴菜','天津捞面','熟梨糕','锅巴菜'],
+        restaurants: ['狗不理','石头门坎素包','起士林','天津卫码头','耳朵眼会馆'] }}},
+
+  // ====== 广东 ======
+  '广东': { cities: {
+      '广州': { foods: ['虾饺','肠粉','白切鸡','烧鹅','艇仔粥','叉烧包','云吞面','萝卜牛杂','煲仔饭','姜撞奶'],
+        restaurants: ['广州酒家','点都德','陶陶居','炳胜品味','银记肠粉','吴财记面家'] },
+      '深圳': { foods: ['海鲜大餐','椰子鸡','猪肚鸡','煲仔饭','光明乳鸽','沙井蚝'],
+        restaurants: ['润园四季椰子鸡','金稻园砂锅粥','陈鹏鹏卤鹅'] },
+      '佛山': { foods: ['顺德鱼生','双皮奶','盲公饼','扎蹄','毋米粥','陈村粉','炸牛奶','均安蒸猪'],
+        restaurants: ['黄但记','民信老铺','太艮堡毋米粥'] },
+      '东莞': { foods: ['烧鹅濑粉','道滘裹蒸粽','厚街腊肠','冼沙鱼丸'], restaurants: ['莞府家宴','永利饭店'] },
+      '中山': { foods: ['石岐乳鸽','杏仁饼','脆肉鲩','三乡濑粉'], restaurants: ['石岐佬','海港城大酒楼'] },
+      '珠海': { foods: ['横琴蚝','斗门重壳蟹','虾米糍','大赤坎叉烧'], restaurants: ['新海利海鲜','金悦轩'] },
+      '惠州': { foods: ['梅菜扣肉','东江盐焗鸡','酿豆腐','惠州萝卜粄'], restaurants: ['客家汇','高记风味楼'] },
+      '汕头': { foods: ['牛肉火锅','蚝烙','粿条','卤鹅','粽球','牛肉丸'], restaurants: ['八合里海记牛肉店','老福合沟无米粿'] }
+  }},
+
+  // ====== 四川 ======
+  '四川': { cities: {
+      '成都': { foods: ['火锅','串串香','钵钵鸡','担担面','麻婆豆腐','夫妻肺片','冒菜','甜水面','蛋烘糕','兔头'],
+        restaurants: ['小龙坎火锅','蜀大侠','钢管厂五区小郡肝','陈麻婆豆腐','龙抄手','钟水饺'] },
+      '绵阳': { foods: ['绵阳米粉','江油肥肠','梓潼片粉','席凉粉'], restaurants: ['德华开元米粉','六月雪干锅'] },
+      '乐山': { foods: ['跷脚牛肉','甜皮鸭','钵钵鸡','豆腐脑','峨眉雪糕'], restaurants: ['古市香跷脚牛肉','叶婆婆钵钵鸡'] },
+      '宜宾': { foods: ['宜宾燃面','李庄白肉','南溪豆腐干','柏溪潮糕'], restaurants: ['燃面一条街','李庄古镇'] },
+      '自贡': { foods: ['冷吃兔','火边子牛肉','富顺豆花','牛佛烘肘'], restaurants: ['汇东大酒店','阿婆冷吃兔'] }
+  }},
+
+  // ====== 湖南 ======
+  '湖南': { cities: {
+      '长沙': { foods: ['臭豆腐','剁椒鱼头','口味虾','糖油粑粑','米粉','茶颜悦色','辣椒炒肉','刮凉粉'],
+        restaurants: ['超级文和友','费大厨辣椒炒肉','炊烟时代','四娭毑口味虾','火宫殿'] },
+      '衡阳': { foods: ['衡阳鱼粉','衡东土菜','石鼓酥薄月','衡阳唆螺'], restaurants: ['彭海军鱼粉','旺鸣轩'] },
+      '湘西': { foods: ['湘西腊肉','血粑鸭','酸鱼','米豆腐'], restaurants: ['湘西腊味馆','土家风情楼'] },
+      '岳阳': { foods: ['岳阳烧烤','洞庭湖大闸蟹','君山银针鱼片','口味蛇'], restaurants: ['岳阳楼美食街','三毛烧烤'] }
+  }},
+
+  // ====== 陕西 ======
+  '陕西': { cities: {
+      '西安': { foods: ['肉夹馍','凉皮','羊肉泡馍','biangbiang面','裤带面','甑糕','臊子面','葫芦头','水盆羊肉','柿子饼'],
+        restaurants: ['老孙家羊肉泡馍','魏家凉皮','长安大排档','同盛祥','德发长饺子馆'] },
+      '咸阳': { foods: ['礼泉烙面','乾县豆腐脑','三原泡油糕','旬邑花馍'], restaurants: ['咸阳老街','汇通夜市'] },
+      '宝鸡': { foods: ['宝鸡擀面皮','岐山臊子面','凤翔豆花泡馍','陇县核桃饼'], restaurants: ['令氏家外家','艳阳天'] }
+  }},
+
+  // ====== 江苏 ======
+  '江苏': { cities: {
+      '南京': { foods: ['盐水鸭','鸭血粉丝汤','小笼包','梅花糕','皮肚面','牛肉锅贴','赤豆元宵','烤鸭'],
+        restaurants: ['南京大牌档','回味鸭血粉丝','韩复兴','李记清真馆','鸡鸣酒家'] },
+      '苏州': { foods: ['松鼠桂鱼','糖粥','鸡头米','苏式面','碧螺虾仁','太湖三白','响油鳝糊','枣泥麻饼'],
+        restaurants: ['得月楼','松鹤楼','吴门人家','同得兴面馆'] },
+      '无锡': { foods: ['无锡酱排骨','太湖三白','小笼包','油面筋塞肉','惠山豆腐花'], restaurants: ['三凤桥','王兴记','老牛窝里'] },
+      '扬州': { foods: ['扬州炒饭','狮子头','大煮干丝','蟹黄汤包','文思豆腐'], restaurants: ['冶春茶社','富春茶社','扬州宴'] },
+      '常州': { foods: ['常州麻糕','天目湖鱼头','萝卜干炒饭','银丝面'], restaurants: ['塘桥老店','常州银丝面馆'] },
+      '徐州': { foods: ['徐州烧烤','地锅鸡','辣汤','饣它(sha)汤','沛县狗肉'], restaurants: ['映像徐州','三中高皇羊肉馆'] }
+  }},
+
+  // ====== 浙江 ======
+  '浙江': { cities: {
+      '杭州': { foods: ['西湖醋鱼','龙井虾仁','东坡肉','片儿川','葱包烩','叫花鸡','定胜糕','宋嫂鱼羹'],
+        restaurants: ['楼外楼','外婆家','绿茶餐厅','山外山','奎元馆'] },
+      '宁波': { foods: ['宁波汤圆','红膏炝蟹','雪菜黄鱼','年糕','梭子蟹','油赞子'], restaurants: ['缸鸭狗','宁海食府','石浦大酒店'] },
+      '温州': { foods: ['温州鱼丸','灯盏糕','糯米饭','瘦肉丸','鸭舌'], restaurants: ['五马街老店','天一角'] },
+      '绍兴': { foods: ['臭豆腐','霉干菜扣肉','绍兴黄酒','醉蟹','奶油小攀'], restaurants: ['咸亨酒店','寻宝记'] },
+      '嘉兴': { foods: ['嘉兴粽子','南湖菱','文虎酱鸭','西塘八珍糕'], restaurants: ['五芳斋','真真老老'] },
+      '金华': { foods: ['金华火腿','金华酥饼','义乌红糖麻花','兰溪鸡子馃'], restaurants: ['金华百年老店','兰庆鸡子馃'] }
+  }},
+
+  // ====== 湖北 ======
+  '湖北': { cities: {
+      '武汉': { foods: ['热干面','小龙虾','莲藕排骨汤','豆皮','面窝','武昌鱼','鸭脖','欢喜坨'],
+        restaurants: ['蔡林记热干面','巴厘龙虾','户部巷','小蓝鲸','亢龙太子'] },
+      '宜昌': { foods: ['宜昌萝卜饺子','凉虾','合渣','秭归脐橙'], restaurants: ['自己人家菜馆','放翁酒家'] },
+      '襄阳': { foods: ['襄阳牛肉面','宜城板鸭','襄阳缠蹄','金刚酥'], restaurants: ['王府面馆','邓家牛腩'] },
+      '荆州': { foods: ['荆州鱼糕','公安牛肉','洪湖藕带','沙市早堂面'], restaurants: ['老街坊','五一路米粉'] }
+  }},
+
+  // ====== 福建 ======
+  '福建': { cities: {
+      '厦门': { foods: ['沙茶面','土笋冻','海蛎煎','姜母鸭','烧肉粽','同安封肉','花生汤'],
+        restaurants: ['1980烧肉粽','莲欢海蛎煎','堂宴','阿杰五香'] },
+      '福州': { foods: ['佛跳墙','鱼丸','锅边糊','荔枝肉','肉燕','芋泥','捞化'],
+        restaurants: ['聚春园','老福州','安泰楼'] },
+      '泉州': { foods: ['面线糊','醋肉','润饼','牛肉羹','洪濑鸡爪','四果汤'], restaurants: ['斯丹姜母鸭','好成财牛排馆'] },
+      '漳州': { foods: ['漳州卤面','手抓面','猫仔粥','五香卷','麻糍'], restaurants: ['亚芬卤面','建国蚵煎'] },
+      '武夷山': { foods: ['熏鹅','岚谷薰鹅','紫溪粉','光饼'], restaurants: ['武夷山旧街','小柒的店'] }
+  }},
+
+  // ====== 山东 ======
+  '山东': { cities: {
+      '济南': { foods: ['把子肉','九转大肠','糖醋鲤鱼','油旋','甜沫','奶汤蒲菜','济南烧烤'],
+        restaurants: ['闫府私房菜','城南往事','济南老字号魁盛居'] },
+      '青岛': { foods: ['辣炒蛤蜊','海鲜水饺','啤酒','烤鱿鱼','鲅鱼水饺','海菜凉粉','崂山菇炖鸡'],
+        restaurants: ['船歌鱼水饺','王姐烧烤','开海','翠华海鲜阁'] },
+      '烟台': { foods: ['烟台焖子','蓬莱小面','鲅鱼饺子','福山大面','莱阳梨'], restaurants: ['蓬莱春','毓璜顶宾馆'] },
+      '威海': { foods: ['威海刺身','鲅鱼煎饺','海鲜大咖','乳山生蚝'], restaurants: ['威海卫大厦','百姓海鲜'] },
+      '淄博': { foods: ['淄博烧烤','博山菜','周村烧饼','豆腐箱','酥锅'], restaurants: ['淄博又一村','大红门'] }
+  }},
+
+  // ====== 云南 ======
+  '云南': { cities: {
+      '昆明': { foods: ['过桥米线','汽锅鸡','野生菌火锅','烤乳扇','鲜花饼','小锅米线','官渡粑粑'],
+        restaurants: ['桥香园','滇味人家','一颗印','建新园'] },
+      '大理': { foods: ['大理酸辣鱼','乳扇','凉鸡米线','喜洲粑粑','雕梅'], restaurants: ['大理段公子','醉琉璃'] },
+      '丽江': { foods: ['腊排骨火锅','鸡豆凉粉','黑山羊火锅','丽江粑粑','酥油茶'], restaurants: ['阿婆腊排骨','滇藏石锅宴'] },
+      '西双版纳': { foods: ['菠萝饭','香茅草烤鱼','傣味手抓饭','泡鲁达','酸笋牛肉'], restaurants: ['傣庄园','玛扎烧烤'] },
+      '香格里拉': { foods: ['酥油茶','糌粑','牦牛肉火锅','青稞饼','松茸'], restaurants: ['热贡艺人阁','藏家土司宴'] }
+  }},
+
+  // ====== 广西 ======
+  '广西': { cities: {
+      '南宁': { foods: ['老友粉','柠檬鸭','螺蛳粉','酸野', '粉饺','卷筒粉','八仙粉'],
+        restaurants: ['舒记老友粉','阿明螺蛳粉','甘家界柠檬鸭'] },
+      '桂林': { foods: ['桂林米粉','啤酒鱼','田螺酿','油茶','荔浦芋扣肉','马蹄糕','桂花糕'],
+        restaurants: ['崇善米粉','椿记烧鹅','桂林人','金龙寨'] },
+      '柳州': { foods: ['柳州螺蛳粉','螺蛳鸭脚煲','牛杂火锅','融水香鸭'], restaurants: ['西环肥仔螺蛳粉','阿柠檬螺蛳粉'] },
+      '北海': { foods: ['北海海鲜','虾饼','沙蟹汁','越南卷粉','椒盐濑尿虾'], restaurants: ['中国珍珠城海鲜','外沙海鲜岛'] },
+      '阳朔': { foods: ['啤酒鱼','田螺酿','酿豆腐','漓江虾'], restaurants: ['大师傅啤酒鱼','谢三姐啤酒鱼'] }
+  }},
+
+  // ====== 贵州 ======
+  '贵州': { cities: {
+      '贵阳': { foods: ['酸汤鱼','花溪牛肉粉','肠旺面','丝娃娃','豆腐圆子','辣子鸡','洋芋粑'],
+        restaurants: ['老凯俚酸汤鱼','花溪王记','杨姨妈丝娃娃','但家香酥鸭'] },
+      '遵义': { foods: ['遵义羊肉粉','豆花面','乌江鱼','遵义鸡蛋糕'], restaurants: ['董公寺戴家羊肉粉','龙记鱼庄'] },
+      '黔东南': { foods: ['酸汤鱼','牛瘪','腌鱼','糯米饭','榕江卷粉'], restaurants: ['亮欢寨','侗寨楼'] }
+  }},
+
+  // ====== 河北 ======
+  '河北': { cities: {
+      '石家庄': { foods: ['驴肉火烧','金凤扒鸡','缸炉烧饼','藁城宫面'], restaurants: ['北斗星餐厅','保定驴肉张'] },
+      '保定': { foods: ['驴肉火烧','白运章包子','高碑店豆腐丝','保定糖葫芦'], restaurants: ['老成家驴肉火烧','白运章'] },
+      '秦皇岛': { foods: ['海鲜大咖','山海关浑锅','青龙水豆腐','杨肠子'], restaurants: ['海鲜居','秦家味'] },
+      '唐山': { foods: ['唐山麻糖','棋子烧饼','乐亭烧饼','刘美烧鸡'], restaurants: ['鸿宴饭庄','唐山宴'] },
+      '承德': { foods: ['承德八大碗','御土荷叶鸡','驴打滚','莜面窝子'], restaurants: ['承德乔家满族八大碗','新乾隆酒店'] }
+  }},
+
+  // ====== 河南 ======
+  '河南': { cities: {
+      '郑州': { foods: ['烩面','胡辣汤','黄河大鲤鱼','蒸饺','焖饼'], restaurants: ['合记烩面','方中山胡辣汤','萧记三鲜烩面'] },
+      '洛阳': { foods: ['洛阳水席','牛肉汤','驴肉汤','浆面条','牡丹饼'], restaurants: ['真不同','管记水席','龙翔斋'] },
+      '开封': { foods: ['开封灌汤包','鲤鱼焙面','杏仁茶','炒凉粉','红薯泥'], restaurants: ['第一楼','黄家老店','邢家锅贴'] },
+      '安阳': { foods: ['安阳三熏','道口烧鸡','扁粉菜','老庙牛肉'], restaurants: ['盛德利','安阳宾馆'] }
+  }},
+
+  // ====== 江西 ======
+  '江西': { cities: {
+      '南昌': { foods: ['南昌拌粉','瓦罐汤','藜蒿炒腊肉','南昌白糖糕','鄱阳湖鱼头'], restaurants: ['老左杂酱面','民间饭庄','堂瓦里'] },
+      '景德镇': { foods: ['碱水粑','冷粉','瓷泥煨鸡','乐平狗肉'], restaurants: ['回家吃饭','小黄鱼'] },
+      '庐山': { foods: ['庐山三石(石鸡石鱼石耳)','庐山云雾茶','鄱阳湖银鱼'], restaurants: ['庐山宾馆中餐厅'] },
+      '赣州': { foods: ['赣南小炒鱼','南安板鸭','瑞金牛肉汤','信丰萝卜饺'], restaurants: ['赣南人家','太子楼'] },
+      '上饶': { foods: ['上饶鸡腿','铅山烫粉','弋阳年糕','婺源糊豆腐'], restaurants: ['老闵田螺馆','万家灯火'] }
+  }},
+
+  // ====== 安徽 ======
+  '安徽': { cities: {
+      '合肥': { foods: ['合肥小龙虾','李鸿章大杂烩','吴山贡鹅','三河米饺','庐州烤鸭'], restaurants: ['庐州烤鸭店','老乡鸡','不倒翁'] },
+      '黄山': { foods: ['臭鳜鱼','毛豆腐','屯溪醉蟹','黄山烧饼','徽州一品锅'], restaurants: ['徽商故里','老街一楼','钟大厨'] },
+      '芜湖': { foods: ['芜湖虾籽面','小笼汤包','无为板鸭','弋江羊肉'], restaurants: ['耿福兴','四季春'] },
+      '安庆': { foods: ['安庆江毛水饺','鸡汤泡炒米','石塘甲鱼','柏兆记'], restaurants: ['江万春','大南门牛肉包子'] }
+  }},
+
+  // ====== 山西 ======
+  '山西': { cities: {
+      '太原': { foods: ['山西刀削面','太原头脑','过油肉','剔尖','莜面栲栳栳','羊杂割'], restaurants: ['并州饭店','山西会馆','老太原菜馆'] },
+      '大同': { foods: ['大同刀削面','广灵豆腐干','浑源凉粉','大同羊杂','黄糕'], restaurants: ['凤临阁','凯鸽酒楼'] },
+      '平遥': { foods: ['平遥牛肉','栲栳栳','碗托','长山药'], restaurants: ['天元奎客栈','洪武记'] },
+      '运城': { foods: ['运城大盘鸡','闻喜煮饼','芮城麻片','北相羊肉胡卜'], restaurants: ['河东家宴','马师水饺'] }
+  }},
+
+  // ====== 辽宁 ======
+  '辽宁': { cities: {
+      '沈阳': { foods: ['鸡架','老边饺子','冷面','锅包肉','白肉血肠','马家烧麦','沈阳回头'],
+        restaurants: ['老杨家熟食','西塔美食街','老边饺子馆','宝发园'] },
+      '大连': { foods: ['海鲜大咖','海胆饺子','铁板鱿鱼','焖子','大连虾酱'], restaurants: ['品海楼','大连海味馆','天天渔港'] },
+      '丹东': { foods: ['丹东草莓','黄蚬子','韩式烤肉','焖子'], restaurants: ['柳京大厦','丹东海鲜坊'] },
+      '锦州': { foods: ['锦州烧烤','锦州小菜','沟帮子熏鸡','北镇猪蹄'], restaurants: ['老白烧烤','城市花园'] }
+  }},
+
+  // ====== 吉林 ======
+  '吉林': { cities: {
+      '长春': { foods: ['长春酱肉','冷面','雪衣豆沙','鸡肉串','烧鸽子'], restaurants: ['春发合饭庄','元盛居','王记酱骨头'] },
+      '吉林市': { foods: ['吉林煎粉','白肉血肠','人参鸡','庆岭活鱼'], restaurants: ['新兴园饺子','峰之味道'] },
+      '延边': { foods: ['延吉冷面','石锅拌饭','辣白菜','打糕','韩式烤肉'], restaurants: ['金刚山','全州拌饭','丰茂串城'] }
+  }},
+
+  // ====== 黑龙江 ======
+  '黑龙江': { cities: {
+      '哈尔滨': { foods: ['锅包肉','哈尔滨红肠','杀猪菜','马迭尔冰棍','大列巴','得莫利炖鱼','松仁小肚'],
+        restaurants: ['老厨家','华梅西餐厅','马迭尔西餐厅','东方饺子王'] },
+      '齐齐哈尔': { foods: ['齐齐哈尔烤肉','克东腐乳','拜泉酸菜'], restaurants: ['完美生活烤肉','马晓马佳'] },
+      '大庆': { foods: ['大庆坑烤','肇源烤鱼','杜尔伯特手把肉'], restaurants: ['坑烤一条街','大庆宾馆'] },
+      '牡丹江': { foods: ['镜泊湖鱼','朝鲜族冷面','狗肉汤饭'], restaurants: ['釜山美食','小酒馆'] }
+  }},
+
+  // ====== 甘肃 ======
+  '甘肃': { cities: {
+      '兰州': { foods: ['兰州牛肉面','酿皮','灰豆子','牛奶鸡蛋醪糟','手抓羊肉','浆水面','甜醅子'],
+        restaurants: ['马子禄牛肉面','磨沟沿老字号','白建强牛肉面','阿西娅'] },
+      '敦煌': { foods: ['驴肉黄面','敦煌酿皮','杏皮水','鸣山大枣','羊肉粉汤'], restaurants: ['顺张驴肉黄面','敦煌味道'] },
+      '嘉峪关': { foods: ['嘉峪关烤肉','雄关火锅','烧壳子'], restaurants: ['大唐美食街','小党烤肉'] },
+      '天水': { foods: ['天水呱呱','天水凉粉','秦安肚丝汤','甘谷辣椒'], restaurants: ['常记呱呱','光明巷'] }
+  }},
+
+  // ====== 内蒙古 ======
+  '内蒙古': { cities: {
+      '呼和浩特': { foods: ['手扒羊肉','莜面','烧麦','焙子','奶茶','马奶酒'], restaurants: ['格日勒阿妈','蒙古大营','半亩地'] },
+      '包头': { foods: ['包头涮羊肉','羊杂碎','荞面饸饹','蒙古馅饼'], restaurants: ['小肥羊','快乐小羊'] },
+      '呼伦贝尔': { foods: ['烤全羊','手把肉','布里亚特包子','蓝莓酸奶'], restaurants: ['百味鲜火锅','诺敏塔拉奶茶馆'] },
+      '鄂尔多斯': { foods: ['炖羊肉','酸烩菜','准格尔碗托','鄂托克奶酪'], restaurants: ['鄂尔多斯博源豪生'] }
+  }},
+
+  // ====== 新疆 ======
+  '新疆': { cities: {
+      '乌鲁木齐': { foods: ['羊肉串','大盘鸡','手抓饭','烤包子','馕','拉条子','椒麻鸡','酸奶粽子'],
+        restaurants: ['楼兰秘烤','小西门夜市','血站大盘鸡','小李子血站大盘鸡'] },
+      '喀什': { foods: ['喀什烤鸽子','缸子肉','米肠子面肺子','馕坑肉','石榴汁'], restaurants: ['艾提尕尔老茶馆','古城夜市'] },
+      '吐鲁番': { foods: ['吐鲁番葡萄','羊肉抓饭','大盘肚','烤全羊'], restaurants: ['葡萄庄园','麦西来甫'] },
+      '伊犁': { foods: ['伊犁马肉纳仁','熏马肠','锡伯大饼','卡瓦斯'], restaurants: ['艾勒卡斯木','伊犁餐厅'] }
+  }},
+
+  // ====== 西藏 ======
+  '西藏': { cities: {
+      '拉萨': { foods: ['酥油茶','藏面','糌粑','牦牛肉','甜茶','藏香猪','血肠','酸奶'],
+        restaurants: ['玛吉阿米','光明港琼甜茶馆','娜玛瑟德','雪域餐厅'] },
+      '林芝': { foods: ['林芝石锅鸡','松茸','藏香猪','青稞饼'], restaurants: ['石锅鸡总店','鲁朗石锅鸡'] },
+      '日喀则': { foods: ['日喀则烤羊','糌粑','酥油茶','风干牦牛肉'], restaurants: ['藏家宴','丰盛藏餐馆'] }
+  }},
+
+  // ====== 青海 ======
+  '青海': { cities: {
+      '西宁': { foods: ['青海羊肉串','酿皮','尕面片','甜醅','狗浇尿','青海土火锅','手抓羊肉'],
+        restaurants: ['雅君羊肉','西宁莫家街','马忠食府'] },
+      '青海湖': { foods: ['青海湖湟鱼','青稞饼','牦牛酸奶','酥油糌粑'], restaurants: ['青海湖渔场餐厅'] },
+      '格尔木': { foods: ['格尔木烤肉','昆仑玉','青稞酒','柴达木枸杞'], restaurants: ['格尔木宾馆餐厅'] }
+  }},
+
+  // ====== 宁夏 ======
+  '宁夏': { cities: {
+      '银川': { foods: ['手抓羊肉','羊杂碎','宁夏滩羊肉','烩小吃','八宝茶','同心春'],
+        restaurants: ['老毛手抓','国强手抓','仙鹤楼'] },
+      '中卫': { foods: ['硒砂西瓜','中卫蒿子面','扁豆子面','鸽子鱼'], restaurants: ['中卫商城夜市'] },
+      '吴忠': { foods: ['吴忠羊杂','白水鸡','炒糊饽','麻辣烫'], restaurants: ['杜优素羊杂','西施羊杂'] }
+  }},
+
+  // ====== 海南 ======
+  '海南': { cities: {
+      '海口': { foods: ['海南粉','文昌鸡','加积鸭','清补凉','老爸茶','鱼煲'], restaurants: ['龙泉集团','海口骑楼小吃街'] },
+      '三亚': { foods: ['海鲜大餐','椰子饭','藤桥排骨','陵水酸粉','抱罗粉'], restaurants: ['第一市场海鲜加工','阿浪海鲜'] },
+      '文昌': { foods: ['文昌鸡','糟粕醋','抱罗粉','椰子船'], restaurants: ['文昌鸡饭店','三角街'] },
+      '琼海': { foods: ['嘉积鸭','万泉河鱼','芒果肠粉','温泉鹅'], restaurants: ['琼海银海路美食街'] }
+  }},
+
+  // ====== 港澳台 ======
+  '台湾': { cities: {
+      '台北': { foods: ['蚵仔煎','卤肉饭','牛肉面','珍珠奶茶','凤梨酥','大肠包小肠','盐酥鸡','胡椒饼'],
+        restaurants: ['永康牛肉面','鼎泰丰','阿宗面线','林东芳牛肉面'] },
+      '高雄': { foods: ['高雄木瓜牛奶','旗津海鲜','碳烤三明治','鸭肉珍'], restaurants: ['瑞丰夜市','六合夜市'] },
+      '台中': { foods: ['太阳饼','台中肉圆','麻叶羹','东泉辣椒酱'], restaurants: ['宫原眼科','春水堂'] },
+      '花莲': { foods: ['花莲扁食','炸弹葱油饼','曾记麻糬','公正包子'], restaurants: ['花莲东大门夜市'] }
+  }},
+  '香港': { cities: { '香港': { foods: ['云吞面','烧腊','菠萝包','蛋挞','丝袜奶茶','叉烧','碗仔翅','车仔面','鸡蛋仔','咖喱鱼蛋'],
+        restaurants: ['镛记酒家','添好运','兰芳园','九记牛腩','澳洲牛奶公司','莲香楼'] }}},
+  '澳门': { cities: { '澳门': { foods: ['葡式蛋挞','猪扒包','水蟹粥','杏仁饼','葡国鸡','木糠布甸','马介休'],
+        restaurants: ['安德鲁饼店','大利来记','玛嘉烈蛋挞','葡国餐厅','陈光记'] }}},
+
+  // ====================================================================
+  // 🌍 国际美食
+  // ====================================================================
+  '日本': { cities: {
+      '东京': { foods: ['寿司','拉面','天妇罗','鳗鱼饭','和果子','寿喜烧','章鱼烧','刺身'],
+        restaurants: ['数寄屋桥次郎','一兰拉面','浅草今半','筑地市场'] },
+      '大阪': { foods: ['大阪烧','章鱼烧','串炸','蟹道乐','金龙拉面'], restaurants: ['道顿堀美食街','法善寺横丁'] },
+      '京都': { foods: ['抹茶甜品','京怀石','汤豆腐','抹茶冰淇淋','和果子'], restaurants: ['菊乃井','茶寮都路里'] },
+      '北海道': { foods: ['札幌拉面','海鲜丼','螃蟹','牛奶冰淇淋','白色恋人'], restaurants: ['札幌拉面共和国','二条市场'] },
+      '福冈': { foods: ['博多拉面','明太子','牛杂锅','水炊锅'], restaurants: ['一风堂','中洲屋台'] }
+  }},
+  '韩国': { cities: {
+      '首尔': { foods: ['韩国烤肉','石锅拌饭','韩式炸鸡','泡菜','辣炒年糕','参鸡汤','冷面','部队锅'],
+        restaurants: ['姜虎东烤肉','土俗村参鸡汤','广藏市场','明洞饺子'] },
+      '釜山': { foods: ['猪肉汤饭','海鲜煎饼','机长刀鱼','甜辣炸鸡'], restaurants: ['札嘎其市场','双胞胎猪肉汤饭'] },
+      '济州岛': { foods: ['黑猪肉烤肉','海鲜锅','济州橘子','鲍鱼粥'], restaurants: ['黑家黑猪肉','秘苑'] }
+  }},
+  '泰国': { cities: {
+      '曼谷': { foods: ['冬阴功汤','泰式炒河粉','绿咖喱','芒果糯米饭','泰式奶茶','青木瓜沙拉','椰子冰淇淋'],
+        restaurants: ['建兴酒家','Nara','Thip Samai Pad Thai'] },
+      '清迈': { foods: ['咖喱面','泰北香肠','青木瓜沙拉','芒果饭','烤串'], restaurants: ['Khao Soi Khun Yai','Cooking Love'] },
+      '普吉岛': { foods: ['普吉海鲜','冬阴功','泰式菠萝饭','香蕉煎饼'], restaurants: ['拉威海鮮市场','Kan Eang'] },
+      '芭堤雅': { foods: ['海鲜BBQ','泰式酸辣鱼','椰子糕'], restaurants: ['Rimpa Lapin','The Sky Gallery'] }
+  }},
+  '越南': { cities: {
+      '胡志明市': { foods: ['越南河粉','法棍三明治','越南春卷','滴漏咖啡','越南煎饼'], restaurants: ['Pho 2000','Ngon 138','Bun Thit Nuong'] },
+      '河内': { foods: ['河粉','烤肉米线','鸡蛋咖啡','虾饼','螺肉米粉'], restaurants: ['Pho Gia Truyen','Bun Cha Huong Lien'] },
+      '岘港': { foods: ['海鲜火锅','越南煎饼','白玫瑰','广南面'], restaurants: ['Madame Lan','Be Man Seafood'] },
+      '芽庄': { foods: ['海鲜BBQ','越南渔露','燕窝汤','瓦片烤肉'], restaurants: ['Lanterns','Sailing Club'] }
+  }},
+  '新加坡': { cities: { '新加坡': { foods: ['海南鸡饭','肉骨茶','叻沙','辣椒螃蟹','咖椰吐司','沙爹','福建虾面'],
+        restaurants: ['天天海南鸡饭','松发肉骨茶','珍宝海鲜','了凡油鸡饭面'] }}},
+  '马来西亚': { cities: {
+      '吉隆坡': { foods: ['椰浆饭','沙爹','福建面','烧鱼','槟城炒粿条','榴莲'],
+        restaurants: ['阿罗街夜市','关夫人餐厅','黄亚华小吃店'] },
+      '槟城': { foods: ['槟城炒粿条','槟城叻沙','煎蕊','炒面','蚝煎'], restaurants: ['愉园茶室','汕头街夜市'] },
+      '沙巴': { foods: ['海鲜大餐','椰子虾','娘惹菜','树仔菜'], restaurants: ['大茄来海鲜','双天海鲜楼'] }
+  }},
+  '印度尼西亚': { cities: {
+      '巴厘岛': { foods: ['印尼炒饭','沙爹','巴厘岛烤猪肋排','脏鸭餐','金巴兰海鲜'], restaurants: ['Bebek Bengil','Naughty Nuri'] },
+      '雅加达': { foods: ['印尼炒面','Soto汤','Gado-Gado','Rendang'], restaurants: ['Lara Djonggrang','Soto Betawi'] }
+  }},
+  '印度': { cities: {
+      '新德里': { foods: ['咖喱','烤饼','塔利','印度酸奶','羊肉Biryani'], restaurants: ['Bukhara','Karim\'s'] },
+      '孟买': { foods: ['街头小吃Pani Puri','Vada Pav','印度薄饼','海鲜咖喱'], restaurants: ['Leopold Cafe','Trishna'] },
+      '斋浦尔': { foods: ['Dal Baati','拉贾斯坦咖喱','甜点Ghewar'], restaurants: ['Chokhi Dhani','LMB'] }
+  }},
+  '法国': { cities: {
+      '巴黎': { foods: ['法棍面包','可颂','蜗牛','鹅肝','马卡龙','可丽饼','牛排薯条','法式洋葱汤'],
+        restaurants: ['L\'Ambroisie','Bouillon Pigalle','Angelina','Le Meurice'] },
+      '尼斯': { foods: ['尼斯沙拉','普罗旺斯炖菜','法式海鲜','马赛鱼汤'], restaurants: ['Le Chantecler','La Petite Maison'] },
+      '里昂': { foods: ['里昂香肠','Quenelle','里昂沙拉','焗蜗牛'], restaurants: ['Paul Bocuse','Brasserie Georges'] },
+      '马赛': { foods: ['马赛鱼汤','普罗旺斯炖菜','蒜泥蛋黄酱', '海鲜拼盘'], restaurants: ['Chez Fonfon','Miramar'] }
+  }},
+  '意大利': { cities: {
+      '罗马': { foods: ['意大利面','披萨','冰淇淋','卡布奇诺','提拉米苏','Suppli'], restaurants: ['Roscioli','Da Enzo','Armando al Pantheon'] },
+      '米兰': { foods: ['米兰炸肉排','意大利烩饭','Panzerotti','意式冰淇淋'], restaurants: ['Cracco','Luini','Trattoria Masuelli'] },
+      '佛罗伦萨': { foods: ['佛罗伦萨T骨牛排','意大利宽面','牛肚包','基安蒂红酒'], restaurants: ['Trattoria Dall\'Oste','Mercato Centrale'] },
+      '威尼斯': { foods: ['墨鱼面','威尼斯炸海鲜','Tiramisu','Spritz鸡尾酒'], restaurants: ['Trattoria Al Gazzettino','Cantina Do Spade'] },
+      '那不勒斯': { foods: ['那不勒斯披萨','炸披萨','海鲜意面','西西里卷'], restaurants: ['L\'Antica Pizzeria da Michele','Sorbillo'] }
+  }},
+  '英国': { cities: {
+      '伦敦': { foods: ['英式早餐','炸鱼薯条','周日烤肉','牧羊人派','英式下午茶','烤牛肉约克布丁'],
+        restaurants: ['The Ledbury','Borough Market','St. John','Dishoom'] },
+      '爱丁堡': { foods: ['哈吉斯','苏格兰三文鱼','肉馅羊肚','Shortbread'], restaurants: ['The Kitchin','The Witchery'] },
+      '曼彻斯特': { foods: ['曼彻斯特炖牛肉','黑布丁','曼彻斯特蛋'], restaurants: ['Mackie Mayor','Tatton Arms'] }
+  }},
+  '西班牙': { cities: {
+      '巴塞罗那': { foods: ['西班牙海鲜饭','Tapas','伊比利亚火腿','桑格利亚','加泰罗尼亚焦糖布丁'],
+        restaurants: ['Can Solé','Cal Pep','Las Ramblas市场'] },
+      '马德里': { foods: ['西班牙油条','马德里炖牛肚','烤乳猪','海鲜饭','西班牙煎蛋'], restaurants: ['Botín','Casa Lucio','Mercado de San Miguel'] },
+      '塞维利亚': { foods: ['塞维利亚炖菜','西班牙冷汤','油炸小鱼','伊比利亚黑猪肉'], restaurants: ['El Rinconcillo','La Azotea'] },
+      '瓦伦西亚': { foods: ['正宗海鲜饭','瓦伦西亚水','Horchata','橙子'], restaurants: ['La Riua','El Rincón de la Piedra'] }
+  }},
+  '葡萄牙': { cities: {
+      '里斯本': { foods: ['葡式蛋挞','鳕鱼饼','葡式海鲜饭','Piri Piri烤鸡','绿汤'], restaurants: ['Pastéis de Belém','Cervejaria Ramiro'] },
+      '波尔图': { foods: ['Francesinha','波特酒','烤乳猪','章鱼沙拉'], restaurants: ['Castro','Taberna dos Mercadores'] }
+  }},
+  '德国': { cities: {
+      '柏林': { foods: ['德国香肠','猪肘','咖喱肠','德国啤酒','椒盐脆饼','柏林甜甜圈'], restaurants: ['Zur Letzten Instanz','Curry 36'] },
+      '慕尼黑': { foods: ['猪肘','白香肠','椒盐卷饼','慕尼黑啤酒','Schweinshaxe'], restaurants: ['Hofbräuhaus','Augustiner-Keller'] },
+      '法兰克福': { foods: ['法兰克福香肠','绿酱','苹果酒','Frankfurter Kranz'], restaurants: ['Kleinmarkthalle','Apfelwein Dax'] },
+      '科隆': { foods: ['科隆啤酒','猪肘','血肠','科隆鱼饼'], restaurants: ['Früh am Dom','Gilden im Zims'] }
+  }},
+  '荷兰': { cities: {
+      '阿姆斯特丹': { foods: ['荷兰煎饼','生鲱鱼','荷兰薯条','奶酪','Dutch Stroopwafel','鸡肉沙爹'], restaurants: ['The Pancake Bakery','Frens Haringhandel'] },
+      '鹿特丹': { foods: ['鹿特丹肉球','荷兰鱼饼','巧克力酱三明治'], restaurants: ['Restaurant Rotterdam','Markthal'] }
+  }},
+  '比利时': { cities: {
+      '布鲁塞尔': { foods: ['比利时华夫饼','比利时薯条','巧克力','青口配薯条','比利时啤酒'], restaurants: ['Chez Léon','Fin de Siècle'] },
+      '布鲁日': { foods: ['华夫饼','淡菜','巧克力','比利时啤酒'], restaurants: ['Den Dijver','De Halve Maan'] }
+  }},
+  '瑞士': { cities: {
+      '苏黎世': { foods: ['芝士火锅','Rösti','苏黎世牛肉','瑞士巧克力','Fondue'], restaurants: ['Kronenhalle','Zeughauskeller'] },
+      '日内瓦': { foods: ['芝士火锅','Raclette','瑞士土豆饼','巧克力'], restaurants: ['Café du Soleil','Le Relais de l\'Entrecôte'] },
+      '卢塞恩': { foods: ['瑞士奶酪','奶油蘑菇面','琉森鱼'], restaurants: ['Wirtshaus zum Weissen Kreuz'] }
+  }},
+  '奥地利': { cities: {
+      '维也纳': { foods: ['维也纳炸猪排','苹果卷','萨赫蛋糕','维也纳香肠','清炖牛肉'], restaurants: ['Figlmüller','Café Central','Plachutta'] },
+      '萨尔茨堡': { foods: ['萨尔茨堡汤团','莫扎特巧克力球','炸猪排'], restaurants: ['St. Peter Stiftskeller','Café Tomaselli'] }
+  }},
+  '希腊': { cities: {
+      '雅典': { foods: ['希腊沙拉','烤羊肉','Moussaka','Souvlaki','希腊酸奶','Pita','Baklava'], restaurants: ['Athiri','Mani Mani','O Thanasis'] },
+      '圣托里尼': { foods: ['圣托里尼海鲜','番茄糕','Fava豆泥','烤章鱼','葡萄酒'], restaurants: ['Ambrosia','Sunset Tavern'] },
+      '米克诺斯': { foods: ['Kopanisti奶酪','海鲜拼盘','希腊沙拉','Louza'], restaurants: ['Kastro\'s Restaurant'] }
+  }},
+  '土耳其': { cities: {
+      '伊斯坦布尔': { foods: ['烤肉卷','土耳其披萨','土耳其冰淇淋','果仁蜜饼','土耳其咖啡','Lahmacun','Kebab'],
+        restaurants: ['Çiya Sofrası','Karaköy Güllüoglu','Hamdi Restaurant'] },
+      '安卡拉': { foods: ['安卡拉肉丸','土耳其披萨','米布丁','烤羊排'], restaurants: ['Zenger Pasa','Trilye'] },
+      '卡帕多奇亚': { foods: ['陶罐牛肉','土耳其烤肉','烤杏仁','苹果茶'], restaurants: ['Topdeck Cave','Seten Anatolian'] }
+  }},
+  '俄罗斯': { cities: {
+      '莫斯科': { foods: ['罗宋汤','俄式饺子','黑面包','基辅鸡','俄式煎饼','俄式沙拉','格瓦斯'],
+        restaurants: ['白兔餐厅','普希金咖啡馆','Mari Vanna'] },
+      '圣彼得堡': { foods: ['俄式红菜汤','俄式饺子','鱼子酱','俄式黑面包','格鲁吉亚菜'], restaurants: ['Yat','Gogol','Teplo'] }
+  }},
+  '美国': { cities: {
+      '纽约': { foods: ['纽约披萨','汉堡','热狗','芝士蛋糕','百吉饼','苹果派','牛排','Ramen','炸鸡'],
+        restaurants: ['Katz\'s Delicatessen','Peter Luger','Keen\'s Steakhouse'] },
+      '旧金山': { foods: ['酸面包蛤蜊汤','加州卷','海鲜Cioppino','波丁酸面包','Mission式墨西哥卷'], restaurants: ['Boudin Bakery','Tony\'s Pizza','Swan Oyster Depot'] },
+      '洛杉矶': { foods: ['墨西哥卷','In-N-Out汉堡','韩国烤肉','泰式炒河粉','网红早午餐'], restaurants: ['Koreatown','Grand Central Market'] },
+      '芝加哥': { foods: ['芝加哥深盘披萨','芝加哥热狗','意大利牛肉三明治','爆米花'], restaurants: ['Lou Malnati\'s','Portillo\'s'] },
+      '新奥尔良': { foods: ['秋葵汤','Jambalaya','Cajun美食','小龙虾','贝奈特饼'], restaurants: ['Café du Monde','Commander\'s Palace'] },
+      '夏威夷': { foods: ['Poke','Spam饭团','夏威夷烤肉','Loco Moco'], restaurants: ['Ono Seafood','Helena\'s Hawaiian Food'] }
+  }},
+  '加拿大': { cities: {
+      '多伦多': { foods: ['Poutine','加拿大培根','Montreal烟肉三明治','肉汁奶酪薯条','枫糖浆'], restaurants: ['Canis','St. Lawrence Market'] },
+      '温哥华': { foods: ['温哥华寿司','斑点虾','海胆','日式拉面','Poutine'], restaurants: ['Miku','Guu','Granville Island'] },
+      '蒙特利尔': { foods: ['Montreal烟肉三明治','Poutine','百吉饼','枫糖派','熏肉'], restaurants: ['Schwartz\'s','St-Viateur Bagel'] },
+      '魁北克城': { foods: ['魁北克肉饼','枫糖派','Poutine','法国菜'], restaurants: ['Aux Anciens Canadiens'] }
+  }},
+  '墨西哥': { cities: {
+      '墨西哥城': { foods: ['Taco','Burrito','牛油果酱','Churros','墨西哥粽子','Enchilada','Guacamole'],
+        restaurants: ['Pujol','El Huequito','Tacos El Califa'] },
+      '坎昆': { foods: ['海鲜Taco','Ceviche','龙舌兰酒','烤鱼','墨西哥辣椒酱'], restaurants: ['La Habichuela','Lorenzo\'s'] },
+      '瓜达拉哈拉': { foods: ['Tortas Ahogadas','Birria','龙舌兰酒','Taco'], restaurants: ['La Chata','Santo Coyote'] }
+  }},
+  '巴西': { cities: {
+      '里约热内卢': { foods: ['巴西烤肉','Feijoada','Açaí碗','芝士面包球','巴西鸡尾酒'], restaurants: ['Churrascaria Palace','Confeitaria Colombo'] },
+      '圣保罗': { foods: ['巴西烤肉','小笼包(日式)','Coxinha','木薯煎饼','Paçoca'], restaurants: ['Figueira Rubaiyat','Mercado Municipal'] },
+      '萨尔瓦多': { foods: ['Acarajé','椰子海鲜饭','Moqueca','Vatapá'], restaurants: ['Casa de Tereza','Yemanjá'] }
+  }},
+  '阿根廷': { cities: {
+      '布宜诺斯艾利斯': { foods: ['阿根廷烤肉','Empanada','Milanesa','Dulce de Leche','马黛茶'], restaurants: ['Don Julio','La Cabrera','El Preferido'] },
+      '门多萨': { foods: ['阿根廷烤肉','Malbec红酒','Empanada','牛排'], restaurants: ['1884','Azafrán'] }
+  }},
+  '澳大利亚': { cities: {
+      '悉尼': { foods: ['肉派','鱼薯','Flat White咖啡','海鲜拼盘','Lamington','澳式BBQ'], restaurants: ['Quay','Tetsuya\'s','Sydney Fish Market'] },
+      '墨尔本': { foods: ['Brunch','澳式汉堡','Flat White','牛油果吐司','拉面','咖啡文化'], restaurants: ['Attica','Chin Chin','Lune Croissanterie'] },
+      '黄金海岸': { foods: ['海鲜','澳式烧烤','澳洲牛排','炸鱼薯条','热带水果'], restaurants: ['Omeros Bros','Rick Shores'] }
+  }},
+  '新西兰': { cities: {
+      '奥克兰': { foods: ['新西兰青口贝','羊排','Kumara薯条','Hangi','Pavlova'], restaurants: ['The Grove','Sidart','Depot'] },
+      '皇后镇': { foods: ['新西兰牛排','三文鱼','大脸汉堡','Fergbaker','羊肉派'], restaurants: ['Fergburger','Rata'] },
+      '基督城': { foods: ['新西兰羊肉','Green-lipped mussel','美禄甜点','Pavlova'], restaurants: ['Inati','Twenty Seven Steps'] }
+  }},
+  '埃及': { cities: {
+      '开罗': { foods: ['Koshari','Falafel','烤鸽子','烤肉串','扁豆汤','埃及面包'], restaurants: ['Abou El Sid','Felfela','Naguib Mahfouz'] },
+      '亚历山大': { foods: ['亚历山大鱼','海鲜料理','Falafel','Kofta','埃及甜点'], restaurants: ['Mohammed Ahmed','Fish Market'] },
+      '卢克索': { foods: ['烤鸽子','埃及炖菜','Koshari','甘蔗汁'], restaurants: ['Sofra','Al-Sahaby Lane'] }
+  }},
+  '摩洛哥': { cities: {
+      '马拉喀什': { foods: ['塔吉锅','库斯库斯','摩洛哥薄荷茶','羊肉串','摩洛哥沙拉'], restaurants: ['Nomad','Le Jardin','Al Fassia'] },
+      '菲斯': { foods: ['摩洛哥炖菜','Pastilla','羊头肉','薄荷茶','甜点'], restaurants: ['Ruined Garden','Café Clock'] },
+      '卡萨布兰卡': { foods: ['Tajine','Couscous','摩洛哥海鲜','Pastilla'], restaurants: ['Rick\'s Café','Le Cabestan'] }
+  }},
+  '南非': { cities: {
+      '开普敦': { foods: ['Biltong(肉干)','南非烤肉','南非海鲜','Malva布丁','班尼迪克蛋'], restaurants: ['The Test Kitchen','Pot Luck Club'] },
+      '约翰内斯堡': { foods: ['Boerewors香肠','Bunny Chow','Pap','南非烤肉'], restaurants: ['Marble','The Grillhouse'] }
+  }},
+  '秘鲁': { cities: {
+      '利马': { foods: ['Ceviche','Lomo Saltado','秘鲁玉米','Pisco Sour','Anticucho'], restaurants: ['Central','Maido','Astrid y Gastón'] },
+      '库斯科': { foods: ['Cuy(豚鼠)','秘鲁汤','Choclo玉米','烤羊驼','绿茶'], restaurants: ['Morena Peruvian Kitchen','Uchu'] }
+  }},
+  '古巴': { cities: { '哈瓦那': { foods: ['Ropa Vieja','古巴三明治','黑豆饭','Mojito','炸香蕉','古巴披萨'],
+        restaurants: ['La Guarida','Paladar Los Mercaderes'] }}},
+  '柬埔寨': { cities: {
+      '暹粒': { foods: ['Amok','柬式烤肉','高棉咖喱','吴哥啤酒','炸昆虫'], restaurants: ['Viroth\'s','Chanrey Tree'] },
+      '金边': { foods: ['粿条','柬式春卷','烤串','炒牛肉', 'Amok'], restaurants: ['Malis','Friends The Restaurant'] }
+  }},
+  '缅甸': { cities: {
+      '仰光': { foods: ['缅甸鱼汤面','茶叶沙拉','Mohinga','缅甸咖喱','椰汁面'], restaurants: ['Shan Yoe Yar','Feel Myanmar'] },
+      '蒲甘': { foods: ['缅式黄饭','酸肉','花生脆饼'], restaurants: ['San Shue','Nanda'] }
+  }},
+  '老挝': { cities: { '琅勃拉邦': { foods: ['老挝腊肉','竹筒饭','老挝沙拉','老挝咖啡','湄公河鱼'], restaurants: ['Tamarind','Manda de Laos'] }}},
+  '蒙古': { cities: { '乌兰巴托': { foods: ['烤全羊','手扒肉','蒙古奶茶','奶皮子','米茶','蒙古包子'], restaurants: ['Modern Nomads','BD\'s Mongolian BBQ'] }}}
+};
+
+function searchFood() {
+  const prov = document.getElementById('food-province').value.trim();
+  const city = document.getElementById('food-city').value.trim();
+  const dist = document.getElementById('food-district').value.trim();
+  const el = document.getElementById('food-results');
+  if (!prov || !city) { el.innerHTML = '<div class="empty-rec">请填写省份和城市～</div>'; return; }
+  // 模糊匹配
+  let matched = null;
+  for (const [pk, pv] of Object.entries(FOOD_DATA)) {
+    if (pk.includes(prov) || prov.includes(pk)) {
+      for (const [ck, cv] of Object.entries(pv.cities)) {
+        if (ck.includes(city) || city.includes(ck)) { matched = cv; break; }
+      }
+    }
+    if (matched) break;
+  }
+  if (!matched) {
+    el.innerHTML = `<div class="empty-rec">还没收录 ${city} 的美食数据呢～试试其他城市！</div>`;
+    return;
+  }
+  let html = `<div style="margin-bottom:8px;font-weight:600;">🍜 ${city} 经典美食</div>`;
+  html += matched.foods.map(f => `<span class="rec-tag" style="background:#fce4d6;color:#e67e22;">${f}</span>`).join('') + '<br><br>';
+  html += `<div style="margin-bottom:6px;font-weight:600;">🏪 人气店铺推荐</div>`;
+  matched.restaurants.forEach((r,i) => {
+    const stars = '⭐'.repeat(3 + Math.floor(Math.random()*3));
+    html += `<div class="rec-card" style="border-left-color:#e67e22;"><h4>${r}</h4><div class="rec-meta">${stars} · 本地人推荐</div></div>`;
+  });
+  if (dist) html += `<div style="margin-top:8px;font-size:0.8rem;color:#999;">📍 在 ${dist} 附近可以找到上述美食～</div>`;
+  el.innerHTML = html;
+}
+
+// 自动填充省份/城市 datalist
+(function initFoodData() {
+  const provList = document.getElementById('province-list');
+  const cityList = document.getElementById('city-list');
+  Object.keys(FOOD_DATA).forEach(p => { const o = document.createElement('option'); o.value=p; provList.appendChild(o); });
+  document.getElementById('food-province').addEventListener('input', function() {
+    cityList.innerHTML = '';
+    const pv = FOOD_DATA[this.value];
+    if (pv) Object.keys(pv.cities).forEach(c => { const o = document.createElement('option'); o.value=c; cityList.appendChild(o); });
+  });
+})();
+
+// ====== 游玩推荐数据库 ======
+const PLAY_DATA = {
+  '自己/独自': {
+    tag: '🧘 独处时光',
+    items: [
+      { name: '书店发呆', desc: '选一本想看很久的书，点杯咖啡待一下午', tag: '文艺' },
+      { name: '咖啡馆放空', desc: '带上耳机，观察窗外的人和风景', tag: '放松' },
+      { name: '一个人看电影', desc: '包场感，想哭就哭想笑就笑', tag: '治愈' },
+      { name: '逛博物馆', desc: '安安静静地看展，没人催你走', tag: '文艺' },
+      { name: '城市骑行', desc: '扫一辆共享单车，漫无目的地穿街走巷', tag: '运动' },
+      { name: '公园野餐', desc: '带上三明治和水果，在草地上晒太阳', tag: '放松' },
+      { name: 'DIY手作坊', desc: '做陶艺、画画、做蛋糕，享受创作的快乐', tag: '创意' },
+      { name: '泡温泉', desc: '一个人泡汤，才是真正的奢侈', tag: '享受' }
+    ]
+  },
+  '朋友': {
+    tag: '👫 好友同乐',
+    items: [
+      { name: '密室逃脱', desc: '一起烧脑，考验默契和胆量', tag: '刺激' },
+      { name: 'KTV', desc: '抢麦大战，嘶吼到喉咙哑', tag: '嗨玩' },
+      { name: '剧本杀', desc: '穿上戏服，演一出爱恨情仇', tag: '烧脑' },
+      { name: '桌游吧', desc: '狼人杀、三国杀、大富翁，玩到忘记时间', tag: '欢乐' },
+      { name: '蹦床公园', desc: '跳起来，把所有烦恼甩到天上', tag: '运动' },
+      { name: '烧烤露营', desc: '自己动手烤串，晚上看星星聊天', tag: '户外' },
+      { name: '电玩城', desc: '抓娃娃、赛车、跳舞机，回到少年时代', tag: '嗨玩' },
+      { name: '汗蒸/汤泉', desc: '边泡边聊，再来个搓澡按摩', tag: '放松' }
+    ]
+  },
+  '恋人/对象': {
+    tag: '💑 双人甜蜜',
+    items: [
+      { name: '电影院看爱情片', desc: '牵手看一场浪漫电影，散场后还有话题聊', tag: '浪漫' },
+      { name: '烛光晚餐', desc: '找一家氛围感餐厅，拍照+吃饭两不误', tag: '浪漫' },
+      { name: '摩天轮', desc: '在最高点接吻，传说能永远在一起', tag: '浪漫' },
+      { name: '情侣SPA', desc: '一起做按摩，享受双人放松时光', tag: '享受' },
+      { name: '手工DIY', desc: '一起做戒指、陶艺、蛋糕，留下专属回忆', tag: '创意' },
+      { name: '动物园/海洋馆', desc: '看企鹅走路，看水母发光，约会经典项目', tag: '治愈' },
+      { name: '密室逃脱', desc: '在惊吓中抱紧对方，感情迅速升温', tag: '刺激' },
+      { name: '屋顶/天台看日落', desc: '带一瓶酒和蓝牙音箱，等城市亮灯', tag: '浪漫' }
+    ]
+  },
+  '父母': {
+    tag: '👨‍👩‍👧 家庭温馨',
+    items: [
+      { name: '公园散步', desc: '陪父母慢慢走，聊聊家长里短', tag: '休闲' },
+      { name: '博物馆/美术馆', desc: '不赶时间，慢慢看展览', tag: '文艺' },
+      { name: '温泉度假', desc: '泡温泉放松筋骨，享受家庭时光', tag: '享受' },
+      { name: '农家乐', desc: '摘水果、钓鱼、吃柴火饭，回归田园', tag: '户外' },
+      { name: '茶楼喝茶', desc: '一壶茶一碟瓜子，听父母讲年轻的故事', tag: '休闲' },
+      { name: '逛花鸟市场', desc: '看看花、逗逗鸟，买几盆绿植回家', tag: '休闲' },
+      { name: '家庭聚餐', desc: '选一家父母爱吃的餐厅，点一桌子菜', tag: '美食' },
+      { name: '短途自驾游', desc: '开车去周边小镇，走走停停不赶路', tag: '户外' }
+    ]
+  },
+  '领导/老板': {
+    tag: '💼 商务社交',
+    items: [
+      { name: '高尔夫', desc: '边打球边谈事，高端社交标配', tag: '商务' },
+      { name: '高端餐厅', desc: '选一家米其林或黑珍珠，氛围和菜品都在线', tag: '商务' },
+      { name: '品酒会', desc: '红酒、威士忌品鉴，聊酒比聊工作轻松', tag: '商务' },
+      { name: '茶道体验', desc: '在安静雅致的茶空间里品茶谈事', tag: '商务' },
+      { name: '商务KTV', desc: '唱几首歌拉近距离，酒过三旬好谈事', tag: '社交' },
+      { name: '美术馆/艺术展', desc: '附庸风雅的好选择，适合文化人设的领导', tag: '文艺' },
+      { name: '雪茄吧', desc: '如果领导好这口，雪茄吧是绝佳选择', tag: '商务' }
+    ]
+  },
+  '同事/团建': {
+    tag: '🤝 团队破冰',
+    items: [
+      { name: '密室逃脱团建', desc: '分工合作，看谁最先找到线索', tag: '团建' },
+      { name: '户外拓展', desc: '攀岩、过断桥、信任背摔，凝聚力拉满', tag: '团建' },
+      { name: '轰趴馆', desc: '桌球、Switch、KTV、麻将一应俱全', tag: '嗨玩' },
+      { name: '聚餐烤肉', desc: '边烤边聊，没有什么是一顿烤肉解决不了的', tag: '美食' },
+      { name: '漂流', desc: '夏天去漂流，尖叫声中拉近关系', tag: '刺激' },
+      { name: '剧本杀', desc: '看看平时严肃的同事演起戏来是什么样', tag: '团建' },
+      { name: '运动比赛', desc: '羽毛球、篮球、保龄球，分组对抗', tag: '运动' }
+    ]
+  },
+  '孩子/亲子': {
+    tag: '👶 亲子时光',
+    items: [
+      { name: '动物园', desc: '看长颈鹿吃树叶，看熊猫打滚，小朋友的最爱', tag: '亲子' },
+      { name: '游乐园', desc: '旋转木马、过山车，大朋友小朋友都开心', tag: '亲子' },
+      { name: '科技馆', desc: '边玩边学，激发孩子对科学的好奇心', tag: '亲子' },
+      { name: '亲子餐厅', desc: '有游乐区有儿童餐，大人也能安心吃饭', tag: '亲子' },
+      { name: '手工作坊', desc: '一起做蛋糕、捏陶土，培养动手能力', tag: '亲子' },
+      { name: '自然博物馆', desc: '恐龙骨架、矿物标本，让孩子大开眼界', tag: '亲子' },
+      { name: '农场体验', desc: '摘草莓、喂小羊，亲近大自然', tag: '户外' },
+      { name: '室内游乐场', desc: '海洋球池、滑梯、蹦床，放电一整天', tag: '亲子' }
+    ]
+  }
+};
+
+function searchPlay() {
+  const input = document.getElementById('play-with').value.trim();
+  const el = document.getElementById('play-results');
+  if (!input) { el.innerHTML = '<div class="empty-rec">告诉我和谁一起去～</div>'; return; }
+  // 模糊匹配
+  let matched = null, matchedKey = '';
+  for (const [key, val] of Object.entries(PLAY_DATA)) {
+    if (key.includes(input) || input.includes(key) ||
+        (input.includes('领导') && key.includes('领导')) ||
+        (input.includes('父母') && key.includes('父母')) ||
+        (input.includes('朋友') && key.includes('朋友')) ||
+        (input.includes('恋') && key.includes('恋')) ||
+        (input.includes('对象') && key.includes('对象')) ||
+        (input.includes('同事') && key.includes('同事')) ||
+        (input.includes('团建') && key.includes('团建')) ||
+        (input.includes('孩子') && key.includes('亲子')) ||
+        (input.includes('亲子') && key.includes('亲子')) ||
+        (input.includes('自己') && key.includes('自己')) ||
+        (input.includes('独自') && key.includes('独自'))) {
+      matched = val; matchedKey = key; break;
+    }
+  }
+  if (!matched) {
+    el.innerHTML = '<div class="empty-rec">试试输入：自己、朋友、恋人、父母、领导、同事、孩子～</div>';
+    return;
+  }
+  let html = `<div style="margin-bottom:8px;font-weight:600;">${matched.tag}</div>`;
+  matched.items.forEach(item => {
+    html += `<div class="rec-card" style="border-left-color:#5b6abf;">
+      <h4>${item.name}</h4>
+      <div class="rec-desc">${item.desc}</div>
+      <span class="rec-tag">${item.tag}</span>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ====== 影片推荐数据库 ======
+const MOVIE_DATA = {
+  '纪录片': [
+    { title:'地球脉动 II', year:'2016', desc:'BBC神级自然纪录片，每一帧都是壁纸', pref:['国外','自然','欧美'], rating:9.8 },
+    { title:'蓝色星球 II', year:'2017', desc:'深入海洋世界，叹为观止的水下奇观', pref:['国外','自然','欧美'], rating:9.7 },
+    { title:'舌尖上的中国', year:'2012', desc:'中国各地美食文化，看完饿到睡不着', pref:['国产','美食'], rating:9.4 },
+    { title:'大国崛起', year:'2006', desc:'讲述世界大国兴衰史，格局拉满', pref:['国产','历史'], rating:9.1 },
+    { title:'我在故宫修文物', year:'2016', desc:'文物修复师的匠心日常，温暖治愈', pref:['国产','人文'], rating:9.4 },
+    { title:'人类星球', year:'2011', desc:'BBC讲述人类与自然的极致生存故事', pref:['国外','自然','欧美'], rating:9.7 },
+    { title:'但是还有书籍', year:'2019', desc:'关于书的纪录片，爱书人的精神食粮', pref:['国产','人文'], rating:9.2 },
+    { title:'旅行到宇宙边缘', year:'2008', desc:'从月球出发，一路飞到宇宙尽头', pref:['国外','科学','欧美'], rating:9.3 },
+    { title:'寻找小糖人', year:'2012', desc:'一个传奇音乐人的寻访之旅', pref:['国外','音乐','欧美'], rating:9.2 },
+    { title:'帝企鹅日记', year:'2005', desc:'南极帝企鹅的生命之旅，感人至深', pref:['国外','自然'], rating:9.0 },
+    { title:'人生七年', year:'1964', desc:'历时56年追踪14个英国孩子的人生', pref:['国外','社会','欧美'], rating:9.6 },
+    { title:'航拍中国', year:'2017', desc:'从天空俯瞰中国，每一帧都美哭', pref:['国产','自然'], rating:9.2 },
+    { title:'风味人间', year:'2018', desc:'陈晓卿团队打造，全球美食探索', pref:['国产','美食'], rating:9.1 },
+    { title:'河西走廊', year:'2015', desc:'一部关于丝绸之路的史诗', pref:['国产','历史'], rating:9.7 }
+  ],
+  '恐怖片': [
+    { title:'闪灵', year:'1980', desc:'库布里克经典，心理恐怖的巅峰', pref:['国外','欧美','心理'], rating:8.7 },
+    { title:'咒怨', year:'2002', desc:'日式恐怖天花板，看完不敢上厕所', pref:['日韩','日本'], rating:8.1 },
+    { title:'昆池岩', year:'2018', desc:'韩国伪纪录恐怖片，全程高能', pref:['日韩','韩国'], rating:7.3 },
+    { title:'午夜凶铃', year:'1998', desc:'贞子从电视里爬出来那幕成经典', pref:['日韩','日本'], rating:8.0 },
+    { title:'招魂', year:'2013', desc:'温子仁宇宙开山之作，真实事件改编', pref:['国外','欧美'], rating:8.1 },
+    { title:'遗传厄运', year:'2018', desc:'现代恐怖片神作，家庭创伤的噩梦演绎', pref:['国外','欧美','心理'], rating:7.8 },
+    { title:'釜山行', year:'2016', desc:'韩国丧尸片，又恐怖又好哭', pref:['日韩','韩国'], rating:8.6 },
+    { title:'寂静之地', year:'2018', desc:'出声就会死，全程屏住呼吸', pref:['国外','欧美'], rating:7.5 },
+    { title:'死寂', year:'2007', desc:'人偶恐怖经典，温子仁执导', pref:['国外','欧美'], rating:7.7 },
+    { title:'哭声', year:'2016', desc:'韩国悬疑恐怖巨作，看完需要解析', pref:['日韩','韩国'], rating:7.7 },
+    { title:'山村老尸', year:'1999', desc:'香港恐怖片经典，童年阴影系列', pref:['国产','香港'], rating:6.9 },
+    { title:'中邪', year:'2016', desc:'国产伪记录恐怖片，民俗恐怖', pref:['国产'], rating:7.1 },
+    { title:'异形', year:'1979', desc:'科幻恐怖鼻祖，太空惊悚', pref:['国外','欧美','科幻'], rating:8.3 },
+    { title:'小丑回魂', year:'2017', desc:'史蒂芬金小说改编，小丑恐惧来源', pref:['国外','欧美'], rating:7.7 },
+    { title:'潜伏', year:'2010', desc:'温子仁恐怖宇宙又一力作', pref:['国外','欧美'], rating:7.9 }
+  ],
+  '电视剧': [
+    { title:'琅琊榜', year:'2015', desc:'古装权谋巅峰，胡歌演技炸裂', pref:['国产','古装','权谋'], rating:9.4 },
+    { title:'甄嬛传', year:'2011', desc:'宫斗剧天花板，百看不厌', pref:['国产','古装','女性'], rating:9.4 },
+    { title:'请回答1988', year:'2015', desc:'韩国家庭温情剧，笑着笑着就哭了', pref:['日韩','韩国','治愈'], rating:9.7 },
+    { title:'权力的游戏', year:'2011', desc:'史诗奇幻巨制，前四季封神', pref:['国外','欧美','奇幻'], rating:9.3 },
+    { title:'绝命毒师', year:'2008', desc:'化学老师变毒枭，美剧史上最伟大之一', pref:['国外','欧美','犯罪'], rating:9.5 },
+    { title:'大明王朝1566', year:'2007', desc:'历史正剧天花板，演员全员戏骨', pref:['国产','历史'], rating:9.8 },
+    { title:'沉默的真相', year:'2020', desc:'国产悬疑剧巅峰，看完久久不能平静', pref:['国产','悬疑'], rating:9.0 },
+    { title:'我的大叔', year:'2018', desc:'韩剧治愈系，两个疲惫灵魂的相互救赎', pref:['日韩','韩国','治愈'], rating:9.2 },
+    { title:'隐秘的角落', year:'2020', desc:'国产悬疑爆款，秦昊的秃头名场面', pref:['国产','悬疑'], rating:8.9 },
+    { title:'伦敦生活', year:'2016', desc:'英国丧喜剧，又好笑又扎心', pref:['国外','欧美','喜剧'], rating:8.9 },
+    { title:'EVA新世纪福音战士', year:'1995', desc:'日本动画神作，人类补完计划', pref:['日韩','日本','动画'], rating:9.4 },
+    { title:'漫长的季节', year:'2023', desc:'国产悬疑天花板，范伟演技封神', pref:['国产','悬疑'], rating:9.4 },
+    { title:'机智的医生生活', year:'2020', desc:'韩剧医疗群像剧，温暖又搞笑', pref:['日韩','韩国','治愈'], rating:9.2 },
+    { title:'怪奇物语', year:'2016', desc:'少年冒险+超自然，复古味道十足', pref:['国外','欧美','科幻'], rating:8.9 },
+    { title:'山海情', year:'2021', desc:'国产现实主义题材，黄土高原的脱贫史', pref:['国产','励志'], rating:9.2 },
+    { title:'狂飙', year:'2023', desc:'国产扫黑大剧，高启强征服全国观众', pref:['国产','犯罪'], rating:9.1 },
+    { title:'后翼弃兵', year:'2020', desc:'天才女棋手的成长故事，又飒又美', pref:['国外','欧美','女性','励志'], rating:8.8 },
+    { title:'小舍得', year:'2021', desc:'教育内卷下的家庭百态，直击痛点', pref:['国产','家庭'], rating:7.8 },
+    { title:'非自然死亡', year:'2018', desc:'日剧法医题材，石原里美主演', pref:['日韩','日本'], rating:9.4 },
+    { title:'开端', year:'2022', desc:'国产时间循环剧，无限流标杆', pref:['国产','悬疑','科幻'], rating:8.5 },
+    { title:'半泽直树', year:'2013', desc:'日剧职场爽剧，加倍奉还！', pref:['日韩','日本','励志'], rating:9.2 },
+    { title:'去有风的地方', year:'2023', desc:'大理治愈系慢生活，刘亦菲主演', pref:['国产','治愈','女性'], rating:8.3 }
+  ],
+  '动画': [
+    { title:'千与千寻', year:'2001', desc:'宫崎骏巅峰之作，每个成年人都该重温', pref:['日韩','日本','宫崎骏'], rating:9.4 },
+    { title:'寻梦环游记', year:'2017', desc:'皮克斯关于爱与记忆的催泪神作', pref:['国外','欧美','迪士尼'], rating:9.1 },
+    { title:'你的名字。', year:'2016', desc:'新海诚现象级动画，画面美到窒息', pref:['日韩','日本'], rating:8.4 },
+    { title:'疯狂动物城', year:'2016', desc:'迪士尼动物乌托邦，成年人的童话', pref:['国外','欧美','迪士尼'], rating:9.2 },
+    { title:'龙猫', year:'1988', desc:'宫崎骏治愈经典，永远的天真与温柔', pref:['日韩','日本','宫崎骏'], rating:9.2 },
+    { title:'飞屋环游记', year:'2009', desc:'开头的十分钟哭完一包纸巾', pref:['国外','欧美','迪士尼'], rating:9.1 },
+    { title:'头脑特工队', year:'2015', desc:'把情绪拟人化，想象力满分', pref:['国外','欧美','迪士尼'], rating:8.8 },
+    { title:'幽灵公主', year:'1997', desc:'宫崎骏最宏大的自然寓言', pref:['日韩','日本','宫崎骏'], rating:8.9 },
+    { title:'蜘蛛侠：平行宇宙', year:'2018', desc:'动画技术革命的里程碑，视觉盛宴', pref:['国外','欧美','超级英雄'], rating:8.8 },
+    { title:'哈尔的移动城堡', year:'2004', desc:'宫崎骏奇幻爱情，苏菲与哈尔', pref:['日韩','日本','宫崎骏'], rating:9.0 },
+    { title:'哪吒之魔童降世', year:'2019', desc:'国产动画票房巅峰，我命由我不由天', pref:['国产','励志'], rating:8.4 },
+    { title:'长安三万里', year:'2023', desc:'唐诗背后的故事，盛唐气象扑面而来', pref:['国产','历史'], rating:8.3 },
+    { title:'铃芽之旅', year:'2022', desc:'新海诚灾难三部曲，治愈系公路片', pref:['日韩','日本'], rating:7.6 },
+    { title:'玩具总动员3', year:'2010', desc:'告别童年的那一课，看哭所有大人', pref:['国外','欧美','迪士尼'], rating:8.9 },
+    { title:'深海', year:'2023', desc:'国产粒子特效巅峰，献给每一个孤独的人', pref:['国产','治愈'], rating:7.8 }
+  ],
+  '爱情片': [
+    { title:'怦然心动', year:'2010', desc:'青梅竹马的纯爱故事，清新治愈', pref:['国外','欧美'], rating:9.1 },
+    { title:'泰坦尼克号', year:'1997', desc:'旷世经典，你跳我也跳', pref:['国外','欧美'], rating:9.4 },
+    { title:'情书', year:'1995', desc:'日本纯爱电影天花板，暗恋的极致', pref:['日韩','日本'], rating:8.9 },
+    { title:'爱在黎明破晓前', year:'1995', desc:'话痨式爱情，两个灵魂的一夜共鸣', pref:['国外','欧美'], rating:8.8 },
+    { title:'你的婚礼', year:'2018', desc:'韩国纯爱，初恋的遗憾与美好', pref:['日韩','韩国'], rating:7.6 },
+    { title:'真爱至上', year:'2003', desc:'圣诞必看，群星演绎的十个爱情故事', pref:['国外','欧美'], rating:8.7 },
+    { title:'罗马假日', year:'1953', desc:'赫本经典，公主和平民的一天', pref:['国外','欧美'], rating:9.1 },
+    { title:'初恋这件小事', year:'2010', desc:'泰国青春纯爱，暗恋的力量', pref:['日韩','泰国'], rating:8.5 },
+    { title:'Before Sunset', year:'2004', desc:'九年后的重逢，爱在三部曲第二部', pref:['国外','欧美'], rating:8.9 },
+    { title:'消失的情人节', year:'2020', desc:'奇幻爱情喜剧，慢半拍的浪漫', pref:['国产'], rating:8.0 },
+    { title:'山楂树之恋', year:'2010', desc:'最干净的爱情故事，张艺谋作品', pref:['国产'], rating:7.9 },
+    { title:'断背山', year:'2005', desc:'李安执导，两个牛仔的禁忌之爱', pref:['国外','欧美'], rating:8.8 },
+    { title:'花束般的恋爱', year:'2021', desc:'当百分百合拍的恋人走向分手', pref:['日韩','日本'], rating:8.6 },
+    { title:'遇见你之前', year:'2016', desc:'瘫痪富豪与护工的爱情，又甜又虐', pref:['国外','欧美'], rating:8.0 },
+    { title:'时光情书', year:'2014', desc:'泰国穿越爱情，催泪指数爆表', pref:['日韩','泰国'], rating:7.9 }
+  ],
+  '喜剧': [
+    { title:'三傻大闹宝莱坞', year:'2009', desc:'印度教育反思喜剧，笑着笑着就哭了', pref:['国外','印度','励志'], rating:9.2 },
+    { title:'让子弹飞', year:'2010', desc:'姜文神作，站直了挣钱', pref:['国产'], rating:9.0 },
+    { title:'夏洛特烦恼', year:'2015', desc:'开心麻花爆笑穿越，笑到肚子疼', pref:['国产'], rating:8.0 },
+    { title:'你好，李焕英', year:'2021', desc:'贾玲献给母亲的喜剧，后半段哭成狗', pref:['国产','女性'], rating:8.1 },
+    { title:'功夫', year:'2004', desc:'周星驰后现代无厘头巅峰', pref:['国产'], rating:8.8 },
+    { title:'宿醉', year:'2009', desc:'R级喜剧经典，一夜宿醉后的疯狂', pref:['国外','欧美'], rating:7.8 },
+    { title:'疯狂的石头', year:'2006', desc:'国产多线叙事黑色幽默开山之作', pref:['国产'], rating:8.6 },
+    { title:'布达佩斯大饭店', year:'2014', desc:'韦斯安德森对称美学，粉红童话喜剧', pref:['国外','欧美'], rating:8.9 },
+    { title:'我不是药神', year:'2018', desc:'笑着开场哭着结束，国产现实主义神作', pref:['国产','励志'], rating:9.0 },
+    { title:'食神', year:'1996', desc:'周星驰美食喜剧，只要用心人人都是食神', pref:['国产'], rating:8.3 },
+    { title:'疯狂原始人', year:'2013', desc:'合家欢动画喜剧，全家都爱看', pref:['国外','欧美','动画'], rating:8.7 },
+    { title:'人在囧途', year:'2010', desc:'春运路上的爆笑囧事，王宝强经典', pref:['国产'], rating:7.9 },
+    { title:'阳光小美女', year:'2006', desc:'家庭公路喜剧，每个人都是loser又怎样', pref:['国外','欧美'], rating:8.5 }
+  ],
+  '动作片': [
+    { title:'盗梦空间', year:'2010', desc:'诺兰神作，梦中梦中梦中梦', pref:['国外','欧美','科幻'], rating:9.3 },
+    { title:'黑客帝国', year:'1999', desc:'科幻动作标杆，子弹时间名留影史', pref:['国外','欧美','科幻'], rating:9.1 },
+    { title:'战狼2', year:'2017', desc:'国产军事动作片票房奇迹', pref:['国产'], rating:7.2 },
+    { title:'黑暗骑士', year:'2008', desc:'超级英雄电影天花板，希斯莱杰封神', pref:['国外','欧美'], rating:9.2 },
+    { title:'速度与激情5', year:'2011', desc:'系列巅峰，飞车抢劫场面炸裂', pref:['国外','欧美'], rating:8.4 },
+    { title:'碟中谍6', year:'2018', desc:'阿汤哥亲自跳伞扒飞机，实拍狂魔', pref:['国外','欧美'], rating:8.2 },
+    { title:'一代宗师', year:'2013', desc:'王家卫的武林，每一帧都是摄影展', pref:['国产'], rating:8.2 },
+    { title:'叶问', year:'2008', desc:'甄子丹咏春传奇，我要打十个', pref:['国产'], rating:8.0 },
+    { title:'疯狂的麦克斯4', year:'2015', desc:'废土动作片视觉盛宴，全程无尿点', pref:['国外','欧美'], rating:8.6 },
+    { title:'谍影重重3', year:'2007', desc:'近身格斗教科书，马特达蒙封神', pref:['国外','欧美'], rating:8.8 },
+    { title:'红海行动', year:'2018', desc:'国产军事大片，战争场面真实残酷', pref:['国产'], rating:8.3 },
+    { title:'杀死比尔', year:'2003', desc:'昆汀暴力美学，新娘复仇之旅', pref:['国外','欧美','女性'], rating:8.3 },
+    { title:'突袭', year:'2011', desc:'印尼动作片，全程高能打斗无冷场', pref:['国外'], rating:7.8 },
+    { title:'新龙门客栈', year:'1992', desc:'香港武侠经典，大漠中的刀光剑影', pref:['国产'], rating:8.6 }
+  ]
+};
+
+function searchMovie() {
+  const genre = document.getElementById('movie-genre').value.trim();
+  const pref = document.getElementById('movie-pref').value.trim().toLowerCase();
+  const el = document.getElementById('movie-results');
+  if (!genre) { el.innerHTML = '<div class="empty-rec">先选一个影片类型～</div>'; return; }
+  // 匹配类型
+  let matchedGenre = null;
+  for (const [key, val] of Object.entries(MOVIE_DATA)) {
+    if (key.includes(genre) || genre.includes(key)) { matchedGenre = val; break; }
+  }
+  if (!matchedGenre) {
+    el.innerHTML = '<div class="empty-rec">试试：纪录片、恐怖片、电视剧、动画、爱情片、喜剧、动作片</div>';
+    return;
+  }
+  // 偏好过滤
+  const prefs = pref ? pref.split(/[,，]/).map(s=>s.trim().toLowerCase()).filter(Boolean) : [];
+  let filtered = matchedGenre;
+  if (prefs.length > 0) {
+    filtered = matchedGenre.filter(m =>
+      prefs.some(p => m.pref.some(mp => mp.toLowerCase().includes(p) || p.includes(mp)))
+    );
+    // 如果过滤结果太少，放宽条件
+    if (filtered.length < 3) filtered = matchedGenre;
+  }
+  if (filtered.length === 0) { el.innerHTML = '<div class="empty-rec">没有匹配的影片，换换偏好试试～</div>'; return; }
+  let html = `<div style="margin-bottom:8px;font-weight:600;">🎞️ ${genre} · 找到 ${filtered.length} 部</div>`;
+  filtered.slice(0, 20).forEach(m => {
+    const stars = m.rating >= 9 ? '🌟' : m.rating >= 8 ? '⭐' : '✨';
+    html += `<div class="rec-card" style="border-left-color:#5b6abf;">
+      <h4>${m.title} <span style="font-weight:normal;font-size:0.78rem;color:#999;">${m.year} · ${stars} ${m.rating}</span></h4>
+      <div class="rec-desc">${m.desc}</div>
+      <div>${m.pref.map(p => `<span class="rec-tag">${p}</span>`).join('')}</div>
+    </div>`;
+  });
+  if (filtered.length > 20) html += `<div style="text-align:center;color:#999;font-size:0.82rem;">还有 ${filtered.length-20} 部，换个偏好看看更多～</div>`;
+  el.innerHTML = html;
+}
+
+/* ================================================================
+   💤 眠眠账本
+   ================================================================ */
+let sleepData = lsGet('sleep', {});
+let dreams = lsGet('dreams', []);
+
+// 设置默认日期
+document.getElementById('sleep-date').valueAsDate = new Date();
+document.getElementById('dream-date').valueAsDate = new Date();
+
+function saveSleep() {
+  const date = document.getElementById('sleep-date').value;
+  const bed = document.getElementById('sleep-bedtime').value;
+  const wake = document.getElementById('sleep-waketime').value;
+  const ideal = parseFloat(document.getElementById('sleep-ideal').value) || 8;
+  if (!bed || !wake) { alert('请填写入睡和醒来时间～'); return; }
+  // 计算时长
+  const b = bed.split(':').map(Number); const w = wake.split(':').map(Number);
+  let bMin = b[0]*60+b[1], wMin = w[0]*60+w[1];
+  if (wMin <= bMin) wMin += 24*60; // 跨天
+  const durationMin = wMin - bMin;
+  const duration = Math.round(durationMin / 6) / 10; // 保留1位小数
+  sleepData[date] = { bed, wake, duration, ideal };
+  lsSet('sleep', sleepData);
+  updateSleepUI();
+  checkDebt();
+  checkKoala();
+  alert('💾 睡眠记录已保存！');
+  // 清空 time 输入以便下次录入
+  document.getElementById('sleep-bedtime').value = '';
+  document.getElementById('sleep-waketime').value = '';
+}
+
+function updateSleepUI() {
+  const today = new Date().toISOString().slice(0,10);
+  const todayRecord = sleepData[today];
+  if (todayRecord) {
+    document.getElementById('sleep-today-num').textContent = todayRecord.duration.toFixed(1);
+    const debt = todayRecord.duration - todayRecord.ideal;
+    const el = document.getElementById('sleep-today-debt');
+    if (debt >= 0) el.innerHTML = `<span style="color:#27ae60;">盈余 +${debt.toFixed(1)}h</span>`;
+    else el.innerHTML = `<span style="color:#e74c3c;">债务 ${debt.toFixed(1)}h</span>`;
+  } else {
+    document.getElementById('sleep-today-num').textContent = '--';
+    document.getElementById('sleep-today-debt').textContent = '今天还没记录';
+  }
+  // 累计债务
+  let totalDebt = 0;
+  const recent = Object.keys(sleepData).filter(k => k >= getDateDaysAgo(30)).sort();
+  let consecutiveEmpty = 0;
+  for (let i=1; i<=7; i++) {
+    const d = getDateDaysAgo(i);
+    if (!sleepData[d]) consecutiveEmpty++;
+    else consecutiveEmpty=0;
+  }
+  for (const d of recent) {
+    const r = sleepData[d];
+    if (r) { const diff = r.ideal - r.duration; if (diff>0) totalDebt += diff; }
+  }
+  const debtEl = document.getElementById('sleep-total-debt');
+  debtEl.textContent = totalDebt.toFixed(1);
+  debtEl.className = 'big-num ' + (totalDebt>=5?'red':'green');
+  // 连续几天未记录提示
+  if (consecutiveEmpty >= 3) {
+    if (!document.getElementById('sleep-no-record-msg')) {
+      const p = document.createElement('p');
+      p.id='sleep-no-record-msg'; p.style.cssText='color:#7f8c8d;font-size:0.82rem;margin-top:4px;';
+      p.textContent = '你已经好几天没记账了，是不是睡得太香忘了？';
+      document.querySelector('.sleep-summary').appendChild(p);
+    }
+  } else {
+    const p = document.getElementById('sleep-no-record-msg');
+    if (p) p.remove();
+  }
+  drawSleepChart();
+}
+
+function getDateDaysAgo(n) { const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); }
+
+function drawSleepChart() {
+  const canvas = document.getElementById('sleep-chart-canvas');
+  if (!canvas || canvas.offsetWidth===0) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height, pad = {t:20,b:20,l:35,r:15};
+  ctx.clearRect(0,0,w,h);
+  const days = [];
+  for (let i=6; i>=0; i--) days.push(getDateDaysAgo(i));
+  const data = days.map(d => sleepData[d] ? sleepData[d].duration : null);
+  const idealVal = sleepData[getDateDaysAgo(0)] ? sleepData[getDateDaysAgo(0)].ideal : 8;
+  const maxVal = Math.max(...data.filter(v=>v!==null), idealVal, 10) + 2;
+  const chartW = w - pad.l - pad.r; const chartH = h - pad.t - pad.b;
+  const xScale = chartW / (days.length - 1 || 1);
+  const yScale = chartH / maxVal;
+
+  // 网格
+  ctx.strokeStyle='#f0f0f0'; ctx.lineWidth=1;
+  for (let i=0; i<=4; i++) {
+    const y = pad.t + chartH - (chartH/4)*i;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    ctx.fillStyle='#bdc3c7'; ctx.font='10px sans-serif'; ctx.textAlign='right';
+    ctx.fillText((maxVal/4*i).toFixed(1), pad.l-4, y+3);
+  }
+
+  // 理想线（红色虚线）
+  ctx.setLineDash([6,4]); ctx.strokeStyle='#e74c3c'; ctx.lineWidth=1.5;
+  const idealY = pad.t + chartH - idealVal * yScale;
+  ctx.beginPath(); ctx.moveTo(pad.l, idealY); ctx.lineTo(w-pad.r, idealY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#e74c3c'; ctx.font='9px sans-serif'; ctx.textAlign='left';
+  ctx.fillText('理想 '+idealVal.toFixed(1)+'h', w-pad.r-60, idealY-4);
+
+  // 数据点 & 贝塞尔曲线
+  const pts = data.map((v,i) => {
+    if (v===null) return null;
+    return { x: pad.l + i * xScale, y: pad.t + chartH - v * yScale };
+  }).filter(p=>p!==null);
+  if (pts.length < 2) {
+    ctx.fillStyle='#bdc3c7'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('数据不足，继续记录吧', w/2, h/2);
+    return;
+  }
+  // 曲线
+  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i=1; i<pts.length; i++) {
+    const cx1 = (pts[i-1].x + pts[i].x)/2;
+    ctx.bezierCurveTo(cx1, pts[i-1].y, cx1, pts[i].y, pts[i].x, pts[i].y);
+  }
+  ctx.strokeStyle='#5b6abf'; ctx.lineWidth=2.5; ctx.stroke();
+
+  // 数据点
+  data.forEach((v,i) => {
+    if (v===null) return;
+    const x = pad.l + i * xScale, y = pad.t + chartH - v * yScale;
+    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fillStyle='#5b6abf'; ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+    // 日期
+    ctx.fillStyle='#7f8c8d'; ctx.font='9px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(days[i].slice(5), x, h-4);
+  });
+}
+
+function checkDebt() {
+  // 计算最近30天累计债务
+  let totalDebt = 0;
+  const recent = Object.keys(sleepData).filter(k => k >= getDateDaysAgo(30)).sort();
+  for (const d of recent) {
+    const r = sleepData[d];
+    if (r) { const diff = r.ideal - r.duration; if (diff>0) totalDebt += diff; }
+  }
+  const banner = document.getElementById('debt-banner');
+  if (totalDebt >= 10) {
+    const x = Math.min(3, Math.floor(totalDebt/3));
+    banner.textContent = `⚠️ 你已欠身体 ${totalDebt.toFixed(1)} 小时睡眠，建议今晚提前 ${x} 小时睡觉！`;
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+function checkKoala() {
+  // 连续3天睡眠超过10小时
+  let count = 0;
+  for (let i=1; i<=3; i++) {
+    const d = getDateDaysAgo(i);
+    const r = sleepData[d];
+    if (r && r.duration >= 10) count++;
+  }
+  const el = document.getElementById('koala-msg');
+  if (count >= 3) { el.style.display='block'; el.textContent='🐨 你是考拉转世吗？'; }
+  else el.style.display='none';
+}
+
+// 点击横幅关闭
+document.getElementById('debt-banner').addEventListener('click', function() {
+  this.classList.remove('show');
+});
+
+// ====== 梦境记事本 ======
+function saveDream() {
+  const title = document.getElementById('dream-title').value.trim();
+  const content = document.getElementById('dream-content').value.trim();
+  const tagsStr = document.getElementById('dream-tags').value.trim();
+  const date = document.getElementById('dream-date').value;
+  if (!title || !content) { alert('标题和内容不能为空～'); return; }
+  const tags = tagsStr ? tagsStr.split(/[,，]/).map(s=>s.trim()).filter(Boolean) : [];
+  const dream = { id: Date.now(), title, content, tags, date };
+  dreams.unshift(dream);
+  lsSet('dreams', dreams);
+  document.getElementById('dream-title').value = '';
+  document.getElementById('dream-content').value = '';
+  document.getElementById('dream-tags').value = '';
+  renderDreams();
+  // 检查工作相关词汇
+  const workWords = ['老板','工作','加班','同事','开会','项目','汇报'];
+  for (const w of workWords) {
+    if (content.includes(w) || title.includes(w)) {
+      setTimeout(() => alert('😴 梦见工作？建议今天摸鱼半小时。'), 200);
+      break;
+    }
+  }
+}
+
+function renderDreams() {
+  const list = document.getElementById('dream-list');
+  const search = document.getElementById('dream-search').value.trim().toLowerCase();
+  let filtered = dreams;
+  if (search) {
+    filtered = dreams.filter(d =>
+      d.title.toLowerCase().includes(search) ||
+      d.content.toLowerCase().includes(search) ||
+      d.tags.some(t => t.toLowerCase().includes(search))
+    );
+  }
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="color:#bdc3c7;font-size:0.85rem;padding:10px;text-align:center;">🌙 还没有梦境记录，今晚梦见了什么？</div>';
+    return;
+  }
+  const colors = ['#e67e22','#e74c3c','#2ecc71','#3498db','#9b59b6','#1abc9c','#f39c12','#e91e63'];
+  list.innerHTML = filtered.map(d => `
+    <div class="dream-item" onclick="this.classList.toggle('open')">
+      <div class="dream-title"><span>${escapeHtml(d.title)}</span><span class="del-btn" onclick="event.stopPropagation();delDream('${d.id}')">✕</span></div>
+      <div class="dream-meta">${d.date}${d.tags.length ? ' · '+d.tags.map((t,i)=>`<span class="dream-tag-dot" style="background:${colors[i%colors.length]}"></span>${escapeHtml(t)}`).join(' '):''}</div>
+      <div class="dream-content">${escapeHtml(d.content)}</div>
+    </div>
+  `).join('');
+}
+
+function delDream(id) { dreams = dreams.filter(d => d.id != id); lsSet('dreams', dreams); renderDreams(); }
+
+// ====== 梦境分析报告 ======
+function openReport() {
+  closeReport();
+  document.getElementById('report-modal').classList.add('show');
+  generateReport();
+}
+function closeReport() { document.getElementById('report-modal').classList.remove('show'); }
+
+function generateReport() {
+  const now = new Date();
+  const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate()-7);
+  const weekStr = weekAgo.toISOString().slice(0,10);
+  const weekDreams = dreams.filter(d => d.date >= weekStr);
+  const stats = document.getElementById('analysis-stats');
+  if (weekDreams.length === 0) {
+    stats.innerHTML = '<div style="color:#bdc3c7;">本周暂无梦境记录</div>';
+    document.getElementById('analysis-comment').textContent = '今晚早点睡，说不定会做有趣的梦哦～';
+    drawWordCloud([]);
+    return;
+  }
+  const total = weekDreams.length;
+  const avgWords = Math.round(weekDreams.reduce((s,d)=>s+d.content.length,0)/total);
+  stats.innerHTML = `
+    <div class="a-item"><div class="a-num">${total}</div><div class="a-label">本周梦境</div></div>
+    <div class="a-item"><div class="a-num">${avgWords}</div><div class="a-label">平均字数</div></div>
+    <div class="a-item"><div class="a-num" id="dream-score-num">--</div><div class="a-label">梦幻指数</div></div>
+    <div class="a-item"><div class="a-num" id="bizarre-num">--</div><div class="a-label">荒诞指数</div></div>
+  `;
+  // 词频
+  const allText = weekDreams.map(d=>d.content).join('');
+  const words = allText.split(/[\s\n\r,，。！？、；：""''「」【】《》（）\.\!\?;:\s]+/).filter(w=>w.length>=2);
+  const freq = {};
+  let feelgoodCount = 0, bizarreCount = 0, totalWords = words.length || 1;
+  for (const w of words) {
+    freq[w] = (freq[w]||0)+1;
+    if (DREAM_FEELGOOD.includes(w)) feelgoodCount++;
+    if (DREAM_BIZARRE.includes(w)) bizarreCount++;
+  }
+  const sorted = Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+  const dreamScore = Math.min(100, Math.round((feelgoodCount/totalWords)*200));
+  const bizarre = Math.min(100, Math.round((bizarreCount/totalWords)*300));
+  document.getElementById('dream-score-num').textContent = dreamScore;
+  document.getElementById('bizarre-num').textContent = bizarre;
+  // 词云
+  drawWordCloud(sorted.slice(0,20));
+  // 评语
+  let comment = '';
+  const topWords = sorted.slice(0,3).map(k=>k[0]);
+  if (topWords.includes('考试') || topWords.includes('学习')) comment = '多次梦见考试 → 压力不小，周末去放松吧。';
+  else if (topWords.includes('老板') || topWords.includes('工作') || topWords.includes('加班')) comment = '梦里都在工作…你的工位是有多大魅力？';
+  else if (topWords.includes('飞行') || topWords.includes('飞') || topWords.includes('天空')) comment = '经常梦见飞翔，说明你向往自由～';
+  else if (topWords.includes('怪兽') || topWords.includes('外星人') || topWords.includes('鬼')) comment = '你的梦境像是科幻大片片场！';
+  else if (dreamScore > 60) comment = '你的梦境充满正能量，继续保持！';
+  else if (bizarre > 60) comment = '你的梦境脑洞大得能拍一部电影了！';
+  else comment = '梦境平稳而丰富，你的睡眠质量不错～';
+  document.getElementById('analysis-comment').textContent = '💬 ' + comment;
+}
+
+function drawWordCloud(words) {
+  const canvas = document.getElementById('wordcloud-canvas');
+  const ctx = canvas.getContext('2d');
+  const w=canvas.width, h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  if (words.length === 0) {
+    ctx.fillStyle='#bdc3c7'; ctx.font='14px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('暂无梦境数据', w/2, h/2);
+    return;
+  }
+  const maxFreq = words[0][1] || 1;
+  const placed = [];
+  const colors = ['#e67e22','#e74c3c','#5b6abf','#27ae60','#8e44ad','#2980b9','#f39c12','#1abc9c','#d35400','#2c3e50'];
+  for (let i=0; i<words.length; i++) {
+    const [word, freq] = words[i];
+    const size = 12 + (freq/maxFreq) * 28;
+    const rot = (Math.random() - 0.5) * (Math.PI/6);
+    ctx.save();
+    ctx.font = `bold ${Math.round(size)}px sans-serif`;
+    const metrics = ctx.measureText(word);
+    const tw = metrics.width, th = size;
+    // 尝试放置
+    let px, py, placedOk = false;
+    for (let attempt=0; attempt<100; attempt++) {
+      px = 20 + Math.random() * (w-40-tw);
+      py = 20 + Math.random() * (h-40-th);
+      let overlap = false;
+      for (const p of placed) {
+        if (px < p.x+p.w && px+tw > p.x && py < p.y+p.h && py+th > p.y) { overlap=true; break; }
+      }
+      if (!overlap) { placedOk=true; break; }
+    }
+    if (placedOk) {
+      ctx.translate(px+tw/2, py+th/2); ctx.rotate(rot);
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(word, 0, 0);
+      ctx.restore();
+      placed.push({x:px,y:py,w:tw+4,h:th+4});
+    } else ctx.restore();
+  }
+}
+
+// ====== 导出睡眠报告 ======
+function exportSleepReport() {
+  const days = [];
+  for (let i=6; i>=0; i--) days.push(getDateDaysAgo(i));
+  let report = '📋 睡眠周报\n' + new Date().toLocaleDateString('zh-CN') + '\n' + '='.repeat(30) + '\n\n';
+  for (const d of days) {
+    const r = sleepData[d];
+    if (r) report += `${d} → ${r.duration.toFixed(1)}h (理想 ${r.ideal}h, ${r.duration>=r.ideal?'✅盈余':'⚠️债务'} ${Math.abs(r.duration-r.ideal).toFixed(1)}h)\n`;
+    else report += `${d} → 未记录\n`;
+  }
+  report += '\n' + '='.repeat(30) + '\n';
+  const debt = document.getElementById('sleep-total-debt').textContent;
+  report += `累计睡眠债务：${debt}h\n\n`;
+  report += '💡 睡前别玩手机\n';
+  report += '💡 ' + PSEUDO_SCIENCE[Math.floor(Math.random()*PSEUDO_SCIENCE.length)];
+  // 创建下载
+  const blob = new Blob([report], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `睡眠报告_${new Date().toISOString().slice(0,10)}.txt`;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ====== 初始化睡眠模块 ======
+(function initSleep() {
+  updateSleepUI();
+  checkDebt();
+  renderDreams();
+})();
+
+/* ================================================================
+   工具函数
+   ================================================================ */
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// 窗口尺寸变化时重绘 Canvas
+window.addEventListener('resize', () => {
+  setTimeout(() => {
+    if (currentTab === 'pomodoro') { drawProgress(); drawPet(); drawWeekChart(); }
+    if (currentTab === 'decide') drawWheel();
+    if (currentTab === 'sleep') drawSleepChart();
+  }, 200);
+});
+
+/* ================================================================
+   无障碍设置（色弱模式 / 字体 / 背景色）
+   ================================================================ */
+let settings = lsGet('settings', { highContrast: false, fontSize: 'medium', bgColor: '' });
+
+function toggleSettings() {
+  document.getElementById('settings-panel').classList.toggle('show');
+}
+// 点击外部关闭设置面板
+document.addEventListener('click', function(e) {
+  const panel = document.getElementById('settings-panel');
+  const btn = document.getElementById('settings-btn');
+  if (panel.classList.contains('show') && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.classList.remove('show');
+  }
+});
+
+function toggleHighContrast() {
+  settings.highContrast = !settings.highContrast;
+  document.body.classList.toggle('high-contrast', settings.highContrast);
+  document.getElementById('hc-toggle').textContent = settings.highContrast ? '开启 ✓' : '关闭';
+  lsSet('settings', settings);
+}
+
+function adjustFont(delta) {
+  const sizes = ['small','medium','large'];
+  let idx = sizes.indexOf(settings.fontSize);
+  if (idx === -1) idx = 1;
+  idx = Math.max(0, Math.min(2, idx + delta));
+  settings.fontSize = sizes[idx];
+  document.body.classList.remove('font-small','font-medium','font-large');
+  document.body.classList.add('font-'+settings.fontSize);
+  const labels = ['小','中','大'];
+  document.getElementById('font-label').textContent = labels[idx];
+  lsSet('settings', settings);
+}
+
+function changeBg(color) {
+  settings.bgColor = color;
+  document.body.style.background = color;
+  // 如果是渐变则保留，否则设为纯色
+  if (!color.includes('gradient')) {
+    // 如果是纯色，加一点微妙的径向渐变增加层次
+    document.body.style.background = `${color} linear-gradient(135deg, ${color} 0%, ${adjustColor(color,-10)} 100%)`;
+  }
+  lsSet('settings', settings);
+}
+
+function resetBg() {
+  settings.bgColor = '';
+  document.body.style.background = '';
+  document.getElementById('bg-picker').value = '#f9f5f0';
+  lsSet('settings', settings);
+}
+
+/* 辅助：颜色变暗/变亮 */
+function adjustColor(hex, amt) {
+  let c = hex.replace('#','');
+  if (c.length === 3) c = c[0]+c[0]+c[1]+c[1]+c[2]+c[2];
+  let r = parseInt(c.substr(0,2),16)+amt;
+  let g = parseInt(c.substr(2,2),16)+amt;
+  let b = parseInt(c.substr(4,2),16)+amt;
+  r = Math.max(0,Math.min(255,r)); g = Math.max(0,Math.min(255,g)); b = Math.max(0,Math.min(255,b));
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+// 初始化无障碍设置
+(function initSettings() {
+  if (settings.highContrast) {
+    document.body.classList.add('high-contrast');
+    document.getElementById('hc-toggle').textContent = '开启 ✓';
+  }
+  document.body.classList.add('font-'+settings.fontSize);
+  const labels = { small:'小', medium:'中', large:'大' };
+  document.getElementById('font-label').textContent = labels[settings.fontSize] || '中';
+  if (settings.bgColor) {
+    document.body.style.background = settings.bgColor + ' linear-gradient(135deg, ' + settings.bgColor + ' 0%, ' + adjustColor(settings.bgColor, -10) + ' 100%)';
+    document.getElementById('bg-picker').value = settings.bgColor;
+  }
+})();
+
+console.log('🌿 LifeCombo 已加载完成！');
+</script>
+</body>
+</html>
