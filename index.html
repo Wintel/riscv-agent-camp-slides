@@ -103,6 +103,23 @@ h2.sec{font-size:clamp(28px,4vw,40px);line-height:1.15;font-weight:800;margin:0 
 .btn.ghost{background:var(--panel);color:var(--ink);border-color:var(--line)}
 .btn.ghost:hover{border-color:var(--crimson);color:var(--crimson)}
 
+/* ---------- 英雄区里的板子照片 ---------- */
+.hgrid{display:grid;grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr);gap:48px;align-items:center}
+.shot{position:relative}
+.shot img{width:100%;height:auto;filter:drop-shadow(0 26px 46px rgba(40,20,14,.34));
+  transform:rotate(-2deg);transition:transform .5s cubic-bezier(.3,1,.5,1)}
+.shot:hover img{transform:rotate(0deg) scale(1.02)}
+.shot .caps{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:6px}
+.shot .cap{font:600 11.5px var(--mono);color:var(--ink-soft);background:var(--panel);
+  border:1px solid var(--line);border-radius:999px;padding:5px 11px;white-space:nowrap}
+@media (prefers-color-scheme:dark){.shot img{filter:drop-shadow(0 26px 46px rgba(0,0,0,.6))}}
+:root[data-theme="dark"] .shot img{filter:drop-shadow(0 26px 46px rgba(0,0,0,.6))}
+@media (max-width:900px){
+  .hgrid{grid-template-columns:1fr;gap:32px}
+  .shot{max-width:440px;margin:0 auto}
+  .shot img{transform:none}
+}
+
 /* ---------- 概览卡片 ---------- */
 .grid{display:grid;gap:18px}
 .cols-4{grid-template-columns:repeat(4,1fr)}
@@ -220,20 +237,31 @@ footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)
   <!-- ===== 英雄区 ===== -->
   <section class="hero">
     <div class="wrap">
-      <span class="badge">📍 上海交通大学学森暑期营 · 上院302</span>
-      <h1>零基础 <span class="m">RISC-V</span> 芯片<br>智能体开发</h1>
-      <p class="sub">四天，从连上一块 RISC-V 芯片开始，一步步学会用 <span class="hl">AI 智能体</span>在 Linux 上做开发。</p>
-      <div class="facts">
-        <span class="fact"><span class="i">📅</span>7 月 27–30 日</span>
-        <span class="fact"><span class="i">📍</span>上院302</span>
-        <span class="fact"><span class="i">👥</span>面向零基础高中生</span>
-        <span class="fact"><span class="i">🖥️</span>Milk-V Titan · 8 核 RISC-V</span>
-      </div>
-      <div class="cta">
-        <a class="btn primary" href="#schedule">查看日程 →</a>
-        <a class="btn ghost" href="showcase.html">🏆 同学作品 →</a>
-        <a class="btn ghost" href="groups.html">分组与机器 IP →</a>
-        <a class="btn ghost" href="#resources">学习资源 →</a>
+      <div class="hgrid">
+        <div>
+          <span class="badge">📍 上海交通大学学森暑期营 · 上院302</span>
+          <h1>零基础 <span class="m">RISC-V</span> 芯片<br>智能体开发</h1>
+          <p class="sub">四天，从连上一块 RISC-V 芯片开始，一步步学会用 <span class="hl">AI 智能体</span>在 Linux 上做开发。</p>
+          <div class="facts">
+            <span class="fact"><span class="i">📅</span>7 月 27–30 日</span>
+            <span class="fact"><span class="i">📍</span>上院302</span>
+            <span class="fact"><span class="i">👥</span>面向零基础高中生</span>
+            <span class="fact"><span class="i">🖥️</span>Milk-V Titan · 8 核 RISC-V</span>
+          </div>
+          <div class="cta">
+            <a class="btn primary" href="#schedule">查看日程 →</a>
+            <a class="btn ghost" href="showcase.html">🏆 同学作品 →</a>
+            <a class="btn ghost" href="groups.html">分组与机器 IP →</a>
+            <a class="btn ghost" href="#resources">学习资源 →</a>
+          </div>
+        </div>
+        <div class="shot">
+          <img src="titan-view.webp" alt="Milk-V Titan 开发板实物照片：MINI-ITX 主板，中间是带风扇的散热器，左下角一排网口和 USB 接口" width="1454" height="1062" loading="eager" decoding="async">
+          <div class="caps">
+            <span class="cap">这就是你要连的那块板子</span>
+            <span class="cap">UltraRISC DP1000 · 8 核 RV64</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
