@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧟 丧尸捉人模拟器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a12;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  user-select: none;
+}
+.wrapper {
+  background: #12121e;
+  border-radius: 18px;
+  padding: 18px 20px 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.7);
+}
+canvas {
+  display: block;
+  border-radius: 10px;
+  background: #1a1a2e;
+  cursor: default;
+}
+.hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 6px 4px;
+  color: #8899b0;
+  font-size: 14px;
+}
+.hud-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.hud-dot {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+.hud-dot.blue { background: #4dabf7; }
+.hud-dot.red { background: #ff6b6b; }
+.hud-dot.white { background: #dee2e6; }
+.hud-dot.green { background: #51cf66; }
+.hud-num {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 28px;
+  color: #c8d6e5;
+}
+.btn-reset {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  color: #8899b0;
+  padding: 4px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.btn-reset:hover { background: rgba(255,255,255,.12); color: #c8d6e5; }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <canvas id="cv" width="1000" height="700"></canvas>
+  <div class="hud">
+    <div class="hud-item"><span class="hud-dot blue"></span> 幸存者 <span class="hud-num" id="countBlue">100</span></div>
+    <div class="hud-item"><span class="hud-dot red"></span> 丧尸 <span class="hud-num" id="countRed">5</span></div>
+    <div class="hud-item"><span class="hud-dot white"></span> 军人 <span class="hud-num" id="countWhite">5</span></div>
+    <div class="hud-item"><span class="hud-dot green"></span> 已获救 <span class="hud-num" id="countSaved">0</span></div>
+    <button class="btn-reset" id="resetBtn">🔄 重置</button>
+  </div>
+</div>
+
+<script src="zombie-game.js"></script>
+</body>
+</html>
