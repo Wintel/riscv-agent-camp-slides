@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Super Wangjian 的提示词 · 零基础 RISC-V 芯片智能体开发</title>
+<meta name="description" content="第 6 组作品 Super Wangjian · Pixel Quest 的提示词归档：产品实现、人物精灵处理、板子部署三段，原样收录。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%23AD1730'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='6'%20fill='white'/%3E%3C/svg%3E">
+<style>
+/* =========================================================================
+   提示词归档 · 与成果展示页同一套设计语言（交大红）
+   ========================================================================= */
+:root{
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2;
+  --paper:#F4F2EE; --panel:#FFFFFF; --panel-2:#ECE8E1;
+  --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88; --line:#DCD4C8;
+  --ok:#1E8A6E;
+  --shadow:0 18px 44px -26px rgba(60,30,20,.5);
+  --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Cascadia Code","JetBrains Mono","SF Mono","Consolas","Menlo",monospace;
+  --maxw:1080px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --crimson:#E4586C; --crimson-deep:#F08292; --crimson-soft:#3A1E24;
+    --paper:#17140F; --panel:#211C17; --panel-2:#2A241E;
+    --ink:#EDE7DF; --ink-soft:#B3A99F; --ink-faint:#8A8078; --line:#3A332B;
+    --ok:#4FBFA0; --shadow:0 20px 50px -28px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="light"]{
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2;
+  --paper:#F4F2EE; --panel:#FFFFFF; --panel-2:#ECE8E1;
+  --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88; --line:#DCD4C8;
+  --ok:#1E8A6E; --shadow:0 18px 44px -26px rgba(60,30,20,.5);
+}
+:root[data-theme="dark"]{
+  --crimson:#E4586C; --crimson-deep:#F08292; --crimson-soft:#3A1E24;
+  --paper:#17140F; --panel:#211C17; --panel-2:#2A241E;
+  --ink:#EDE7DF; --ink-soft:#B3A99F; --ink-faint:#8A8078; --line:#3A332B;
+  --ok:#4FBFA0; --shadow:0 20px 50px -28px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:inherit}
+img{max-width:100%;display:block}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.hl{color:var(--crimson);font-weight:700}
+
+/* ---------- 顶部导航 ---------- */
+header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);
+  backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:16px;height:64px;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.nav .brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:15px;text-decoration:none}
+.nav .brand img{width:34px;height:34px}
+.nav .brand .b2{font:600 10px var(--mono);letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase}
+.nav .links{margin-left:auto;display:flex;gap:20px;font-size:14px}
+.nav .links a{color:var(--ink-soft);text-decoration:none}
+.nav .links a:hover{color:var(--crimson)}
+.tbtn{margin-left:14px;width:34px;height:34px;border-radius:9px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink-soft);cursor:pointer;font-size:15px;line-height:1}
+.tbtn:hover{border-color:var(--crimson);color:var(--crimson)}
+@media (max-width:720px){ .nav .links{display:none} }
+
+/* ---------- 英雄区 ---------- */
+.hero{padding:52px 0 34px;border-bottom:1px solid var(--line)}
+.badge{display:inline-flex;align-items:center;gap:7px;font:700 12px var(--mono);letter-spacing:.08em;
+  color:var(--crimson);background:var(--crimson-soft);border-radius:999px;padding:6px 13px}
+h1{margin:16px 0 10px;font-size:clamp(28px,5vw,44px);line-height:1.16;letter-spacing:-.02em}
+h1 .m{color:var(--crimson)}
+.sub{margin:0;color:var(--ink-soft);font-size:clamp(15px,1.7vw,17px);max-width:68ch}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.fact{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-soft);
+  background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 13px}
+
+/* ---------- 正文区 ---------- */
+section{padding:44px 0}
+.eyebrow{display:inline-block;font:700 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--crimson)}
+h2.sec{margin:9px 0 8px;font-size:clamp(21px,3vw,28px);letter-spacing:-.01em}
+.sec-lead{margin:0 0 22px;color:var(--ink-soft);max-width:70ch}
+
+.pblock{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+  overflow:hidden;margin-bottom:26px}
+.phead{display:flex;align-items:center;gap:11px;padding:15px 20px;border-bottom:1px solid var(--line);
+  background:var(--panel-2)}
+.pnum{flex:none;width:27px;height:27px;border-radius:8px;background:var(--crimson);color:#fff;
+  display:grid;place-items:center;font:700 13px var(--mono)}
+.ptitle{font-weight:700;font-size:15px}
+.pmeta{margin-left:auto;font:600 11px var(--mono);color:var(--ink-faint);letter-spacing:.06em}
+.pbody{padding:20px}
+.pnote{margin:0 0 14px;color:var(--ink-soft);font-size:14px}
+.quote{margin:0;padding:16px 18px;background:var(--panel-2);border-left:3px solid var(--crimson);
+  border-radius:0 10px 10px 0;font-size:14.5px;line-height:1.8;white-space:pre-wrap;word-break:break-word}
+.quote.en{font-family:var(--mono);font-size:13px;line-height:1.75}
+.pbody ol{margin:14px 0 0;padding-left:22px;color:var(--ink-soft);font-size:14.5px}
+.pbody ol li{margin:7px 0}
+.pbody ul{margin:12px 0 0;padding-left:22px;color:var(--ink-soft);font-size:14.5px}
+.pbody ul li{margin:5px 0}
+code{font-family:var(--mono);font-size:.92em;background:var(--panel-2);border:1px solid var(--line);
+  border-radius:5px;padding:1px 5px}
+.quote code{background:color-mix(in srgb,var(--ink) 8%,transparent);border-color:transparent}
+
+.pin{display:flex;gap:11px;align-items:flex-start;background:var(--crimson-soft);
+  border:1px solid color-mix(in srgb,var(--crimson) 26%,transparent);border-radius:13px;
+  padding:14px 17px;color:var(--ink);font-size:14.5px;margin-top:6px}
+.pin .i{flex:none;font-size:17px;line-height:1.4}
+
+.backrow{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+.blink{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;font-size:14px;
+  color:var(--crimson);background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px 17px}
+.blink:hover{border-color:var(--crimson)}
+
+/* ---------- 页脚 ---------- */
+footer{border-top:1px solid var(--line);background:var(--panel);padding:26px 0}
+.foot{max-width:var(--maxw);margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+.foot img{width:32px;height:32px}
+.ft{font-weight:700;font-size:14px}
+.fs{font-size:12.5px;color:var(--ink-faint)}
+.fr{margin-left:auto;font:600 11px var(--mono);letter-spacing:.13em;color:var(--ink-faint)}
+
+/* ---------- 进场动画 ---------- */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){ .reveal{opacity:1;transform:none;transition:none} }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <a class="brand" href="../index.html">
+      <img src="../sjtu.png" alt="上海交通大学">
+      <span>零基础 RISC-V 芯片智能体开发<br><span class="b2">SJTU · Xuesen Camp</span></span>
+    </a>
+    <div class="links">
+      <a href="../showcase.html">← 成果展示</a>
+      <a href="mario-pixel-quest/" target="_blank" rel="noopener">玩这个游戏 ↗</a>
+      <a href="../groups.html">分组</a>
+    </div>
+    <button class="tbtn" id="themeBtn" title="切换深浅色" aria-label="切换深浅色">◐</button>
+  </nav>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="wrap">
+      <span class="badge">🗝️ 提示词归档 · 第 6 组</span>
+      <h1>Super Wangjian <span class="m">是怎么问出来的</span></h1>
+      <p class="sub">这一页是第 6 组做《Super Wangjian · Pixel Quest》时<span class="hl">真正用过的提示词</span>，原样收录，没有删改。游戏本身有一千多行代码 —— 但同学写的不是代码，是下面这几段话。</p>
+      <div class="facts">
+        <span class="fact"><span>🎮</span>一段话换来四个关卡</span>
+        <span class="fact"><span>🖼️</span>一段话处理人物精灵</span>
+        <span class="fact"><span>📦</span>一段话把它部署上板子</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="reveal">
+        <span class="eyebrow">怎么看这一页</span>
+        <h2 class="sec">三段提示词，三件不同的事</h2>
+        <p class="sec-lead">留意它们的共同点：<b>说清楚要什么、说死不能变的地方、说清楚怎么算做完了</b>。这三件事写得越具体，智能体返工越少。</p>
+      </div>
+
+      <div class="reveal">
+
+        <!-- 1 · 产品实现 -->
+        <div class="pblock">
+          <div class="phead">
+            <span class="pnum">1</span>
+            <span class="ptitle">产品实现提示词 —— 让它把游戏做出来</span>
+            <span class="pmeta">ONE SHOT</span>
+          </div>
+          <div class="pbody">
+            <p class="pnote">整个游戏本体来自这一段。注意里面全是<b>可以被验收的具体数字</b>：几只栗宝宝、几枚金币、哪一关没有食人花。</p>
+            <blockquote class="quote">在新文件夹中制作一个高精度的马里奥小游戏，不发布网站。标题使用 SUPER WANGJIAN。补全 World 1–1 至 1–4，按原版地图网格复刻，修正 1–1 金币位置。World 1–2 按原版 192×15 图块地图和数据重建地表入口、地下主路线、27 金币隐藏房、14 只栗宝宝、3 只绿乌龟、1 只红乌龟，删除该关全部食人花，保留四座成对反向移动升降台、正常出口地表和屋顶 Warp Zone。1–1 至 1–3 需要旗杆下滑、终点旗下降、人物自动走进城堡、城堡旗升起的完整过关动画。提高人物跳跃高度。把用户提供的像素人物“王健”做进游戏，开局提供“经典马里奥 / 王健”人物选择，切换关卡时必须保持所选人物。为两名角色分别适配蘑菇保护框。键盘、鼠标和触控都可操作。保留计分、金币、生命、暂停、声音开关和连续过关流程。地图数据与测试共用同一来源，并真实走通入口、隐藏房往返、正常出口和旗杆路线。</blockquote>
+            <div class="pin" style="margin-top:16px"><span class="i">💡</span><span>最后一句是关键：<b>「地图数据与测试共用同一来源」</b> —— 这一句直接决定了地图不会和验收规则对不上。提要求的时候顺手把「怎么防止出错」也说了。</span></div>
+          </div>
+        </div>
+
+        <!-- 2 · 人物资源 -->
+        <div class="pblock">
+          <div class="phead">
+            <span class="pnum">2</span>
+            <span class="ptitle">人物资源处理提示词 —— 把人物抠成透明图</span>
+            <span class="pmeta">图像编辑工具</span>
+          </div>
+          <div class="pbody">
+            <p class="pnote">这一段是给<b>内置图像编辑工具</b>的，用来生成游戏里那张透明的人物精灵图。英文写的，因为图像模型对英文指令更稳。</p>
+            <blockquote class="quote en">Use case: background-extraction
+Asset type: four-frame pixel-art character sprite sheet for a browser platform game
+Primary request: preserve the four existing character poses exactly and isolate them on a perfectly flat solid #ff00ff chroma-key background suitable for transparent removal.
+Input image: the supplied image is the edit target and identity/pose/color reference.
+Composition: keep the same left-to-right order: standing, running, jumping, celebrating; keep generous separation and do not crop any pose.
+Style: exact crisp pixel art, no antialiasing, no reinterpretation.
+Constraints: keep the character's face, glasses, black suit, white shirt, striped blue tie, proportions, poses, lighting, pixel edges, and all details unchanged. Background must be one uniform #ff00ff with no gradient, texture, shadow, text, watermark, or extra object. Do not use #ff00ff inside the character.
+Avoid: redesign, extra frames, missing limbs, blurred edges, altered identity, changed pose, changed clothing.</blockquote>
+            <p class="pnote" style="margin:14px 0 0">生成的洋红底图再用本地色键处理抠掉背景，最终得到 <code>character-sprites.png</code>。</p>
+            <div class="pin" style="margin-top:16px"><span class="i">💡</span><span>为什么选 <code>#ff00ff</code> 这个粉紫色当背景？因为人物身上不会出现这个颜色 —— 这样抠图时就不会把衣服一起抠掉。<b>Avoid 那一行同样重要：先把不想要的结果说出来。</b></span></div>
+          </div>
+        </div>
+
+        <!-- 3 · 部署 -->
+        <div class="pblock">
+          <div class="phead">
+            <span class="pnum">3</span>
+            <span class="ptitle">部署提示词 —— 交给板子上的智能体</span>
+            <span class="pmeta">OpenClaw / DeepSeek</span>
+          </div>
+          <div class="pbody">
+            <p class="pnote">这一段是写给<b>跑在 RISC-V 板子上的智能体</b>的，让它自己把项目装好、跑起来、验证通过。</p>
+            <blockquote class="quote">请解压随消息提供的 <code>mario-world1-riscv-openclaw-bundle.tar.gz</code>，部署其中的 <code>mario-pixel-quest</code> 项目。
+
+目标机器是一块 RISC-V Linux 板，局域网 IP 为 <code>192.168.31.105</code>。端口 <code>8000</code> 和 <code>8080</code> 已被其他服务占用，严禁停止、覆盖或修改这两个服务。优先使用端口 <code>3001</code>；启动前先用 <code>ss -ltn</code> 检查，若 <code>3001</code> 也被占用，则自动选择 <code>3002</code>、<code>3003</code> 等空闲端口，并在完成信息中明确告诉我最终地址。</blockquote>
+            <p class="pnote" style="margin:16px 0 0">后面跟着 8 条硬性要求，摘几条关键的：</p>
+            <ol>
+              <li>先读 <code>README.md</code>、<code>RISCV_DEPLOY.md</code>、<code>package.json</code> 和源码，<b>再动手</b>。</li>
+              <li>列出全部必须保留的功能（四个关卡、人物选择、1–2 的四条路线、过关动画……），一样都不能少。</li>
+              <li>服务绑定 <code>0.0.0.0</code> 以便局域网访问；<b>不发布到公网</b>，不配置外部云服务。</li>
+              <li>不许碰 <code>8000</code>、<code>8080</code> 上的任何进程，不许执行破坏性系统命令。</li>
+              <li>万一依赖没有 RISC-V 版本，<b>保持玩法和视觉不变</b>，把项目转成纯静态版本，且不得替换人物图。</li>
+              <li>先跑 <code>pnpm test</code> 再启动；用 <code>curl</code> 验证首页能打开、HTML 里有「选择人物」「经典马里奥」「王健」。<b>不许删测试。</b></li>
+              <li>最后只报告：关键步骤、最终端口、访问 URL、守护方式、是否通过验证。</li>
+            </ol>
+            <div class="pin" style="margin-top:18px"><span class="i">🛡️</span><span>这段里真正值钱的是那些<b>「不许做什么」</b>：不许动别人的端口、不许删测试、不许换人物图、不许发到公网。给智能体开权限之前，先把红线画出来 —— 这是让它替你干活时最该学会的一件事。</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="reveal backrow">
+        <a class="blink" href="mario-pixel-quest/" target="_blank" rel="noopener">🎮 去玩这个游戏 ↗</a>
+        <a class="blink" href="../showcase.html">← 回成果展示</a>
+        <a class="blink" href="https://github.com/Wintel/riscv-agent-camp-slides/tree/main/works/mario-pixel-quest-src" target="_blank" rel="noopener">📂 看源码 ↗</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="foot">
+    <img src="../sjtu.png" alt="上海交通大学">
+    <div>
+      <div class="ft">提示词归档 · 第 6 组 Super Wangjian</div>
+      <div class="fs">上海交通大学学森暑期营 · 零基础 RISC-V 芯片智能体开发</div>
+    </div>
+    <div class="fr">SJTU · RISC-V · AI AGENT</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // —— 主题切换（浅/深），与课程主页共用同一个记忆键 ——
+  var root=document.documentElement, btn=document.getElementById('themeBtn');
+  function cur(){
+    var t=root.getAttribute('data-theme');
+    if(t) return t;
+    return window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  }
+  function apply(t){ if(t){root.setAttribute('data-theme',t);} btn.textContent = cur()==='dark'?'☀':'◐'; }
+  try{ var saved=localStorage.getItem('camp-theme'); if(saved) apply(saved); else apply(); }catch(e){ apply(); }
+  btn.addEventListener('click',function(){
+    var next=cur()==='dark'?'light':'dark';
+    apply(next);
+    try{ localStorage.setItem('camp-theme',next); }catch(e){}
+  });
+
+  // —— 滚动进入动画 ——
+  var els=[].slice.call(document.querySelectorAll('.reveal'));
+  if(!('IntersectionObserver' in window)){
+    els.forEach(function(el){ el.classList.add('in'); });
+  }else{
+    var io=new IntersectionObserver(function(list){
+      list.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    },{rootMargin:'0px 0px -8% 0px',threshold:.06});
+    els.forEach(function(el){ io.observe(el); });
+  }
+})();
+</script>
+</body>
+</html>
