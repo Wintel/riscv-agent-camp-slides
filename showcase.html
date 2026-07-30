@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>成果展示 · 零基础 RISC-V 芯片智能体开发</title>
+<meta name="description" content="学森暑期营「零基础 RISC-V 芯片智能体开发」同学作品集：小组作品与个人作品，都是用 AI 智能体在四天里做出来的。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%23AD1730'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='6'%20fill='white'/%3E%3C/svg%3E">
+<style>
+/* =========================================================================
+   成果展示 · 与课程主页 / 分组页同一套设计语言（交大红）
+   ========================================================================= */
+:root{
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2;
+  --paper:#F4F2EE; --panel:#FFFFFF; --panel-2:#ECE8E1;
+  --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88; --line:#DCD4C8;
+  --ok:#1E8A6E;
+  --shadow:0 18px 44px -26px rgba(60,30,20,.5);
+  --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Cascadia Code","JetBrains Mono","SF Mono","Consolas","Menlo",monospace;
+  --maxw:1080px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --crimson:#E4586C; --crimson-deep:#F08292; --crimson-soft:#3A1E24;
+    --paper:#17140F; --panel:#211C17; --panel-2:#2A241E;
+    --ink:#EDE7DF; --ink-soft:#B3A99F; --ink-faint:#8A8078; --line:#3A332B;
+    --ok:#4FBFA0; --shadow:0 20px 50px -28px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="light"]{
+  --crimson:#AD1730; --crimson-deep:#870F26; --crimson-soft:#F3DEE2;
+  --paper:#F4F2EE; --panel:#FFFFFF; --panel-2:#ECE8E1;
+  --ink:#221C1B; --ink-soft:#6A5F5A; --ink-faint:#9A8F88; --line:#DCD4C8;
+  --ok:#1E8A6E; --shadow:0 18px 44px -26px rgba(60,30,20,.5);
+}
+:root[data-theme="dark"]{
+  --crimson:#E4586C; --crimson-deep:#F08292; --crimson-soft:#3A1E24;
+  --paper:#17140F; --panel:#211C17; --panel-2:#2A241E;
+  --ink:#EDE7DF; --ink-soft:#B3A99F; --ink-faint:#8A8078; --line:#3A332B;
+  --ok:#4FBFA0; --shadow:0 20px 50px -28px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:inherit}
+img{max-width:100%;display:block}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono)}
+.hl{color:var(--crimson);font-weight:700}
+
+/* ---------- 顶部导航 ---------- */
+header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);
+  backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:16px;height:64px;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.nav .brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:15px;text-decoration:none}
+.nav .brand img{width:34px;height:34px}
+.nav .brand .b2{font:600 10px var(--mono);letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase}
+.nav .links{margin-left:auto;display:flex;gap:6px}
+.nav .links a{font-size:14px;color:var(--ink-soft);text-decoration:none;padding:8px 12px;border-radius:8px;transition:.15s}
+.nav .links a:hover{color:var(--crimson);background:var(--crimson-soft)}
+.tbtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+  cursor:pointer;font-size:16px;display:grid;place-items:center;color:var(--ink-soft);transition:.15s}
+.tbtn:hover{border-color:var(--crimson);color:var(--crimson)}
+@media (max-width:760px){.nav .brand span:not(.b2){font-size:13px}.nav .links a{padding:8px 9px}}
+
+/* ---------- 通用区块 ---------- */
+section{padding:56px 0}
+.eyebrow{font:600 13px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);
+  display:inline-flex;align-items:center;gap:10px;margin-bottom:14px}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--crimson)}
+h2.sec{font-size:clamp(24px,3.4vw,32px);line-height:1.15;font-weight:800;margin:0 0 12px;text-wrap:balance}
+.sec-lead{font-size:17px;color:var(--ink-soft);max-width:62ch;margin:0}
+
+/* ---------- 英雄区 ---------- */
+.hero{position:relative;overflow:hidden;padding:62px 0 52px;border-bottom:1px solid var(--line)}
+.hero::before{content:"";position:absolute;inset:0;z-index:0;opacity:.6;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:radial-gradient(120% 80% at 80% 0%,#000,transparent 70%);
+  mask-image:radial-gradient(120% 80% at 80% 0%,#000,transparent 70%)}
+.hero::after{content:"";position:absolute;right:-160px;top:-190px;width:520px;height:520px;border-radius:50%;z-index:0;
+  background:radial-gradient(circle,color-mix(in srgb,var(--crimson) 20%,transparent),transparent 62%)}
+.hero .wrap{position:relative;z-index:1}
+.hero .badge{display:inline-flex;align-items:center;gap:9px;font:600 13px var(--mono);letter-spacing:.06em;
+  color:var(--crimson);background:var(--crimson-soft);border:1px solid color-mix(in srgb,var(--crimson) 30%,transparent);
+  padding:7px 14px;border-radius:999px;margin-bottom:20px}
+.hero h1{font-size:clamp(30px,5.2vw,50px);line-height:1.06;font-weight:800;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.hero h1 .m{font-family:var(--mono);color:var(--crimson)}
+.hero p.sub{font-size:clamp(16px,2.1vw,19px);color:var(--ink-soft);max-width:52ch;margin:20px 0 0}
+.facts{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.fact{display:inline-flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:11px 16px;font-size:15px;font-weight:600;box-shadow:var(--shadow)}
+.fact .i{font-size:18px}
+
+/* ---------- 作品卡片 ---------- */
+.works{display:grid;gap:20px;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));margin-top:28px}
+.work{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  overflow:hidden;box-shadow:var(--shadow);transition:.18s}
+.work:hover{border-color:color-mix(in srgb,var(--crimson) 45%,transparent);transform:translateY(-3px)}
+.whead{display:flex;align-items:center;gap:12px;padding:15px 17px;background:var(--panel-2);border-bottom:1px solid var(--line)}
+.wav{flex:none;width:40px;height:40px;border-radius:11px;background:var(--crimson);color:#fff;
+  display:grid;place-items:center;font:800 17px var(--sans)}
+.wwho{min-width:0}
+.wname{font-size:15.5px;font-weight:700;line-height:1.25}
+.wmeta{font:600 11.5px var(--mono);color:var(--ink-faint);margin-top:2px}
+.py{font-family:var(--mono);font-weight:700;font-size:14.5px;padding:0 .5px}
+.wgrp{margin-left:auto;flex:none;font:700 12px var(--mono);color:var(--crimson);background:var(--crimson-soft);
+  border:1px solid color-mix(in srgb,var(--crimson) 28%,transparent);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.wbody{padding:17px;display:flex;flex-direction:column;gap:10px;flex:1}
+.wtitle{font-size:19px;font-weight:800;line-height:1.3;margin:0;text-wrap:balance}
+.wdesc{margin:0;font-size:14.5px;color:var(--ink-soft);line-height:1.65}
+.wtags{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto;padding-top:4px}
+.wtag{font:600 11.5px var(--sans);color:var(--ink-soft);background:var(--paper);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px}
+.wgo{display:flex;align-items:center;gap:8px;margin:0;padding:13px 17px;border-top:1px solid var(--line);
+  background:var(--panel-2);font:700 14px var(--sans);color:var(--crimson);text-decoration:none;transition:.15s}
+.wgo:hover{background:var(--crimson);color:#fff}
+.wgo .wurl{margin-left:auto;font:600 11.5px var(--mono);opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:52%}
+
+/* ---------- 空位占位卡 ---------- */
+.soon{display:grid;place-items:center;text-align:center;gap:8px;min-height:190px;padding:28px 24px;
+  border:2px dashed var(--line);border-radius:16px;color:var(--ink-faint);background:transparent}
+.soon .si{font-size:30px}
+.soon .st{font-size:15.5px;font-weight:700;color:var(--ink-soft)}
+.soon .sd{font-size:13.5px;max-width:34ch;line-height:1.6}
+
+/* ---------- 提示条 ---------- */
+.pin{margin:22px 0 0;display:flex;gap:10px;align-items:flex-start;background:var(--crimson-soft);
+  border:1px solid color-mix(in srgb,var(--crimson) 30%,transparent);border-radius:12px;padding:12px 16px;
+  font-size:14px;font-weight:600;color:var(--crimson-deep)}
+.pin .i{font-size:17px;line-height:1.4}
+
+/* ---------- 投稿说明 ---------- */
+.howto{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;
+  box-shadow:var(--shadow);margin-top:26px}
+.howto h3{margin:0 0 10px;font-size:17px}
+.howto ol{margin:0;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+.howto li{margin:7px 0}
+.howto code{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--line);border-radius:6px;
+  padding:1px 6px;font-size:.9em;color:var(--crimson-deep);font-weight:600}
+
+/* ---------- 页脚 ---------- */
+footer{border-top:1px solid var(--line);padding:40px 0;background:var(--panel-2)}
+.foot{display:flex;align-items:center;gap:16px;flex-wrap:wrap;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.foot img{width:40px;height:40px}
+.foot .ft{font-weight:700}
+.foot .fs{font-size:13px;color:var(--ink-faint)}
+.foot .fr{margin-left:auto;font:600 12px var(--mono);color:var(--ink-faint);letter-spacing:.08em}
+
+/* ---------- 滚动进入动画 ---------- */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s cubic-bezier(.3,1,.5,1)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .reveal{opacity:1;transform:none;transition:none}
+  *{transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <a class="brand" href="index.html">
+      <img src="sjtu.png" alt="上海交通大学">
+      <span>零基础 RISC-V 芯片智能体开发<br><span class="b2">SJTU · Xuesen Camp</span></span>
+    </a>
+    <div class="links">
+      <a href="index.html">← 返回主页</a>
+      <a href="#team">小组作品</a>
+      <a href="#solo">个人作品</a>
+      <a href="groups.html">分组</a>
+    </div>
+    <button class="tbtn" id="themeBtn" title="切换深浅色" aria-label="切换深浅色">◐</button>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ===== 英雄区 ===== -->
+  <section class="hero">
+    <div class="wrap">
+      <span class="badge">🏆 同学作品集 · 持续更新</span>
+      <h1>成果<span class="m">展示</span></h1>
+      <p class="sub">四天前他们还没碰过 Linux。这些全是<span class="hl">同学自己做的</span> —— 想法是他们的，活儿是 AI 智能体干的。</p>
+      <div class="facts">
+        <span class="fact"><span class="i">🧑‍💻</span>指挥智能体完成</span>
+        <span class="fact"><span class="i">🌍</span>点开就能玩</span>
+        <span class="fact"><span class="i">📬</span>欢迎继续投稿</span>
+      </div>
+      <div class="pin"><span class="i">🎉</span><span>已经有同学把自己的作品上线到互联网了。做完了想上这个页面？往下看<a href="#submit" style="color:inherit;text-decoration:underline">「怎么投稿」→</a></span></div>
+    </div>
+  </section>
+
+  <!-- ===== 小组作品 ===== -->
+  <section id="team">
+    <div class="wrap">
+      <div class="reveal">
+        <span class="eyebrow">小组作品</span>
+        <h2 class="sec">各组的答辩成果</h2>
+        <p class="sec-lead">12 个小组在板子上做出来的东西。答辩之后陆续补齐，做完记得把链接发给助教。</p>
+      </div>
+
+      <div class="works reveal">
+        <div class="soon">
+          <span class="si">🚧</span>
+          <span class="st">还没有小组作品上线</span>
+          <span class="sd">答辩结束后，各组把成果整理好发给助教，就会出现在这里。</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 个人作品 ===== -->
+  <section id="solo" style="background:var(--panel-2)">
+    <div class="wrap">
+      <div class="reveal">
+        <span class="eyebrow">个人作品</span>
+        <h2 class="sec">课余自己折腾出来的</h2>
+        <p class="sec-lead">没人要求他们做这些 —— 纯粹是学会了之后自己想做。这类作品最值得看。</p>
+      </div>
+
+      <div class="works reveal">
+
+        <!-- 王Q浔 · 文学人格测试 -->
+        <div class="work">
+          <div class="whead">
+            <div class="wav">王</div>
+            <div class="wwho">
+              <div class="wname">王<span class="py">Q</span>浔</div>
+              <div class="wmeta">北京市第四中学</div>
+            </div>
+            <span class="wgrp">第 3 组</span>
+          </div>
+          <div class="wbody">
+            <h3 class="wtitle">找到你命运的互文</h3>
+            <p class="wdesc">一个文学人格测试：20 道题、约 5 分钟，从 9 种文学原型、27 个人物里挑出与你共振的那一个 ——「与某个文学人物互为注脚，在不同的时空里共振」。答过的题会高亮，还能点题号回去改答案。</p>
+            <div class="wtags">
+              <span class="wtag">📖 文学 × 心理测试</span>
+              <span class="wtag">🖱️ 交互式网页</span>
+              <span class="wtag">🌐 GitHub Pages</span>
+            </div>
+          </div>
+          <a class="wgo" href="https://wqx-121212.github.io/SJTU-wqxLitPersonalityQuiz/" target="_blank" rel="noopener">
+            去测一下 ↗<span class="wurl">wqx-121212.github.io</span>
+          </a>
+        </div>
+
+        <div class="soon">
+          <span class="si">➕</span>
+          <span class="st">这里留给下一个人</span>
+          <span class="sd">你也做了点什么？发给助教，明天它就在这儿。</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 怎么投稿 ===== -->
+  <section id="submit">
+    <div class="wrap">
+      <div class="reveal">
+        <span class="eyebrow">投稿</span>
+        <h2 class="sec">怎么让你的作品上这一页</h2>
+        <p class="sec-lead">不限形式：网页、脚本、小游戏、板子上跑的小工具都算。</p>
+      </div>
+
+      <div class="howto reveal">
+        <h3>📬 三步搞定</h3>
+        <ol>
+          <li><b>让它能被打开。</b>网页最省事 —— 用<a href="lab-github-pages.html">选修实验</a>那套办法发到 GitHub Pages，你就有了一个网址。不是网页的话，把代码放个仓库、或者直接把文件发给助教。</li>
+          <li><b>把这几样发给助教：</b>作品名字、一两句介绍（它是干什么的）、网址或代码、你的姓名和小组。</li>
+          <li><b>等它出现在这一页。</b>老师会加上来，你就可以把链接发给爸妈和同学了。</li>
+        </ol>
+        <div class="pin" style="margin-top:18px"><span class="i">🔒</span><span>投稿前<b>自己检查一遍</b>：作品里不要出现手机号、家庭住址、班级、别人的真名和照片，也<b>不要有任何 API key / token</b>。这一页是公开的，全世界都能看到。</span></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="foot">
+    <img src="sjtu.png" alt="上海交通大学">
+    <div>
+      <div class="ft">成果展示 · 同学作品集</div>
+      <div class="fs">上海交通大学学森暑期营 · 零基础 RISC-V 芯片智能体开发</div>
+    </div>
+    <div class="fr">SJTU · RISC-V · AI AGENT</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // —— 主题切换（浅/深），与课程主页共用同一个记忆键 ——
+  var root=document.documentElement, btn=document.getElementById('themeBtn');
+  function cur(){
+    var t=root.getAttribute('data-theme');
+    if(t) return t;
+    return window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  }
+  function apply(t){ if(t){root.setAttribute('data-theme',t);} btn.textContent = cur()==='dark'?'☀':'◐'; }
+  try{ var saved=localStorage.getItem('camp-theme'); if(saved) apply(saved); else apply(); }catch(e){ apply(); }
+  btn.addEventListener('click',function(){
+    var next=cur()==='dark'?'light':'dark';
+    apply(next);
+    try{ localStorage.setItem('camp-theme',next); }catch(e){}
+  });
+
+  // —— 滚动进入动画 ——
+  var els=[].slice.call(document.querySelectorAll('.reveal'));
+  if(!('IntersectionObserver' in window)){
+    els.forEach(function(el){ el.classList.add('in'); });
+  }else{
+    var io=new IntersectionObserver(function(list){
+      list.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    },{rootMargin:'0px 0px -8% 0px',threshold:.06});
+    els.forEach(function(el){ io.observe(el); });
+  }
+})();
+</script>
+</body>
+</html>
