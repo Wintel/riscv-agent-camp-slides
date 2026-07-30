@@ -1,0 +1,2219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartPlan 智能任务计划</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0f172a; color: #e2e8f0;
+    height: 100vh; display: flex; flex-direction: column;
+    padding: 0.75rem 1.25rem;
+  }
+  .header { display:flex; align-items:center; justify-content:space-between; flex-shrink:0; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem; }
+  .header h1 { font-size:1.35rem; background:linear-gradient(135deg,#38bdf8,#818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .header-right { display:flex; align-items:center; gap:0.75rem; font-size:0.8rem; color:#94a3b8; }
+  .status-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:5px; }
+  .status-dot.green { background:#22c55e; box-shadow:0 0 8px #22c55e88; }
+
+  /* Status Bar */
+  .status-bar {
+    display:flex; gap:0.6rem; flex-wrap:wrap; flex-shrink:0;
+    background:#1e293b; border-radius:8px; padding:0.4rem 0.8rem;
+    border:1px solid #334155; margin-bottom:0.6rem; font-size:0.75rem;
+  }
+  .status-bar .item { display:flex; align-items:center; gap:0.25rem; color:#94a3b8; }
+  .status-bar .item span { color:#e2e8f0; font-weight:500; }
+
+  .main { display:none; gap:0.75rem; flex:1; min-height:0; }
+
+  /* ── Left: Calendar + Task List ── */
+  .left-panel { flex:1; display:flex; flex-direction:column; min-width:0; gap:0.5rem; }
+
+  /* Calendar */
+  .cal-wrap { background:#1e293b; border:1px solid #334155; border-radius:10px; padding:0.75rem; flex-shrink:0; }
+  .cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem; }
+  .cal-header .cal-title { font-size:0.9rem; font-weight:600; }
+  .cal-nav { display:flex; gap:0.3rem; }
+  .cal-nav button {
+    background:#334155; border:none; color:#e2e8f0; cursor:pointer;
+    padding:0.15rem 0.5rem; border-radius:4px; font-size:0.75rem; transition:0.15s;
+  }
+  .cal-nav button:hover { background:#475569; }
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; text-align:center; }
+  .cal-grid .wd { font-size:0.65rem; color:#64748b; padding:0.2rem 0; font-weight:600; }
+  .cal-grid .day {
+    padding:0.4rem 0; border-radius:6px; cursor:pointer; font-size:0.8rem;
+    transition:0.15s; position:relative; font-weight:400;
+  }
+  .cal-grid .day:hover { background:#334155; }
+  .cal-grid .day.other { color:#475569; }
+  .cal-grid .day.today { background:#2563eb22; border:1px solid #2563eb; }
+  .cal-grid .day.selected { background:#2563eb; color:#fff; font-weight:700; }
+  .cal-grid .day.has-task { font-weight:700; color:#38bdf8; }
+  .cal-grid .day.selected.has-task { color:#fff; }
+  .cal-grid .day .task-count-badge {
+    position:absolute; top:-2px; right:-2px;
+    background:#22c55e; color:#0f172a; font-size:0.55rem; font-weight:700;
+    width:14px; height:14px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* Task list */
+  .task-section { flex:1; display:flex; flex-direction:column; min-height:0; }
+  .task-section-header { display:flex; align-items:center; gap:0.4rem; margin-bottom:0.4rem; flex-shrink:0; flex-wrap:wrap; }
+  .task-section-header h2 { font-size:0.95rem; font-weight:600; }
+  .task-section-header .date-label { font-size:0.75rem; color:#64748b; }
+  .task-count { background:#334155; padding:0.05rem 0.45rem; border-radius:99px; font-size:0.7rem; color:#94a3b8; }
+  .task-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:0.35rem; padding-right:0.2rem; }
+  .task-list::-webkit-scrollbar { width:4px; }
+  .task-list::-webkit-scrollbar-thumb { background:#475569; border-radius:2px; }
+
+  .sort-select {
+    background:#1e293b; border:1px solid #334155; border-radius:4px;
+    color:#94a3b8; font-size:0.7rem; padding:0.1rem 0.25rem;
+    outline:none; cursor:pointer;
+  }
+  .sort-select:focus { border-color:#38bdf8; }
+
+  .loading-skeleton {
+    padding:0.75rem; text-align:center; color:#475569; font-size:0.8rem;
+  }
+  .loading-skeleton .spinner {
+    display:inline-block; width:12px; height:12px;
+    border:2px solid #334155; border-top-color:#38bdf8;
+    border-radius:50%; animation: spin 0.8s linear infinite;
+    margin-right:0.3rem; vertical-align:middle;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .error-banner {
+    background:#2d1b1b; border:1px solid #ef4444; border-radius:6px;
+    padding:0.4rem 0.6rem; font-size:0.75rem; color:#ef4444;
+    margin-bottom:0.4rem; display:none;
+  }
+  .error-banner.show { display:block; }
+
+  .task-card {
+    background:#1e293b; border:1px solid #334155; border-radius:8px;
+    padding:0.5rem 0.75rem; display:flex; align-items:center; gap:0.5rem;
+    transition:border-color 0.2s, opacity 0.2s;
+  }
+  .task-card:hover { border-color:#38bdf8; }
+  .task-card.disabled { opacity:0.5; }
+  .task-card.completed { opacity:0.45; border-color:#22c55e; }
+  .task-card.completed .name { color:#94a3b8; }
+  .task-card.completed .time-badge { color:#22c55e; }
+  .task-card .actions .btn-done { color:#22c55e; }
+  .task-card .actions .btn-done:hover { color:#4ade80; }
+  .task-card .time-badge {
+    flex-shrink:0; min-width:70px; text-align:center;
+    font-size:0.7rem; color:#38bdf8; font-weight:600; letter-spacing:0.3px;
+  }
+  .task-card .info { flex:1; min-width:0; }
+  .task-card .info .name { font-size:0.85rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .task-card .info .cmd { font-size:0.7rem; color:#64748b; line-height:1.3; white-space:pre-wrap; word-break:break-all; }
+  .task-card .info .cmd a { color:#38bdf8; text-decoration:underline; }
+  .task-card .info .date-tag { font-size:0.65rem; color:#818cf8; margin-left:0.3rem; }
+  .task-card .actions { display:flex; gap:0.2rem; flex-shrink:0; }
+  .task-card .actions button {
+    background:none; border:1px solid transparent; color:#64748b; cursor:pointer;
+    padding:0.15rem 0.35rem; border-radius:4px; font-size:0.8rem; transition:all 0.15s;
+  }
+  .task-card .actions button:hover { color:#e2e8f0; border-color:#475569; }
+  .task-card .actions .toggle-on { color:#22c55e; }
+  .task-card .actions .toggle-off { color:#ef4444; }
+  .task-card .actions .btn-run { color:#38bdf8; font-size:0.75rem; }
+  .task-card .actions .btn-run:hover { color:#7dd3fc; }
+
+  /* Minute presets */
+  .minute-input-wrap { display:flex; gap:0.25rem; align-items:center; }
+  .minute-input-wrap input { width:60px; text-align:center; }
+  .minute-preset {
+    background:#334155; border:none; color:#94a3b8; cursor:pointer;
+    padding:0.15rem 0.35rem; border-radius:3px; font-size:0.65rem;
+    transition:all 0.15s;
+  }
+  .minute-preset:hover { background:#475569; color:#e2e8f0; }
+  .minute-preset.active { background:#2563eb; color:#fff; }
+
+  /* Expired toggle */
+  .expired-toggle {
+    font-size:0.65rem; color:#64748b; cursor:pointer;
+    background:none; border:1px solid #334155; border-radius:3px;
+    padding:0.1rem 0.3rem; transition:all 0.15s;
+  }
+  .expired-toggle:hover { border-color:#475569; color:#94a3b8; }
+  .expired-toggle.showing { color:#ef4444; border-color:#ef4444; }
+
+  /* Quick checkbox strikethrough animation */
+  .task-card.completing .name { animation: strikeThrough 0.3s ease-out forwards; }
+  @keyframes strikeThrough {
+    from { text-decoration:none; color:#e2e8f0; }
+    to { text-decoration:line-through; color:#94a3b8; }
+  }
+
+  /* ── Right Panel ── */
+  .right-panel { width:300px; flex-shrink:0; display:flex; flex-direction:column; gap:0.5rem; }
+  .section { background:#1e293b; border:1px solid #334155; border-radius:10px; padding:0.75rem; }
+  .section h3 { font-size:0.75rem; font-weight:600; color:#94a3b8; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:1px; }
+
+  .form-group { margin-bottom:0.4rem; }
+  .form-group label { display:block; font-size:0.7rem; color:#94a3b8; margin-bottom:0.15rem; }
+  .form-group input, .form-group textarea, .form-group select {
+    width:100%; background:#0f172a; border:1px solid #334155; border-radius:5px;
+    padding:0.35rem 0.5rem; color:#e2e8f0; font-size:0.8rem; outline:none; transition:border-color 0.2s;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:#38bdf8; }
+  .form-group textarea { resize:vertical; min-height:36px; font-family:monospace; }
+
+  .btn {
+    padding:0.35rem 0.85rem; border-radius:5px; border:none; cursor:pointer;
+    font-size:0.75rem; font-weight:500; transition:all 0.15s;
+  }
+  .btn:active { transform:scale(0.96); }
+  .btn-primary { background:#2563eb; color:#fff; }
+  .btn-primary:hover { background:#3b82f6; }
+  .btn-secondary { background:#334155; color:#e2e8f0; }
+  .btn-secondary:hover { background:#475569; }
+  .btn-success { background:#16a34a; color:#fff; }
+  .btn-success:hover { background:#22c55e; }
+  .btn-sm { padding:0.2rem 0.5rem; font-size:0.7rem; }
+
+  .form-row { display:flex; gap:0.4rem; }
+  .form-row .form-group { flex:1; }
+
+  .ai-input-wrap { display:flex; gap:0.4rem; }
+  .ai-input-wrap input { flex:1; font-size:0.8rem; }
+  .ai-result {
+    margin-top:0.35rem; padding:0.4rem; background:#0f172a; border-radius:5px;
+    font-size:0.75rem; display:none;
+  }
+  .ai-result.show { display:block; }
+  .ai-result .ai-label { color:#22c55e; font-weight:500; margin-bottom:0.2rem; }
+  .ai-result .ai-field { display:flex; justify-content:space-between; color:#94a3b8; }
+  .ai-result .ai-field span:last-child { color:#e2e8f0; font-family:monospace; }
+
+  .completion-stats {
+    margin-bottom:0.4rem; padding:0.5rem; background:#0f172a;
+    border-radius:6px; text-align:center;
+  }
+  .completion-stats .rate {
+    font-size:1.5rem; font-weight:700;
+    background:linear-gradient(135deg,#22c55e,#38bdf8);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .completion-stats .detail { font-size:0.7rem; color:#94a3b8; margin-top:0.15rem; }
+  .completion-stats .slogan { font-size:0.75rem; font-weight:500; margin-top:0.3rem; }
+  .completion-stats .slogan.all-done { color:#22c55e; }
+  .completion-stats .slogan.halfway { color:#facc15; }
+  .completion-stats .slogan.start { color:#94a3b8; }
+
+  .log-list { max-height:100px; overflow-y:auto; font-size:0.7rem; }
+  .log-list::-webkit-scrollbar { width:3px; }
+  .log-list::-webkit-scrollbar-thumb { background:#475569; border-radius:2px; }
+  .log-item { display:flex; justify-content:space-between; padding:0.15rem 0; border-bottom:1px solid #1e293b; }
+  .log-item .log-status { font-weight:600; }
+  .log-item .log-status.ok { color:#22c55e; }
+  .log-item .log-status.fail { color:#ef4444; }
+  .log-item .log-status.timeout { color:#facc15; }
+  .log-item .log-time { color:#64748b; }
+
+  .deadline-tag { font-size:0.65rem; color:#facc15; margin-left:0.35rem; font-weight:500; }
+  .deadline-tag.overdue { color:#ef4444; }
+  .deadline-tag.urgent { color:#fb923c; }
+  .deadline-tag.expired-hidden { opacity:0.35; font-style:italic; }
+
+  .modal-overlay {
+    position:fixed; top:0; left:0; width:100vw; height:100vh;
+    background:rgba(0,0,0,0.55); display:none; align-items:center; justify-content:center;
+    z-index:1000;
+  }
+  .modal-overlay.show { display:flex; }
+
+  /* ── Toast Notification ── */
+  .toast-container {
+    position:fixed; top:1rem; right:1rem; z-index:9999;
+    display:flex; flex-direction:column; gap:0.5rem;
+    max-width:320px;
+  }
+  .toast {
+    background:#1e293b; border:1px solid #38bdf8; border-radius:8px;
+    padding:0.6rem 0.8rem; box-shadow:0 4px 20px rgba(0,0,0,0.4);
+    animation: toastIn 0.3s ease-out;
+    font-size:0.8rem;
+  }
+  .toast.urgent-1m { border-color:#ef4444; background:#2d1b1b; }
+  .toast.urgent-10m { border-color:#fb923c; background:#2d2218; }
+  .toast.urgent-30m { border-color:#facc15; background:#2d2a18; }
+  .toast.urgent-1h { border-color:#22c55e; background:#1a2d1a; }
+  .toast .toast-title { font-weight:600; margin-bottom:0.15rem; color:#e2e8f0; }
+  .toast .toast-msg { color:#94a3b8; font-size:0.7rem; }
+  @keyframes toastIn {
+    from { opacity:0; transform:translateX(100px); }
+    to { opacity:1; transform:translateX(0); }
+  }
+  .toast-out { animation: toastOut 0.3s ease-in forwards; }
+  @keyframes toastOut {
+    from { opacity:1; transform:translateX(0); }
+    to { opacity:0; transform:translateX(100px); }
+  }
+
+  .chart-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .chart-bar { width:100%; border-radius:3px 3px 0 0; min-height:4px; transition:height 0.3s; }
+  .chart-bar.has-task { background:linear-gradient(to top, #2563eb, #38bdf8); }
+  .chart-bar.no-task { background:#334155; }
+  .chart-bar-label { font-size:0.55rem; color:#64748b; }
+  .chart-bar-count { font-size:0.55rem; color:#94a3b8; font-weight:600; }
+
+  .empty-state { text-align:center; padding:1.5rem 0; color:#475569; font-size:0.8rem; }
+
+  @media (max-width: 768px) {
+    body { padding:0.5rem; }
+    .main { flex-direction:column; }
+    .right-panel { width:100%; }
+  }
+
+  /* ── Auth Screen ── */
+  .auth-screen {
+    position:fixed; top:0; left:0; width:100vw; height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);
+    z-index:10000;
+  }
+  .auth-screen.hidden { display:none; }
+  .auth-box {
+    background:#1e293b; border:1px solid #334155; border-radius:16px;
+    padding:2rem; width:360px; max-width:90vw;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .auth-box h1 {
+    font-size:1.5rem; text-align:center; margin-bottom:0.25rem;
+    background:linear-gradient(135deg,#38bdf8,#818cf8);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .auth-box .subtitle { text-align:center; color:#64748b; font-size:0.8rem; margin-bottom:1.5rem; }
+  .auth-box .form-group { margin-bottom:0.75rem; }
+  .auth-box .form-group label { display:block; font-size:0.75rem; color:#94a3b8; margin-bottom:0.25rem; }
+  .auth-box .form-group input {
+    width:100%; background:#0f172a; border:1px solid #334155; border-radius:8px;
+    padding:0.6rem 0.75rem; color:#e2e8f0; font-size:0.9rem; outline:none;
+    transition:border-color 0.2s;
+  }
+  .auth-box .form-group input:focus { border-color:#38bdf8; }
+  .auth-box .auth-btn {
+    width:100%; padding:0.6rem; border:none; border-radius:8px;
+    font-size:0.9rem; font-weight:600; cursor:pointer;
+    background:linear-gradient(135deg,#2563eb,#38bdf8); color:#fff;
+    transition:opacity 0.15s; margin-top:0.25rem;
+  }
+  .auth-box .auth-btn:hover { opacity:0.9; }
+  .auth-box .auth-btn:active { transform:scale(0.98); }
+  .auth-box .auth-switch {
+    text-align:center; margin-top:1rem; font-size:0.8rem; color:#64748b;
+  }
+  .auth-box .auth-switch a { color:#38bdf8; cursor:pointer; text-decoration:none; }
+  .auth-box .auth-switch a:hover { text-decoration:underline; }
+  .auth-box .auth-error {
+    background:#2d1b1b; border:1px solid #ef4444; border-radius:6px;
+    padding:0.4rem 0.6rem; font-size:0.75rem; color:#ef4444; margin-bottom:0.75rem;
+    display:none;
+  }
+  .auth-box .auth-error.show { display:block; }
+  .auth-box .auth-loading { text-align:center; color:#94a3b8; font-size:0.75rem; margin-top:0.5rem; display:none; }
+  .auth-box .auth-loading.show { display:block; }
+  .header-right .logout-btn {
+    background:none; border:1px solid #334155; color:#94a3b8; cursor:pointer;
+    padding:0.1rem 0.45rem; border-radius:4px; font-size:0.7rem; transition:0.15s;
+  }
+  .header-right .logout-btn:hover { border-color:#ef4444; color:#ef4444; }
+
+
+  /* ── Admin Panel ── */
+  .admin-btn {
+    background:none; border:1px solid #475569; color:#818cf8; cursor:pointer;
+    padding:0.1rem 0.4rem; border-radius:4px; font-size:0.7rem; transition:0.15s;
+  }
+  .admin-btn:hover { border-color:#818cf8; background:#1e1b4b; }
+  .admin-panel {
+    position:fixed; top:0; left:0; width:100vw; height:100vh;
+    background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center;
+    z-index:9999;
+  }
+  .admin-panel.show { display:flex; }
+  .admin-content {
+    background:#1e293b; border:1px solid #334155; border-radius:12px;
+    padding:1.25rem; width:550px; max-width:92vw; max-height:85vh; overflow-y:auto;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .admin-content h2 {
+    font-size:1rem; margin-bottom:0.5rem;
+    display:flex; align-items:center; gap:0.4rem;
+  }
+  .admin-content .close-btn {
+    margin-left:auto; background:none; border:none; color:#64748b; cursor:pointer;
+    font-size:1.2rem; padding:0 0.3rem;
+  }
+  .admin-content .close-btn:hover { color:#ef4444; }
+  .admin-status-grid { display:flex; flex-direction:column; gap:0.35rem; margin:0.5rem 0; }
+  .admin-check {
+    display:flex; align-items:center; gap:0.5rem;
+    padding:0.4rem 0.5rem; border-radius:6px; font-size:0.8rem;
+    background:#0f172a;
+  }
+  .admin-check .icon { font-size:1rem; width:1.2rem; text-align:center; }
+  .admin-check .icon.ok { color:#22c55e; }
+  .admin-check .icon.fail { color:#ef4444; }
+  .admin-check .label { color:#94a3b8; flex-shrink:0; }
+  .admin-check .msg { color:#e2e8f0; }
+  .admin-check .msg.err { color:#ef4444; }
+  .admin-overall {
+    text-align:center; padding:0.5rem; margin-bottom:0.5rem;
+    border-radius:8px; font-weight:600; font-size:0.85rem;
+  }
+  .admin-overall.ok { background:#052e16; color:#22c55e; border:1px solid #166534; }
+  .admin-overall.fail { background:#2d1b1b; color:#ef4444; border:1px solid #7f1d1d; }
+  .admin-sysinfo { display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.5rem; padding-top:0.5rem; border-top:1px solid #334155; }
+  .admin-sysinfo .item { font-size:0.7rem; color:#64748b; }
+  .admin-sysinfo .item span { color:#e2e8f0; }
+  .admin-panel .refresh-note { text-align:center; font-size:0.65rem; color:#475569; margin-top:0.5rem; }
+
+</style>
+
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-content">
+    <h2>🛡️ 系统健康检查 <button class="close-btn" onclick="closeAdminPanel()">✕</button></h2>
+    <div id="adminStatus">
+      <div style="text-align:center;color:#64748b;font-size:0.8rem;padding:1rem 0;">加载中...</div>
+    </div>
+    <div class="refresh-note">每 10 秒自动刷新</div>
+  </div>
+</div>
+
+</head>
+<body>
+
+<div style="flex-shrink:0;background:#0f2a3d;border-bottom:1px solid #1e4a63;color:#7dd3fc;font-size:0.72rem;padding:0.35rem 0.9rem;text-align:center;line-height:1.5;">
+  这是 SmartPlan 的静态演示版：数据只保存在你当前浏览器的本地存储里，完整版（Python + SQLite，含账号系统与真实定时调度）运行在开发板上。
+</div>
+
+<div class="auth-screen" id="authScreen">
+  <div class="auth-box">
+    <h1>📋 SmartPlan</h1>
+    <div class="subtitle">智能任务计划系统</div>
+    <div class="auth-error" id="authError"></div>
+    <div id="authLogin">
+      <div class="form-group"><label>用户名</label><input type="text" id="loginUser" placeholder="输入用户名" autocomplete="username"></div>
+      <div class="form-group"><label>密码</label><input type="password" id="loginPass" placeholder="输入密码" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="auth-btn" onclick="doLogin()">登 录</button>
+      <div class="auth-switch">还没有账号？<a onclick="showRegister()">立即注册</a></div>
+    </div>
+    <div id="authRegister" style="display:none;">
+      <div class="form-group"><label>用户名</label><input type="text" id="regUser" placeholder="2个字符以上" autocomplete="username"></div>
+      <div class="form-group"><label>密码</label><input type="password" id="regPass" placeholder="至少4个字符" autocomplete="new-password"></div>
+      <div class="form-group"><label>确认密码</label><input type="password" id="regPass2" placeholder="再次输入密码" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()"></div>
+      <button class="auth-btn" onclick="doRegister()">注 册</button>
+      <div class="auth-switch">已有账号？<a onclick="showLogin()">返回登录</a></div>
+    </div>
+    <div class="auth-loading" id="authLoading">处理中...</div>
+  </div>
+</div>
+
+
+<div class="header">
+  <h1>📋 SmartPlan 智能任务计划</h1>
+  <div class="header-right">
+    <span><span class="status-dot green"></span>运行中</span>
+    <span id="currentUserName" style="color:#38bdf8;font-size:0.75rem;"></span>
+    <button class="admin-btn" id="adminBtn" onclick="openAdminPanel()" style="display:none;">🛡️ 管理</button>
+    <span id="currentTime">--</span>
+    <button class="btn btn-primary btn-sm" onclick="saveAll()">💾 保存</button>
+    <button class="btn btn-secondary btn-sm" onclick="refreshAll()">⟳ 刷新</button>
+    <button class="logout-btn" id="logoutBtn" onclick="doLogout()" style="display:none;">退出</button>
+  </div>
+</div>
+
+<div class="status-bar" id="statusBar">
+  <div class="item">🖥️ <span id="sbHost">--</span></div>
+  <div class="item">⚙️ <span id="sbArch">--</span></div>
+  <div class="item">⏱️ <span id="sbUptime">--</span></div>
+  <div class="item">🧠 <span id="sbMem">--</span></div>
+  <div class="item">💾 <span id="sbDisk">--</span></div>
+</div>
+
+<div class="error-banner" id="errorBanner"></div>
+
+<div class="main">
+  <!-- Left: Calendar + Tasks -->
+  <div class="left-panel">
+    <!-- Calendar -->
+    <div class="cal-wrap">
+      <div class="cal-header">
+        <div class="cal-title" id="calTitle"></div>
+        <div class="cal-nav">
+          <button onclick="calPrev()">◀</button>
+          <button onclick="calToday()">今天</button>
+          <button onclick="calNext()">▶</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <!-- Task list -->
+    <div class="task-section">
+      <div class="task-section-header">
+        <h2>📌 任务</h2>
+        <span class="date-label" id="dateLabel">(全部)</span>
+        <span class="task-count" id="taskCount">0</span>
+        <select class="sort-select" id="sortSelect" onchange="onSortChange()">
+          <option value="deadline">按截止时间</option>
+          <option value="name">按名称</option>
+          <option value="created">按创建时间</option>
+        </select>
+        <button class="expired-toggle" id="expiredToggle" onclick="toggleExpired()" title="显示/隐藏已过期任务">📅 过期</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ 新建</button>
+      </div>
+      <div class="task-list" id="taskList">
+        <div class="empty-state">暂无任务</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right-panel">
+    <div class="section">
+      <h3>🤖 AI 智能生成</h3>
+      <div class="ai-input-wrap">
+        <input type="text" id="aiInput" placeholder="如「每天上午9点备份」" onkeydown="if(event.key==='Enter')generateFromAI()">
+        <button class="btn btn-success btn-sm" onclick="generateFromAI()">生成</button>
+      </div>
+      <div class="ai-result" id="aiResult">
+        <div class="ai-label">✅ 解析结果</div>
+        <div class="ai-field"><span>名称</span><span id="aiName">--</span></div>
+        <div class="ai-field"><span>时间</span><span id="aiCron">--</span></div>
+        <div class="ai-field"><span>备注</span><span id="aiCmd">--</span></div>
+        <div class="ai-field" id="aiDateRow" style="display:none;"><span>日期</span><span id="aiDate">--</span></div>
+        <div style="margin-top:0.3rem;"><button class="btn btn-primary btn-sm" onclick="addFromAI()">+ 添加到任务</button></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>✅ 今日完成率</h3>
+      <div class="completion-stats" id="completionStats">
+        <div class="rate" id="compRate">0%</div>
+        <div class="detail" id="compDetail">今日任务 0 / 已完成 0</div>
+        <div class="slogan start" id="compSlogan">📋 快快开启今日的任务吧</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>📊 近7天完成趋势</h3>
+      <div id="weeklyChart" style="height:100px;display:flex;align-items:flex-end;gap:4px;padding:0.3rem 0;">
+        <div style="width:100%;text-align:center;color:#475569;font-size:0.7rem;padding:1rem 0;">加载中...</div>
+      </div>
+    </div>
+
+    <div class="section" style="flex:1;display:flex;flex-direction:column;min-height:0;">
+      <h3>📜 执行日志</h3>
+      <div class="log-list" id="logList">
+        <div class="empty-state">暂无记录</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ══════════════════════════════════════════════════════════════════
+// SmartPlan 静态演示版 — 本地数据层
+// 用 window.fetch 拦截层替代真实的 /api/* 后端，数据存在 localStorage。
+// 忠实移植自 server.py（含 parse_natural_language 中文规则引擎）。
+// 不联网、不依赖任何外部资源；只在本机浏览器里读写数据。
+// ══════════════════════════════════════════════════════════════════
+(function () {
+  'use strict';
+
+  // ── localStorage keys ──
+  var LS_TASKS = 'sp_local_tasks';
+  var LS_COMPLETIONS = 'sp_local_completions'; // { "<taskId>": ["2026-07-29", ...] }
+  var LS_LOGS = 'sp_local_logs';
+  var LS_NEXT_TASK_ID = 'sp_local_next_task_id';
+  var LS_NEXT_LOG_ID = 'sp_local_next_log_id';
+  var LS_VALID_TOKEN = 'sp_local_valid_token';
+
+  // ── small helpers ──
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function dateStr(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function todayStr() { return dateStr(new Date()); }
+  function addDays(d, n) { var r = new Date(d); r.setDate(r.getDate() + n); return r; }
+  function nowDateTimeStr() {
+    var d = new Date();
+    return dateStr(d) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+  }
+  function nowMinuteStr() {
+    var d = new Date();
+    return dateStr(d) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  }
+  function readJSON(key, fallback) {
+    try {
+      var v = localStorage.getItem(key);
+      return v === null ? fallback : JSON.parse(v);
+    } catch (e) { return fallback; }
+  }
+  function writeJSON(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+  function genToken() {
+    var s = 'demo_';
+    for (var i = 0; i < 32; i++) s += Math.floor(Math.random() * 16).toString(16);
+    return s + Date.now().toString(16);
+  }
+
+  // ── data access ──
+  function loadTasks() { return readJSON(LS_TASKS, []); }
+  function saveTasks(t) { writeJSON(LS_TASKS, t); }
+  function loadCompletions() { return readJSON(LS_COMPLETIONS, {}); }
+  function saveCompletions(c) { writeJSON(LS_COMPLETIONS, c); }
+  function loadLogs() { return readJSON(LS_LOGS, []); }
+  function saveLogs(l) { writeJSON(LS_LOGS, l); }
+  function isRecurring(t) { return !t.task_date || t.task_date === ''; }
+
+  // ── seed demo data on very first run ──
+  function seedIfNeeded() {
+    if (localStorage.getItem(LS_TASKS) !== null) return; // already initialized (even if user emptied it since)
+    var now = nowDateTimeStr();
+    var today = todayStr();
+    var tasks = [
+      { id: 1, name: '喝水提醒', cron_expr: '0 15 * * *', command: '', enabled: 1, completed: 0, task_date: '', created_at: now, updated_at: now, user_id: 1, last_executed: '' },
+      { id: 2, name: '提交每日学习笔记', cron_expr: '30 20 * * 1-5', command: '', enabled: 1, completed: 0, task_date: '', created_at: now, updated_at: now, user_id: 1, last_executed: '' },
+      { id: 3, name: '背 20 个新单词', cron_expr: '0 21 * * *', command: '默写一遍今天的单词表', enabled: 1, completed: 0, task_date: today, created_at: now, updated_at: now, user_id: 1, last_executed: '' }
+    ];
+    saveTasks(tasks);
+    writeJSON(LS_NEXT_TASK_ID, 4);
+
+    var completions = {
+      '1': [dateStr(addDays(new Date(), -2)), dateStr(addDays(new Date(), -1)), today]
+    };
+    saveCompletions(completions);
+
+    var logs = [
+      { id: 1, task_id: 1, task_name: '喝水提醒', status: 'ok', output: '', executed_at: dateStr(addDays(new Date(), -1)) + ' 15:00:03', user_id: 1 },
+      { id: 2, task_id: 1, task_name: '喝水提醒', status: 'ok', output: '', executed_at: today + ' 15:00:02', user_id: 1 }
+    ];
+    saveLogs(logs);
+    writeJSON(LS_NEXT_LOG_ID, 3);
+  }
+
+  // ── demo identity: auto-login, skip the login wall ──
+  // 若已有 token 则沿用（刷新页面不掉登录态）；否则生成一个演示身份。
+  // 用户名固定为 admin，只是为了让页面自带的"系统健康检查"面板能打开，
+  // 不对应任何真实账号或密码。
+  (function ensureDemoLogin() {
+    var existing = localStorage.getItem('sp_token');
+    if (existing) {
+      localStorage.setItem(LS_VALID_TOKEN, existing);
+    } else {
+      var token = genToken();
+      localStorage.setItem('sp_token', token);
+      localStorage.setItem('sp_user', 'admin');
+      localStorage.setItem(LS_VALID_TOKEN, token);
+    }
+  })();
+
+  seedIfNeeded();
+
+  // ══════════════════════════════════════════════════════════════
+  // parse_natural_language — 逐条对照 server.py 移植
+  // ══════════════════════════════════════════════════════════════
+  var WEEKDAY_MAP = { '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '日': 0, '天': 0 };
+  var HOUR_MAP_ENTRIES = [
+    ['凌晨', 3], ['早上', 7], ['早晨', 7], ['上午', 9], ['中午', 12],
+    ['下午', 14], ['傍晚', 18], ['晚上', 20], ['深夜', 23], ['半夜', 0]
+  ];
+
+  function parseNaturalLanguage(text) {
+    var result = { name: text, cron_expr: '0 9 * * *', command: '', date: null };
+
+    var hour = 9, minute = 0;
+    var cronDay = '*', cronMonth = '*', cronWeek = '*';
+    var taskDate = null;
+
+    // ── 时段关键词（凌晨/早上/... ）+ offset ──
+    var periodOffset = 0;
+    for (var i = 0; i < HOUR_MAP_ENTRIES.length; i++) {
+      var kw = HOUR_MAP_ENTRIES[i][0], h0 = HOUR_MAP_ENTRIES[i][1];
+      if (text.indexOf(kw) !== -1) {
+        hour = h0;
+        if (kw === '下午' || kw === '晚上' || kw === '傍晚') periodOffset = 12;
+        break;
+      }
+    }
+
+    var hourMatch = text.match(/(\d{1,2})\s*点/);
+    if (hourMatch) {
+      var h = parseInt(hourMatch[1], 10);
+      if (h >= 0 && h <= 23) {
+        if (periodOffset && h >= 1 && h <= 12) {
+          hour = h + periodOffset;
+          if (hour >= 24) hour = 0;
+        } else {
+          hour = h;
+        }
+      }
+    }
+
+    // ── 分钟 ──
+    var minMatch = text.match(/(\d{1,2})\s*分/);
+    if (minMatch) {
+      var m = parseInt(minMatch[1], 10);
+      if (m >= 0 && m <= 59) minute = m;
+    }
+    if (text.indexOf('点半') !== -1 && !minMatch) minute = 30;
+
+    // ── 相对时间："半小时后" "一小时后" ──
+    var relMatch = text.match(/(\d+)\s*(半)?\s*(小时|分钟|秒|分|时)\s*后/);
+    if (relMatch) {
+      var num = parseInt(relMatch[1], 10);
+      var half = (relMatch[2] || '').indexOf('半') !== -1;
+      var unit = relMatch[3];
+      var now = new Date();
+      if (unit === '小时' || unit === '时') {
+        now = new Date(now.getTime() + (num + (half ? 0.5 : 0)) * 3600000);
+      } else if (unit === '分钟' || unit === '分') {
+        now = new Date(now.getTime() + (num + (half ? 30 : 0)) * 60000);
+      } else if (unit === '秒') {
+        now = new Date(now.getTime() + num * 1000);
+      }
+      hour = now.getHours();
+      minute = now.getMinutes();
+      taskDate = dateStr(now);
+    }
+
+    // ── 星期匹配："每周三" "周二和周四" ──
+    var weekdayMatches = [];
+    var wRe = /周([一二三四五六日天])/g, wm;
+    while ((wm = wRe.exec(text)) !== null) weekdayMatches.push(wm[1]);
+    if (weekdayMatches.length) {
+      var daysSet = {};
+      weekdayMatches.forEach(function (d) {
+        if (d in WEEKDAY_MAP) daysSet[String(WEEKDAY_MAP[d])] = true;
+      });
+      cronWeek = Object.keys(daysSet).sort().join(',');
+    }
+
+    // ── "工作日" ──
+    if (text.indexOf('工作日') !== -1 || text.indexOf('周一到周五') !== -1 || text.indexOf('周一至周五') !== -1) {
+      cronWeek = '1-5';
+    }
+
+    // ── 每月几号："每月15号" "每月1号" ──
+    var monthdayMatch = text.match(/(\d{1,2})\s*(?:号|日)/);
+    if (monthdayMatch) {
+      var dd = parseInt(monthdayMatch[1], 10);
+      if (dd >= 1 && dd <= 31) cronDay = String(dd);
+    }
+
+    // ── 具体日期："7月30日" ──
+    var dateMatch = text.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*日/);
+    if (dateMatch) {
+      var mm = parseInt(dateMatch[1], 10);
+      var ddd = parseInt(dateMatch[2], 10);
+      var year = new Date().getFullYear();
+      taskDate = year + '-' + pad2(mm) + '-' + pad2(ddd);
+      cronDay = String(ddd);
+      cronMonth = String(mm);
+    }
+
+    // ── 一次性关键词 ──
+    if (text.indexOf('明天') !== -1) {
+      taskDate = dateStr(addDays(new Date(), 1));
+    } else if (text.indexOf('后天') !== -1) {
+      taskDate = dateStr(addDays(new Date(), 2));
+    } else if (text.indexOf('今天') !== -1) {
+      taskDate = todayStr();
+    }
+
+    result.date = taskDate;
+
+    // ── 组装完整 5 段 cron ──
+    result.cron_expr = minute + ' ' + hour + ' ' + cronDay + ' ' + cronMonth + ' ' + cronWeek;
+
+    // ── 判断是否为重复任务 ──
+    var isRepeating = weekdayMatches.length > 0 || text.indexOf('每天') !== -1 || text.indexOf('每日') !== -1 ||
+      text.indexOf('天天') !== -1 || text.indexOf('例行') !== -1;
+    isRepeating = isRepeating || text.indexOf('每周') !== -1 || text.indexOf('每月') !== -1 || text.indexOf('工作日') !== -1;
+
+    if (!result.date && (cronDay !== '*' || cronMonth !== '*' || cronWeek !== '*')) {
+      // 已经通过 cron 字段表达重复规律，维持不变
+    } else if (!result.date && isRepeating) {
+      // 维持为重复任务
+    } else if (!result.date && !isRepeating) {
+      result.date = todayStr();
+    }
+
+    // ── "执行/运行" 后面的备注 ──
+    var cmdMatch = text.match(/[执行运行](?:[:：])?\s*(.+)/);
+    if (cmdMatch) {
+      result.command = cmdMatch[1].trim();
+    }
+
+    // ── 清理任务名称 ──
+    var name = text;
+    var prefixes = ['每天', '每周', '每月', '每', '在', '请帮我', '帮我', '我要', '例行'];
+    for (var p = 0; p < prefixes.length; p++) {
+      if (name.indexOf(prefixes[p]) === 0) {
+        name = name.slice(prefixes[p].length).trim();
+        break;
+      }
+    }
+    ['今天', '明天', '后天'].forEach(function (kw2) {
+      if (name.indexOf(kw2) !== -1) name = name.split(kw2).join('').trim();
+    });
+    name = name.replace(/\d{1,2}\s*月\s*\d{1,2}\s*日/g, '');
+    name = name.replace(/周[一二三四五六日天]/g, '');
+    name = name.replace(/\d+\s*点\s*(半|\d+\s*分)?/g, '');
+    name = name.replace(/\d+\s*(小时|分钟)\s*后/g, '');
+    name = name.replace(/\s+/g, ' ').trim();
+    name = name.split('工作日').join('').trim();
+
+    if (cmdMatch) {
+      name = name.split(cmdMatch[0]).join('').trim();
+    }
+
+    result.name = name || text;
+    return result;
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // 系统状态 / 健康检查 —— 没有真机可查，给出合理占位（时间保持实时）
+  // ══════════════════════════════════════════════════════════════
+  function getSystemStatus() {
+    var d = new Date();
+    return {
+      hostname: 'smartplan-demo',
+      arch: 'riscv64',
+      uptime: '（静态演示，无实时数据）',
+      memory: { percent: 38.6 },
+      disk: { percent: 46.2 },
+      time: nowDateTimeStr.call(null) || (dateStr(d) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds()))
+    };
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // API handlers —— 逐个对照 server.py 的 do_GET / do_POST / do_PUT / do_DELETE
+  // ══════════════════════════════════════════════════════════════
+  function jsonResponse(data, status) {
+    return new Response(JSON.stringify(data), {
+      status: status || 200,
+      headers: { 'Content-Type': 'application/json; charset=utf-8' }
+    });
+  }
+
+  function getBearerToken(headers) {
+    var auth = '';
+    if (!headers) return '';
+    if (typeof Headers !== 'undefined' && headers instanceof Headers) {
+      auth = headers.get('Authorization') || headers.get('authorization') || '';
+    } else if (typeof headers === 'object') {
+      auth = headers['Authorization'] || headers['authorization'] || '';
+    }
+    if (auth.indexOf('Bearer ') === 0) return auth.slice(7);
+    return '';
+  }
+
+  function requireAuth(opts) {
+    var token = getBearerToken(opts && opts.headers);
+    var valid = localStorage.getItem(LS_VALID_TOKEN);
+    if (!token || !valid || token !== valid) return null;
+    return 1; // 演示版只有一个本地身份，固定 user_id = 1
+  }
+
+  function handleAuthCheck(opts) {
+    var uid = requireAuth(opts);
+    if (uid) {
+      return jsonResponse({ ok: true, user_id: uid, username: localStorage.getItem('sp_user') || 'admin' });
+    }
+    return jsonResponse({ error: 'unauthorized' }, 401);
+  }
+
+  function handleRegister(body) {
+    var username = String(body.username || '').trim();
+    var password = String(body.password || '').trim();
+    if (username.length < 2 || password.length < 4) {
+      return jsonResponse({ error: '用户名至少2字符，密码至少4字符' }, 400);
+    }
+    var token = genToken();
+    localStorage.setItem(LS_VALID_TOKEN, token);
+    localStorage.setItem('sp_token', token);
+    localStorage.setItem('sp_user', username);
+    return jsonResponse({ ok: true, token: token, username: username });
+  }
+
+  function handleLogin(body) {
+    // 演示版不做真实账号校验：任意非空用户名密码都能登录
+    var username = String(body.username || '').trim();
+    var password = String(body.password || '').trim();
+    if (!username || !password) {
+      return jsonResponse({ error: '请输入用户名和密码' }, 400);
+    }
+    var token = genToken();
+    localStorage.setItem(LS_VALID_TOKEN, token);
+    localStorage.setItem('sp_token', token);
+    localStorage.setItem('sp_user', username);
+    return jsonResponse({ ok: true, token: token, username: username });
+  }
+
+  function handleLogout() {
+    localStorage.removeItem(LS_VALID_TOKEN);
+    return jsonResponse({ ok: true });
+  }
+
+  function handleGetTasks(query) {
+    var tasks = loadTasks();
+    var completions = loadCompletions();
+    var dateParam = query.get('date');
+    var list;
+    if (dateParam) {
+      list = tasks.filter(function (t) { return t.task_date === dateParam || !t.task_date || t.task_date === ''; });
+    } else {
+      list = tasks.slice();
+    }
+    list.sort(function (a, b) {
+      var ca = a.cron_expr || '', cb = b.cron_expr || '';
+      return ca < cb ? -1 : ca > cb ? 1 : 0;
+    });
+    var viewDate = dateParam || todayStr();
+    var out = list.map(function (t) {
+      var copy = Object.assign({}, t);
+      if (isRecurring(t)) {
+        var comps = completions[String(t.id)] || [];
+        copy.completed = comps.indexOf(viewDate) !== -1 ? 1 : 0;
+      }
+      return copy;
+    });
+    return jsonResponse(out);
+  }
+
+  function handleCreateTask(body) {
+    var name = String(body.name || '').trim();
+    if (!name) return jsonResponse({ error: 'name required' }, 400);
+    var tasks = loadTasks();
+    var nextId = parseInt(localStorage.getItem(LS_NEXT_TASK_ID) || '1', 10);
+    var now = nowDateTimeStr();
+    var task = {
+      id: nextId,
+      name: name,
+      cron_expr: body.cron_expr || '0 9 * * *',
+      command: body.command || '',
+      enabled: parseInt(body.enabled != null ? body.enabled : 1, 10),
+      completed: parseInt(body.completed || 0, 10),
+      task_date: body.date || '',
+      created_at: now,
+      updated_at: now,
+      user_id: 1,
+      last_executed: ''
+    };
+    tasks.push(task);
+    saveTasks(tasks);
+    localStorage.setItem(LS_NEXT_TASK_ID, String(nextId + 1));
+    return jsonResponse({ id: nextId }, 201);
+  }
+
+  function handleUpdateTask(tid, body) {
+    tid = parseInt(tid, 10);
+    var tasks = loadTasks();
+    var idx = -1;
+    for (var i = 0; i < tasks.length; i++) { if (tasks[i].id === tid) { idx = i; break; } }
+    if (idx === -1) {
+      // 与 server.py 一致：UPDATE 未命中任何行时依然返回 ok:true
+      return jsonResponse({ ok: true });
+    }
+    var task = tasks[idx];
+    var recurring = isRecurring(task);
+    var data = Object.assign({}, body);
+
+    if ('completed' in data && recurring) {
+      var completions = loadCompletions();
+      var compDate = data.date || todayStr();
+      var key = String(task.id);
+      var arr = completions[key] || [];
+      if (data.completed) {
+        if (arr.indexOf(compDate) === -1) arr.push(compDate);
+      } else {
+        var pos = arr.indexOf(compDate);
+        if (pos !== -1) arr.splice(pos, 1);
+      }
+      completions[key] = arr;
+      saveCompletions(completions);
+      delete data.completed;
+      delete data.date;
+    }
+
+    var changed = false;
+    ['name', 'cron_expr', 'command', 'enabled', 'completed'].forEach(function (key) {
+      if (key in data) { task[key] = data[key]; changed = true; }
+    });
+    if ('date' in data) { task.task_date = data.date; changed = true; }
+    if (changed) task.updated_at = nowDateTimeStr();
+    tasks[idx] = task;
+    saveTasks(tasks);
+    return jsonResponse({ ok: true });
+  }
+
+  function handleDeleteTask(tid) {
+    tid = parseInt(tid, 10);
+    var tasks = loadTasks().filter(function (t) { return t.id !== tid; });
+    saveTasks(tasks);
+    var completions = loadCompletions();
+    delete completions[String(tid)];
+    saveCompletions(completions);
+    return jsonResponse({ ok: true });
+  }
+
+  function cronFieldMatchRange(field, value) {
+    // 与 server.py 的日历/周报匹配逻辑一致：只支持精确匹配或 "a-b" 区间，
+    // 不支持逗号列表（server.py 在这两个接口里本来就没做，如实保留这个限制）。
+    if (field === String(value)) return true;
+    if (field.indexOf('-') !== -1) {
+      var parts = field.split('-');
+      var a = parseInt(parts[0], 10), b = parseInt(parts[1], 10);
+      if (a <= value && value <= b) return true;
+    }
+    return false;
+  }
+
+  function handleDateMap(query) {
+    var year = parseInt(query.get('year') || '2026', 10);
+    var month = parseInt(query.get('month') || '1', 10);
+    var tasks = loadTasks();
+    var prefix = year + '-' + pad2(month);
+    var dateMap = {};
+
+    tasks.forEach(function (t) {
+      if (t.task_date && t.task_date.indexOf(prefix) === 0) {
+        dateMap[t.task_date] = (dateMap[t.task_date] || 0) + 1;
+      }
+    });
+
+    var daysInMonth = new Date(year, month, 0).getDate();
+    var recTasks = tasks.filter(function (t) { return isRecurring(t) && t.cron_expr && parseInt(t.enabled) === 1; });
+
+    recTasks.forEach(function (t) {
+      var parts = (t.cron_expr || '').trim().split(/\s+/);
+      if (parts.length !== 5) return;
+      var cronDay = parts[2], cronWeek = parts[4];
+      for (var d = 1; d <= daysInMonth; d++) {
+        var ds = year + '-' + pad2(month) + '-' + pad2(d);
+        var dowSun = new Date(year, month - 1, d).getDay(); // 周日=0 .. 周六=6，与 Python 的 dow_sun 一致
+        var matches = false;
+        if (cronDay === '*' && cronWeek === '*') {
+          matches = true;
+        } else if (cronDay !== '*') {
+          matches = cronFieldMatchRange(cronDay, d);
+        } else if (cronWeek !== '*') {
+          matches = cronFieldMatchRange(cronWeek, dowSun);
+        }
+        if (matches) {
+          if (ds in dateMap) {
+            dateMap[ds] = (dateMap[ds] === true ? 1 : dateMap[ds]) + 1;
+          } else {
+            dateMap[ds] = true;
+          }
+        }
+      }
+    });
+
+    return jsonResponse(dateMap);
+  }
+
+  function handleWeeklyStats() {
+    var tasks = loadTasks();
+    var completions = loadCompletions();
+    var recTasks = tasks.filter(function (t) { return isRecurring(t) && parseInt(t.enabled) === 1; });
+    var weekdayLabels = ['一', '二', '三', '四', '五', '六', '日']; // 按 Python weekday()：周一=0..周日=6
+    var stats = [];
+    var today = new Date();
+
+    for (var i = 6; i >= 0; i--) {
+      var d = addDays(today, -i);
+      var ds = dateStr(d);
+      var jsDay = d.getDay(); // 周日=0..周六=6
+      var pyDow = (jsDay + 6) % 7; // 周一=0..周日=6
+      var dowSun = jsDay;
+      var dayOfMonth = d.getDate();
+
+      var total = 0, done = 0;
+      tasks.forEach(function (t) {
+        if (t.task_date === ds) {
+          total++;
+          if (parseInt(t.completed) === 1) done++;
+        }
+      });
+
+      var recTotal = 0, recDone = 0;
+      recTasks.forEach(function (t) {
+        var parts = (t.cron_expr || '').trim().split(/\s+/);
+        if (parts.length !== 5) return;
+        var cd = parts[2], cw = parts[4];
+        var matches = false;
+        if (cd === '*' && cw === '*') {
+          matches = true;
+        } else if (cd !== '*') {
+          matches = cronFieldMatchRange(cd, dayOfMonth);
+        } else if (cw !== '*') {
+          matches = cronFieldMatchRange(cw, dowSun);
+        }
+        if (matches) {
+          recTotal++;
+          var arr = completions[String(t.id)] || [];
+          if (arr.indexOf(ds) !== -1) recDone++;
+        }
+      });
+
+      stats.push({ date: ds, weekday: weekdayLabels[pyDow], total: total + recTotal, done: done + recDone });
+    }
+    return jsonResponse(stats);
+  }
+
+  function handleLogs() {
+    var logs = loadLogs().slice();
+    logs.sort(function (a, b) {
+      return a.executed_at < b.executed_at ? 1 : (a.executed_at > b.executed_at ? -1 : 0);
+    });
+    return jsonResponse(logs.slice(0, 50));
+  }
+
+  function handleRunTask(tid) {
+    tid = parseInt(tid, 10);
+    var tasks = loadTasks();
+    var idx = -1;
+    for (var i = 0; i < tasks.length; i++) { if (tasks[i].id === tid) { idx = i; break; } }
+    if (idx === -1) return jsonResponse({ error: 'Task not found' }, 404);
+    var t = tasks[idx];
+    var nowFull = nowDateTimeStr();
+    var logs = loadLogs();
+    var nextLogId = parseInt(localStorage.getItem(LS_NEXT_LOG_ID) || '1', 10);
+    logs.push({ id: nextLogId, task_id: t.id, task_name: t.name, status: 'ok', output: t.command || '', executed_at: nowFull, user_id: 1 });
+    saveLogs(logs);
+    localStorage.setItem(LS_NEXT_LOG_ID, String(nextLogId + 1));
+    t.last_executed = nowMinuteStr();
+    t.updated_at = nowFull;
+    if (t.task_date) t.completed = 1;
+    tasks[idx] = t;
+    saveTasks(tasks);
+    return jsonResponse({ ok: true, message: 'Task #' + tid + ' executed' });
+  }
+
+  function handleAdminHealth() {
+    var tasks = loadTasks();
+    var completions = loadCompletions();
+    var totalTasks = tasks.length;
+    var enabledTasks = tasks.filter(function (t) { return parseInt(t.enabled) === 1; }).length;
+    var today = todayStr();
+    var completedToday = 0;
+    Object.keys(completions).forEach(function (k) {
+      if ((completions[k] || []).indexOf(today) !== -1) completedToday++;
+    });
+    var badCron = 0;
+    tasks.forEach(function (t) {
+      var parts = (t.cron_expr || '').trim().split(/\s+/);
+      if (parts.length !== 5) badCron++;
+    });
+    var checks = {
+      database: { ok: true, msg: '连接正常（本地 localStorage）' },
+      tables: { ok: true, msg: '所有表正常' },
+      tasks: { ok: true, msg: '共 ' + totalTasks + ' 个任务，' + enabledTasks + ' 个启用，今日完成 ' + completedToday + ' 个重复任务' },
+      errors: { ok: true, msg: '过去24小时 0 个错误' },
+      cron: { ok: badCron === 0, msg: badCron + ' 个任务cron格式异常' }
+    };
+    var overall = Object.keys(checks).every(function (k) { return checks[k].ok; });
+    return jsonResponse({ overall: overall, checks: checks, system: getSystemStatus() });
+  }
+
+  function handleGenerate(body) {
+    var text = body.text || '';
+    if (!text) return jsonResponse({ error: 'text required' }, 400);
+    return jsonResponse(parseNaturalLanguage(text));
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // 路由分发 —— 对齐 server.py 的鉴权规则：
+  // /api/auth/* 不需要 token，其余 /api/* 都需要
+  // ══════════════════════════════════════════════════════════════
+  function routeApi(path, method, query, body, opts) {
+    var isAuthPath = path.indexOf('/api/auth/') === 0;
+    if (!isAuthPath) {
+      var uid = requireAuth(opts);
+      if (!uid) return jsonResponse({ error: 'unauthorized' }, 401);
+    }
+
+    if (method === 'GET') {
+      if (path === '/api/auth/check') return handleAuthCheck(opts);
+      if (path === '/api/tasks') return handleGetTasks(query);
+      if (path === '/api/task/date-map') return handleDateMap(query);
+      if (path === '/api/status') return jsonResponse(getSystemStatus());
+      if (path === '/api/admin/health') return handleAdminHealth();
+      if (path === '/api/stats/weekly') return handleWeeklyStats();
+      if (path === '/api/logs') return handleLogs();
+      return jsonResponse({ error: 'Not Found' }, 404);
+    }
+    if (method === 'POST') {
+      if (path === '/api/auth/register') return handleRegister(body);
+      if (path === '/api/auth/login') return handleLogin(body);
+      if (path === '/api/auth/logout') return handleLogout();
+      if (path === '/api/task') return handleCreateTask(body);
+      if (path === '/api/generate') return handleGenerate(body);
+      var runMatch = path.match(/^\/api\/task\/(\d+)\/run$/);
+      if (runMatch) return handleRunTask(runMatch[1]);
+      return jsonResponse({ error: 'Not Found' }, 404);
+    }
+    if (method === 'PUT') {
+      var putMatch = path.match(/^\/api\/task\/(\d+)$/);
+      if (putMatch) return handleUpdateTask(putMatch[1], body);
+      return jsonResponse({ error: 'Not Found' }, 404);
+    }
+    if (method === 'DELETE') {
+      var delMatch = path.match(/^\/api\/task\/(\d+)$/);
+      if (delMatch) return handleDeleteTask(delMatch[1]);
+      return jsonResponse({ error: 'Not Found' }, 404);
+    }
+    return jsonResponse({ error: 'Not Found' }, 404);
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // fetch 拦截层 —— 页面里所有请求（api() 内部的 fetch 以及另外 5 处
+  // 直接写的 fetch('/api/auth/...')）都会经过这里，统一分发到上面的
+  // 本地实现，不会有真正的网络请求发出去。
+  // ══════════════════════════════════════════════════════════════
+  var originalFetch = window.fetch ? window.fetch.bind(window) : null;
+
+  window.fetch = function (input, opts) {
+    opts = opts || {};
+    var url = typeof input === 'string' ? input : (input && input.url) || '';
+    if (typeof url !== 'string' || url.indexOf('/api/') !== 0) {
+      return originalFetch ? originalFetch(input, opts) : Promise.reject(new Error('fetch not available'));
+    }
+
+    var qIdx = url.indexOf('?');
+    var path = qIdx === -1 ? url : url.slice(0, qIdx);
+    var query = new URLSearchParams(qIdx === -1 ? '' : url.slice(qIdx + 1));
+    var method = (opts.method || 'GET').toUpperCase();
+    var body = {};
+    if (opts.body) {
+      try { body = JSON.parse(opts.body); } catch (e) { body = {}; }
+    }
+
+    // 用 Promise 微任务保留"异步网络请求"的调用形态（调用方 .then() 不会同步触发），
+    // 但不经过 setTimeout 宏任务 —— 后台/无头标签页里宏任务定时器可能被浏览器限流到
+    // 秒级延迟，微任务不受这个限流影响，能让页面响应保持跟真实 fetch 一样快。
+    return Promise.resolve().then(function () {
+      return routeApi(path, method, query, body, opts);
+    }).catch(function (e) {
+      return jsonResponse({ error: String((e && e.message) || e) }, 500);
+    });
+  };
+})();
+
+// ── Auth ──
+let authToken = localStorage.getItem('sp_token') || '';
+let authUser = localStorage.getItem('sp_user') || '';
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideAuthError() {
+  document.getElementById('authError').classList.remove('show');
+}
+function showLoading(v) {
+  document.getElementById('authLoading').classList.toggle('show', v);
+}
+function showLogin() {
+  hideAuthError();
+  document.getElementById('authLogin').style.display = 'block';
+  document.getElementById('authRegister').style.display = 'none';
+}
+function showRegister() {
+  hideAuthError();
+  document.getElementById('authLogin').style.display = 'none';
+  document.getElementById('authRegister').style.display = 'block';
+}
+
+async function doLogin() {
+  hideAuthError();
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  if (!username || !password) { showAuthError('请输入用户名和密码'); return; }
+  showLoading(true);
+  try {
+    const r = await fetch('/api/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username, password})
+    });
+    const data = await r.json();
+    if (!r.ok) { showAuthError(data.error || '登录失败'); showLoading(false); return; }
+    authToken = data.token;
+    authUser = data.username;
+    localStorage.setItem('sp_token', authToken);
+    localStorage.setItem('sp_user', authUser);
+    showLoading(false);
+    enterApp();
+  } catch(e) {
+    showLoading(false);
+    showAuthError('网络错误: ' + e.message);
+  }
+}
+
+async function doRegister() {
+  hideAuthError();
+  const username = document.getElementById('regUser').value.trim();
+  const password = document.getElementById('regPass').value;
+  const password2 = document.getElementById('regPass2').value;
+  if (username.length < 2) { showAuthError('用户名至少2个字符'); return; }
+  if (password.length < 4) { showAuthError('密码至少4个字符'); return; }
+  if (password !== password2) { showAuthError('两次密码不一致'); return; }
+  showLoading(true);
+  try {
+    const r = await fetch('/api/auth/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username, password})
+    });
+    const data = await r.json();
+    if (!r.ok) { showAuthError(data.error || '注册失败'); showLoading(false); return; }
+    authToken = data.token;
+    authUser = data.username;
+    localStorage.setItem('sp_token', authToken);
+    localStorage.setItem('sp_user', authUser);
+    showLoading(false);
+    enterApp();
+  } catch(e) {
+    showLoading(false);
+    showAuthError('网络错误: ' + e.message);
+  }
+}
+
+function doLogout() {
+  // Attempt server logout (best-effort)
+  if (authToken) {
+    fetch('/api/auth/logout', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + authToken}
+    }).catch(() => {});
+  }
+  authToken = '';
+  authUser = '';
+  localStorage.removeItem('sp_token');
+  localStorage.removeItem('sp_user');
+  document.getElementById('authScreen').classList.remove('hidden');
+  document.querySelector('.main').style.display = 'none';
+  document.getElementById('currentUserName').textContent = '';
+  document.getElementById('logoutBtn').style.display = 'none';
+}
+
+function enterApp() {
+  document.getElementById('authScreen').classList.add('hidden');
+  document.querySelector('.main').style.display = 'flex';
+  document.getElementById('currentUserName').textContent = '👤 ' + authUser;
+  document.getElementById('logoutBtn').style.display = 'inline-block';
+  // Show admin button only for admin (user_id === 1)
+  if (authToken) {
+    fetch('/api/auth/check', {
+      headers: {'Authorization': 'Bearer ' + authToken}
+    }).then(r => r.json()).then(data => {
+      if (data.username === 'admin') {
+        document.getElementById('adminBtn').style.display = 'inline-block';
+      }
+    }).catch(() => {});
+  }
+  // Boot full app
+  calToday();
+  requestNotifPermission();
+  loadTasks();
+  loadStatus();
+  loadLogs();
+  loadWeeklyStats();
+  setTimeout(checkDeadlineAlerts, 1000);
+  setInterval(() => { loadStatus(); loadLogs(); loadWeeklyStats(); }, 30000);
+  setInterval(() => { renderTasks(); checkDeadlineAlerts(); }, 60000);
+  window.addEventListener('hashchange', onHashChange);
+}
+
+
+// ── State ──
+let tasks = [];
+let editingId = null;
+let aiSuggestion = null;
+let calYear = 2026, calMonth = 7;
+let selectedDate = null;
+let dateMap = {};
+let isLoading = false;
+let showExpired = false;
+let calCache = {}; // { '2026-7': {data, ts} }
+
+// ── Enhanced API with error handling ──
+async function api(path, opts={}) {
+  try {
+    const headers = {'Content-Type':'application/json'};
+    if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
+    const r = await fetch(path, {
+      headers,
+      ...opts,
+    });
+    if (r.status === 401) {
+      // Token expired/invalid → logout
+      authToken = '';
+      authUser = '';
+      localStorage.removeItem('sp_token');
+      localStorage.removeItem('sp_user');
+      document.getElementById('authScreen').classList.remove('hidden');
+      document.querySelector('.main').style.display = 'none';
+      throw new Error('登录已过期，请重新登录');
+    }
+    if (!r.ok) {
+      const text = await r.text().catch(() => '');
+      throw new Error(`HTTP ${r.status}: ${text || r.statusText}`);
+    }
+    return r.json();
+  } catch(e) {
+    throw e;
+  }
+}
+
+// ── Error display ──
+let errorTimer = null;
+function showError(msg) {
+  const el = document.getElementById('errorBanner');
+  el.textContent = '⚠️ ' + msg;
+  el.classList.add('show');
+  clearTimeout(errorTimer);
+  errorTimer = setTimeout(() => el.classList.remove('show'), 6000);
+}
+
+// ── Calendar with caching ──
+function setMinute(val) {
+  document.getElementById('formMinute').value = String(val).padStart(2, '0');
+}
+
+function toggleExpired() {
+  showExpired = !showExpired;
+  document.getElementById('expiredToggle').classList.toggle('showing', showExpired);
+  renderTasks();
+}
+function calRender() {
+  const title = document.getElementById('calTitle');
+  title.textContent = `${calYear}年 ${calMonth}月`;
+
+  const grid = document.getElementById('calGrid');
+  const weekDays = ['日','一','二','三','四','五','六'];
+  let html = weekDays.map(d => `<div class="wd">${d}</div>`).join('');
+
+  const first = new Date(calYear, calMonth-1, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+  const today = new Date();
+  const todayStr = fmtDate(today);
+  const selStr = selectedDate;
+
+  // Compute task count per date from dateMap
+  // dateMap is { "2026-07-29": true, ... } - get counts from API-enhanced values
+  // We store counts in dateMap when loaded
+  const getCount = (ds) => {
+    const v = dateMap[ds];
+    if (v === true) return 1;
+    if (typeof v === 'number') return v;
+    return 0;
+  };
+
+  for (let i = 0; i < first; i++) {
+    html += '<div class="day other"></div>';
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let cls = 'day';
+    if (ds === todayStr) cls += ' today';
+    if (ds === selStr) cls += ' selected';
+    const count = getCount(ds);
+    if (count > 0) cls += ' has-task';
+    const countBadge = count > 1 ? `<span class="task-count-badge">${count}</span>` : '';
+    html += `<div class="${cls}" onclick="calSelect('${ds}')">${d}${countBadge}</div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+function calPrev() {
+  calMonth--;
+  if (calMonth < 1) { calMonth = 12; calYear--; }
+  loadDateMap();
+}
+
+function calNext() {
+  calMonth++;
+  if (calMonth > 12) { calMonth = 1; calYear++; }
+  loadDateMap();
+}
+
+function calToday() {
+  const t = new Date();
+  calYear = t.getFullYear();
+  calMonth = t.getMonth() + 1;
+  selectedDate = fmtDate(t);
+  updateHash();
+  loadDateMap();
+}
+
+function calSelect(ds) {
+  selectedDate = (selectedDate === ds) ? null : ds;
+  updateHash();
+  loadDateMap();
+  loadTasks();
+}
+
+function fmtDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+async function loadDateMap() {
+  const cacheKey = `${calYear}-${calMonth}`;
+  const cached = calCache[cacheKey];
+  // 缓存 5 分钟内有效
+  if (cached && Date.now() - cached.ts < 300000) {
+    dateMap = cached.data;
+    calRender();
+    return;
+  }
+  try {
+    const dm = await api(`/api/task/date-map?year=${calYear}&month=${calMonth}`);
+    if (dm) {
+      dateMap = dm;
+      calCache[cacheKey] = { data: dm, ts: Date.now() };
+    } else if (cached) {
+      dateMap = cached.data;
+    }
+  } catch(e) { if (cached) dateMap = cached.data; else dateMap = {}; }
+  calRender();
+}
+
+// ── Hash routing ──
+function updateHash() {
+  if (selectedDate) {
+    if (location.hash !== '#' + selectedDate) {
+      history.replaceState(null, '', '#' + selectedDate);
+    }
+  } else {
+    if (location.hash) history.replaceState(null, '', ' ');
+  }
+}
+
+function onHashChange() {
+  const hash = location.hash.replace('#', '');
+  if (hash) {
+    selectedDate = hash;
+    loadDateMap();
+    loadTasks();
+  }
+}
+
+// ── Tasks ──
+async function loadTasks() {
+  isLoading = true;
+  renderTasks();
+  try {
+    let url = '/api/tasks';
+    if (selectedDate) url += `?date=${selectedDate}`;
+    tasks = await api(url);
+    isLoading = false;
+  } catch(e) {
+    isLoading = false;
+    showError('加载任务失败: ' + e.message);
+    tasks = [];
+  }
+  renderTasks();
+}
+
+function getDeadlineMs(task) {
+  if (!task.task_date) return Infinity;
+  const parts = task.cron_expr.split(' ');
+  const min = parseInt(parts[0]) || 0;
+  const hour = parseInt(parts[1]) || 0;
+  const deadline = new Date(task.task_date + 'T' +
+    String(hour).padStart(2,'0') + ':' + String(min).padStart(2,'0') + ':00');
+  return deadline - new Date();
+}
+
+function calcDeadlineInfo(task) {
+  if (!task.task_date) return '';
+  const now = new Date();
+  const parts = task.cron_expr.split(' ');
+  let hour = 0, minute = 0;
+  if (parts.length >= 2) {
+    minute = parseInt(parts[0]) || 0;
+    hour = parseInt(parts[1]) || 0;
+  }
+  const deadline = new Date(task.task_date + 'T' +
+    String(hour).padStart(2,'0') + ':' + String(minute).padStart(2,'0') + ':00');
+  const diff = deadline - now;
+  if (diff <= 0) return '<span class="deadline-tag overdue">⏰ 已过期</span>';
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  let text;
+  if (days > 0)      text = `⏰ 剩余 ${days}天${hours}小时`;
+  else if (hours > 0) text = `⏰ 剩余 ${hours}小时${mins}分`;
+  else                 text = `⏰ 剩余 ${mins}分`;
+  const urgency = diff < 86400000 ? 'urgent' : '';
+  return `<span class="deadline-tag ${urgency}">${text}</span>`;
+}
+
+function formatCronAsTime(cron) {
+  if (!cron) return '--:--';
+  const parts = cron.split(' ');
+  const min = parseInt(parts[0]) || 0;
+  const hour = parseInt(parts[1]) || 0;
+  return `${String(hour).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+}
+
+// ── Sort ──
+function onSortChange() {
+  renderTasks();
+}
+
+function getSortKey(task, sortBy) {
+  if (sortBy === 'name') return task.name.toLowerCase();
+  if (sortBy === 'created') return task.created_at || '';
+  // default: deadline
+  const dm = getDeadlineMs(task);
+  return dm === Infinity ? 'zzzz' : String(dm).padStart(15, '0');
+}
+
+function renderTasks() {
+  const el = document.getElementById('taskList');
+  const count = document.getElementById('taskCount');
+  document.getElementById('dateLabel').textContent = selectedDate ? `(${selectedDate})` : '(全部)';
+
+  if (isLoading) {
+    el.innerHTML = '<div class="loading-skeleton"><span class="spinner"></span>加载中...</div>';
+    return;
+  }
+
+  // Filter by selectedDate: show exact-date tasks + recurring tasks (no task_date)
+  const now = new Date();
+  let expiredCount = 0;
+  const filtered = tasks.filter(t => {
+    // Recurring tasks (no task_date): always show
+    if (!t.task_date) return true;
+    // Date-bound task: must match selectedDate (or show all when no date selected)
+    if (selectedDate && t.task_date !== selectedDate) return false;
+    // Expired one-time tasks: hide unless showExpired
+    if (t.completed) return true;
+    const parts = (t.cron_expr || '').split(' ');
+    const deadline = new Date(t.task_date + 'T' +
+      String(parseInt(parts[1])||0).padStart(2,'0') + ':' +
+      String(parseInt(parts[0])||0).padStart(2,'0') + ':00');
+    if (deadline < now) {
+      expiredCount++;
+      return showExpired;
+    }
+    return true;
+  });
+
+  count.textContent = filtered.length;
+
+  // Update expired toggle button text with count
+  const expBtn = document.getElementById('expiredToggle');
+  if (expiredCount > 0) {
+    expBtn.textContent = '📅 过期 ' + expiredCount;
+    if (!showExpired) expBtn.title = '点击查看 ' + expiredCount + ' 个过期任务';
+  } else {
+    expBtn.textContent = '📅 过期';
+    expBtn.title = '显示/隐藏已过期任务';
+  }
+
+  if (filtered.length === 0) {
+    el.innerHTML = '<div class="empty-state">' +
+      (tasks.length > 0 ? '所有任务已过期，点击「📅 过期」查看' : '暂无任务') +
+      '</div>';
+    return;
+  }
+
+  const sortBy = document.getElementById('sortSelect').value;
+  const sorted = [...filtered].sort((a,b) => {
+    if (a.completed && !b.completed) return 1;
+    if (!a.completed && b.completed) return -1;
+    const ka = getSortKey(a, sortBy);
+    const kb = getSortKey(b, sortBy);
+    return ka < kb ? -1 : ka > kb ? 1 : 0;
+  });
+
+  el.innerHTML = sorted.map(t => {
+    const timeStr = formatCronAsTime(t.cron_expr);
+    const cls = t.enabled ? '' : 'disabled';
+    const dateTag = t.task_date ? `<span class="date-tag">📅 ${esc(t.task_date)}</span>` : '';
+    const deadlineTag = calcDeadlineInfo(t);
+    const completedCls = t.completed ? 'completed' : '';
+    // XSS-safe link detection in command
+    let cmdHtml = '';
+    if (t.command) {
+      cmdHtml = '💬 ' + esc(t.command).replace(
+        /(https?:\/\/[^\s<]+)/gi,
+        function(m) {
+          const safe = sanitizeUrl(m);
+          return safe ? '<a href="' + safe + '" target="_blank" rel="noopener noreferrer">' + safe + '</a>' : m;
+        }
+      );
+    }
+    return `<div class="task-card ${cls} ${completedCls}">
+      <div class="time-badge">${timeStr}</div>
+      <div class="info">
+        <div class="name">${esc(t.name)}${dateTag}${deadlineTag}</div>
+        <div class="cmd">${cmdHtml}</div>
+      </div>
+      <div class="actions">
+        <button class="${t.enabled?'toggle-on':'toggle-off'}" onclick="toggleTask(${t.id})" title="启停">${t.enabled?'●':'○'}</button>
+        <button class="${t.completed?'btn-done':''}" onclick="toggleComplete(${t.id})" title="完成">${t.completed?'✓':'○'}</button>
+        <button class="btn-run" onclick="runTask(${t.id})" title="立即运行">▶</button>
+        <button onclick="openEditModal(${t.id})" title="编辑">✎</button>
+        <button onclick="deleteTask(${t.id})" style="color:#ef4444;" title="删除">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+  updateCompletionStats();
+}
+
+// ── XSS-safe escape ──
+function esc(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function sanitizeUrl(url) {
+  // 只允许 http/https/mailto 协议，阻止 javascript: 等伪协议
+  if (!url) return '';
+  const lower = url.trim().toLowerCase();
+  if (lower.startsWith('http://') || lower.startsWith('https://') || lower.startsWith('mailto:')) {
+    return esc(url);
+  }
+  return '';
+}
+
+// ── CRUD ──
+function openAddModal() {
+  editingId = null;
+  showFormDialog('新建任务', '', '0 9 * * *', '', 1, selectedDate || '');
+}
+
+function openEditModal(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  editingId = id;
+  showFormDialog('编辑任务', t.name, t.cron_expr, t.command||'', t.enabled, t.task_date||'');
+}
+
+function showFormDialog(title, name, cron, cmd, enabled, date) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('formName').value = name;
+  const parts = (cron || '0 9 * * *').split(' ');
+  document.getElementById('formHour').value = (parseInt(parts[1]) || 9).toString();
+  document.getElementById('formMinute').value = (parseInt(parts[0]) || 0).toString();
+  document.getElementById('formCmd').value = cmd;
+  document.getElementById('formEnabled').value = enabled;
+  document.getElementById('formDate').value = date;
+  // Reset repeat type to custom
+  document.getElementById('formRepeat').value = 'custom';
+  document.getElementById('modalSaveBtn').textContent = editingId ? '更新' : '保存';
+  document.getElementById('taskModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('taskModal').classList.remove('show');
+}
+
+// Repeat type → cron preset
+const REPEAT_PRESETS = {
+  daily:  { cron: '0 9 * * *',     label: '每天' },
+  weekdays: { cron: '0 9 * * 1-5', label: '工作日' },
+  weekly: { cron: '0 9 * * 1',     label: '每周一' },
+  monthly: { cron: '0 9 1 * *',    label: '每月1号' },
+};
+function onRepeatChange() {
+  const val = document.getElementById('formRepeat').value;
+  if (val !== 'custom' && REPEAT_PRESETS[val]) {
+    const preset = REPEAT_PRESETS[val];
+    const parts = preset.cron.split(' ');
+    document.getElementById('formHour').value = parts[1];
+    document.getElementById('formMinute').value = parts[0];
+  }
+}
+
+async function saveTask() {
+  const hour = parseInt(document.getElementById('formHour').value) || 0;
+  let minute = parseInt(document.getElementById('formMinute').value) || 0;
+  // Validate hour 0-23, minute 0-59
+  if (hour < 0 || hour > 23) { showError('小时必须在 0-23 之间'); return; }
+  if (minute < 0 || minute > 59) { showError('分钟必须在 0-59 之间'); return; }
+  minute = String(minute).padStart(2, '0');
+  const repeatVal = document.getElementById('formRepeat').value;
+  let cronExpr = `${minute} ${hour} * * *`;
+  if (repeatVal !== 'custom' && REPEAT_PRESETS[repeatVal]) {
+    const parts = REPEAT_PRESETS[repeatVal].cron.split(' ');
+    cronExpr = `${minute} ${hour} ${parts[2]} ${parts[3]} ${parts[4]}`;
+  }
+  // Validate cron expression (5 fields)
+  if (!/^(\d{1,2}|\*) (\d{1,2}|\*) (\d{1,2}|\*) (\d{1,2}|\*) (\d{1,2}|\*|\d-\d|\d,\d+)$/.test(cronExpr)) {
+    showError('cron 表达式格式无效'); return;
+  }
+  const data = {
+    name: document.getElementById('formName').value.trim(),
+    cron_expr: cronExpr,
+    command: document.getElementById('formCmd').value.trim(),
+    enabled: parseInt(document.getElementById('formEnabled').value),
+  };
+  const d = document.getElementById('formDate').value.trim();
+  if (d) data.date = d;
+  if (!data.name) { showError('请输入任务名称'); return; }
+
+  try {
+    if (editingId) {
+      await api(`/api/task/${editingId}`, {method:'PUT', body:JSON.stringify(data)});
+    } else {
+      await api('/api/task', {method:'POST', body:JSON.stringify(data)});
+    }
+    closeModal();
+    loadTasks();
+    loadDateMap();
+    loadWeeklyStats();
+  } catch(e) {
+    showError('保存失败: ' + e.message);
+  }
+}
+
+async function deleteTask(id) {
+  if (!confirm('确认删除「' + (tasks.find(t=>t.id===id)?.name||'') + '」？')) return;
+  try {
+    await api(`/api/task/${id}`, {method:'DELETE'});
+    loadTasks();
+    loadDateMap();
+    loadWeeklyStats();
+  } catch(e) {
+    showError('删除失败: ' + e.message);
+  }
+}
+
+async function toggleTask(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  // Optimistic update
+  const oldVal = t.enabled;
+  t.enabled = t.enabled ? 0 : 1;
+  renderTasks();
+  try {
+    await api(`/api/task/${id}`, {method:'PUT', body:JSON.stringify({enabled: t.enabled})});
+  } catch(e) {
+    t.enabled = oldVal; // rollback
+    renderTasks();
+    showError('操作失败: ' + e.message);
+  }
+}
+
+// ── Run Now ──
+async function runTask(id) {
+  try {
+    const r = await api(`/api/task/${id}/run`, {method:'POST', _force: true});
+    if (r && r.ok) {
+      showError('✅ 任务已执行');
+      setTimeout(() => document.getElementById('errorBanner').classList.remove('show'), 2000);
+      loadTasks();
+      loadLogs();
+    }
+  } catch(e) {
+    showError('执行失败: ' + e.message);
+  }
+}
+
+// ── Desktop Notification ──
+function requestNotifPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function sendDesktopNotif(title, body) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, { body, icon: '📋' });
+  }
+}
+
+async function toggleComplete(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  // Optimistic update
+  const oldVal = t.completed;
+  t.completed = t.completed ? 0 : 1;
+  renderTasks();
+  try {
+    const payload = {completed: t.completed};
+    if (selectedDate) payload.date = selectedDate;
+    await api(`/api/task/${id}`, {method:'PUT', body:JSON.stringify(payload)});
+    loadWeeklyStats();
+  } catch(e) {
+    t.completed = oldVal; // rollback
+    renderTasks();
+    showError('操作失败: ' + e.message);
+  }
+}
+
+function updateCompletionStats() {
+  if (!selectedDate) {
+    document.getElementById('compRate').textContent = '--';
+    document.getElementById('compDetail').textContent = '请选择日期查看';
+    document.getElementById('compSlogan').textContent = '📅 选中日期查看完成率';
+    document.getElementById('compSlogan').className = 'slogan start';
+    return;
+  }
+  // Count tasks matching selectedDate: exact date match + recurring tasks
+  const todayTasks = tasks.filter(t => {
+    if (t.completed && !(t.task_date === selectedDate || !t.task_date)) return false;
+    // Exact date match OR recurring task (no task_date) counts for today
+    if (t.task_date === selectedDate) return true;
+    if (!t.task_date && t.cron_expr) return true;
+    return false;
+  });
+  const total = todayTasks.length;
+  const done = todayTasks.filter(t => t.completed).length;
+  const rate = total > 0 ? Math.round(done / total * 100) : 0;
+  document.getElementById('compRate').textContent = rate + '%';
+  document.getElementById('compDetail').textContent = `今日任务 ${total} / 已完成 ${done}`;
+  const slogan = document.getElementById('compSlogan');
+  if (total === 0) {
+    slogan.textContent = '📋 暂无今日任务';
+    slogan.className = 'slogan start';
+  } else if (rate >= 100) {
+    slogan.textContent = '🎉 已完成今日所有任务！';
+    slogan.className = 'slogan all-done';
+  } else if (rate >= 50) {
+    slogan.textContent = '💪 任务进度已过半，请继续努力';
+    slogan.className = 'slogan halfway';
+  } else {
+    slogan.textContent = '📋 快快开启今日的任务吧';
+    slogan.className = 'slogan start';
+  }
+}
+
+// ── AI ──
+async function generateFromAI() {
+  const text = document.getElementById('aiInput').value.trim();
+  if (!text) return;
+  try {
+    const result = await api('/api/generate', {method:'POST', body:JSON.stringify({text})});
+    aiSuggestion = result;
+    document.getElementById('aiResult').classList.add('show');
+    document.getElementById('aiName').textContent = result.name;
+    document.getElementById('aiCron').textContent = formatCronAsTime(result.cron_expr);
+    document.getElementById('aiCmd').textContent = result.command || '（无）';
+    document.getElementById('aiDateRow').style.display = 'none';
+    if (result.date) {
+      document.getElementById('aiDateRow').style.display = 'flex';
+      document.getElementById('aiDate').textContent = result.date;
+    }
+  } catch(e) {
+    document.getElementById('aiResult').classList.add('show');
+    document.getElementById('aiName').textContent = '❌ 解析失败';
+    document.getElementById('aiCron').textContent = '';
+    document.getElementById('aiCmd').textContent = '';
+    showError('AI 解析失败: ' + e.message);
+  }
+}
+
+async function addFromAI() {
+  if (!aiSuggestion) return;
+  const body = {...aiSuggestion};
+  // If AI produced a recurring pattern (has weekday or day-of-month), don't pin to a date
+  const cronParts = (body.cron_expr || '').split(' ');
+  const hasRecurringField = cronParts.length === 5 && (cronParts[2] !== '*' || cronParts[4] !== '*');
+  if (!hasRecurringField && selectedDate && !body.date) {
+    body.date = selectedDate;
+  }
+  if (hasRecurringField) {
+    body.date = ''; // ensure recurring tasks have no date
+  }
+  try {
+    await api('/api/task', {method:'POST', body:JSON.stringify(body)});
+    loadWeeklyStats();
+  } catch(e) {
+    showError('添加失败: ' + e.message);
+  }
+  aiSuggestion = null;
+  document.getElementById('aiResult').classList.remove('show');
+  document.getElementById('aiInput').value = '';
+  loadTasks();
+  loadDateMap();
+}
+
+// ── Status & Logs ──
+async function loadStatus() {
+  try {
+    const s = await api('/api/status');
+    document.getElementById('sbHost').textContent = s.hostname;
+    document.getElementById('sbArch').textContent = s.arch;
+    document.getElementById('sbUptime').textContent = s.uptime;
+    document.getElementById('sbMem').textContent = s.memory.percent + '%';
+    document.getElementById('sbDisk').textContent = s.disk.percent + '%';
+    document.getElementById('currentTime').textContent = s.time;
+  } catch(e) {}
+}
+
+async function loadWeeklyStats() {
+  try {
+    const stats = await api('/api/stats/weekly');
+    const el = document.getElementById('weeklyChart');
+    const maxVal = Math.max(...stats.map(s => s.total), 1);
+    el.innerHTML = stats.map(s => {
+      const pct = s.total > 0 ? (s.done / s.total * 100) : 0;
+      const h = Math.max(4, s.total > 0 ? (pct / 100 * 80) : 4);
+      const hasTask = s.total > 0;
+      const barCls = hasTask ? 'has-task' : 'no-task';
+      return `<div class="chart-bar-wrap">
+        <div class="chart-bar-count">${s.done}/${s.total}</div>
+        <div class="chart-bar ${barCls}" style="height:${h}px"></div>
+        <div class="chart-bar-label">${s.weekday}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+async function loadLogs() {
+  try {
+    const logs = await api('/api/logs');
+    const el = document.getElementById('logList');
+    if (logs.length === 0) {
+      el.innerHTML = '<div class="empty-state">暂无记录</div>';
+      return;
+    }
+    el.innerHTML = logs.slice(0, 30).map(l =>
+      `<div class="log-item"><span><span class="log-status ${l.status}">●</span> ${esc(l.task_name||'#'+l.task_id)}</span><span class="log-time">${l.executed_at}</span></div>`
+    ).join('');
+  } catch(e) {}
+}
+
+// ── Deadline Alert System ──
+const DEADLINE_THRESHOLDS = [
+  { ms: 60000, label: '1分钟', cls: 'urgent-1m', msg: '仅剩不到 1 分钟！' },
+  { ms: 600000, label: '10分钟', cls: 'urgent-10m', msg: '仅剩不到 10 分钟！' },
+  { ms: 1800000, label: '30分钟', cls: 'urgent-30m', msg: '仅剩不到 30 分钟！' },
+  { ms: 3600000, label: '1小时', cls: 'urgent-1h', msg: '距离截止还有不到 1 小时' },
+];
+
+function showAlertToast(title, msg, cls) {
+  // Desktop notification fallback
+  sendDesktopNotif('SmartPlan - ' + title, msg);
+  // Page toast
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${cls}`;
+  toast.innerHTML = `<div class="toast-title">⏰ ${esc(title)}</div><div class="toast-msg">${msg}</div>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('toast-out');
+    setTimeout(() => toast.remove(), 300);
+  }, 8000);
+}
+
+function checkDeadlineAlerts() {
+  tasks.forEach(t => {
+    if (t.completed) return;
+    const deadline = getDeadlineMs(t);
+    if (deadline <= 0 || deadline === Infinity) return;
+
+    for (const { ms, label, cls, msg } of DEADLINE_THRESHOLDS) {
+      if (deadline <= ms) {
+        const key = `sp_notified_${t.id}_${ms}`;
+        // Check localStorage first, fall back to in-memory
+        if (!localStorage.getItem(key)) {
+          localStorage.setItem(key, '1');
+          showAlertToast(t.name, msg, cls);
+        }
+        break;
+      }
+    }
+  });
+}
+
+function refreshAll() {
+  loadTasks();
+  loadStatus();
+  loadLogs();
+  if (!document.getElementById('calGrid').childElementCount) loadDateMap();
+}
+
+// ── Modal ──
+document.addEventListener('DOMContentLoaded', () => {
+  // Check auth state
+  if (authToken) {
+    // Verify token is still valid
+    fetch('/api/auth/check', {
+      headers: {'Authorization': 'Bearer ' + authToken}
+    }).then(r => {
+      if (r.ok) {
+        enterApp();
+      } else {
+        localStorage.removeItem('sp_token');
+        localStorage.removeItem('sp_user');
+        authToken = ''; authUser = '';
+        document.getElementById('authScreen').classList.remove('hidden');
+        document.querySelector('.main').style.display = 'none';
+      }
+    }).catch(() => {
+      // Can't reach server, show app anyway (offline mode)
+      enterApp();
+    });
+  } else {
+    document.getElementById('authScreen').classList.remove('hidden');
+    document.querySelector('.main').style.display = 'none';
+  }
+  // (original DOMContentLoaded logic moved to enterApp())
+
+  // Build modal HTML (always available)
+  const hoursOpts = Array.from({length:24}, (_,i) => `<option value="${i}">${String(i).padStart(2,'0')}</option>`).join('');
+  const minsOpts = Array.from({length:12}, (_,i) => `<option value="${i*5}">${String(i*5).padStart(2,'0')}</option>`).join('');
+  const modalHTML = `<div class="modal-overlay" id="taskModal">
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1.25rem;width:400px;max-width:90vw;">
+      <h3 id="modalTitle" style="margin-bottom:0.75rem;font-size:1rem;">新建任务</h3>
+      <div class="form-group"><label>任务名称</label><input type="text" id="formName" placeholder="如：备份日志"></div>
+      <div class="form-row">
+        <div class="form-group"><label>重复类型</label><select id="formRepeat" onchange="onRepeatChange()">
+          <option value="custom">自定义</option>
+          <option value="daily">每天</option>
+          <option value="weekdays">工作日(周一至周五)</option>
+          <option value="weekly">每周一</option>
+          <option value="monthly">每月1号</option>
+        </select></div>
+        <div class="form-group"><label>启用</label><select id="formEnabled"><option value="1">是</option><option value="0">否</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>小时</label><select id="formHour">${hoursOpts}</select></div>
+        <div class="form-group"><label>分钟</label>
+          <div class="minute-input-wrap">
+            <input type="number" id="formMinute" min="0" max="59" value="0" style="width:55px;">
+            <button class="minute-preset" onclick="setMinute(0)">:00</button>
+            <button class="minute-preset" onclick="setMinute(15)">:15</button>
+            <button class="minute-preset" onclick="setMinute(30)">:30</button>
+            <button class="minute-preset" onclick="setMinute(45)">:45</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group"><label>备注</label><textarea id="formCmd" placeholder="任务的备注说明（链接自动识别）"></textarea></div>
+      <div class="form-group"><label>指定日期（可选，留空为循环任务）</label><input type="date" id="formDate"></div>
+      <div style="display:flex;justify-content:flex-end;gap:0.4rem;margin-top:0.5rem;">
+        <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" id="modalSaveBtn" onclick="saveTask()">保存</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  const toastHTML = '<div class="toast-container" id="toastContainer"></div>';
+  document.body.insertAdjacentHTML('beforeend', toastHTML);
+});
+
+
+// ── Admin Panel ──
+let adminTimer = null;
+
+function openAdminPanel() {
+  document.getElementById('adminPanel').classList.add('show');
+  loadAdminHealth();
+  adminTimer = setInterval(loadAdminHealth, 10000);
+}
+
+function closeAdminPanel() {
+  document.getElementById('adminPanel').classList.remove('show');
+  if (adminTimer) { clearInterval(adminTimer); adminTimer = null; }
+}
+
+async function loadAdminHealth() {
+  const el = document.getElementById('adminStatus');
+  try {
+    const h = await api('/api/admin/health');
+    const overallCls = h.overall ? 'ok' : 'fail';
+    const overallIcon = h.overall ? '✅' : '❌';
+    const overallText = h.overall ? '系统运行正常' : '存在异常';
+    let html = `<div class="admin-overall ${overallCls}">${overallIcon} ${overallText}</div>`;
+    html += '<div class="admin-status-grid">';
+    for (const [key, check] of Object.entries(h.checks)) {
+      const icon = check.ok ? '✅' : '❌';
+      const msgCls = check.ok ? '' : 'err';
+      const labels = {
+        database: '数据库', tables: '数据表', tasks: '任务状态',
+        errors: '错误日志', cron: 'Cron 格式',
+      };
+      html += `<div class="admin-check"><span class="icon ${check.ok?'ok':'fail'}">${icon}</span><span class="label">${labels[key]||key}</span><span class="msg ${msgCls}">${check.msg}</span></div>`;
+    }
+    html += '</div>';
+    // System info
+    const s = h.system;
+    html += '<div class="admin-sysinfo">';
+    html += `<span class="item">🖥️ <span>${s.hostname}</span></span>`;
+    html += `<span class="item">⚙️ <span>${s.arch}</span></span>`;
+    html += `<span class="item">⏱️ <span>${s.uptime}</span></span>`;
+    html += `<span class="item">🧠 <span>${s.memory.percent}%</span></span>`;
+    html += `<span class="item">💾 <span>${s.disk.percent}%</span></span>`;
+    html += `<span class="item">🕐 <span>${s.time}</span></span>`;
+    html += '</div>';
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = `<div style="text-align:center;color:#ef4444;font-size:0.8rem;padding:1rem;">❌ 获取状态失败: ${esc(e.message)}</div>`;
+  }
+}
+
+// Close admin panel on ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeAdminPanel();
+});
+
+
+// ── Save All ──
+async function saveAll() {
+  const btn = document.querySelector('.btn-primary');
+  btn.disabled = true;
+  btn.textContent = '💾 保存中...';
+  try {
+    // Refresh all data from server
+    await Promise.all([
+      loadTasks(),
+      loadStatus(),
+      loadLogs(),
+      loadDateMap(),
+      loadWeeklyStats(),
+    ]);
+    // Show toast feedback
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = '<div class="toast-title">✅ 已保存</div><div class="toast-msg">所有数据已同步</div>';
+    container.appendChild(toast);
+    setTimeout(() => { toast.classList.add('toast-out'); setTimeout(() => toast.remove(), 300); }, 2000);
+  } catch(e) {
+    showError('保存失败: ' + e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = '💾 保存';
+}
+
+</script>
+
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-content">
+    <h2>🛡️ 系统健康检查 <button class="close-btn" onclick="closeAdminPanel()">✕</button></h2>
+    <div id="adminStatus">
+      <div style="text-align:center;color:#64748b;font-size:0.8rem;padding:1rem 0;">加载中...</div>
+    </div>
+    <div class="refresh-note">每 10 秒自动刷新</div>
+  </div>
+</div>
+
+</body>
+</html>
