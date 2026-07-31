@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI短剧生成器 v2.0 网页版</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:#0b0e14;color:#e2e4ec;min-height:100vh}
+/* ── Header ── */
+.header{background:linear-gradient(135deg,#0f1117 0%,#1a1040 100%);border-bottom:1px solid #1e2230;padding:0 1rem}
+.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+.header h1{font-size:1.3rem;background:linear-gradient(135deg,#6c5ce7,#00cec9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+.header h1 small{font-size:.7rem;color:#6a7090;-webkit-text-fill-color:#6a7090;margin-left:.5rem}
+.nav{display:flex;gap:.3rem}
+.nav-btn{padding:.5rem 1rem;border-radius:8px;border:1px solid transparent;background:transparent;color:#8a90b0;cursor:pointer;font-size:.85rem;transition:all .2s;position:relative}
+.nav-btn:hover{color:#e2e4ec;background:rgba(108,92,231,.1)}
+.nav-btn.active{background:rgba(108,92,231,.2);border-color:#6c5ce7;color:#fff}
+.nav-badge{position:absolute;top:-4px;right:-4px;background:#e74c3c;color:#fff;font-size:.65rem;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center}
+.user-area{display:flex;align-items:center;gap:.5rem}
+.user-area input{padding:.4rem .7rem;border-radius:6px;border:1px solid #2a2e40;background:#0b0e14;color:#e2e4ec;font-size:.82rem;width:100px;outline:none}
+.user-area input:focus{border-color:#6c5ce7}
+.user-area .avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6c5ce7,#00cec9);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;flex-shrink:0}
+/* ── Layout ── */
+.container{max-width:1200px;margin:0 auto;padding:1.5rem 1rem}
+.page{display:none}
+.page.active{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* ── Cards ── */
+.card{background:#141822;border:1px solid #1e2230;border-radius:12px;padding:1.5rem;margin-bottom:1rem}
+.card-title{color:#00cec9;font-size:1rem;margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
+.card-title .num{background:#6c5ce7;color:#fff;border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
+label{display:block;color:#8a90b0;font-size:.85rem;margin-bottom:.3rem}
+select,input,textarea{width:100%;padding:.6rem .8rem;border-radius:8px;border:1px solid #2a2e40;background:#0b0e14;color:#e2e4ec;font-size:.9rem;outline:none;transition:border .2s;font-family:inherit}
+select:focus,input:focus,textarea:focus{border-color:#6c5ce7}
+select option{background:#141822}
+textarea{resize:vertical;min-height:60px}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:8px;border:none;font-size:.85rem;cursor:pointer;transition:all .2s;font-weight:500}
+.btn-primary{background:linear-gradient(135deg,#6c5ce7,#00cec9);color:#fff}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-secondary{background:#1e2230;color:#aab0d0;border:1px solid #2a2e40}
+.btn-secondary:hover{background:#2a2e40}
+.btn-ghost{background:transparent;color:#6a7090;padding:.4rem .8rem;font-size:.8rem}
+.btn-ghost:hover{color:#e2e4ec}
+.btn-sm{padding:.35rem .7rem;font-size:.78rem}
+.btn-danger{background:#3d1a1a;color:#e74c3c;border:1px solid #5a2020}
+.btn-danger:hover{background:#5a2020}
+.flex{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.mt1{margin-top:1rem}
+.mb1{margin-bottom:1rem}
+.mr1{margin-right:.5rem}
+.hidden{display:none!important}
+/* ── Category Grid ── */
+.grid-cat{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.4rem}
+.cat-btn,.style-btn{padding:.5rem;border-radius:8px;border:1px solid #2a2e40;background:transparent;color:#aab0d0;cursor:pointer;font-size:.82rem;text-align:center;transition:all .2s}
+.cat-btn:hover,.style-btn:hover{border-color:#6c5ce7;color:#e2e4ec}
+.cat-btn.selected,.style-btn.selected{background:rgba(108,92,231,.25);border-color:#6c5ce7;color:#fff}
+.sub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.4rem;margin-top:.5rem}
+.sub-btn{padding:.4rem .6rem;border-radius:6px;border:1px solid #2a2e40;background:transparent;color:#8a90b0;cursor:pointer;font-size:.78rem;text-align:center;transition:all .2s}
+.sub-btn:hover,.sub-btn.selected{border-color:#00cec9;color:#00cec9;background:rgba(0,206,201,.1)}
+/* ── Spinner ── */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid #2a2e40;border-top-color:#00cec9;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:.4rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ── Toast ── */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#141822;border:1px solid #6c5ce7;border-radius:8px;padding:.7rem 1.3rem;font-size:.85rem;z-index:999;animation:fadeIn .3s;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.error{border-color:#e74c3c}
+.toast.success{border-color:#00cec9}
+/* ── Progress ── */
+.progress{display:flex;gap:.3rem;justify-content:center;margin-bottom:1.5rem}
+.prog-dot{width:10px;height:10px;border-radius:50%;background:#1e2230;transition:all .3s}
+.prog-dot.done{background:#6c5ce7}
+.prog-dot.active{background:#00cec9;box-shadow:0 0 8px rgba(0,206,201,.5)}
+/* ── Result ── */
+.result-section{background:#141822;border:1px solid #1e2230;border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.result-section h3{color:#00cec9;font-size:1rem;margin-bottom:.5rem}
+.result-section .story-text{background:#0b0e14;border-radius:8px;padding:1rem;font-size:.88rem;line-height:1.9;overflow-x:auto;white-space:pre-wrap;color:#c4c8d8;max-height:500px;overflow-y:auto}
+.episode-title{padding:.6rem;background:#1e2230;border-radius:6px;cursor:pointer;margin:.3rem 0;font-size:.85rem;display:flex;justify-content:space-between}
+.episode-title:hover{background:#2a2e40}
+.episode-body{display:none;padding:.8rem;background:#0b0e14;border-radius:6px;margin:.3rem 0;font-size:.85rem;line-height:1.9;max-height:600px;overflow-y:auto;white-space:pre-wrap}
+/* ── Gallery ── */
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.gallery-card{background:#141822;border:1px solid #1e2230;border-radius:12px;padding:1.2rem;cursor:pointer;transition:all .2s}
+.gallery-card:hover{border-color:#6c5ce7;transform:translateY(-2px);box-shadow:0 4px 20px rgba(108,92,231,.15)}
+.gallery-card h3{color:#e2e4ec;font-size:1rem;margin-bottom:.3rem}
+.gallery-card .meta{color:#6a7090;font-size:.78rem;margin-bottom:.5rem}
+.gallery-card .tags{display:flex;gap:.3rem;flex-wrap:wrap}
+.gallery-card .tag{display:inline-block;background:rgba(108,92,231,.15);color:#a5b4fc;padding:.1rem .4rem;border-radius:4px;font-size:.7rem}
+.gallery-empty{padding:3rem 1rem;text-align:center;color:#6a7090;font-size:.9rem}
+/* ── Diff Highlight ── */
+.diff-changed{background:rgba(255,193,7,.2);border-radius:4px;padding:.2rem .1rem}
+.diff-count{color:#ffc107;font-size:.78rem;margin-bottom:.5rem}
+/* ── Draft ── */
+.draft-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.draft-card{background:#141822;border:1px solid #1e2230;border-radius:12px;padding:1.2rem;cursor:default;transition:all .2s;border-left:3px solid #e67e22}
+.draft-card h3{color:#e2e4ec;font-size:1rem;margin-bottom:.3rem}
+.draft-card .meta{color:#6a7090;font-size:.78rem;margin-bottom:.5rem}
+.draft-card .tags{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.8rem}
+.draft-card .tag{display:inline-block;background:rgba(108,92,231,.15);color:#a5b4fc;padding:.1rem .4rem;border-radius:4px;font-size:.7rem}
+.draft-card .tag.optimized{background:rgba(255,193,7,.15);color:#ffc107}
+.draft-actions{display:flex;gap:.4rem;flex-wrap:wrap}
+.draft-badge{display:inline-block;background:#e67e22;color:#fff;padding:.1rem .5rem;border-radius:4px;font-size:.7rem;margin-left:.4rem}
+/* ── Detail View ── */
+.detail-header{margin-bottom:1.5rem}
+.detail-header h2{font-size:1.4rem;color:#e2e4ec;margin-bottom:.3rem}
+.detail-header .meta{color:#6a7090;font-size:.82rem}
+.detail-section{background:#141822;border:1px solid #1e2230;border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.detail-section h3{color:#00cec9;font-size:.95rem;margin-bottom:.5rem;border-left:3px solid #6c5ce7;padding-left:.6rem}
+.detail-section .content{font-size:.88rem;line-height:1.8;white-space:pre-wrap;color:#c4c8d8}
+.detail-ep-toggle{padding:.5rem;background:#1e2230;border-radius:6px;cursor:pointer;margin:.2rem 0;font-size:.83rem;display:flex;justify-content:space-between;color:#aab0d0}
+.detail-ep-toggle:hover{background:#2a2e40}
+.detail-ep-body{display:none;padding:.8rem;background:#0b0e14;border-radius:6px;margin:.2rem 0;font-size:.85rem;line-height:1.9;max-height:500px;overflow-y:auto;white-space:pre-wrap}
+/* ── Comments ── */
+.comment-box{margin-top:1rem}
+.comment-input-area{display:flex;gap:.5rem;margin-bottom:.8rem}
+.comment-input-area textarea{flex:1;min-height:50px;font-size:.82rem;padding:.5rem}
+.comment-item{padding:.6rem 0;border-bottom:1px solid #1e2230}
+.comment-item:last-child{border-bottom:none}
+.comment-user{color:#a5b4fc;font-size:.8rem;font-weight:500}
+.comment-time{color:#6a7090;font-size:.72rem;margin-left:.5rem}
+.comment-text{color:#c4c8d8;font-size:.83rem;margin-top:.2rem;line-height:1.5}
+.comment-empty{color:#6a7090;font-size:.82rem;padding:.5rem 0}
+/* ── Modal ── */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
+.modal-box{background:#141822;border:1px solid #2a2e40;border-radius:16px;padding:1.5rem;max-width:500px;width:90%;max-height:80vh;overflow-y:auto}
+.modal-box h2{color:#e2e4ec;font-size:1rem;margin-bottom:1rem}
+.modal-actions{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem}
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#0b0e14}
+::-webkit-scrollbar-thumb{background:#2a2e40;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#3a3e50}
+@media(max-width:640px){
+  .header-inner{flex-wrap:wrap;height:auto;padding:.5rem 0;gap:.5rem}
+  .grid-cat{grid-template-columns:repeat(3,1fr)}
+  .gallery-grid{grid-template-columns:1fr}
+  .nav-btn{padding:.35rem .6rem;font-size:.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>AI 短剧生成器 <small>v2.0 网页版</small></h1>
+    <div class="nav">
+      <button class="nav-btn active" onclick="switchPage('gallery')">作品集</button>
+      <button class="nav-btn" onclick="switchPage('generator')">新建剧本</button>
+      <button class="nav-btn" id="nav-drafts" onclick="switchPage('drafts')">草稿箱<span class="nav-badge" id="draft-badge" style="display:none">0</span></button>
+      <button class="nav-btn" onclick="showDataModal()">💾 数据</button>
+    </div>
+    <div class="user-area">
+      <input id="username-input" placeholder="输入用户名" value="" maxlength="20"
+             oninput="saveUsername()" onfocus="this.select()">
+      <div class="avatar" id="avatar-display">?</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- ══ 作品集 ══ -->
+  <div id="page-gallery" class="page active">
+    <div class="flex" style="margin-bottom:1rem;justify-content:space-between">
+      <h2 style="font-size:1.1rem;color:#e2e4ec">公开作品集</h2>
+      <button class="btn btn-sm btn-secondary" onclick="loadGallery()">🔄 刷新</button>
+    </div>
+    <div id="gallery-list" class="gallery-grid">
+      <div class="gallery-empty">加载中...</div>
+    </div>
+  </div>
+
+  <!-- ══ 详情视图 ══ -->
+  <div id="page-detail" class="page">
+    <button class="btn btn-ghost mb1" onclick="backToGallery()">← 返回作品集</button>
+    <div id="detail-content"></div>
+  </div>
+
+  <!-- ══ 生成器 ══ -->
+  <div id="page-generator" class="page">
+    <div class="progress" id="progress-bar"></div>
+    <div id="step-container"></div>
+    <div id="result-area" class="hidden"></div>
+  </div>
+
+  <!-- ══ 草稿箱 ══ -->
+  <div id="page-drafts" class="page">
+    <div class="flex" style="margin-bottom:1rem;justify-content:space-between">
+      <h2 style="font-size:1.1rem;color:#e2e4ec">📋 我的草稿箱</h2>
+      <button class="btn btn-sm btn-secondary" onclick="loadDrafts()">🔄 刷新</button>
+    </div>
+    <div id="draft-list" class="draft-grid">
+      <div class="gallery-empty">加载中...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// 数据
+// ══════════════════════════════════════════════════════════
+const CATEGORIES = [
+  {main:"玄幻", subs:["东方玄幻","异世大陆","王朝争霸","高武世界"]},
+  {main:"奇幻", subs:["现代魔法","剑与魔法","史诗奇幻","神秘幻想"]},
+  {main:"武侠", subs:["传统武侠","武侠幻想","国术无双"]},
+  {main:"仙侠", subs:["修真文明","幻想修仙","现代修真","神话修真"]},
+  {main:"都市", subs:["爱情婚姻","都市生活","都市异能","异术超能","青春校园","娱乐明星"]},
+  {main:"现实", subs:["时代叙事","家庭伦理","女性题材","青年故事","社会悬疑","人间百态"]},
+  {main:"军事", subs:["军旅生涯","军事战争","战争幻想","抗战烽火","谍战特工"]},
+  {main:"历史", subs:["架空历史","秦汉三国","两晋隋唐","两宋元明","清史民国","外国历史"]},
+  {main:"游戏", subs:["电子竞技","虚拟网游","游戏异界","游戏主播"]},
+  {main:"体育", subs:["篮球运动","体育赛事","足球运动"]},
+  {main:"科幻", subs:["古武机甲","未来世界","星际文明","超级科技","时空穿梭","进化变异","末世危机"]},
+  {main:"诸天无限", subs:["无限","诸天","综漫"]},
+  {main:"悬疑灵异", subs:["诡异神秘","规则怪谈","侦探推理","灵异民俗","惊悚微恐"]},
+  {main:"轻小说", subs:["原生幻想","衍生同人","搞笑吐槽"]}
+];
+const STYLES = [
+  {num:"1",name:"极致爽",feat:"低阻力快反击无憋屈"},
+  {num:"2",name:"高智商博弈",feat:"权谋算计势均力敌"},
+  {num:"3",name:"跌宕逆袭",feat:"先抑后扬前期憋屈"},
+  {num:"4",name:"种田发育",feat:"低调发育稳步变强"},
+  {num:"5",name:"惊险高压",feat:"全程高压步步惊险"},
+  {num:"6",name:"轻松日常",feat:"无冲突纯解压"},
+  {num:"7",name:"现实虐心",feat:"无金手指写实扎心"},
+  {num:"8",name:"热血竞技",feat:"公平对抗团队热血"},
+  {num:"9",name:"宏大宿命",feat:"身负宿命史诗格局"}
+];
+
+// ══════════════════════════════════════════════════════════
+// 状态
+// ══════════════════════════════════════════════════════════
+let state = {
+  step: 0,
+  mainCat: '', subCat: '', style: '', protagCfg: '1',
+  theme: '', episodes: 10, golden: '', camera: '',
+  apiKey: '', apiBase: 'https://api.deepseek.com/v1',
+  isRealistic: false
+};
+const steps = ['api','category','subcategory','style','protagonist','theme','episodes','golden','camera','done'];
+
+// ── 用户名 ──
+function getUsername(){
+  return document.getElementById('username-input').value.trim() || '匿名观众';
+}
+function saveUsername(){
+  const name = document.getElementById('username-input').value.trim();
+  const av = document.getElementById('avatar-display');
+  av.textContent = name ? name.charAt(0).toUpperCase() : '?';
+  try{localStorage.setItem('drama_username', name);}catch(e){}
+}
+function loadUsername(){
+  try{
+    const saved = localStorage.getItem('drama_username');
+    if(saved){ document.getElementById('username-input').value = saved; saveUsername(); }
+  }catch(e){}
+}
+
+// ── 页面切换 ──
+function switchPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const el = document.getElementById('page-'+name);
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    var label = b.textContent.replace(/\d+/g,'').trim();
+    if(name==='gallery' && label.startsWith('作品集')) b.classList.add('active');
+    else if(name==='generator' && label.startsWith('新建')) b.classList.add('active');
+    else if(name==='drafts' && label.startsWith('草稿箱')) b.classList.add('active');
+  });
+  if(name==='gallery') loadGallery();
+  if(name==='drafts') loadDrafts();
+}
+
+// ══════════════════════════════════════════════════════════
+// 作品集
+// ══════════════════════════════════════════════════════════
+async function loadGallery(){
+  const list = document.getElementById('gallery-list');
+  list.innerHTML = '<div class="gallery-empty">⏳ 加载中...</div>';
+  try{
+    var data = getAllScripts();
+    if(!data || data.length===0){
+      list.innerHTML = '<div class="gallery-empty">📭 还没有人发布作品，去「新建剧本」生成一个吧！</div>';
+      return;
+    }
+    list.innerHTML = '';
+    data.forEach(s=>{
+      const card = document.createElement('div');
+      card.className = 'gallery-card';
+      card.onclick = ()=>openDetail(s.id);
+      card.innerHTML = `
+        <h3>${escHtml(s.title||'未命名')}</h3>
+        <div class="meta">👤 ${escHtml(s.username||'匿名')} · ${s.created||''}</div>
+        <div class="tags">
+          <span class="tag">${escHtml(s.mainCat||'')}</span>
+          <span class="tag">${escHtml(s.subCat||'')}</span>
+          <span class="tag">${escHtml(s.style||'')}</span>
+          <span class="tag">📺 ${s.episodes||0}集</span>
+          <span class="tag">💬 ${s.commentCount||0}</span>
+        </div>`;
+      list.appendChild(card);
+    });
+  }catch(e){
+    list.innerHTML = `<div class="gallery-empty">❌ 加载失败: ${escHtml(e.message)}</div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// 详情页
+// ══════════════════════════════════════════════════════════
+async function openDetail(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-detail').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const cont = document.getElementById('detail-content');
+  cont.innerHTML = '<div style="text-align:center;padding:2rem;color:#6a7090">⏳ 加载中...</div>';
+  try{
+    var s = getScriptById(id);
+    if(!s) throw new Error('剧本不存在');
+    renderDetail(s);
+  }catch(e){
+    cont.innerHTML = `<div style="text-align:center;padding:2rem;color:#e74c3c">❌ ${escHtml(e.message)}</div>`;
+  }
+}
+
+function renderDetail(s){
+  const cont = document.getElementById('detail-content');
+  let epHtml = '';
+  const eps = s.episodes_data || [];
+  eps.forEach((ep,i)=>{
+    epHtml += `<div class="detail-ep-toggle" onclick="toggleDetailEp(this)">
+      <span>第 ${ep.num||(i+1)} 集</span><span style="color:#6a7090">点击展开 ▸</span>
+    </div>
+    <div class="detail-ep-body">${escHtml(ep.content||'')}</div>`;
+  });
+
+  // 分镜提示词（和分集故事一样格式）
+  let shotsHtml = '';
+  const shots = s.shots_data || [];
+  if(shots.length > 0){
+    // 尝试解析 episodes 格式
+    var shotEpisodes = null;
+    if(typeof shots === 'object' && shots.episodes && Array.isArray(shots.episodes)){
+      shotEpisodes = shots.episodes;
+    } else if(Array.isArray(shots)){
+      // 可能是 [{num:1, content:...}, ...] 或每集json
+      if(shots.length > 0 && shots[0].content){
+        shotEpisodes = shots;
+      } else if(shots.length > 0 && typeof shots[0] === 'object' && !shots[0].content){
+        shotEpisodes = null; // 复杂结构，跳过
+      }
+    }
+    if(shotEpisodes && shotEpisodes.length > 0){
+      var shotHtml = '';
+      shotEpisodes.forEach(function(se, idx){
+        var content = se.content || (se.shots ? JSON.stringify(se.shots, null, 2) : JSON.stringify(se, null, 2));
+        shotHtml += '<div class="detail-ep-toggle" onclick="toggleDetailEp(this)">' +
+          '<span>第 '+(se.episodeNum||se.num||(idx+1))+' 集 · 分镜</span><span style="color:#6a7090">点击展开 ▸</span>' +
+        '</div>' +
+        '<div class="detail-ep-body">' + escHtml(content) + '</div>';
+      });
+      shotsHtml = '<div class="detail-section"><h3>🎬 时间轴分镜提示词（'+shotEpisodes.length+'集）</h3>' + shotHtml + '</div>';
+    } else if(Array.isArray(shots)){
+      // 纯文本分镜
+      shotsHtml = '<div class="detail-section"><h3>🎬 时间轴分镜提示词</h3><div class="content">' + escHtml(shots.map(function(s){return typeof s==='string' ? s : JSON.stringify(s);}).join('\n\n---\n\n')) + '</div></div>';
+    } else {
+      shotsHtml = '<div class="detail-section"><h3>🎬 时间轴分镜提示词</h3><div class="content">' + escHtml(JSON.stringify(shots, null, 2)) + '</div></div>';
+    }
+  }
+
+  // 评论
+  let commentHtml = '<div class="comment-box" id="comment-area">';
+  const comments = s.comments || [];
+  if(comments.length===0){
+    commentHtml += '<div class="comment-empty">暂无评论</div>';
+  }else{
+    comments.forEach(c=>{
+      commentHtml += `<div class="comment-item">
+        <span class="comment-user">${escHtml(c.username||'匿名')}</span>
+        <span class="comment-time">${c.time||''}</span>
+        <div class="comment-text">${escHtml(c.content)}</div>
+      </div>`;
+    });
+  }
+  commentHtml += `<div class="comment-input-area">
+    <textarea id="comment-input" placeholder="写下你的评论..." rows="1"></textarea>
+    <button class="btn btn-sm btn-primary" onclick="submitComment('${s.id}')">发送</button>
+  </div></div>`;
+
+  cont.innerHTML = `
+    <div class="detail-header">
+      <h2>${escHtml(s.title||'未命名')}</h2>
+      <div class="meta">👤 ${escHtml(s.username||'匿名')} · ${s.created||''}
+        · ${escHtml(s.mainCat||'')} → ${escHtml(s.subCat||'')}
+        · ${escHtml(s.style||'')} · 📺 ${s.episodes||0}集</div>
+    </div>
+    <div class="detail-section">
+      <h3>角色设定</h3>
+      <div class="content">${escHtml(s.characters||'')}</div>
+    </div>
+    <div class="detail-section">
+      <h3>剧情大纲</h3>
+      <div class="content">${escHtml(s.outline||'')}</div>
+    </div>
+    <div class="detail-section">
+      <h3>分集故事（${eps.length}集）</h3>
+      ${epHtml}
+    </div>
+    ${shotsHtml}
+    <div class="detail-section">
+      <h3>评论 (${comments.length})</h3>
+      ${commentHtml}
+    </div>`;
+}
+
+function toggleDetailEp(el){
+  const body = el.nextElementSibling;
+  if(!body || !body.classList.contains('detail-ep-body')) return;
+  const d = body.style.display;
+  body.style.display = d==='block'?'none':'block';
+  el.querySelector('span:last-child').textContent = d==='block'?'点击展开 ▸':'点击收起 ▾';
+}
+
+async function submitComment(scriptId){
+  const input = document.getElementById('comment-input');
+  const content = input.value.trim();
+  if(!content){ toast('请输入评论内容'); return; }
+  const username = getUsername();
+  try{
+    var comment = {
+      id: genId(),
+      username: username,
+      content: content,
+      time: new Date().toLocaleString('zh-CN')
+    };
+    addComment(scriptId, comment);
+    input.value = '';
+    toast('评论已发布', 'success');
+    openDetail(scriptId);
+  }catch(e){
+    toast(e.message, true);
+  }
+}
+
+function backToGallery(){
+  switchPage('gallery');
+}
+
+// ══════════════════════════════════════════════════════════
+// 生成器
+// ══════════════════════════════════════════════════════════
+function render(){
+  document.getElementById('step-container').innerHTML = renderStep(state.step);
+  renderProgress();
+}
+function renderProgress(){
+  const bar = document.getElementById('progress-bar');
+  bar.innerHTML = '';
+  for(let i=0;i<steps.length-1;i++){
+    const dot = document.createElement('div');
+    dot.className = 'prog-dot' + (i<state.step?' done':'') + (i===state.step?' active':'');
+    bar.appendChild(dot);
+  }
+}
+function goTo(s){ state.step = s; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function next(){
+  if(state.step < steps.length-1){ state.step++; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+function renderStep(s){
+  switch(s){
+    case 0: return stepAPI();
+    case 1: return stepCategory();
+    case 2: return stepSubCategory();
+    case 3: return stepStyle();
+    case 4: return stepProtagonist();
+    case 5: return stepTheme();
+    case 6: return stepEpisodes();
+    case 7: return stepGolden();
+    case 8: return stepCamera();
+    case 9: return stepDone();
+    default: return '';
+  }
+}
+
+function stepAPI(){
+  return `<div class="card">
+    <div class="card-title"><span class="num">1</span> API 配置</div>
+    <p style="color:#6a7090;font-size:.85rem;margin-bottom:1rem">需要 DeepSeek API Key 才能生成故事。
+    去 <a href="https://platform.deepseek.com" target="_blank" style="color:#00cec9">platform.deepseek.com</a> 免费注册获取</p>
+    <label>API Key</label>
+    <input id="apikey" type="password" placeholder="sk-..." value="${state.apiKey}"
+           oninput="state.apiKey=this.value.trim()">
+    <div class="mt1"></div>
+    <label>API 地址</label>
+    <input id="apibase" value="${state.apiBase}" oninput="state.apiBase=this.value.trim()">
+    ${!state.apiKey ? `<div class="mt1" style="color:#e67e22;font-size:.78rem">💡 没有 Key 也可以浏览「作品集」查看别人发布的作品</div>` : ''}
+    <div class="mt1 flex"><button class="btn btn-primary" onclick="next()">下一步 →</button></div>
+  </div>`;
+}
+
+function stepCategory(){
+  let html = `<div class="card"><div class="card-title"><span class="num">2</span> 选择一级分类</div><div class="grid-cat">`;
+  CATEGORIES.forEach((c,i)=>{
+    html += `<button class="cat-btn${state.mainCat===c.main?' selected':''}" onclick="selectCat(${i})">${c.main}</button>`;
+  });
+  html += `</div><div class="mt1 flex"><button class="btn btn-ghost" onclick="goTo(0)">← 上一步</button>
+    <button class="btn btn-primary" onclick="next()" ${!state.mainCat?'disabled':''}>下一步 →</button></div></div>`;
+  return html;
+}
+function selectCat(i){ state.mainCat=CATEGORIES[i].main; state.subCat=''; state.isRealistic=state.mainCat==='现实'; render(); }
+
+function stepSubCategory(){
+  const cat = CATEGORIES.find(c=>c.main===state.mainCat);
+  if(!cat||cat.subs.length===0) return next(), '';
+  let html = `<div class="card"><div class="card-title"><span class="num">3</span> 选择「${state.mainCat}」下的子分类</div><div class="sub-grid">`;
+  cat.subs.forEach(s=>{
+    html += `<button class="sub-btn${state.subCat===s?' selected':''}" onclick="state.subCat='${s}';render()">${s}</button>`;
+  });
+  html += `</div><div class="mt1 flex"><button class="btn btn-ghost" onclick="goTo(1)">← 上一步</button>
+    <button class="btn btn-primary" onclick="next()" ${!state.subCat?'disabled':''}>下一步 →</button></div></div>`;
+  return html;
+}
+
+function stepStyle(){
+  let html = `<div class="card"><div class="card-title"><span class="num">4</span> 选择剧情风格</div><div class="grid-cat">`;
+  STYLES.forEach(s=>{
+    html += `<button class="style-btn${state.style===s.name?' selected':''}" onclick="state.style='${s.name}';render()">
+      ${s.name}<br><span style="font-size:.7rem;color:#6a7090">${s.feat}</span></button>`;
+  });
+  html += `</div><div class="mt1 flex"><button class="btn btn-ghost" onclick="goTo(2)">← 上一步</button>
+    <button class="btn btn-primary" onclick="next()" ${!state.style?'disabled':''}>下一步 →</button></div></div>`;
+  return html;
+}
+
+function stepProtagonist(){
+  const opts=[['1','标准配置（1男1女+反派）'],['2','双男主（两男主+反派）'],['3','双女主（两女主+反派）']];
+  let html=`<div class="card"><div class="card-title"><span class="num">5</span> 主角配置</div><div class="sub-grid">`;
+  opts.forEach(([v,label])=>{
+    html+=`<button class="sub-btn${state.protagCfg===v?' selected':''}" onclick="state.protagCfg='${v}';render()">${label}</button>`;
+  });
+  html+=`</div><div class="mt1 flex"><button class="btn btn-ghost" onclick="goTo(3)">← 上一步</button>
+    <button class="btn btn-primary" onclick="next()">下一步 →</button></div></div>`;
+  return html;
+}
+
+function stepTheme(){
+  return `<div class="card"><div class="card-title"><span class="num">6</span> 输入短剧主题或名字</div>
+    <p style="color:#6a7090;font-size:.82rem;margin-bottom:.5rem">例如：赘婿归来、校园暗恋、末世求生</p>
+    <input id="theme-input" value="${state.theme}" placeholder="输入主题..." oninput="state.theme=this.value">
+    <div class="mt1 flex"><button class="btn btn-ghost" onclick="goTo(4)">← 上一步</button>
+      <button class="btn btn-primary" onclick="next()">下一步 →</button></div></div>`;
+}
+
+function stepEpisodes(){
+  return `<div class="card"><div class="card-title"><span class="num">7</span> 集数（每集30-60秒）</div>
+    <input type="number" min="1" max="100" value="${state.episodes}" id="ep-input"
+           oninput="state.episodes=parseInt(this.value)||10">
+    <div class="mt1 flex"><button class="btn btn-ghost" onclick="goTo(5)">← 上一步</button>
+      <button class="btn btn-primary" onclick="next()">下一步 →</button></div></div>`;
+}
+
+function stepGolden(){
+  if(state.isRealistic) return next(), '';
+  return `<div class="card"><div class="card-title"><span class="num">8</span> 主角金手指/特殊能力</div>
+    <p style="color:#6a7090;font-size:.82rem;margin-bottom:.5rem">不知道填什么就留空，自动匹配</p>
+    <input id="golden-input" value="${state.golden}" placeholder="例如：透视眼、签到系统、重生记忆..." oninput="state.golden=this.value">
+    <div class="mt1 flex"><button class="btn btn-ghost" onclick="goTo(6)">← 上一步</button>
+      <button class="btn btn-primary" onclick="next()">下一步 →</button></div></div>`;
+}
+
+function stepCamera(){
+  return `<div class="card"><div class="card-title"><span class="num">9</span> 画面风格</div>
+    <p style="color:#6a7090;font-size:.82rem;margin-bottom:.5rem">不知道填什么就留空，自动匹配</p>
+    <input id="camera-input" value="${state.camera}" placeholder="例如：古风武侠、现代都市、暗黑悬疑..."
+           oninput="state.camera=this.value">
+    <div class="mt1 flex"><button class="btn btn-ghost" onclick="goTo(7)">← 上一步</button>
+      <button class="btn btn-primary" onclick="startGenerate()">🎬 开始生成</button></div></div>`;
+}
+
+function stepDone(){
+  return `<div class="card"><div class="card-title">✅ 生成完成</div>
+    <button class="btn btn-secondary" onclick="resetGenerator()">重新开始</button></div>`;
+}
+
+function resetGenerator(){
+  state.step=0;
+  document.getElementById('result-area').classList.add('hidden');
+  render();
+}
+
+// ══════════════════════════════════════════════════════════
+// 本地数据存储（替代后端API）
+// ══════════════════════════════════════════════════════════
+var DATA_KEY = 'standalone_scripts';
+
+function getAllScripts(){
+  try{ return JSON.parse(localStorage.getItem(DATA_KEY)||'[]'); }catch(e){ return []; }
+}
+
+function saveAllScripts(data){
+  try{ localStorage.setItem(DATA_KEY, JSON.stringify(data)); }catch(e){}
+}
+
+function getScriptById(id){
+  var list = getAllScripts();
+  for(var i=0;i<list.length;i++){ if(list[i].id===id) return list[i]; }
+  return null;
+}
+
+function addScript(script){
+  var list = getAllScripts();
+  list.unshift(script);
+  saveAllScripts(list);
+  return script;
+}
+
+function updateScript(id, updates){
+  var list = getAllScripts();
+  for(var i=0;i<list.length;i++){
+    if(list[i].id===id){
+      for(var k in updates) list[i][k]=updates[k];
+      break;
+    }
+  }
+  saveAllScripts(list);
+}
+
+function deleteScript(id){
+  var list = getAllScripts();
+  list = list.filter(function(s){ return s.id!==id; });
+  saveAllScripts(list);
+}
+
+function addComment(scriptId, comment){
+  var list = getAllScripts();
+  for(var i=0;i<list.length;i++){
+    if(list[i].id===scriptId){
+      if(!list[i].comments) list[i].comments=[];
+      list[i].comments.push(comment);
+      break;
+    }
+  }
+  saveAllScripts(list);
+}
+
+function genId(){ return Math.random().toString(36).slice(2,10); }
+
+// ── file:// 协议检测 ──
+var fileProtocolShown = false;
+function checkFileProtocol(){
+  if(window.location.protocol !== 'file:' || fileProtocolShown) return;
+  fileProtocolShown = true;
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.style.zIndex = '2000';
+  overlay.innerHTML = '<div class="modal-box" style="max-width:550px">' +
+    '<h2>⚠️ 当前页面受限</h2>' +
+    '<p style="color:#e2e4ec;font-size:.85rem;line-height:1.8;margin-bottom:1rem">' +
+      '您正在通过「文件」协议(<code style="background:#1e2230;padding:.1rem .3rem;border-radius:3px">file://</code>)打开此页面。' +
+      '部分浏览器（如Chrome、Edge）会阻止此模式下的网络请求，导致无法调用DeepSeek API。' +
+    '</p>' +
+    '<div style="background:#0b0e14;border-radius:8px;padding:.8rem;margin-bottom:1rem">' +
+      '<div style="color:#00cec9;font-size:.85rem;margin-bottom:.5rem">✅ 方案一：用 Safari 打开（推荐，零操作）</div>' +
+      '<p style="color:#8a90b0;font-size:.8rem;line-height:1.5">' +
+        'macOS 自带的 Safari 没有此限制。将页面拖到 Safari 图标上即可正常使用全部功能。' +
+      '</p>' +
+    '</div>' +
+    '<div style="background:#0b0e14;border-radius:8px;padding:.8rem;margin-bottom:1rem">' +
+      '<div style="color:#e67e22;font-size:.85rem;margin-bottom:.5rem">🛠 方案二：下载启动脚本</div>' +
+      '<p style="color:#8a90b0;font-size:.8rem;line-height:1.5">' +
+        '下载下方的启动脚本到桌面，双击即可在本地起一个临时 HTTP 服务器，自动打开浏览器。' +
+        '需要 macOS 已安装 Python 3。' +
+      '</p>' +
+    '</div>' +
+    '<div class="flex" style="gap:.5rem">' +
+      '<button class="btn btn-primary btn-sm" onclick="downloadStartupScript();document.getElementById(\'file-protocol-modal\').remove()">⬇ 下载启动脚本</button>' +
+      '<button class="btn btn-secondary btn-sm" onclick="document.getElementById(\'file-protocol-modal\').remove();fileProtocolShown=false;">我知道了我用 Safari</button>' +
+    '</div>' +
+  '</div>';
+  overlay.id = 'file-protocol-modal';
+  document.body.appendChild(overlay);
+}
+
+function downloadStartupScript(){
+  var isWin = navigator.platform.indexOf('Win') !== -1;
+  var content = '';
+  if(isWin){
+    // Windows 批处理
+    content = '@echo off\r\ncd /d "%~dp0"\r\npython -m http.server 8000\r\nstart http://localhost:8000\r\npause';
+    var blob = new Blob([content], {type:'application/octet-stream'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = '启动服务.bat';
+    a.click(); URL.revokeObjectURL(url);
+    toast('已下载启动脚本，双击运行', 'success');
+  } else {
+    // macOS .command
+    content = '#!/bin/bash\ncd "$(dirname "$0")"\npython3 -m http.server 8000\nopen http://localhost:8000';
+    var blob = new Blob([content], {type:'application/octet-stream'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = '启动服务.command';
+    a.click(); URL.revokeObjectURL(url);
+    toast('已下载启动脚本，双击运行', 'success');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// API 调用
+// ══════════════════════════════════════════════════════════
+async function callAPI(messages, system, temp=0.85, maxTokens=2000){
+  if(!state.apiKey) throw new Error('请先输入 API Key');
+  const body = {model:'deepseek-chat', messages:[], temperature:temp, max_tokens:maxTokens};
+  if(system) body.messages.push({role:'system', content:system});
+  body.messages.push(...messages);
+
+  // 修正 API URL
+  var baseUrl = state.apiBase.replace(/\/+$/,'');
+  // 如果用户填了 /v1 去掉，DeepSeek 不需要
+  baseUrl = baseUrl.replace(/\/v1$/,'');
+  const apiUrl = baseUrl + '/chat/completions';
+
+  // 清理 API Key：去除非 ASCII 字符（避免复制时带入零宽空格等不可见字符）
+  var cleanKey = state.apiKey.trim().replace(/[^\x20-\x7E]/g,'');
+  if(!cleanKey) throw new Error('API Key 无效，请重新输入（注意不要有多余空格或特殊字符）');
+
+  for(let attempt=0; attempt<3; attempt++){
+    try{
+      const res = await fetch(apiUrl, {
+        method:'POST',
+        headers:{'Content-Type':'application/json', 'Authorization':'Bearer '+cleanKey},
+        body:JSON.stringify(body)
+      });
+      if(!res.ok){
+        const e=await res.text();
+        throw new Error('API HTTP '+res.status+(e?' - '+e.slice(0,300):''));
+      }
+      // 检查返回类型
+      const ctype = (res.headers.get('content-type')||'').toLowerCase();
+      if(!ctype.includes('application/json') && !ctype.includes('text/json')){
+        const text = await res.text();
+        throw new Error('API 返回了非 JSON 内容（URL可能不对），请检查 API 地址是否正确。返回内容开头: '+text.slice(0,80));
+      }
+      const data = await res.json();
+      if(!data.choices || !data.choices[0]){
+        throw new Error('API 返回格式异常: ' + JSON.stringify(data).slice(0,200));
+      }
+      return data.choices[0].message.content.trim();
+    }catch(e){
+      // 捕获非 Latin-1 字符导致的 fetch 错误
+      if(e.message && e.message.indexOf('non ISO-8859-1') !== -1){
+        throw new Error('API Key 包含非法字符，请重新输入（只允许英文字母、数字和符号）');
+      }
+      // 检测到 file:// 协议下的网络错误，弹出修复提示
+      if(window.location.protocol === 'file:' && (e.message.indexOf('fetch') !== -1 || e.message.indexOf('network') !== -1 || e.message.indexOf('NetworkError') !== -1)){
+        checkFileProtocol();
+        throw new Error('⚠️ 当前页面通过 file:// 协议打开，浏览器禁止了网络请求。请用 Safari 打开或下载启动脚本解决（已弹出提示）');
+      }
+      if(attempt<2 && !e.message.includes('非 JSON')){
+        await new Promise(r=>setTimeout(r,2000*(attempt+1)));
+        continue;
+      }
+      throw e;
+    }
+  }
+}
+
+// ── 干净文本处理 ──
+function cleanMd(text){
+  return text.replace(/\*\*([^*]+)\*\*/g,'$1').replace(/#+\s*/g,'').replace(/__([^_]+)__/g,'$1')
+             .replace(/~~(.+?)~~/g,'$1').replace(/`([^`]+)`/g,'$1').trim();
+}
+
+// 深度清理：去除 AI 的确认/解释性前缀 + 双星号/井号等标记
+function cleanShotText(text){
+  if(!text) return '';
+  var cleaned = text;
+  // 去除 AI 常见确认前缀（好的/明白/确认/已收到/严格遵守 等开头段）
+  cleaned = cleaned.replace(/^(好的[，,。]?|好[的，,]|明白[了，,]?|确认[。，]?|已收到[。，]?|收到[。，]?|以下是我|以下是根据|根据要求|遵照指令|严格遵循|如您所愿|现在开始|直接输出).*?(角色名册|故事原文|输出格式|分镜\d)/si, '$2');
+  cleaned = cleaned.replace(/^(好的[，,。!！]*\s*指令[已确].*?(?:分镜|画面|镜头))/si, '');
+  cleaned = cleaned.replace(/^(好的[，,。]*\s*[^。\n]{0,80}?[。！]?)\n{1,2}(?=分镜)/s, '');
+  // 去掉末尾的额外解释
+  cleaned = cleaned.replace(/\n{2,}(以上|以上就是|如需|如果您|希望|请问|注：|注意).*/s, '');
+  // 去掉 markdown 标记
+  cleaned = cleaned.replace(/\*\*/g,'').replace(/##+\s*/g,'').replace(/__/g,'').replace(/~~/g,'').replace(/`/g,'');
+  // 去掉多余空行
+  cleaned = cleaned.replace(/\n{3,}/g,'\n\n').trim();
+  return cleaned;
+}
+
+function formatStory(text){
+  text = cleanMd(text);
+  text = text.replace(/\n{3,}/g,'\n\n');
+  let lines = text.split('\n').map(l=>l.trim());
+  let result = [];
+  for(let line of lines){
+    if(!line){ result.push(''); continue; }
+    if('。！？，；：、"\''.includes(line.slice(-1)) || line.endsWith('...')){
+      result.push(line);
+    } else if(line.length>60){
+      let parts = line.split(/(?<=[。！？])/);
+      for(let p of parts){ p=p.trim(); if(p) result.push(p); }
+    } else {
+      result.push(line);
+    }
+  }
+  return result.join('\n');
+}
+
+// ══════════════════════════════════════════════════════════
+// 从角色设定文本中提取关键角色名
+// ══════════════════════════════════════════════════════════
+function extractNames(charText){
+  var names = { hero:'', hero2:'', villain:'', heroine:'', all:[] };
+  var lines = (charText||'').split('\n');
+  for(var i=0;i<lines.length;i++){
+    var l = lines[i].trim();
+    if(l.indexOf('主角姓名')!==-1) names.hero = l.split(/[：:]/).pop().trim();
+    else if(l.indexOf('主角1姓名')!==-1) names.hero = l.split(/[：:]/).pop().trim();
+    else if(l.indexOf('主角2姓名')!==-1) names.hero2 = l.split(/[：:]/).pop().trim();
+    else if(l.indexOf('反派姓名')!==-1) names.villain = l.split(/[：:]/).pop().trim();
+    else if(l.indexOf('女主角姓名')!==-1) names.heroine = l.split(/[：:]/).pop().trim();
+    if(l.indexOf('姓名')!==-1 || l.indexOf('名字')!==-1){
+      var nameVal = l.split(/[：:]/).pop().trim().split(/[\/\s]/)[0];
+      if(nameVal && nameVal.length>=2) names.all.push(nameVal);
+    }
+  }
+  // 去重
+  names.all = names.all.filter(function(v,i,self){return self.indexOf(v)===i;});
+  return names;
+}
+
+// 从提取的角色名构建【锁定角色名册】字符串 — 后续所有步骤强制使用
+function buildLockedNames(namesObj){
+  var parts = [];
+  if(namesObj.hero) parts.push('【主角】'+namesObj.hero);
+  if(namesObj.hero2) parts.push('【主角2】'+namesObj.hero2);
+  if(namesObj.villain) parts.push('【反派】'+namesObj.villain);
+  if(namesObj.heroine) parts.push('【女主角】'+namesObj.heroine);
+  // 也包含自动捕获的其他角色名
+  for(var i=0;i<namesObj.all.length;i++){
+    var n = namesObj.all[i];
+    if(n!==namesObj.hero && n!==namesObj.hero2 && n!==namesObj.villain && n!==namesObj.heroine){
+      parts.push('【其他】'+n);
+    }
+  }
+  if(parts.length===0) return '（未提取到角色名）';
+  return '╔══════════════════════════════════════════════════════╗\n║            【全局锁定角色名册 — 严禁修改】            ║\n║  以下角色名是本剧本唯一允许使用的姓名。              ║\n║  后续所有步骤（大纲、每集、分镜）必须严格使用这些     ║\n║  姓名，绝对禁止创建任何新角色名或修改已有角色名。     ║\n║  若AI在输出中创建了新名字，将被判定为严重违规。      ║\n╚══════════════════════════════════════════════════════╝\n' + parts.join('\n');
+}
+
+// ══════════════════════════════════════════════════════════
+// 生成流程（严格角色名一致性）
+// ══════════════════════════════════════════════════════════
+let generatedResult = { characters:'', outline:'', episodes:[], shots:[], names:{} };
+
+async function startGenerate(){
+  if(!state.apiKey){ toast('请先输入 API Key', true); return; }
+
+  const stepCard = document.querySelector('.card');
+  stepCard.innerHTML = '<h3>⏳ 正在生成...<span class="spinner"></span></h3>';
+
+  const outDiv = document.getElementById('result-area');
+  outDiv.classList.remove('hidden');
+  outDiv.innerHTML = '';
+
+  try{
+    const cfgNotes={'1':'常规男女主配置','2':'【双男主】禁止男女恋爱退婚赘婿剧情','3':'【双女主】禁止男女恋爱嫁人退婚剧情'};
+    const cfgNote=cfgNotes[state.protagCfg]||'';
+
+    // ── 1.角色设定 ──
+    showProgress('⏳ 正在生成角色设定...');
+    const charP=`为以下短剧生成完整角色设定，必须标注性别、外貌、服装、人物关系。分类：${state.mainCat}→${state.subCat}。风格：${state.style}。主题：${state.theme}。金手指：${state.golden||'由你决定'}。${cfgNote}。格式：主角姓名/主角性别/主角外貌/主角衣着/主角性格/主角身份。反派姓名/反派性别/反派外貌/反派衣着/反派性格/反派与主角关系。
+
+【最高优先级禁令】你生成的这些角色姓名将成为整个剧本的规范角色表，后续所有大纲、分集、分镜必须严格使用这些姓名，绝对禁止创建任何新角色名。请确保姓名清晰明确、唯一。`;
+    const charR = await callAPI([{role:'user',content:charP}],'【硬性禁令】专业角色设计师。标注性别关系。不要用markdown标记。不要用星号井号。注意：你生成的姓名将作为全局规范，后续所有步骤强制使用这些姓名，严禁编造新名字。');
+    const charText = cleanMd(charR);
+    generatedResult.characters = charText;
+    showResult('🎭 角色设定', charText);
+
+    // 从角色设定中提取标准姓名 + 构建【全局锁定角色名册】
+    names = extractNames(charText);
+    generatedResult.names = names;
+    const lockedNames = buildLockedNames(names);
+    var charBrief = [];
+    if(names.hero) charBrief.push('主角：'+names.hero);
+    if(names.hero2) charBrief.push('主角2：'+names.hero2);
+    if(names.villain) charBrief.push('反派：'+names.villain);
+    if(names.heroine) charBrief.push('女主角：'+names.heroine);
+    charBrief = charBrief.join('，');
+
+    // ── 2.剧情大纲 — 严格遵循角色名册 + 上一步内容 ──
+    showProgress('⏳ 正在生成剧情大纲...');
+    const outlineSys='【⚡ 最高优先级指令 — 角色名锁定 + 步骤依赖】\n\n【角色锁定条款】\n1. 以下【全局锁定角色名册】中的姓名是本剧本唯一合法的角色名。\n2. 你输出的所有内容（大纲、冲突、情节）中出现的角色名必须严格来自该名册。\n3. 绝对禁止创建任何新角色名或修改已有角色名。违反此条 = 严重违规。\n\n【步骤依赖条款】\n- 以下【上一步已生成 — 角色设定】是你必须严格遵循的输入。\n- 你生成的剧情大纲必须与角色设定中的姓名、性别、身份、人物关系完全一致。\n- 如果角色设定中标注了某个角色的性别/身份，你不得更改或矛盾。\n\n' + lockedNames + '\n\n【上一步已生成 — 角色设定】\n' + charText;
+    const outP=`为${state.episodes}集短剧《${state.theme}》创作大纲。
+分类：${state.mainCat}→${state.subCat}。风格：${state.style}。金手指：${state.golden||'无'}。${cfgNote}
+
+要求：五幕结构，每幕标注核心冲突和反转点。500字内。不要markdown标记。不要用星号井号。`;
+    const outline = await callAPI([{role:'user',content:outP}], outlineSys, 0.7, 2000);
+    const outlineText = cleanMd(outline);
+    generatedResult.outline = outlineText;
+    showResult('📋 剧情大纲', outlineText);
+
+    // ── 3.逐集生成 ──
+    const epSection = document.createElement('div');
+    epSection.className = 'result-section';
+    epSection.id = 'episodes-section';
+    epSection.innerHTML = '<h3>📜 分集故事</h3><div id="ep-list"></div>';
+    outDiv.appendChild(epSection);
+
+    let prevSum = '故事尚未开始。';
+    for(let ep=1; ep<=state.episodes; ep++){
+      const progEl = document.createElement('div');
+      progEl.className = 'result-section';
+      progEl.id = 'ep-progress-'+ep;
+      progEl.innerHTML = '<h3>⏳ 正在生成第 '+ep+'/'+state.episodes+' 集...<span class="spinner"></span></h3>';
+      outDiv.insertBefore(progEl, epSection.nextSibling || null);
+
+      const epSys='【⚡ 最高优先级指令 — 角色名锁定 + 步骤依赖】\n\n【角色锁定条款】\n1. 以下【全局锁定角色名册】中的姓名是本剧本唯一合法的角色名。\n2. 你输出的所有角色名必须严格来自该名册。\n3. 绝对禁止创建任何新角色名或修改已有角色名。\n4. 角色的性别、外貌、身份必须与【上一步已生成 — 角色设定】完全一致。\n\n【步骤依赖条款】\n- 以下【上一步已生成 — 剧情大纲】是你必须严格遵循的完整叙事框架。\n- 本集内容必须严格建立在大纲之上，不得偏离大纲的核心情节和冲突。\n- 如果你发现你想写的内容不在大纲中，请修改你的想法以匹配大纲。\n\n' + lockedNames + '\n\n【上一步已生成 — 角色设定】\n' + charText + '\n\n【上一步已生成 — 剧情大纲】\n' + outlineText;
+      const epP=`写第${ep}集，共${state.episodes}集。剧名：《${state.theme}》。分类：${state.mainCat}→${state.subCat}。风格：${state.style}。金手指：${state.golden||'无'}。${cfgNote}
+
+【硬性禁令】整个故事中只允许使用【全局锁定角色名册】中的姓名，绝对禁止创造任何新角色名。如果前情摘要中出现了不在角色设定中的名字，请忽略前情，改用最接近的角色替代。
+前情：${prevSum}
+要求：像小说一样有环境心理对话，800-1000字，结尾留悬念钩子。不要markdown标记。不要用星号井号。`;
+      const epC = await callAPI([{role:'user',content:epP}], epSys, 0.85, 3000);
+      const epText = formatStory(epC);
+
+      progEl.remove();
+      const epList = document.getElementById('ep-list');
+      const epDiv = document.createElement('div');
+      epDiv.className = 'episode-title';
+      epDiv.innerHTML = '<span>第 '+ep+' 集</span><span style="color:#6a7090">点击展开 ▸</span>';
+      epDiv.onclick = function(){ toggleEp(this); };
+      const epBody = document.createElement('div');
+      epBody.className = 'episode-body';
+      epBody.style.display = 'block'; // 刚生成的自动展开
+      epBody.textContent = epText;
+      epList.appendChild(epDiv);
+      epList.appendChild(epBody);
+
+      generatedResult.episodes.push({num:ep, content:epText});
+      const lines = epText.split('\n').filter(Boolean);
+      prevSum = lines.slice(-5).join('\n') || epText.slice(0,200);
+    }
+
+    // 更新标题显示总集数
+    document.getElementById('episodes-section').querySelector('h3').textContent = '📜 分集故事（'+state.episodes+'集）';
+
+    // ── 4.生成时间轴分镜提示词（前20集，严格基于已有故事+角色名） ──
+    const shotSection = document.createElement('div');
+    shotSection.className = 'result-section';
+    shotSection.id = 'shots-section';
+    shotSection.innerHTML = '<h3>🎬 时间轴分镜提示词</h3><div id="shot-list"></div>';
+    outDiv.appendChild(shotSection);
+
+    const shotEpisodes = Math.min(state.episodes, 20);
+    for(let ep=1; ep<=shotEpisodes; ep++){
+      const progEl = document.createElement('div');
+      progEl.className = 'result-section';
+      progEl.id = 'shot-progress-'+ep;
+      progEl.innerHTML = '<h3>⏳ 正在生成第 '+ep+'/'+shotEpisodes+' 集分镜...<span class="spinner"></span></h3>';
+      outDiv.insertBefore(progEl, shotSection.nextSibling || null);
+
+      const epData = generatedResult.episodes[ep-1];
+      const epContent = epData ? epData.content : '';
+
+      const shotSys='【⚡ 最高优先级指令 — 角色名锁定 + 步骤依赖】\n\n【角色锁定条款】\n1. 以下【全局锁定角色名册】中的姓名是本剧本唯一合法的角色名。\n2. 分镜提示词中所有角色名必须严格来自该名册。\n3. 绝对禁止创建任何新角色名或修改已有角色名。\n\n【步骤依赖条款】\n- 以下【上一步已生成 — 第' + ep + '集】是本分镜的唯一输入来源。\n- 必须严格基于该集的故事原文进行拆解，禁止创作新剧情、新对话、新角色。\n- 角色动作、状态、对话内容必须直接来自故事原文，不得编造。\n\n' + lockedNames + '\n\n【上一步已生成 — 角色设定】\n' + charText + '\n\n【上一步已生成 — 剧情大纲】\n' + outlineText.slice(0,300);
+      const shotP=`你是AI生图提示词工程师。将以下故事第${ep}集拆解为4个固定分镜画面。
+
+【严格约束】
+1. 分镜提示词中所有角色名必须来自【全局锁定角色名册】，严禁更改或编造新名字
+2. 只能基于下方故事原文拆解，禁止创作新剧情新对话新角色
+3. 角色动作与状态必须来自原文，不得自行添加
+
+故事原文：${epContent.slice(0,1500)}
+
+输出格式：
+分镜1 | 时长0-13秒 | 景别 | 视角 | 角色动作与状态（必须来自原文） | 场景与环境（必须来自原文） | 光影色调 | 英文完整提示词
+分镜2 | 时长14-26秒 | ...
+分镜3 | 时长27-39秒 | ...
+分镜4 | 时长40-50秒 | ...`;
+
+      let shotText = '';
+      try{
+        shotText = await callAPI([{role:'user',content:shotP}], shotSys, 0.7, 2000);
+        shotText = cleanShotText(shotText);
+      }catch(e){
+        shotText = '（生成失败：'+e.message+'）';
+      }
+
+      progEl.remove();
+      const shotList = document.getElementById('shot-list');
+      const sDiv = document.createElement('div');
+      sDiv.className = 'episode-title';
+      sDiv.innerHTML = '<span>第 '+ep+' 集 · 分镜</span><span style="color:#6a7090">点击展开 ▸</span>';
+      sDiv.onclick = function(){ toggleEp(this); };
+      const sBody = document.createElement('div');
+      sBody.className = 'episode-body';
+      sBody.textContent = shotText;
+      shotList.appendChild(sDiv);
+      shotList.appendChild(sBody);
+
+      generatedResult.shots.push({num:ep, content:shotText});
+    }
+
+    document.getElementById('shots-section').querySelector('h3').textContent = '🎬 时间轴分镜提示词（'+shotEpisodes+'集）';
+
+    // ── 全部完成，底部显示发布+分析区 ──
+    const footer = document.createElement('div');
+    footer.className = 'result-section';
+    footer.id = 'publish-footer';
+    footer.innerHTML = `
+      <h3>📤 发布操作</h3>
+      <p style="color:#6a7090;font-size:.82rem;margin-bottom:.8rem">确认无误后，可发布到作品集。发布前可以修改标题。</p>
+      <label>剧本标题（可修改）</label>
+      <input id="publish-title" value="${escHtml(state.theme||'未命名短剧')}" style="margin-bottom:.8rem">
+      <label>作者</label>
+      <input id="publish-author" value="${escHtml(getUsername())}" style="margin-bottom:.8rem;color:#6a7090" readonly disabled>
+      <div class="mt1 flex">
+        <button class="btn btn-primary" onclick="publishScript()">📤 发布到作品集</button>
+        <button class="btn btn-secondary" onclick="saveDraft(false)">💾 保存到草稿箱</button>
+        <button class="btn btn-secondary" onclick="resetGenerator()">🔄 重新生成</button>
+        <button class="btn btn-secondary" id="btn-analyze" onclick="analyzeAudience()">📊 受众分析</button>
+      </div>
+      <div id="publish-status" style="margin-top:.5rem"></div>
+      <div id="analysis-area" style="margin-top:.8rem"></div>`;
+    outDiv.appendChild(footer);
+
+    state.step = 9; render();
+  }catch(e){
+    showResult('❌ 错误', e.message);
+    toast(e.message, true);
+  }
+}
+
+function showProgress(title){
+  const outDiv = document.getElementById('result-area');
+  // 移除旧的进度指示器
+  const old = document.getElementById('progress-indicator');
+  if(old) old.remove();
+  const sec = document.createElement('div'); sec.className = 'result-section';
+  sec.id = 'progress-indicator';
+  sec.innerHTML = '<h3>'+title+'</h3>';
+  outDiv.appendChild(sec);
+}
+
+function showResult(title, content){
+  const outDiv = document.getElementById('result-area');
+  const old = document.getElementById('progress-indicator');
+  if(old) old.remove();
+  const sec = document.createElement('div'); sec.className = 'result-section';
+  sec.innerHTML = '<h3>'+title+'</h3><div class="story-text">'+escHtml(content)+'</div>';
+  outDiv.appendChild(sec);
+}
+
+function toggleEp(el){
+  const body = el.nextElementSibling;
+  if(!body) return;
+  const d = body.style.display;
+  body.style.display = d==='block'?'none':'block';
+  el.querySelector('span:last-child').textContent = d==='block'?'点击展开 ▸':'点击收起 ▾';
+}
+
+async function publishScript(){
+  const statusDiv = document.getElementById('publish-status');
+  statusDiv.innerHTML = '<span class="spinner"></span> 正在发布...';
+  const title = document.getElementById('publish-title').value.trim() || '未命名短剧';
+  const username = getUsername();
+
+  try{
+    var entry = {
+      id: genId(),
+      title: title,
+      username: username,
+      created: new Date().toLocaleString('zh-CN'),
+      mainCat: state.mainCat,
+      subCat: state.subCat,
+      style: state.style,
+      theme: state.theme,
+      episodes: state.episodes,
+      characters: generatedResult.characters,
+      outline: generatedResult.outline,
+      episodes_data: generatedResult.episodes,
+      shots_data: generatedResult.shots,
+      comments: []
+    };
+    addScript(entry);
+    statusDiv.innerHTML = '<span style="color:#00cec9">✅ 剧本「'+title+'」已成功发布！<a href="#" onclick="switchPage(\'gallery\');return false" style="color:#00cec9;text-decoration:underline">去作品集查看 →</a></span>';
+  }catch(e){
+    statusDiv.innerHTML = '<span style="color:#e74c3c">❌ '+escHtml(e.message)+'</span>';
+    toast(e.message, true);
+  }
+}
+
+// ── 受众分析 ──
+async function analyzeAudience(){
+  var btn = document.getElementById('btn-analyze');
+  if(btn.disabled) return;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ 分析中...<span class="spinner"></span>';
+
+  var area = document.getElementById('analysis-area');
+  area.innerHTML = '';
+
+  var epsPreview = generatedResult.episodes.slice(0,3).map(function(e){return '第'+e.num+'集：'+e.content.slice(0,200);}).join('\n\n');
+
+  var prompt = '作为专业内容分析师，请分析以下短剧的受众定位并给出优化建议。\n\n';
+  prompt += '【分类】'+state.mainCat+'→'+state.subCat+'\n';
+  prompt += '【风格】'+state.style+'\n';
+  prompt += '【主题】'+state.theme+'\n';
+  prompt += '【角色设定】'+generatedResult.characters.slice(0,500)+'\n\n';
+  prompt += '【剧情大纲】'+generatedResult.outline.slice(0,500)+'\n\n';
+  prompt += '【前3集预览】'+epsPreview+'\n\n';
+  prompt += '请按以下格式输出（不要markdown标记）：\n';
+  prompt += '【受众画像】描述核心受众的年龄、性别、兴趣、观看场景\n';
+  prompt += '【受众匹配度】从0-10打分并说明理由\n';
+  prompt += '【爆款潜力】分析该题材在当前市场的竞争力\n';
+  prompt += '【优化建议】给出2-3条具体改进方向';
+
+  try{
+    var result = await callAPI([{role:'user',content:prompt}], '你是一个专业的短剧内容分析专家。输出直接、精炼，不要客套话。不要markdown标记。', 0.7, 1500);
+    result = cleanMd(result);
+    // 保存分析结果供后续使用
+    generatedResult.audienceAnalysis = result;
+    // 用 data 属性传分析文本，避免 onclick 参数断裂
+    var safeResult = escHtml(result).replace(/'/g,'&#39;').replace(/\n/g,'&#10;');
+    area.innerHTML = '<div class="result-section" style="border-color:#6c5ce7">' +
+      '<h3>📊 受众分析结果</h3>' +
+      '<div class="story-text">'+escHtml(result)+'</div>' +
+      '<div class="mt1 flex" style="margin-top:.8rem">' +
+        '<button class="btn btn-primary btn-sm" data-analysis="'+safeResult+'" onclick="optimizeScript(this)">🔄 根据建议优化</button>' +
+      '</div></div>';
+  }catch(e){
+    area.innerHTML = '<div style="color:#e74c3c;font-size:.85rem">❌ 分析失败：'+escHtml(e.message)+'</div>';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '📊 受众分析';
+}
+
+// ── 根据受众分析优化 ──
+var optimizedResult = null;
+
+async function optimizeScript(btnEl){
+  // 从按钮的 data-analysis 属性读取分析文本
+  var analysisText = btnEl ? (btnEl.getAttribute('data-analysis') || btnEl.dataset.analysis || '') : (generatedResult.audienceAnalysis || '');
+  if(!analysisText) { toast('缺少分析结果，请重新点击受众分析', true); return; }
+  analysisText = analysisText.replace(/&#10;/g,'\n').replace(/&#39;/g,"'");
+
+  if(btnEl && btnEl.disabled) return;
+  if(btnEl) { btnEl.disabled = true; btnEl.innerHTML = '⏳ 优化中...<span class="spinner"></span>'; }
+
+  var area = document.getElementById('analysis-area');
+  var optArea = document.getElementById('optimize-result');
+  if(!optArea){
+    optArea = document.createElement('div');
+    optArea.id = 'optimize-result';
+    optArea.style.marginTop = '.8rem';
+    area.appendChild(optArea);
+  }
+  optArea.innerHTML = '<h3>⏳ AI 正在根据建议优化剧本...<span class="spinner"></span></h3><p style="color:#6a7090;font-size:.82rem;margin-top:.3rem">正在调用 DeepSeek，需要处理完整剧本内容，请耐心等待...</p>';
+
+  // 提取优化建议（分析文本中【优化建议】后面的内容）
+  var suggestions = '';
+  var idx = analysisText.indexOf('【优化建议】');
+  if(idx !== -1){
+    suggestions = analysisText.substring(idx);
+  } else {
+    suggestions = analysisText;
+  }
+
+  // 构建精简版完整剧本（每集只发摘要，减小 token 消耗）
+  var episodeSummary = generatedResult.episodes.map(function(e){
+    var preview = (e.content||'').slice(0,150).replace(/\n/g,' ');
+    return '第'+e.num+'集（共'+(e.content||'').length+'字）：'+preview+'...';
+  }).join('\n');
+  var shotSummary = generatedResult.shots.map(function(s){
+    var preview = (s.content||'').slice(0,100).replace(/\n/g,' ');
+    return '第'+s.num+'集分镜（共'+(s.content||'').length+'字）：'+preview+'...';
+  }).join('\n');
+
+  var optPrompt = '你是一个专业短剧优化师。以下是当前剧本和优化建议。\n\n';
+  optPrompt += '【优化建议】\n'+suggestions+'\n\n';
+  optPrompt += '【当前剧本】\n';
+  optPrompt += '角色设定（完整）：\n'+generatedResult.characters+'\n\n';
+  optPrompt += '剧情大纲（完整）：\n'+generatedResult.outline+'\n\n';
+  optPrompt += '分集剧本（摘要，完整版在你的参考数据中）：\n'+episodeSummary+'\n\n';
+  optPrompt += '分镜提示词（摘要，完整版在你的参考数据中）：\n'+shotSummary+'\n\n';
+  optPrompt += '要求：\n';
+  optPrompt += '1. 仔细阅读优化建议，只修改被建议点到的相关部分\n';
+  optPrompt += '2. 角色设定中的姓名和身份保持不变，不要改动\n';
+  optPrompt += '3. 未修改的字段不要在JSON中输出，我会自动用原版补全\n';
+  optPrompt += '4. 输出JSON格式（只包含你实际修改了的字段）：\n';
+  optPrompt += '{"characters":"（仅当你修改了角色设定时）", "outline":"（仅当你修改了大纲时）", "episodes":[{"num":1,"content":"（仅当你修改了这集时）", "changed":true}], "shots":[{"num":1,"content":"（仅当你修改了分镜时）", "changed":true}], "changes":[{"section":"剧情大纲","reason":"..."}]}\n';
+  optPrompt += '5. changes 字段列出所有修改的位置和原因\n';
+  optPrompt += '6. 只输出JSON，不要其他文字，不要markdown代码块标记\n';
+  optPrompt += '7. 【重要】所有文本内容中的换行请用 \\n 转义，双引号请用 \\" 转义，确保 JSON 合法可解析';
+
+  // 自动重试函数（最多2次）
+  async function tryOptimize(retries){
+    for(var r=0; r<=retries; r++){
+      try{
+        var raw = await callAPI([{role:'user',content:optPrompt}], '你是一个专业短剧优化师。严格输出合法JSON。注意转义。不要markdown。', 0.7, 32768);
+        raw = raw.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim();
+        return safeJSONParse(raw);
+      }catch(e){
+        if(r < retries && (e.message.indexOf('不完整') !== -1 || e.message.indexOf('截断') !== -1)){
+          optArea.innerHTML = '<h3>⏳ 输出被截断，正在重试...</h3><p style="color:#6a7090;font-size:.82rem">尝试第'+(r+2)+'次...</p>';
+          continue;
+        }
+        throw e;
+      }
+    }
+  }
+
+  try{
+  var optData = await tryOptimize(2);
+  if(!optData) throw new Error('AI返回格式异常');
+
+  // 合并优化结果 + 原版未修改部分
+  optimizedResult = {
+    characters: optData.characters || generatedResult.characters,
+    outline: optData.outline || generatedResult.outline,
+    episodes: generatedResult.episodes.map(function(origEp, idx){
+      var newEp = (optData.episodes||[]).find(function(e){ return (e.num||e.episodeNum) === (origEp.num||(idx+1)); });
+      return newEp && newEp.content ? {num: origEp.num||(idx+1), content: newEp.content} : origEp;
+    }),
+    shots: generatedResult.shots.map(function(origShot, idx){
+      var newShot = (optData.shots||[]).find(function(s){ return (s.num||s.episodeNum) === (origShot.num||(idx+1)); });
+      return newShot && newShot.content ? {num: origShot.num||(idx+1), content: newShot.content} : origShot;
+    }),
+    changes: optData.changes || []
+  };
+    if(!optData || !optData.episodes) throw new Error('AI返回格式异常');
+
+    // 保存优化结果
+    optimizedResult = {
+      characters: optData.characters || generatedResult.characters,
+      outline: optData.outline || generatedResult.outline,
+      episodes: optData.episodes || generatedResult.episodes,
+      shots: optData.shots || generatedResult.shots,
+      changes: optData.changes || []
+    };
+
+    // ── 自动将原版存入草稿箱 ──
+    var oldTitle = (document.getElementById('publish-title')||{}).value || state.theme || '未命名';
+    var draft = {
+      id: 'orig-'+Date.now().toString(36),
+      title: oldTitle + '（原版）',
+      username: getUsername(),
+      savedAt: new Date().toLocaleString('zh-CN'),
+      isOptimized: false,
+      state: {
+        mainCat: state.mainCat, subCat: state.subCat,
+        style: state.style, theme: state.theme,
+        episodes: state.episodes
+      },
+      generatedResult: {
+        characters: generatedResult.characters,
+        outline: generatedResult.outline,
+        episodes: generatedResult.episodes.slice(),
+        shots: generatedResult.shots.slice(),
+        audienceAnalysis: generatedResult.audienceAnalysis||''
+      },
+      optimizedResult: null
+    };
+    var drafts = getDrafts();
+    drafts.unshift(draft);
+    saveDraftsToStorage(drafts);
+
+    // ── 显示优化摘要 + 高亮对比 ──
+    var changeCount = optimizedResult.changes.length;
+    var html = '<div class="result-section" style="border-color:#ffc107">';
+    html += '<h3>🔄 优化完成 ✨</h3>';
+    html += '<p style="color:#6a7090;font-size:.82rem;margin-bottom:.8rem">原版已自动保存到草稿箱，可随时查看</p>';
+    if(changeCount > 0){
+      html += '<div class="diff-count">✏️ 共修改 '+changeCount+' 处：';
+      html += optimizedResult.changes.map(function(c){ return escHtml(c.section)+'（'+escHtml(c.reason)+'）'; }).join('；');
+      html += '</div>';
+    }
+
+    // 高亮对比 - 剧情大纲
+    var outlineDiff = computeDiff(generatedResult.outline, optimizedResult.outline);
+    if(outlineDiff.indexOf('diff-changed') !== -1){
+      html += '<label style="margin-top:.5rem">📋 剧情大纲（黄色=修改部分）</label>';
+      html += '<div class="story-text">'+outlineDiff+'</div>';
+    }
+
+    // 高亮对比 - 分集
+    var hasEpChanges = false;
+    for(var i=0; i<Math.max(generatedResult.episodes.length, optimizedResult.episodes.length); i++){
+      var oldEp = generatedResult.episodes[i];
+      var newEp = optimizedResult.episodes[i];
+      if(oldEp && newEp){
+        var epDiff = computeDiff(oldEp.content, newEp.content);
+        if(epDiff.indexOf('diff-changed') !== -1){
+          if(!hasEpChanges){
+            html += '<label style="margin-top:.8rem">📜 分集变更</label>';
+            hasEpChanges = true;
+          }
+          html += '<div class="episode-title" style="margin-top:.3rem;border-left:3px solid #ffc107">';
+          html += '<span>第 '+(i+1)+' 集 <span style="color:#ffc107;font-size:.75rem">✏️ 已修改</span></span><span style="color:#6a7090">点击展开 ▸</span></div>';
+          html += '<div class="episode-body" style="display:none">'+epDiff+'</div>';
+        }
+      }
+    }
+
+    // 查看完整版本按钮
+    html += '<div class="mt1 flex" style="margin-top:.8rem">';
+    html += '<button class="btn btn-primary" onclick="showOptimizedVersion()">📄 查看完整优化版本</button>';
+    html += '<button class="btn btn-secondary btn-sm" onclick="this.closest(\'.result-section\').remove();if(document.getElementById(\'optimize-result\'))document.getElementById(\'optimize-result\').innerHTML=\'\';">❌ 关闭</button>';
+    html += '</div></div>';
+
+    optArea.innerHTML = html;
+
+    // 让展开收起生效
+    optArea.querySelectorAll('.episode-title').forEach(function(el){
+      el.onclick = function(){ toggleEp(this); };
+    });
+
+    // 刷新草稿箱角标
+    updateDraftBadge();
+
+  }catch(e){
+    optArea.innerHTML = '<div style="color:#e74c3c;font-size:.85rem">❌ 优化失败：'+escHtml(e.message)+'</div>';
+  }
+
+  if(btnEl) { btnEl.disabled = false; btnEl.innerHTML = '🔄 根据建议优化'; }
+}
+
+// ── 显示完整优化版本（替换整个结果区域） ──
+function showOptimizedVersion(){
+  if(!optimizedResult) { toast('没有优化结果', true); return; }
+
+  // 替换 generatedResult 为优化版
+  generatedResult.characters = optimizedResult.characters;
+  generatedResult.outline = optimizedResult.outline;
+  generatedResult.episodes = optimizedResult.episodes.slice();
+  generatedResult.shots = optimizedResult.shots.slice();
+
+  // 关闭分析区域
+  var optArea = document.getElementById('optimize-result');
+  if(optArea) optArea.innerHTML = '';
+  var analysisArea = document.getElementById('analysis-area');
+  if(analysisArea) analysisArea.innerHTML = '<p style="color:#6a7090;font-size:.82rem">✅ 已切换到优化版本</p>';
+
+  // 替换整个结果区域
+  var outDiv = document.getElementById('result-area');
+  outDiv.innerHTML = '';
+
+  // 角色设定
+  var charSec = document.createElement('div');
+  charSec.className = 'result-section';
+  charSec.innerHTML = '<h3>🎭 角色设定</h3><div class="story-text">'+escHtml(generatedResult.characters)+'</div>';
+  outDiv.appendChild(charSec);
+
+  // 剧情大纲
+  var outlineSec = document.createElement('div');
+  outlineSec.className = 'result-section';
+  outlineSec.innerHTML = '<h3>📋 剧情大纲</h3><div class="story-text">'+escHtml(generatedResult.outline)+'</div>';
+  outDiv.appendChild(outlineSec);
+
+  // 分集故事
+  var epSec = document.createElement('div');
+  epSec.className = 'result-section';
+  epSec.id = 'episodes-section';
+  var epList = document.createElement('div');
+  epList.id = 'ep-list';
+  generatedResult.episodes.forEach(function(ep, idx){
+    var title = document.createElement('div');
+    title.className = 'episode-title';
+    title.innerHTML = '<span>第 '+(ep.num||(idx+1))+' 集</span><span style="color:#6a7090">点击展开 ▸</span>';
+    title.onclick = function(){ toggleEp(this); };
+    var body = document.createElement('div');
+    body.className = 'episode-body';
+    body.textContent = ep.content;
+    epList.appendChild(title);
+    epList.appendChild(body);
+  });
+  epSec.innerHTML = '<h3>📜 分集故事（'+generatedResult.episodes.length+'集）</h3>';
+  epSec.appendChild(epList);
+  outDiv.appendChild(epSec);
+
+  // 分镜提示词
+  if(generatedResult.shots && generatedResult.shots.length > 0){
+    var shotSec = document.createElement('div');
+    shotSec.className = 'result-section';
+    shotSec.id = 'shots-section';
+    var shotList = document.createElement('div');
+    shotList.id = 'shot-list';
+    generatedResult.shots.forEach(function(shot, idx){
+      var title = document.createElement('div');
+      title.className = 'episode-title';
+      title.innerHTML = '<span>第 '+(shot.num||(idx+1))+' 集 · 分镜</span><span style="color:#6a7090">点击展开 ▸</span>';
+      title.onclick = function(){ toggleEp(this); };
+      var body = document.createElement('div');
+      body.className = 'episode-body';
+      body.textContent = shot.content;
+      shotList.appendChild(title);
+      shotList.appendChild(body);
+    });
+    shotSec.innerHTML = '<h3>🎬 时间轴分镜提示词（'+generatedResult.shots.length+'集）</h3>';
+    shotSec.appendChild(shotList);
+    outDiv.appendChild(shotSec);
+  }
+
+  // 底部发布区
+  var footer = document.createElement('div');
+  footer.className = 'result-section';
+  footer.id = 'publish-footer';
+  footer.innerHTML = '<h3>📤 发布操作</h3>' +
+    '<p style="color:#6a7090;font-size:.82rem;margin-bottom:.8rem">这是优化后的版本，可发布到作品集或保存到草稿箱</p>' +
+    '<label>剧本标题（可修改）</label>' +
+    '<input id="publish-title" value="'+escHtml(state.theme||'未命名短剧')+'" style="margin-bottom:.8rem">' +
+    '<label>作者</label>' +
+    '<input id="publish-author" value="'+escHtml(getUsername())+'" style="margin-bottom:.8rem;color:#6a7090" readonly disabled>' +
+    '<div class="mt1 flex">' +
+      '<button class="btn btn-primary" onclick="publishScript()">📤 发布到作品集</button>' +
+      '<button class="btn btn-secondary" onclick="saveDraft(true)">💾 保存到草稿箱</button>' +
+      '<button class="btn btn-secondary" onclick="resetGenerator()">🔄 重新生成</button>' +
+      '<button class="btn btn-secondary" id="btn-analyze" onclick="analyzeAudience()">📊 受众分析</button>' +
+    '</div>' +
+    '<div id="publish-status" style="margin-top:.5rem"></div>';
+  outDiv.appendChild(footer);
+
+  // 滚动到顶部
+  window.scrollTo({top:0,behavior:'smooth'});
+  toast('✅ 已切换到优化版本', 'success');
+}
+
+// ── 安全的JSON解析（自动修复常见格式问题） ──
+function safeJSONParse(text){
+  if(!text) throw new Error('JSON为空');
+  var cleaned = text.trim();
+  // 检测是否被截断（未闭合的 { } [ ] 或字符串）
+  var opens = (cleaned.match(/\{/g)||[]).length;
+  var closes = (cleaned.match(/\}/g)||[]).length;
+  var quoteCount = (cleaned.match(/"/g)||[]).length;
+  if(opens !== closes || quoteCount % 2 !== 0){
+    throw new Error('AI 输出不完整（JSON结构未闭合），可能是内容过长被截断，请重试或减少剧本规模');
+  }
+  // 尝试直接解析
+  try { return JSON.parse(cleaned); } catch(e){}
+  // 如果包裹了markdown代码块
+  cleaned = cleaned.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
+  try { return JSON.parse(cleaned); } catch(e){}
+  // 尝试修复常见问题：字符串里未转义的换行
+  cleaned = cleaned.replace(/\n(?=(?:[^"]*"[^"]*")*[^"]*$)/g,'\\n');
+  cleaned = cleaned.replace(/\t(?=(?:[^"]*"[^"]*")*[^"]*$)/g,'\\t');
+  try { return JSON.parse(cleaned); } catch(e){}
+  // 尝试修复未转义的双引号
+  var fixed = '';
+  var inStr = false;
+  for(var ci=0; ci<cleaned.length; ci++){
+    var ch = cleaned[ci];
+    var prev = ci>0 ? cleaned[ci-1] : '';
+    if(ch === '"' && prev !== '\\'){
+      inStr = !inStr;
+      fixed += ch;
+    } else if(ch === '\n' && inStr){
+      fixed += '\\n';
+    } else if(ch === '\t' && inStr){
+      fixed += '\\t';
+    } else {
+      fixed += ch;
+    }
+  }
+  try { return JSON.parse(fixed); } catch(e){}
+  // 最终：提取第一个 { 到最后一个 } 之间的内容
+  cleaned = text.replace(/```(?:json)?/g,'').trim();
+  var start = cleaned.indexOf('{');
+  var end = cleaned.lastIndexOf('}');
+  if(start !== -1 && end > start){
+    cleaned = cleaned.substring(start, end+1);
+    try { return JSON.parse(cleaned); } catch(e){}
+  }
+  throw new Error('JSON格式异常，无法自动修复：'+cleaned.slice(0,300));
+}
+
+// ── 文本对比 → 高亮HTML ──
+function computeDiff(oldText, newText){
+  if(oldText === newText) return escHtml(newText);
+  var oldLines = (oldText||'').split('\n').filter(Boolean);
+  var newLines = (newText||'').split('\n').filter(Boolean);
+  var result = [];
+  var maxLen = Math.max(oldLines.length, newLines.length);
+  for(var i=0; i<maxLen; i++){
+    var oldLine = oldLines[i]||'';
+    var newLine = newLines[i]||'';
+    if(oldLine === newLine){
+      result.push(escHtml(newLine));
+    } else if(newLine){
+      result.push('<span class="diff-changed">'+escHtml(newLine)+'</span>');
+    }
+  }
+  return result.join('<br>');
+}
+
+// ══════════════════════════════════════════════════════════
+// 草稿箱
+// ══════════════════════════════════════════════════════════
+var OPTIMIZED_DRAFT_KEY = 'drama_drafts';
+
+function getDrafts(){
+  try{
+    return JSON.parse(localStorage.getItem(OPTIMIZED_DRAFT_KEY)||'[]');
+  }catch(e){ return []; }
+}
+
+function saveDraftsToStorage(drafts){
+  try{
+    localStorage.setItem(OPTIMIZED_DRAFT_KEY, JSON.stringify(drafts));
+    updateDraftBadge();
+  }catch(e){}
+}
+
+function updateDraftBadge(){
+  var drafts = getDrafts();
+  var badge = document.getElementById('draft-badge');
+  if(drafts.length > 0){
+    badge.style.display = 'flex';
+    badge.textContent = drafts.length > 99 ? '99+' : drafts.length;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function saveDraft(isOptimized){
+  var title = (document.getElementById('publish-title')||{}).value || state.theme || '未命名';
+  var draft = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    title: title,
+    username: getUsername(),
+    savedAt: new Date().toLocaleString('zh-CN'),
+    isOptimized: !!isOptimized,
+    state: {
+      mainCat: state.mainCat,
+      subCat: state.subCat,
+      style: state.style,
+      theme: state.theme,
+      episodes: state.episodes
+    },
+    generatedResult: {
+      characters: generatedResult.characters,
+      outline: generatedResult.outline,
+      episodes: generatedResult.episodes.slice(),
+      shots: generatedResult.shots.slice(),
+      audienceAnalysis: generatedResult.audienceAnalysis||''
+    },
+    optimizedResult: optimizedResult ? {
+      characters: optimizedResult.characters,
+      outline: optimizedResult.outline,
+      episodes: optimizedResult.episodes.slice(),
+      shots: optimizedResult.shots.slice(),
+      changes: optimizedResult.changes.slice()
+    } : null
+  };
+
+  var drafts = getDrafts();
+  drafts.unshift(draft);
+  saveDraftsToStorage(drafts);
+
+  var optArea = document.getElementById('optimize-result');
+  if(optArea){
+    var savedMsg = document.createElement('div');
+    savedMsg.style.cssText = 'color:#00cec9;font-size:.82rem;margin-top:.5rem';
+    savedMsg.textContent = '✅ 已保存到草稿箱！去「草稿箱」查看';
+    optArea.appendChild(savedMsg);
+  }
+  toast('💾 已保存到草稿箱', 'success');
+}
+
+function loadDrafts(){
+  var container = document.getElementById('draft-list');
+  var drafts = getDrafts();
+
+  if(drafts.length === 0){
+    container.innerHTML = '<div class="gallery-empty">📭 草稿箱是空的。生成剧本后点击「保存到草稿箱」即可暂存。</div>';
+    return;
+  }
+
+  container.innerHTML = '';
+  drafts.forEach(function(d, idx){
+    var card = document.createElement('div');
+    card.className = 'draft-card';
+    var tags = '<span class="tag">'+escHtml(d.state.mainCat||'')+'</span>';
+    tags += '<span class="tag">'+escHtml(d.state.subCat||'')+'</span>';
+    tags += '<span class="tag">📺 '+(d.state.episodes||0)+'集</span>';
+    if(d.isOptimized) tags += '<span class="tag optimized">🔄 已优化</span>';
+
+    card.innerHTML = '<h3>'+escHtml(d.title)+'</h3>' +
+      '<div class="meta">👤 '+escHtml(d.username)+' · '+escHtml(d.savedAt)+'</div>' +
+      '<div class="tags">'+tags+'</div>' +
+      '<div class="draft-actions">' +
+        '<button class="btn btn-sm btn-primary" onclick="publishDraft('+idx+')">📤 发布</button>' +
+        '<button class="btn btn-sm btn-secondary" onclick="previewDraft('+idx+')">👁 预览</button>' +
+        '<button class="btn btn-sm btn-danger" onclick="deleteDraft('+idx+')">🗑 删除</button>' +
+      '</div>' +
+      '<div id="draft-preview-'+idx+'"></div>';
+    container.appendChild(card);
+  });
+}
+
+function previewDraft(idx){
+  var drafts = getDrafts();
+  var d = drafts[idx];
+  if(!d) return;
+  var preview = document.getElementById('draft-preview-'+idx);
+  if(!preview) return;
+
+  if(preview.innerHTML){
+    preview.innerHTML = '';
+    return;
+  }
+
+  var data = d.optimizedResult || d.generatedResult;
+  var html = '<div style="margin-top:.6rem;padding:.6rem;background:#0b0e14;border-radius:6px;font-size:.8rem;color:#c4c8d8">';
+  html += '<p><strong>角色设定：</strong>'+escHtml((data.characters||'').slice(0,200))+'...</p>';
+  html += '<p><strong>剧情大纲：</strong>'+escHtml((data.outline||'').slice(0,300))+'...</p>';
+  html += '<p><strong>集数：</strong>'+(data.episodes||[]).length+'集</p>';
+  if(d.optimizedResult && d.optimizedResult.changes && d.optimizedResult.changes.length > 0){
+    html += '<p><strong>修改：</strong>'+d.optimizedResult.changes.map(function(c){ return escHtml(c.section)+'（'+escHtml(c.reason)+'）'; }).join('；')+'</p>';
+  }
+  if(d.generatedResult.audienceAnalysis){
+    html += '<p><strong>受众分析：</strong>已有分析结果</p>';
+  }
+  html += '</div>';
+  preview.innerHTML = html;
+}
+
+function deleteDraft(idx){
+  if(!confirm('确定删除该草稿吗？')) return;
+  var drafts = getDrafts();
+  drafts.splice(idx, 1);
+  saveDraftsToStorage(drafts);
+  loadDrafts();
+  toast('🗑 草稿已删除');
+}
+
+async function publishDraft(idx){
+  var drafts = getDrafts();
+  var d = drafts[idx];
+  if(!d) return;
+
+  var data = d.optimizedResult || d.generatedResult;
+  var btn = document.querySelector('#draft-preview-'+idx).previousElementSibling;
+  if(btn) { btn.disabled = true; btn.innerHTML = '⏳发布中...'; }
+
+  try{
+    var entry = {
+      id: genId(),
+      title: d.title,
+      username: d.username,
+      created: new Date().toLocaleString('zh-CN'),
+      mainCat: d.state.mainCat,
+      subCat: d.state.subCat,
+      style: d.state.style,
+      theme: d.state.theme,
+      episodes: d.state.episodes,
+      characters: data.characters,
+      outline: data.outline,
+      episodes_data: data.episodes,
+      shots_data: data.shots,
+      comments: []
+    };
+    addScript(entry);
+
+    // 发布成功，从草稿箱移除
+    drafts.splice(idx, 1);
+    saveDraftsToStorage(drafts);
+    loadDrafts();
+    toast('🎉 剧本「'+d.title+'」已发布！', 'success');
+  }catch(e){
+    toast('❌ 发布失败：'+e.message, true);
+    if(btn) { btn.disabled = false; btn.innerHTML = '📤 发布'; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// 数据导入导出
+// ══════════════════════════════════════════════════════════
+function showDataModal(){
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'data-modal';
+  var drafts = getDrafts();
+  var scripts = getAllScripts();
+  overlay.innerHTML = '<div class="modal-box">' +
+    '<h2>💾 数据管理</h2>' +
+    '<p style="color:#6a7090;font-size:.82rem;margin-bottom:1rem">所有数据保存在浏览器本地存储中</p>' +
+    '<div style="background:#0b0e14;border-radius:8px;padding:.8rem;margin-bottom:1rem">' +
+      '<div style="color:#aab0d0;font-size:.85rem">📁 作品集：'+scripts.length+' 个剧本</div>' +
+      '<div style="color:#aab0d0;font-size:.85rem;margin-top:.3rem">📋 草稿箱：'+drafts.length+' 个草稿</div>' +
+    '</div>' +
+    '<div class="flex" style="gap:.5rem">' +
+      '<button class="btn btn-primary btn-sm" onclick="exportData()">📤 导出数据</button>' +
+      '<button class="btn btn-secondary btn-sm" onclick="importData()">📥 导入数据</button>' +
+    '</div>' +
+    '<div id="import-status" style="margin-top:.5rem;font-size:.82rem"></div>' +
+    '<input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(this)">' +
+    '<div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="document.getElementById(\'data-modal\').remove()">关闭</button></div>' +
+  '</div>';
+  document.body.appendChild(overlay);
+}
+
+function exportData(){
+  var data = {
+    exportedAt: new Date().toISOString(),
+    scripts: getAllScripts(),
+    drafts: getDrafts()
+  };
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'AI短剧数据_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('📤 数据已导出');
+  document.getElementById('data-modal').remove();
+}
+
+function importData(){
+  document.getElementById('import-file').click();
+}
+
+function handleImport(input){
+  var status = document.getElementById('import-status');
+  if(!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      var data = JSON.parse(e.target.result);
+      if(!data || !data.scripts) throw new Error('数据格式不正确');
+      // 合并作品集
+      var existing = getAllScripts();
+      var existingIds = {};
+      existing.forEach(function(s){ existingIds[s.id]=true; });
+      var imported = 0;
+      (data.scripts||[]).forEach(function(s){
+        if(!existingIds[s.id]){
+          existingIds[s.id]=true;
+          existing.push(s);
+          imported++;
+        }
+      });
+      saveAllScripts(existing);
+      // 合并草稿箱
+      var drafts = getDrafts();
+      var draftIds = {};
+      drafts.forEach(function(d){ draftIds[d.id]=true; });
+      var draftImported = 0;
+      (data.drafts||[]).forEach(function(d){
+        if(!draftIds[d.id]){
+          draftIds[d.id]=true;
+          drafts.push(d);
+          draftImported++;
+        }
+      });
+      saveDraftsToStorage(drafts);
+      updateDraftBadge();
+      status.innerHTML = '<span style="color:#00cec9">✅ 导入完成：'+imported+' 个剧本，'+draftImported+' 个草稿</span>';
+      toast('📥 导入成功！', 'success');
+      setTimeout(function(){ document.getElementById('data-modal').remove(); }, 2000);
+    }catch(err){
+      status.innerHTML = '<span style="color:#e74c3c">❌ 导入失败：'+escHtml(err.message)+'</span>';
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ══════════════════════════════════════════════════════════
+// 工具
+// ══════════════════════════════════════════════════════════
+function escHtml(s){
+  if(!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, isError){
+  const t = document.createElement('div');
+  t.className = 'toast' + (isError==='success'?' success':isError?' error':'');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
+}
+
+// ══════════════════════════════════════════════════════════
+// 初始化
+// ══════════════════════════════════════════════════════════
+loadUsername();
+render();
+loadGallery();
+</script>
+</body>
+</html>
