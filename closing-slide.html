@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>期待在交大再见 · 结束页</title>
+<style>
+:root{
+  --crimson:#AD1730;
+  --crimson-deep:#870F26;
+  --crimson-soft:#F3DEE2;
+  --paper:#F5F2ED;
+  --ink:#211A19;
+  --ink-soft:#6D605C;
+  --line:#D9D0C5;
+  --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",system-ui,sans-serif;
+  --mono:"Cascadia Code","JetBrains Mono","Consolas",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{display:grid;place-items:center;background:#181310;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+#slide{
+  position:relative;width:1280px;height:720px;overflow:hidden;background:var(--paper);
+  box-shadow:0 32px 100px rgba(0,0,0,.45);transform-origin:center center;
+}
+#slide::before{
+  content:"";position:absolute;inset:0;opacity:.62;pointer-events:none;
+  background-image:linear-gradient(rgba(173,23,48,.042) 1px,transparent 1px),linear-gradient(90deg,rgba(173,23,48,.042) 1px,transparent 1px);
+  background-size:40px 40px;
+  -webkit-mask-image:linear-gradient(90deg,#000 0%,rgba(0,0,0,.4) 62%,transparent 88%);
+  mask-image:linear-gradient(90deg,#000 0%,rgba(0,0,0,.4) 62%,transparent 88%);
+}
+.orb{position:absolute;border-radius:50%;pointer-events:none}
+.orb.one{width:520px;height:520px;right:-210px;top:-230px;background:var(--crimson);opacity:.98}
+.orb.two{width:248px;height:248px;right:80px;bottom:-135px;border:42px solid var(--crimson-soft)}
+.header{position:absolute;left:64px;right:64px;top:45px;display:flex;align-items:center;justify-content:space-between;z-index:2}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{width:45px;height:45px;display:block}
+.brand-name{font-size:16px;font-weight:800;letter-spacing:.02em}
+.brand-sub{margin-top:3px;font:600 10px var(--mono);letter-spacing:.18em;color:#958984}
+.end-tag{display:flex;align-items:center;gap:10px;font:700 12px var(--mono);letter-spacing:.18em;color:#fff;text-transform:uppercase}
+.end-tag::before{content:"";width:22px;height:2px;background:#fff}
+.main{position:absolute;inset:118px 70px 64px;display:grid;grid-template-columns:1.25fr .75fr;gap:62px;align-items:center;z-index:1}
+.eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:18px;font:700 13px var(--mono);letter-spacing:.2em;color:var(--crimson);text-transform:uppercase}
+.eyebrow::before{content:"";width:27px;height:3px;background:var(--crimson)}
+h1{margin:0;font-size:64px;line-height:1.13;letter-spacing:-.045em;font-weight:900;text-wrap:balance}
+h1 .focus{color:var(--crimson);position:relative;z-index:0;white-space:nowrap}
+h1 .focus::after{content:"";position:absolute;left:0;right:0;bottom:2px;height:13px;background:var(--crimson-soft);z-index:-1;transform:skewX(-12deg)}
+.lead{margin:25px 0 0;max-width:25em;font-size:23px;line-height:1.65;color:var(--ink-soft);font-weight:500}
+.route{display:flex;align-items:center;gap:12px;margin-top:34px;width:560px}
+.route-label{font:700 12px var(--mono);color:var(--ink-soft);white-space:nowrap}
+.route-line{position:relative;height:2px;flex:1;background:var(--line)}
+.route-line::before,.route-line::after{content:"";position:absolute;top:50%;border-radius:50%;transform:translateY(-50%)}
+.route-line::before{left:0;width:10px;height:10px;background:var(--crimson)}
+.route-line::after{right:0;width:15px;height:15px;background:var(--paper);border:4px solid var(--crimson)}
+.invite{position:relative;align-self:center;background:linear-gradient(145deg,var(--crimson),var(--crimson-deep));color:#fff;border-radius:24px;padding:31px 30px 29px;box-shadow:0 28px 58px -28px rgba(135,15,38,.75);overflow:hidden}
+.invite::after{content:"TCLOUD";position:absolute;right:-8px;bottom:-18px;font:900 74px/1 var(--mono);letter-spacing:-.08em;color:rgba(255,255,255,.07)}
+.invite-kicker{font:700 11px var(--mono);letter-spacing:.2em;color:#F7B5C0;text-transform:uppercase}
+.invite h2{margin:12px 0 7px;font-size:34px;line-height:1.16;letter-spacing:-.03em}
+.invite p{margin:0;font-size:19px;line-height:1.55;color:#FFE7EB}
+.invite-rule{height:1px;margin:22px 0 17px;background:rgba(255,255,255,.25)}
+.invite-chips{display:flex;flex-wrap:wrap;gap:8px;position:relative;z-index:1}
+.invite-chips span{padding:7px 11px;border:1px solid rgba(255,255,255,.35);border-radius:999px;font-size:13px;font-weight:700;background:rgba(255,255,255,.08)}
+.closing{position:absolute;left:70px;right:70px;bottom:36px;display:flex;align-items:center;justify-content:space-between;z-index:2}
+.closing-note{font-size:16px;color:var(--ink-soft)}
+.closing-note b{color:var(--ink);font-weight:800}
+.thanks{font:800 13px var(--mono);letter-spacing:.15em;color:var(--crimson)}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.header{animation:rise .6s both}
+.copy{animation:rise .7s .1s both}
+.invite{animation:rise .7s .22s both}
+.closing{animation:rise .6s .36s both}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<main id="slide" aria-label="夏令营结束语">
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+
+  <header class="header">
+    <div class="brand">
+      <img src="sjtu.png" alt="上海交通大学">
+      <div>
+        <div class="brand-name">上海交通大学</div>
+        <div class="brand-sub">SHANGHAI JIAO TONG UNIVERSITY</div>
+      </div>
+    </div>
+    <div class="end-tag">Until We Meet Again</div>
+  </header>
+
+  <section class="main">
+    <div class="copy">
+      <div class="eyebrow">写给两年后的你</div>
+      <h1>希望两年后，<br>能在<span class="focus">交大校园</span>与你相见</h1>
+      <p class="lead">保持好奇，继续动手。下一次见面，希望你带着自己的作品来。</p>
+      <div class="route" aria-label="从今天走向两年后">
+        <span class="route-label">今天</span>
+        <span class="route-line"></span>
+        <span class="route-label">两年后 · 交大</span>
+      </div>
+    </div>
+
+    <aside class="invite">
+      <div class="invite-kicker">也欢迎更早见面</div>
+      <h2>TCloud 实验室<br>欢迎你来实习</h2>
+      <p>如果你喜欢技术、愿意探索，<br>这里随时欢迎新的想法。</p>
+      <div class="invite-rule"></div>
+      <div class="invite-chips">
+        <span>爱折腾</span><span>爱创造</span><span>爱动手</span>
+      </div>
+    </aside>
+  </section>
+
+  <footer class="closing">
+    <div class="closing-note"><b>愿前路辽阔，愿热爱有回响。</b></div>
+    <div class="thanks">THANK YOU · 2026</div>
+  </footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var slide=document.getElementById("slide");
+  function fit(){
+    var scale=Math.min(window.innerWidth/1280,window.innerHeight/720);
+    slide.style.transform="scale("+scale+")";
+  }
+  fit();
+  window.addEventListener("resize",fit);
+  window.addEventListener("keydown",function(e){
+    if(e.key.toLowerCase()==="f"){
+      if(document.fullscreenElement){document.exitFullscreen();}
+      else{document.documentElement.requestFullscreen();}
+    }
+  });
+})();
+</script>
+</body>
+</html>
